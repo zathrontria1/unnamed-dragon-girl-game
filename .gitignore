@@ -97,3 +97,7 @@ sound/*.cfg
 
 # asset build batch file
 build_assets.bat
+
+# some emulators dump files in the same folder as the output ROM
+/*.sym
+/*.srm
