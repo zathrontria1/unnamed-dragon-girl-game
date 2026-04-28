@@ -1,0 +1,577 @@
+const struct seq_command data_seq_test_t1[] = {
+    {SEQ_OPCODE_SETLOOPPOINT, 6, 0, 0},
+    {SEQ_OPCODE_PLAY_ONESHOT, INS_DRUM_KICK, 31, 31},
+    {SEQ_OPCODE_WAIT, 0, 0, 0},
+    {SEQ_OPCODE_PLAY_ONESHOT, INS_DRUM_HIHAT, 31, 31},
+    {SEQ_OPCODE_WAIT, 0, 0, 0},
+    {SEQ_OPCODE_LOOP, 0, 0, 0},
+
+    {SEQ_OPCODE_PLAY_ONESHOT, INS_DRUM_KICK, 31, 31},
+    {SEQ_OPCODE_PLAY_ONESHOT, INS_DRUM_HIHAT, 31, 31},
+    {SEQ_OPCODE_PLAY_ONESHOT, INS_DRUM_CYMBALS, 31, 31},
+    {SEQ_OPCODE_WAIT, 0, 0, 0},
+
+    {SEQ_OPCODE_SETLOOPPOINT, 6, 0, 0},
+    {SEQ_OPCODE_PLAY_ONESHOT, INS_DRUM_KICK, 31, 31},
+    {SEQ_OPCODE_WAIT, 0, 0, 0},
+    {SEQ_OPCODE_PLAY_ONESHOT, INS_DRUM_HIHAT, 31, 31},
+    {SEQ_OPCODE_WAIT, 0, 0, 0},
+    {SEQ_OPCODE_LOOP, 0, 0, 0},
+
+    {SEQ_OPCODE_PLAY_ONESHOT, INS_DRUM_KICK, 31, 31},
+    {SEQ_OPCODE_PLAY_ONESHOT, INS_DRUM_HIHAT, 31, 31},
+    {SEQ_OPCODE_WAIT, 0, 0, 0},
+    {SEQ_OPCODE_PLAY_ONESHOT, INS_DRUM_CYMBALS, 31, 31},
+
+    {SEQ_OPCODE_RESTART, 0, 0, 0},
+};
+
+const struct seq_command data_seq_test_t2[] = {
+    {SEQ_OPCODE_WAIT, 3, 0, 0},
+
+    {SEQ_OPCODE_PLAY_ONESHOT, INS_DRUM_SNARE, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_RESTART, 0, 0, 0},
+};
+
+const struct seq_command data_seq_test_t3[] = {
+    {SEQ_OPCODE_WAIT, 1, 0, 0},
+
+    {SEQ_OPCODE_SETLOOPPOINT, 3, 0, 0},
+    {26, INS_BASS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+    {SEQ_OPCODE_LOOP, 0, 0, 0},
+
+    {SEQ_OPCODE_SETLOOPPOINT, 3, 0, 0},
+    {29, INS_BASS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+    {SEQ_OPCODE_LOOP, 0, 0, 0},
+
+    {SEQ_OPCODE_SETLOOPPOINT, 3, 0, 0},
+    {24, INS_BASS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+    {SEQ_OPCODE_LOOP, 0, 0, 0},
+
+    {SEQ_OPCODE_SETLOOPPOINT, 2, 0, 0},
+    {31, INS_BASS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+    {SEQ_OPCODE_LOOP, 0, 0, 0},
+
+    {31, INS_BASS, 31, 31},
+    {SEQ_OPCODE_WAIT, 0, 0, 0},
+
+    {SEQ_OPCODE_SETRESTARTPOINT, 0, 0, 0},
+
+    {SEQ_OPCODE_WAIT, 1, 0, 0},
+
+    {SEQ_OPCODE_SETLOOPPOINT, 3, 0, 0},
+    {26, INS_BASS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+    {SEQ_OPCODE_LOOP, 0, 0, 0},
+
+    {SEQ_OPCODE_SETLOOPPOINT, 3, 0, 0},
+    {29, INS_BASS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+    {SEQ_OPCODE_LOOP, 0, 0, 0},
+
+    {SEQ_OPCODE_SETLOOPPOINT, 3, 0, 0},
+    {24, INS_BASS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+    {SEQ_OPCODE_LOOP, 0, 0, 0},
+
+    {SEQ_OPCODE_SETLOOPPOINT, 2, 0, 0},
+    {31, INS_BASS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+    {SEQ_OPCODE_LOOP, 0, 0, 0},
+
+    {31, INS_BASS, 31, 31},
+    {SEQ_OPCODE_WAIT, 0, 0, 0},
+
+    {SEQ_OPCODE_WAIT, 1, 0, 0},
+
+    {SEQ_OPCODE_SETLOOPPOINT, 3, 0, 0},
+    {26, INS_BASS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+    {SEQ_OPCODE_LOOP, 0, 0, 0},
+
+    {SEQ_OPCODE_SETLOOPPOINT, 3, 0, 0},
+    {29, INS_BASS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+    {SEQ_OPCODE_LOOP, 0, 0, 0},
+
+    {SEQ_OPCODE_SETLOOPPOINT, 3, 0, 0},
+    {24, INS_BASS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+    {SEQ_OPCODE_LOOP, 0, 0, 0},
+
+    {SEQ_OPCODE_SETLOOPPOINT, 3, 0, 0},
+    {26, INS_BASS, 31, 31},
+    {SEQ_OPCODE_WAIT, 1, 0, 0},
+    {SEQ_OPCODE_LOOP, 0, 0, 0},
+
+    {31, INS_BASS, 31, 31},
+    {SEQ_OPCODE_WAIT, 0, 0, 0},
+
+    {SEQ_OPCODE_RESTART, 0, 0, 0},
+};
+
+// Example: (0x0f | (0x03 << 4) | (0x01 << 7)),  ((0x17) | (0x07 << 5))
+
+const struct seq_command data_seq_test_t4[] = {
+    {SEQ_OPCODE_WAIT, 63, 0, 0},
+
+    {SEQ_OPCODE_SETRESTARTPOINT, 0, 0, 0}, 
+    {SEQ_OPCODE_NOTEPREFIX, (0x03 | (0x07 << 4) | (0x01 << 7)),  ((0x0c) | (0x07 << 5)), 240}, 
+    {NOTE_C3, INS_STRINGS, 31, 31},
+    {SEQ_OPCODE_WAIT, 30, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, (0x03 | (0x07 << 4) | (0x01 << 7)),  ((0x0c) | (0x07 << 5)), 240}, 
+    {NOTE_E3, INS_STRINGS, 31, 31},
+    {SEQ_OPCODE_WAIT, 30, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, (0x03 | (0x07 << 4) | (0x01 << 7)),  ((0x0c) | (0x07 << 5)), 240}, 
+    {NOTE_C3, INS_STRINGS, 31, 31},
+    {SEQ_OPCODE_WAIT, 30, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, (0x03 | (0x07 << 4) | (0x01 << 7)),  ((0x0c) | (0x07 << 5)), 240}, 
+    {NOTE_F3, INS_STRINGS, 31, 31},
+    {SEQ_OPCODE_WAIT, 30, 0, 0},
+
+    {SEQ_OPCODE_SETLOOPPOINT, 15, 0, 0},
+    {NOTE_C3, INS_STRINGS, 31, 31},
+    {SEQ_OPCODE_WAIT, 0, 0, 0},
+    {SEQ_OPCODE_LOOP, 0, 0, 0},
+
+    {SEQ_OPCODE_SETLOOPPOINT, 15, 0, 0},
+    {NOTE_E3, INS_STRINGS, 31, 31},
+    {SEQ_OPCODE_WAIT, 0, 0, 0},
+    {SEQ_OPCODE_LOOP, 0, 0, 0},
+
+    {SEQ_OPCODE_SETLOOPPOINT, 15, 0, 0},
+    {NOTE_C3, INS_STRINGS, 31, 31},
+    {SEQ_OPCODE_WAIT, 0, 0, 0},
+    {SEQ_OPCODE_LOOP, 0, 0, 0},
+
+    {SEQ_OPCODE_SETLOOPPOINT, 15, 0, 0},
+    {NOTE_G3, INS_STRINGS, 31, 31},
+    {SEQ_OPCODE_WAIT, 0, 0, 0},
+    {SEQ_OPCODE_LOOP, 0, 0, 0},
+
+    {SEQ_OPCODE_SETLOOPPOINT, 15, 0, 0},
+    {NOTE_C3, INS_STRINGS, 31, 31},
+    {SEQ_OPCODE_WAIT, 0, 0, 0},
+    {SEQ_OPCODE_LOOP, 0, 0, 0},
+
+    {SEQ_OPCODE_SETLOOPPOINT, 15, 0, 0},
+    {NOTE_E3, INS_STRINGS, 31, 31},
+    {SEQ_OPCODE_WAIT, 0, 0, 0},
+    {SEQ_OPCODE_LOOP, 0, 0, 0},
+
+    {SEQ_OPCODE_SETLOOPPOINT, 15, 0, 0},
+    {NOTE_C3, INS_STRINGS, 31, 31},
+    {SEQ_OPCODE_WAIT, 0, 0, 0},
+    {SEQ_OPCODE_LOOP, 0, 0, 0},
+
+    {SEQ_OPCODE_SETLOOPPOINT, 15, 0, 0},
+    {NOTE_G3, INS_STRINGS, 31, 31},
+    {SEQ_OPCODE_WAIT, 0, 0, 0},
+    {SEQ_OPCODE_LOOP, 0, 0, 0},
+
+    {SEQ_OPCODE_RESTART, 0, 0, 0},
+};
+
+// Drum test
+const struct seq_command data_seq_test_t5[] = {
+    {SEQ_OPCODE_PLAY_ONESHOT, INS_DRUM_KICK, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_PLAY_ONESHOT, INS_DRUM_SNARE, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_PLAY_ONESHOT, INS_DRUM_HIHAT, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_PLAY_ONESHOT, INS_DRUM_CYMBALS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_PLAY_ONESHOT, INS_DRUM_CLAP, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_PLAY_ONESHOT, INS_DRUM_STICK, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_RESTART, 0, 0, 0},
+};
+
+// Instrument test, pending note chart
+const struct seq_command data_seq_test_t6[] = {
+    // Drums
+    /*{SEQ_OPCODE_PLAY_ONESHOT, INS_DRUM_KICK, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_PLAY_ONESHOT, INS_DRUM_SNARE, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_PLAY_ONESHOT, INS_DRUM_HIHAT, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_PLAY_ONESHOT, INS_DRUM_CYMBALS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_PLAY_ONESHOT, INS_DRUM_CLAP, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_PLAY_ONESHOT, INS_DRUM_STICK, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    // Square wave
+    {NOTE_C5, INS_TONE_SQUARE_B4, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_D5, INS_TONE_SQUARE_B4, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_E5, INS_TONE_SQUARE_B4, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_F5, INS_TONE_SQUARE_B4, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_G5, INS_TONE_SQUARE_B4, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_A5, INS_TONE_SQUARE_B4, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_B5, INS_TONE_SQUARE_B4, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_C6, INS_TONE_SQUARE_B4, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},*/
+
+    // Bass
+    {NOTE_C2, INS_BASS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_D2, INS_BASS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_E2, INS_BASS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_F2, INS_BASS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_G2, INS_BASS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_A2, INS_BASS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_B2, INS_BASS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_C3, INS_BASS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    // Piano
+    {NOTE_C3, INS_PIANO, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_D3, INS_PIANO, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_E3, INS_PIANO, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_F3, INS_PIANO, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_G3, INS_PIANO, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_A3, INS_PIANO, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_B3, INS_PIANO, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_C4, INS_PIANO, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    // Acoustic guitar
+    {NOTE_C3, INS_GUITAR_ACOS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_D3, INS_GUITAR_ACOS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_E3, INS_GUITAR_ACOS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_F3, INS_GUITAR_ACOS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_G3, INS_GUITAR_ACOS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_A3, INS_GUITAR_ACOS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_B3, INS_GUITAR_ACOS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_C4, INS_GUITAR_ACOS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    // Distorted guitar
+    {NOTE_C3, INS_GUITAR_DIST, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_D3, INS_GUITAR_DIST, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_E3, INS_GUITAR_DIST, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_F3, INS_GUITAR_DIST, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_G3, INS_GUITAR_DIST, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_A3, INS_GUITAR_DIST, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_B3, INS_GUITAR_DIST, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_C4, INS_GUITAR_DIST, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    // Flute, held note
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_C4, INS_FLUTE, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_D4, INS_FLUTE, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_E4, INS_FLUTE, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_F4, INS_FLUTE, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_G4, INS_FLUTE, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_A4, INS_FLUTE, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_B4, INS_FLUTE, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_C5, INS_FLUTE, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    // Trumpet, held note
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_C4, INS_TRUMPET, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_D4, INS_TRUMPET, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_E4, INS_TRUMPET, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_F4, INS_TRUMPET, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_G4, INS_TRUMPET, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_A4, INS_TRUMPET, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_B4, INS_TRUMPET, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_C5, INS_TRUMPET, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    // Sax, held note
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_C4, INS_SAX, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_D4, INS_SAX, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_E4, INS_SAX, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_F4, INS_SAX, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_G4, INS_SAX, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_A4, INS_SAX, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_B4, INS_SAX, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_C5, INS_SAX, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    // Strings, held note
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_C5, INS_STRINGS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_D5, INS_STRINGS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_E5, INS_STRINGS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_F5, INS_STRINGS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_G5, INS_STRINGS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_A5, INS_STRINGS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_B5, INS_STRINGS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_C6, INS_STRINGS, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    // Cello, held note
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_C3, INS_CELLO, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_D3, INS_CELLO, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_E3, INS_CELLO, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_F3, INS_CELLO, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_G3, INS_CELLO, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_A3, INS_CELLO, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_B3, INS_CELLO, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_C4, INS_CELLO, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    // Violin, held note
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_C5, INS_VIOLIN, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_D5, INS_VIOLIN, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_E5, INS_VIOLIN, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_F5, INS_VIOLIN, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_G5, INS_VIOLIN, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_A5, INS_VIOLIN, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_B5, INS_VIOLIN, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_NOTEPREFIX, 0xff, 0xf1, 30},
+    {NOTE_C6, INS_VIOLIN, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    // Marimba
+    {NOTE_C3, INS_MARIMBA, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_D3, INS_MARIMBA, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_E3, INS_MARIMBA, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_F3, INS_MARIMBA, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_G3, INS_MARIMBA, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_A3, INS_MARIMBA, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_B3, INS_MARIMBA, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {NOTE_C4, INS_MARIMBA, 31, 31},
+    {SEQ_OPCODE_WAIT, 2, 0, 0},
+
+    {SEQ_OPCODE_RESTART, 0, 0, 0},
+};

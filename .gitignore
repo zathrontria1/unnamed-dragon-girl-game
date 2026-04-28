@@ -1,0 +1,99 @@
+# Prerequisites
+*.d
+
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# Linker output
+*.ilk
+*.map
+*.exp
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# ROM image compiled by calypsi pending Makefile edits
+hello.sfc
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Kernel Module Compile Results
+*.mod*
+*.cmd
+.tmp_versions/
+modules.order
+Module.symvers
+Mkfile.old
+dkms.conf
+
+# debug information files
+*.dwo
+
+# listing
+*.lst
+mapfile
+*~
+
+# vscode stuff
+.vscode/*
+
+# non-finalized image data
+*.ase
+*.png
+*.pdn
+
+# non-finalized map data
+*.py
+*.tmj
+*.tmx
+*.tsx
+*.tiled*
+
+# non-finalized sound data
+sound/abigassbundleofsamples/*
+*.wav
+*.aiff
+*.mp3
+*.flac
+*.aup3
+*.it
+*.bak
+
+sound/*.zip
+
+# sound engine assembly and linker files
+sound/*.bat
+sound/*.asm
+sound/*.inc
+sound/*.cfg
+
+# asset build batch file
+build_assets.bat
