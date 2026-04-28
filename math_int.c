@@ -17,13 +17,10 @@ uint8_t atan2_uint8(int16_t y, int16_t x)
     int16_t abs_y = (y < 0) ? -y : y;
     uint8_t angle;
     if (x >= 0) {
-        angle = 64 - (64 * (x - abs_y)) / (x + abs_y);
+        angle = ((64 - (64 * (x - abs_y)) / (x + abs_y)) >> 1) + 128;
     } else {
-        angle = 192 - (64 * (x + abs_y)) / (abs_y - x);
+        angle = ((192 - (64 * (x + abs_y)) / (abs_y - x)) >> 1) + 128;
     }
-
-    //angle /= 2;
-    angle = (angle >> 1) + 128;
 
     return (y < 0) ? (256 - angle) : angle;
 }
