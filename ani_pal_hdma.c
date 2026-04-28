@@ -85,6 +85,8 @@ void ani_pal_hdma_make_table(uint16_t * table_ptr, uint16_t pal_start, uint16_t 
 
     int i = 0;
 
+    int temp_intensity_counter = 0;
+
     for (; i < height; i += entries)
     {
         uint8_t temp_overflow = 0;
@@ -156,8 +158,10 @@ void ani_pal_hdma_make_table(uint16_t * table_ptr, uint16_t pal_start, uint16_t 
             break;
         }
 
-        if ((i & ((entries << rate_delay) - 1)) == 0)
+        temp_intensity_counter += entries;
+        if (temp_intensity_counter >= (entries << rate_delay))
         {
+            temp_intensity_counter -= (entries << rate_delay);
             temp_intensity += intensity_change;
         }
     }
