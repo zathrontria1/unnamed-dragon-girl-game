@@ -8,27 +8,92 @@
 
 /*  Check each SRAM slot for the verification string.
     If any mismatch, wipe the SRAM bank (8KB section)
+
+    Also used to determine if there is any SRAM, and if yes, how many banks are there.
     */
 void sram_check()
 {
     uint8_t * p = (uint8_t *)SRAM_ADDR;
 
-    for (int slot = 0; slot < SRAM_BANKS; slot++)
+    uint16_t temp_no_sram_found = 0;
+
+    // First, check the first bank to see if there is SRAM in the first place
+    uint8_t * str_bank0 = p;
+    for (int i = 0; i < 8; i++)
     {
-        uint8_t * str = p;
+        if (*str_bank0 != const_sram_verify_str[i])
+        {
+            sram_clear(0);
+
+            // Check if it's possible to write the new string
+            // so immediately check the string again
+
+            uint8_t * str_bank0_retest = p;
+            for (int k = 0; k < 8; k++)
+            {
+                if (*str_bank0_retest != const_sram_verify_str[k])
+                {
+                    temp_no_sram_found = 1;
+                    break;
+                }
+
+                str_bank0_retest++;
+            }
+
+            break;
+        }
+
+        str_bank0++;
+    }
+
+    if (temp_no_sram_found)
+    {
+        sram_available_slots = 0;
+        return;
+    }
+
+    str_bank0 = p + 8;
+    *str_bank0 = 0;
+
+    p = (uint8_t *)SRAM_ADDR + 0x00010000 * (SRAM_BANKS - 1);
+
+    // Clear the other slots
+    for (int slot = SRAM_BANKS-1; slot > 0; slot--)
+    {
+        uint8_t * str_bankother = p;
         for (int i = 0; i < 8; i++)
         {
-            if (*str != const_sram_verify_str[i])
+            if (*str_bankother != const_sram_verify_str[i])
             {
                 sram_clear(slot);
                 break;
             }
 
-            str++;
+            str_bankother++;
+        }
+
+        str_bankother = p + 8;
+        *str_bankother = (uint8_t)slot;
+
+        p = (uint8_t *)((uint32_t)p - 0x00010000);
+    }
+
+    // Finally scan the memory area to determine the highest available bank
+    uint8_t temp_highestbank = 0;
+
+    p = (uint8_t *)SRAM_ADDR+8;
+
+    for (int i = 0; i < SRAM_BANKS; i++)
+    {
+        if (*p > temp_highestbank)
+        {
+            temp_highestbank = *p;
         }
 
         p = (uint8_t *)((uint32_t)p + 0x00010000);
     }
+
+    sram_available_slots = temp_highestbank + 1;
 
     return;
 }

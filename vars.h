@@ -6,8 +6,9 @@
 
 #include "vars_extern.h"
 
-// For SRAM
+// For SRAM management
 extern const uint8_t const_sram_verify_str[];
+extern uint8_t sram_available_slots;
 
 // For DMA/HDMA copies
 extern const uint32_t const_zero;

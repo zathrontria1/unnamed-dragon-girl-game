@@ -26,7 +26,7 @@
 #define SRAM_BANK_SIZE 8192l
 #define SRAM_BANKS (SRAM_TOTAL_SIZE / SRAM_BANK_SIZE)
 #define SRAM_ADDR 0x00306000
-#define SRAM_DATA_OFFSET 0x0008 // after the checksum
+#define SRAM_DATA_OFFSET 0x0010 // after the checksum and reserved area
 
 // Event flags
 #define EVENT_FLAG_LOCAL_MAX 256

@@ -12,8 +12,9 @@
 #include "consts_snd.h"
 #include "sound/seq/seq_test.h"
 
-// For SRAM verification
+// For SRAM management
 const uint8_t const_sram_verify_str[] = "EIEIMUN!"; // Can use any 8 character string that isn't all 0x00 or 0xff. Will occupy 9 bytes in ROM
+uint8_t sram_available_slots;
 
 // For DMA/HDMA copies
 const uint32_t const_zero = 0;
