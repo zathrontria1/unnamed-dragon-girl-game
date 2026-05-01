@@ -147,13 +147,13 @@ void spr_queue_add_back_wrapper(struct game_object * o, uint16_t tileattrib)
     return;
 }
 
-#ifdef __VBCC__
+#if VBCC_ASM == 1
     NO_INLINE void spr_queue_add(__reg("r0/r1") struct spr_queue_entry * s, __reg("r2/r3") struct spr_queue_entry * target_queue)
 #else
     void spr_queue_add(struct spr_queue_entry * s, struct spr_queue_entry * target_queue)
 #endif
 {
-    #ifdef __VBCC__
+    #if VBCC_ASM == 1
         __asm(
         "\ta16\n"
         "\tx16\n"
@@ -298,7 +298,7 @@ void spr_release_vram_slot(uint16_t i, uint16_t slot_count)
 
 void spr_queue_process()
 {
-    #ifdef __VBCC__
+    #if VBCC_ASM == 1
         __asm(
         "\ta16\n"
         "\tx16\n"
@@ -331,7 +331,7 @@ void spr_queue_process()
     spr_front_count = 0;
 
     // Clear the depth buffer
-    #ifdef __VBCC__
+    #if VBCC_ASM == 1
         __asm(
         "\ta16\n"
         "\tx8\n"
@@ -354,7 +354,7 @@ void spr_queue_process()
     #endif
     
     // Tally up sprites on each Y
-    #ifdef __VBCC__
+    #if VBCC_ASM == 1
         __asm(
         "\ta16\n"
         "\tx16\n"
@@ -400,7 +400,7 @@ void spr_queue_process()
 
     // then calculate the OAM offset for sprites
     // Correct, but must be assembly optimized
-    #ifdef __VBCC__
+    #if VBCC_ASM == 1
         __asm(
         "\ta16\n"
         "\tx16\n"
@@ -439,7 +439,7 @@ void spr_queue_process()
     #endif
 
     // write out the sprites
-    #ifdef __VBCC__
+    #if VBCC_ASM == 1
         __asm(
         "\ta16\n"
         "\tx16\n"
@@ -518,7 +518,7 @@ void spr_queue_process()
     spr_sprite_count += spr_normal_count;
     spr_normal_count = 0;
 
-    #ifdef __VBCC__
+    #if VBCC_ASM == 1
         __asm(
         "\ta16\n"
         "\tx16\n"
@@ -557,7 +557,7 @@ void spr_queue_process()
     Draws a sprite immediately. Normally invoked internally from another function.
 */
 
-#ifdef __VBCC__
+#if VBCC_ASM == 1
     NO_INLINE void spr_draw(__reg("r0/r1") struct spr_queue_entry * s)
 #else
     void spr_draw(struct spr_queue_entry * s)
@@ -566,7 +566,7 @@ void spr_queue_process()
     // Draws a sprite
     // A sprite that is here passed all checks
 
-    #ifdef __VBCC__
+    #if VBCC_ASM == 1
         __asm(
         "\ta16\n"
 	    "\tx16\n"
@@ -611,7 +611,7 @@ void spr_queue_process()
 void spr_pack_oam()
 {
     // Packs high OAM bytes into the 32 bytes following the low OAM
-    #ifdef __VBCC__
+    #if VBCC_ASM == 1
         __asm(
         "\tlda #<_shadow_oam+512\n"
         "\tsta r4\n"
@@ -672,7 +672,7 @@ void spr_pack_oam()
 */
 void spr_reset_sprites()
 {
-    #ifdef __VBCC__
+    #if VBCC_ASM == 1
         __asm(
         "\tlda _spr_sprite_count_prev\n"
         "\tbit #3\n"

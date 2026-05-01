@@ -1,7 +1,7 @@
 struct game_object * hit_test_enemy(struct game_object * o);
 struct game_object * hit_test_player(struct game_object * o);
 uint16_t hit_test_interaction(struct game_object * o);
-#ifdef __VBCC__
+#if VBCC_ASM == 1
     NO_INLINE uint16_t hit_test_blocker(struct tile_xy t);
 #else
     uint16_t hit_test_blocker(struct tile_xy t);

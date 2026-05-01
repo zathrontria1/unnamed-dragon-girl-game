@@ -4,8 +4,8 @@
     #include <calypsi/intrinsics65816.h>;
 #endif
 
-
 // assembly for instructions that can't be directly specified in C
+// Always use the compiler defines, not whether inline ASM is enabled
 void emitWAI(void) {
 #ifdef __VBCC__
     __asm("\twai\n");

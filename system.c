@@ -340,11 +340,11 @@ void system_reset()
 
     REG_INIDISP = 0x8f;
 
-    #ifdef __VBCC__
+    #ifdef __VBCC__ // This should use the compiler define always
         __asm("\tjml $008000\n");
     #endif
 
-    #ifdef __CALYPSI__
+    #ifdef __CALYPSI__ // This should use the compiler define always
         __asm("\tjmp long:0x008000\n");
     #endif
 

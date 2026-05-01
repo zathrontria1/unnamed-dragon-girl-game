@@ -6,13 +6,13 @@
 #include "dma.h"
 #include "interrupt.h"
 
-#ifdef __CALYPSI__
+#ifdef __CALYPSI__ // This should use the compiler define always
     __attribute__((interrupt(0xffea))) void __irq_vblank(void)
 #else
     NEAR INTERRUPT void __irq_vblank(void)
 #endif
 {
-    #ifdef __VBCC__
+    #ifdef __VBCC__ // This should use the compiler define always
         __asm(
             "\tjml >.fast_nmi\n"
             ".fast_nmi:\n");

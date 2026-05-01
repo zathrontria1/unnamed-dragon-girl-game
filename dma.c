@@ -78,7 +78,7 @@ void dma_clear_vram()
 void dma_copy_oam()
 {
     // Update OAM from shadow
-    #ifdef __VBCC__
+    #if VBCC_ASM == 1
         __asm(
             "\ta8\n"
             "\tsep #$20\n"
@@ -126,7 +126,7 @@ void dma_copy_oam()
 void dma_copy_palette()
 {
     // Update CGRAM from shadow
-     #ifdef __VBCC__
+     #if VBCC_ASM == 1
         __asm(
             "\ta8\n"
             "\tsep #$20\n"
@@ -301,7 +301,7 @@ uint16_t dma_queue_add(
 
 void dma_queue_process() 
 {
-    #ifdef __VBCC__
+    #if VBCC_ASM == 1
         __asm(
             "\tlda _dma_queue_count\n"
             "\tsep #32\n"

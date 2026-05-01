@@ -1,5 +1,5 @@
 void snd_start();
-#ifdef __VBCC__
+#if VBCC_ASM == 1
     NO_INLINE void snd_upload_data(uint8_t * data_ptr, uint16_t len);
 #else
     void snd_upload_data(uint8_t * data_ptr, uint16_t len);

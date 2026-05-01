@@ -177,13 +177,13 @@ uint16_t hit_test_extended(int16_t x1, int16_t x2, int16_t y1, int16_t y2, int16
 // Call from any moving entity to hit test against dynamic blocked tiles.
 // Note: send tile level positions, in the form of 16-bit X followed by 16-bit Y in a single 32-bit variable
 // Returns 1 on hit
-#ifdef __VBCC__
+#if VBCC_ASM == 1
     NO_INLINE uint16_t hit_test_blocker(struct tile_xy t)
 #else
     uint16_t hit_test_blocker(struct tile_xy t)
 #endif
 {
-    #ifdef __VBCC__
+    #if VBCC_ASM == 1
         __asm(
             "\tlda _blocker_build_count_shadow\n"
             "\tbeq .no_hits\n"

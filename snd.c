@@ -74,7 +74,7 @@ void snd_start()
     return;
 }
 
-#ifdef __VBCC__
+#if VBCC_ASM == 1
     NO_INLINE void snd_upload_data(uint8_t * data_ptr, uint16_t len)
 #else
     void snd_upload_data(uint8_t * data_ptr, uint16_t len)
@@ -84,7 +84,7 @@ void snd_start()
     // May need to change i to exactly 0 and no offset on compared size
     // when implementing actual driver.
 
-    #ifdef __VBCC__
+    #if VBCC_ASM == 1
          __asm(
             "\tsta r0\n" // Data pointer
             "\tstx r0+2\n"

@@ -1,20 +1,26 @@
+#ifndef _WIN32
+    #define INLINE_ASM 1
+#endif
+
 #ifdef __VBCC__
-#define NEAR __near
-#define ZP __zpage
-#define NO_INLINE __noinline
-#define INTERRUPT __interrupt
-#define COMPILER_SET 1
+    #define NEAR __near
+    #define ZP __zpage
+    #define NO_INLINE __noinline
+    #define INTERRUPT __interrupt
+    #define CPU_65816 1
+    #define VBCC_ASM INLINE_ASM
 #endif
 
 #ifdef __CALYPSI__
-#define NEAR 
-#define ZP 
-#define NO_INLINE 
-#define INTERRUPT
-#define COMPILER_SET 1
+    #define NEAR 
+    #define ZP 
+    #define NO_INLINE 
+    #define INTERRUPT
+    #define CPU_65816 1
+    #define CALYPSI_ASM INLINE_ASM
 #endif
 
-#if COMPILER_SET != 1
+#if CPU_65816 != 1
     #define NEAR
     #define ZP
     #define NO_INLINE 
