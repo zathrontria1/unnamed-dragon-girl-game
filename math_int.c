@@ -9,7 +9,7 @@
     returns angle from 0-255
 */
 
-uint8_t atan2_uint8(int16_t y, int16_t x)
+inline uint8_t atan2_uint8(int16_t y, int16_t x)
 {
     if (x == 0 && y == 0) {
         return 0;
@@ -25,7 +25,7 @@ uint8_t atan2_uint8(int16_t y, int16_t x)
     return (y < 0) ? (256 - angle) : angle;
 }
 
-uint16_t rand_get16()
+inline uint16_t rand_get16()
 {
     uint8_t temp_carry = 0;
 

@@ -13,7 +13,7 @@ void dma_copy_oam(void);
 void dma_copy_palette(void);
 void dma_copy_palette_subset(uint16_t start, uint16_t len);
 
-uint16_t dma_queue_add(
+inline uint16_t dma_queue_add(
     uint8_t * src, 
     uint16_t dest, 
     uint16_t length,

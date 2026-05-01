@@ -6,7 +6,7 @@
 #include "hittest.h"
 
 // Call from an enemy to hit test
-struct game_object * hit_test_enemy(struct game_object * o)
+inline struct game_object * hit_test_enemy(struct game_object * o)
 {
     int temp_objects_encountered = 0;
 
@@ -35,7 +35,7 @@ struct game_object * hit_test_enemy(struct game_object * o)
     return NULL;
 }
 
-uint16_t hit_test_interaction(struct game_object * o)
+inline uint16_t hit_test_interaction(struct game_object * o)
 {
     int16_t x1 = o->pos.x.lh.h;
     int16_t y1 = o->pos.y.lh.h;
@@ -49,7 +49,7 @@ uint16_t hit_test_interaction(struct game_object * o)
 }
 
 // Call from player to hit test
-struct game_object * hit_test_player(struct game_object * o)
+inline struct game_object * hit_test_player(struct game_object * o)
 {
     // shrink the player's hitbox
     // for this we'll make a copy
@@ -96,7 +96,7 @@ struct game_object * hit_test_player(struct game_object * o)
 /*
     Two game objects
 */
-uint16_t hit_test(struct game_object * a, struct game_object * b)
+inline uint16_t hit_test(struct game_object * a, struct game_object * b)
 {
     // a.x < b.x + b.w && b.x < a.x + a.w
     if ((b->pos.x.lh.h + b->w) < a->pos.x.lh.h)
@@ -123,7 +123,7 @@ uint16_t hit_test(struct game_object * a, struct game_object * b)
 /*
     Directly specified with square size
 */
-uint16_t hit_test_direct(int16_t x1, int16_t x2, int16_t y1, int16_t y2, int16_t s1, int16_t s2)
+inline uint16_t hit_test_direct(int16_t x1, int16_t x2, int16_t y1, int16_t y2, int16_t s1, int16_t s2)
 {
     // a.x < b.x + b.w && b.x < a.x + a.w
     if ((x2 + s2) < x1)
@@ -150,7 +150,7 @@ uint16_t hit_test_direct(int16_t x1, int16_t x2, int16_t y1, int16_t y2, int16_t
 /*
     Directly specified with non-square size
 */
-uint16_t hit_test_extended(int16_t x1, int16_t x2, int16_t y1, int16_t y2, int16_t w1, int16_t w2, int16_t h1, int16_t h2)
+inline uint16_t hit_test_extended(int16_t x1, int16_t x2, int16_t y1, int16_t y2, int16_t w1, int16_t w2, int16_t h1, int16_t h2)
 {
     // a.x < b.x + b.w && b.x < a.x + a.w
     if ((x2 + w2) < x1)

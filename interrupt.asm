@@ -1,4 +1,3 @@
-;vcprmin=10000
 	section	"DONTMERGE_text.near.__irq_vblank.0","acrx"
 	a16
 	x16
@@ -33,10 +32,6 @@ ___irq_vblank:
 	pei	(r13)
 	pei	(r14)
 	pei	(r15)
-	pei	(r28)
-	pei	(r29)
-	pei	(r30)
-	pei	(r31)
 
 ; volatile barrier
 	sep	#32
@@ -64,10 +59,10 @@ l8:
 	cmp	#100
 	beq	l14
 	lda	_system_current_routine
-	cmp	#65500
-	beq	l14
-	lda	_system_current_routine
-	cmp	#65501
+	sec
+	sbc	#65500
+	cmp	#1
+	bcc	l14
 	beq	l14
 ; volatile barrier
 	sep	#32
@@ -136,9 +131,9 @@ l21:
 	rep	#32
 l22:
 	inc	_system_frames_elapsed
-	bne	l31
+	bne	l33
 	inc	2+_system_frames_elapsed
-l31:
+l33:
 	bra	l29
 l16:
 	lda	_system_current_routine
@@ -158,15 +153,7 @@ l27:
 	jsl	>_dma_copy_bg_64height_anim
 	stz	_ani_bg_tallbg_dma_ready
 l29:
-	rep #$30
-	plx
-	stx	r31
-	plx
-	stx	r30
-	plx
-	stx	r29
-	plx
-	stx	r28
+	rep	#$30
 	plx
 	stx	r15
 	plx

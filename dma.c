@@ -241,7 +241,7 @@ void dma_copy_bg_64height_anim()
     return;
 }
 
-uint16_t dma_queue_add(
+inline uint16_t dma_queue_add(
     uint8_t * src, 
     uint16_t dest, 
     uint16_t length,

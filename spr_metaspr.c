@@ -6,7 +6,7 @@
 #include "spr_metaspr.h"
 
 // Draws a metasprite
-void spr_metaspr_draw(struct game_object * o, const struct spr_metaspr_definition * m)
+inline void spr_metaspr_draw(struct game_object * o, const struct spr_metaspr_definition * m)
 {
     struct spr_queue_entry s;
     s.depth = (o->pos.y.lh.h + 15) - bg_scroll_y.full.high.a;

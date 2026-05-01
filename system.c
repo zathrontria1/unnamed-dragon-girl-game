@@ -286,7 +286,7 @@ void system_poll_input()
     return;
 }
 
-uint16_t system_check_for_key(enum KEYPAD_BITS k)
+inline uint16_t system_check_for_key(enum KEYPAD_BITS k)
 {
     if ((input_pad0_new & k) == k)
     {
@@ -296,7 +296,7 @@ uint16_t system_check_for_key(enum KEYPAD_BITS k)
     return 0;
 }
 
-uint16_t system_check_for_key_hold(enum KEYPAD_BITS k)
+inline uint16_t system_check_for_key_hold(enum KEYPAD_BITS k)
 {
     if ((input_pad0 & k) == k)
     {
@@ -351,7 +351,7 @@ void system_reset()
     return;
 }
 
-void system_check_for_soft_reset()
+inline void system_check_for_soft_reset()
 {
     if ((input_pad0 & (KEY_L | KEY_R | KEY_SELECT | KEY_START)) == (KEY_L | KEY_R | KEY_SELECT | KEY_START)) // check soft reset combo
     {

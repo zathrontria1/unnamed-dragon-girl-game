@@ -10,7 +10,7 @@
     It is the responsibility of the caller select the right queue and 
     to ensure that the written sprite is valid
 */
-void spr_queue_add_ui_wrapper(int16_t x, int16_t y, uint16_t tileattrib)
+inline void spr_queue_add_ui_wrapper(int16_t x, int16_t y, uint16_t tileattrib)
 {
     struct spr_queue_entry s;
     s.x = x;
@@ -39,7 +39,7 @@ void spr_queue_add_ui_wrapper(int16_t x, int16_t y, uint16_t tileattrib)
     return;
 }
 
-void spr_queue_add_front_wrapper(struct game_object * o, uint16_t tileattrib)
+inline void spr_queue_add_front_wrapper(struct game_object * o, uint16_t tileattrib)
 {
     if (spr_front_count >= 128)
     {
@@ -75,7 +75,7 @@ void spr_queue_add_front_wrapper(struct game_object * o, uint16_t tileattrib)
     return;
 }
 
-void spr_queue_add_normal_wrapper(struct game_object * o, uint16_t tileattrib)
+inline void spr_queue_add_normal_wrapper(struct game_object * o, uint16_t tileattrib)
 {
     if (spr_normal_count >= 128)
     {
@@ -111,7 +111,7 @@ void spr_queue_add_normal_wrapper(struct game_object * o, uint16_t tileattrib)
     return;
 }
 
-void spr_queue_add_back_wrapper(struct game_object * o, uint16_t tileattrib)
+inline void spr_queue_add_back_wrapper(struct game_object * o, uint16_t tileattrib)
 {
     if (spr_back_count >= 128)
     {

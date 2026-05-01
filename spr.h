@@ -1,7 +1,7 @@
-void spr_queue_add_ui_wrapper(int16_t x, int16_t y, uint16_t tileattrib);
-void spr_queue_add_front_wrapper(struct game_object * o, uint16_t tileattrib);
-void spr_queue_add_normal_wrapper(struct game_object * o, uint16_t tileattrib);
-void spr_queue_add_back_wrapper(struct game_object * o, uint16_t tileattrib);
+inline void spr_queue_add_ui_wrapper(int16_t x, int16_t y, uint16_t tileattrib);
+inline void spr_queue_add_front_wrapper(struct game_object * o, uint16_t tileattrib);
+inline void spr_queue_add_normal_wrapper(struct game_object * o, uint16_t tileattrib);
+inline void spr_queue_add_back_wrapper(struct game_object * o, uint16_t tileattrib);
 
 #if VBCC_ASM == 1
     NO_INLINE void spr_queue_add(__reg("r0/r1") struct spr_queue_entry * s, __reg("r2/r3") struct spr_queue_entry * target_queue);

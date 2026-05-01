@@ -5,9 +5,9 @@ void snd_start();
     void snd_upload_data(uint8_t * data_ptr, uint16_t len);
 #endif
 
-void snd_play_sfx(uint8_t sfx_id, int8_t pan);
-void snd_play_sfx_extend(uint8_t sfx_id, int8_t vol_l, int8_t vol_r, int8_t pitch);
-void snd_stop_sfx(uint8_t sfx_id);
+inline void snd_play_sfx(uint8_t sfx_id, int8_t pan);
+inline void snd_play_sfx_extend(uint8_t sfx_id, int8_t vol_l, int8_t vol_r, int8_t pitch);
+inline void snd_stop_sfx(uint8_t sfx_id);
 
 void snd_set_dsp_reg(uint8_t dsp_reg, uint8_t dsp_data);
 void snd_reset();
@@ -24,5 +24,5 @@ void snd_music_play();
 void snd_music_pause();
 void snd_music_stop();
 
-void snd_busy_ack();
-void snd_nop_ack();
+inline void snd_busy_ack();
+inline void snd_nop_ack();

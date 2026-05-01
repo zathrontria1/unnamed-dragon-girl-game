@@ -7,11 +7,13 @@ set sfc_name=main
 
 REM the below was a workaround for broken interrupt assembly code generation
 REM uncomment if the source code is changed, then comment it back after editing the assembly code to fix a crash bug
-REM vc +snes-hi -O1 -speed -msfp4 -lms4 -S %cmd_asm1% 
-vc +snes-hi -O1 -speed -msfp4 -lms4 %cmd_code% %cmd_data% -o %sfc_name%.sfc
+REM vc +snes-hi -O4 -size -msfp4 -lms4 -S %cmd_asm1% 
+vc +snes-hi -O4 -size -msfp4 -lms4 %cmd_code% %cmd_data% -o %sfc_name%.sfc
 
 REM Also compile using calypsi for testing purposes
 REM this will invoke make.
 REM The makefile needs to be edited so that it doesn't error out if the ROM image was already made
 REM TODO: there are still show-stopping bugs with the created ROM image. Although it runs, it has bugs that make the game unplayable.
 REM make
+
+pause

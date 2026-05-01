@@ -133,7 +133,7 @@ void snd_start()
     return;
 }
 
-void snd_busy_ack()
+inline void snd_busy_ack()
 {
     while (REG_APU00 != SND_SIG_CLEAR)
     {
@@ -143,7 +143,7 @@ void snd_busy_ack()
     return;
 }
 
-void snd_nop_ack()
+inline void snd_nop_ack()
 {
     REG_APU01 = SND_CMD_NOP;
 
@@ -155,7 +155,7 @@ void snd_nop_ack()
     return;
 }
 
-void snd_play_sfx(uint8_t sfx_id, int8_t pan)
+inline void snd_play_sfx(uint8_t sfx_id, int8_t pan)
 {
     snd_busy_ack();
 
@@ -174,7 +174,7 @@ void snd_play_sfx(uint8_t sfx_id, int8_t pan)
     return;
 }
 
-void snd_play_sfx_extend(uint8_t sfx_id, int8_t vol_l, int8_t vol_r, int8_t pitch)
+inline void snd_play_sfx_extend(uint8_t sfx_id, int8_t vol_l, int8_t vol_r, int8_t pitch)
 {
     snd_busy_ack();
     
@@ -206,7 +206,7 @@ void snd_play_sfx_extend(uint8_t sfx_id, int8_t vol_l, int8_t vol_r, int8_t pitc
 }
 
 // stop an SFX
-void snd_stop_sfx(uint8_t sfx_id)
+inline void snd_stop_sfx(uint8_t sfx_id)
 {
     snd_busy_ack();
 
