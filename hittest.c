@@ -177,6 +177,7 @@ inline uint16_t hit_test_extended(int16_t x1, int16_t x2, int16_t y1, int16_t y2
 // Call from any moving entity to hit test against dynamic blocked tiles.
 // Note: send tile level positions, in the form of 16-bit X followed by 16-bit Y in a single 32-bit variable
 // Returns 1 on hit
+// The queue of blockers should be in the low 8KB of RAM.
 #if VBCC_ASM == 1
     NO_INLINE uint16_t hit_test_blocker(struct tile_xy t)
 #else
@@ -198,11 +199,11 @@ inline uint16_t hit_test_extended(int16_t x1, int16_t x2, int16_t y1, int16_t y2
             "\tsta r3\n"
         ".check_blocker:\n"
             "\tlda r2\n"
-            "\tcmp >_blocker_list,x\n"
+            "\tcmp _blocker_list,x\n"
             "\tbne .check_next_blocker\n"
 
             "\tlda r3\n"
-            "\tcmp >_blocker_list+2,x\n"
+            "\tcmp _blocker_list+2,x\n"
             "\tbne .check_next_blocker\n"
 
             "\tlda #1\n"
@@ -215,6 +216,7 @@ inline uint16_t hit_test_extended(int16_t x1, int16_t x2, int16_t y1, int16_t y2
 
             "\tbpl .check_blocker\n"
         ".no_hits:\n"
+            "\tlda #0\n"
         );
     #else
         for (int k = 0; k < blocker_build_count_shadow; k++)
