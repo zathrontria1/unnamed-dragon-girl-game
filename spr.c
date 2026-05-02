@@ -147,6 +147,11 @@ inline void spr_queue_add_back_wrapper(struct game_object * o, uint16_t tileattr
     return;
 }
 
+/*
+    Adds a sprite into the designated queue.
+
+    Requires the queue to be located in low 8KB of RAM for speed reasons
+*/
 #if VBCC_ASM == 1
     NO_INLINE void spr_queue_add(__reg("r0/r1") struct spr_queue_entry * s, __reg("r2/r3") struct spr_queue_entry * target_queue)
 #else
@@ -158,20 +163,17 @@ inline void spr_queue_add_back_wrapper(struct game_object * o, uint16_t tileattr
         "\ta16\n"
         "\tx16\n"
 
-        "\tphy\n"
-        "\tlda [r0]\n"
-        "\tsta [r2]\n"
+        "\tlda (r0)\n"
+        "\tsta (r2)\n"
         "\tldy #2\n"
-        "\tlda [r0],y\n"
-        "\tsta [r2],y\n"
+        "\tlda (r0),y\n"
+        "\tsta (r2),y\n"
         "\tldy #4\n"
-        "\tlda [r0],y\n"
-        "\tsta [r2],y\n"
+        "\tlda (r0),y\n"
+        "\tsta (r2),y\n"
         "\tldy #6\n"
-        "\tlda [r0],y\n"
-        "\tsta [r2],y\n"
-
-        "\tply\n");
+        "\tlda (r0),y\n"
+        "\tsta (r2),y\n");
     #else
         target_queue->x = s->x;
         target_queue->y = s->y;
@@ -296,6 +298,11 @@ void spr_release_vram_slot(uint16_t i, uint16_t slot_count)
     return;
 }
 
+/*
+    Process all queued sprites.
+
+    Requires the queues, as well as depth buffer, to be located in low 8KB of RAM for speed reasons
+*/
 void spr_queue_process()
 {
     #if VBCC_ASM == 1
@@ -304,12 +311,10 @@ void spr_queue_process()
         "\tx16\n"
         "\tlda _spr_front_count\n"
         "\tbeq .end_drawfront\n"
-        "\tphy\n"
+
         "\ttay\n"
         "\tlda #<_spr_queue_front\n"
         "\tsta r0\n"
-        "\tlda #^_spr_queue_front\n"
-        "\tsta r1\n"
         
         ".loop_drawfrontsprites:\n"
         "\tjsl >_spr_draw\n"
@@ -319,7 +324,6 @@ void spr_queue_process()
         "\tsta r0\n"
         "\tdey\n"
         "\tbne .loop_drawfrontsprites\n"
-        "\tply\n"
         ".end_drawfront:\n");
     #else
         for (int i = 0; i < spr_front_count; i++)
@@ -336,14 +340,13 @@ void spr_queue_process()
         "\ta16\n"
         "\tx8\n"
         "\tsep #$10\n"
-        "\tlda #$0000\n"
-        "\ttax\n"
+        "\tldx #$00\n"
         ".loop_depthclear:\n"
-        "\tsta >_spr_depth_count,x\n"
+        "\tstz _spr_depth_count,x\n"
         "\tinx\n"
         "\tinx\n"
         "\tbne .loop_depthclear\n"
-        "\tsta >_spr_depth_count+255\n"
+        "\tstz _spr_depth_count+255\n"
         "\trep #$10\n"
         "\tx16\n");
     #else
@@ -360,9 +363,6 @@ void spr_queue_process()
         "\tx16\n"
         "\tlda #<_spr_queue_normal\n"
         "\tsta r0\n"
-        "\tlda #^_spr_queue_normal\n"
-        "\tsta r1\n"
-        "\tphy\n"
         "\tlda _spr_normal_count\n"
         "\tbeq .end\n"
         "\tsta r2\n"
@@ -372,12 +372,12 @@ void spr_queue_process()
         "\tsep #$20\n"
         "\tclc \n"
         ".loop_depthtally:\n"
-        "\tlda [r0],y\n"
+        "\tlda (r0),y\n"
         "\ttax\n"
         "\tinx\n"
-        "\tlda >_spr_depth_count,x\n"
+        "\tlda _spr_depth_count,x\n"
         "\tinc\n"
-        "\tsta >_spr_depth_count,x\n"
+        "\tsta _spr_depth_count,x\n"
         "\tlda r0\n"
         "\tadc #8\n"
         "\tsta r0 \n"
@@ -389,8 +389,7 @@ void spr_queue_process()
         "\tbne .loop_depthtally\n"
         "\ta16\n"
         "\trep #$20\n"
-        ".end:\n"
-        "\tply\n");
+        ".end:\n");
     #else
         for (int i = 0; i < spr_normal_count; i++)
         {
@@ -403,27 +402,24 @@ void spr_queue_process()
     #if VBCC_ASM == 1
         __asm(
         "\ta16\n"
-        "\tx16\n"
-        "\tphy\n"
         "\tx8\n"
         "\tsep #$10\n"
         "\tlda #$0000\n"
         "\ttax\n"
-        "\tlda >_spr_sprite_count\n"
+        "\tlda _spr_sprite_count\n"
         "\tclc\n"
-        "\tadc >_spr_normal_count\n"
+        "\tadc _spr_normal_count\n"
         "\tsep #$21\n"
         "\ta8\n"
         ".loop_oamoffsetcalc:\n"
-        "\tsta >_spr_depth_count,x\n"
-	    "\tsbc >_spr_depth_count+1,x\n"
+        "\tsta _spr_depth_count,x\n"
+	    "\tsbc _spr_depth_count+1,x\n"
         "\tinx\n"
         "\tbne .loop_oamoffsetcalc\n"
-        "\tsta >_spr_depth_count+256\n"
+        "\tsta _spr_depth_count+256\n"
         "\trep #$30\n"
         "\ta16\n"
-        "\tx16\n"
-        "\tply\n");
+        "\tx16\n");
     #else
         uint16_t temp_offset = spr_sprite_count + spr_normal_count;
         uint16_t t;
@@ -443,11 +439,8 @@ void spr_queue_process()
         __asm(
         "\ta16\n"
         "\tx16\n"
-        "\tphy\n"
         "\tlda #<_spr_queue_normal\n"
         "\tsta r0\n"
-        "\tlda #^_spr_queue_normal\n"
-        "\tsta r1\n"
         "\tlda _spr_normal_count\n"
         "\tbeq .end2\n"
         "\tsta r2\n"
@@ -459,9 +452,9 @@ void spr_queue_process()
         "\ta8\n"
         "\tlda [r0],y\n"
         "\ttax\n"
-        "\tlda >_spr_depth_count,x\n"
+        "\tlda _spr_depth_count,x\n"
         "\tdec\n"
-        "\tsta >_spr_depth_count,x\n"
+        "\tsta _spr_depth_count,x\n"
 
         // Prepare the indices
         "\ttax\n" 
@@ -476,23 +469,23 @@ void spr_queue_process()
 
         // Transfer the sprite information
         "\tldy #6\n"
-        "\tlda [r0],y\n"
-        "\tsta >_shadow_oam+512,x\n"
+        "\tlda (r0),y\n"
+        "\tsta _shadow_oam+512,x\n"
         
         "\tldx r3\n"
 
         "\tldy #2\n"
-        "\tlda [r0],y\n"
-        "\tsta >_shadow_oam+1,x\n"
+        "\tlda (r0),y\n"
+        "\tsta _shadow_oam+1,x\n"
 
-        "\tlda [r0]\n"
-        "\tsta >_shadow_oam,x\n"
+        "\tlda (r0)\n"
+        "\tsta _shadow_oam,x\n"
         
         "\trep #$20\n"
         "\ta16\n"
         "\tldy #4\n" 
-        "\tlda [r0],y\n"
-        "\tsta >_shadow_oam+2,x\n"
+        "\tlda (r0),y\n"
+        "\tsta _shadow_oam+2,x\n"
         
         "\tlda r0\n"
         "\tclc \n"
@@ -500,8 +493,7 @@ void spr_queue_process()
         "\tsta r0 \n"
         "\tdec r2 \n"
         "\tbne .loop_spritewrite\n"
-        ".end2:\n"
-        "\tply\n");    
+        ".end2:\n");    
     #else
         for (int i = 0; i < spr_normal_count; i++)
         {
@@ -524,12 +516,9 @@ void spr_queue_process()
         "\tx16\n"
         "\tlda _spr_back_count\n"
         "\tbeq .end_drawback\n"
-        "\tphy\n"
         "\ttay\n"
         "\tlda #<_spr_queue_back\n"
         "\tsta r0\n"
-        "\tlda #^_spr_queue_back\n"
-        "\tsta r1\n"
         
         ".loop_drawbacksprites:\n"
         "\tjsl >_spr_draw\n"
@@ -539,7 +528,6 @@ void spr_queue_process()
         "\tsta r0\n"
         "\tdey\n"
         "\tbne .loop_drawbacksprites\n"
-        "\tply\n"
         ".end_drawback:\n");
     #else
         for (int i = 0; i < spr_back_count; i++)
@@ -669,6 +657,8 @@ void spr_pack_oam()
 
 /* 
     Clears all unused sprites from OAM
+
+    OAM buffer copy should be in low 8KB of RAM.
 */
 void spr_reset_sprites()
 {
@@ -687,15 +677,13 @@ void spr_reset_sprites()
         "\tlda _spr_sprite_count\n"
         "\tcmp r10\n"
         "\tbcs .end_sprreset\n"
-        "\tphy\n"
+
         "\ttay\n"
 
         "\tasl\n"
         "\tasl\n"
         "\ttax\n"
 
-        "\tlda #^(_shadow_oam+512)\n"
-        "\tsta r2+2\n"
         "\tlda #<_shadow_oam+512\n"
         "\tsta r2\n"
 
@@ -703,10 +691,10 @@ void spr_reset_sprites()
         "\ta8\n"
         ".loop_sprreset:\n"
         "\tlda #0\n"
-        "\tsta [r2],y\n"
-        "\tsta >_shadow_oam,x\n"
+        "\tsta (r2),y\n"
+        "\tsta _shadow_oam,x\n"
         "\tlda #240\n"
-        "\tsta >_shadow_oam+1,x\n"
+        "\tsta _shadow_oam+1,x\n"
 
         "\tinx\n"
         "\tinx\n"
@@ -721,7 +709,6 @@ void spr_reset_sprites()
         "\ta16\n"
         "\trep #$20\n"
 
-        "\tply\n"
         ".end_sprreset:\n"
         "\tlda _spr_sprite_count\n"
         "\tsta _spr_sprite_count_prev\n");
