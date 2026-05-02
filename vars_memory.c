@@ -63,7 +63,7 @@ uint16_t event_in_combat_shadow;
 uint16_t event_tutorial_shown;
 
 // Blocking colliders data
-NEAR struct tile_xy blocker_list[OBJ_MAX_COUNT];
+struct tile_xy blocker_list[OBJ_MAX_COUNT];
 uint16_t blocker_active_count;
 uint16_t blocker_build_count;
 uint16_t blocker_build_count_shadow; 
@@ -115,8 +115,8 @@ uint16_t input_pad0_new;
 const struct level_data * level_data_ptr;
 
 // Map decompression buffers.
-NEAR uint16_t map_column[32]; // one contiguous column
-NEAR uint16_t map_row[2][32]; // two contiguous rows: left and right rows (2x32)
+uint16_t map_column[32]; // one contiguous column
+uint16_t map_row[2][32]; // two contiguous rows: left and right rows (2x32)
 
 const uint8_t * map_current;
 uint16_t map_extent_x;
@@ -167,7 +167,7 @@ uint16_t ani_bg_frame_coin;
 uint8_t * ani_bg_addr_coin;
 
 // Palette anims, non-HDMA
-NEAR uint16_t pal_ani_entries[8][2]; // Just enough for the magic circle
+uint16_t pal_ani_entries[8][2]; // Just enough for the magic circle
 uint16_t pal_ani_sel;
 
 // UI
@@ -202,19 +202,19 @@ uint16_t spr_sprite_count_prev; // previous
 uint16_t spr_vram_slots[128];
 
 uint16_t spr_front_count; // Rendered non-UI unsorted front-forced sprites this frame
-NEAR struct spr_queue_entry spr_queue_front[128];
+struct spr_queue_entry spr_queue_front[128];
 uint16_t spr_back_count; // Rendered non-UI unsorted back-forced sprites this frame (e.g. background impostors and shadows)
-NEAR struct spr_queue_entry spr_queue_back[128];
+struct spr_queue_entry spr_queue_back[128];
 
 uint16_t spr_normal_count;
-NEAR uint8_t spr_depth_count[257]; // Count of sprites on each depth line
-NEAR struct spr_queue_entry spr_queue_normal[128]; // depth sorted sprite entries
+uint8_t spr_depth_count[257]; // Count of sprites on each depth line
+struct spr_queue_entry spr_queue_normal[128]; // depth sorted sprite entries
 
 // Shadow buffers
-NEAR union oam_buffer shadow_oam;
+union oam_buffer shadow_oam;
 union oam_buffer shadow_oam_copy; // copied during UI open so there's always a full copy ready to use
 
-NEAR union cgram_full shadow_cgram; // 256 palette entries, 2 bytes wide each
+union cgram_full shadow_cgram; // 256 palette entries, 2 bytes wide each
 
 // HDMA table for palettes and other purposes
 // 6 channels usable for HDMA, so 6 arrays each

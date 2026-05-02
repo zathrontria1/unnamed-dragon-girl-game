@@ -42,7 +42,7 @@ extern uint16_t event_in_combat_shadow;
 extern uint16_t event_tutorial_shown;
 
 // Blocking colliders data
-NEAR extern struct tile_xy blocker_list[OBJ_MAX_COUNT];
+extern struct tile_xy blocker_list[OBJ_MAX_COUNT];
 extern uint16_t blocker_active_count;
 extern uint16_t blocker_build_count;
 extern uint16_t blocker_build_count_shadow; 
@@ -94,8 +94,9 @@ extern uint16_t input_pad0_new;
 extern const struct level_data * level_data_ptr;
 
 // Map decompression buffers.
-NEAR extern uint16_t map_column[32]; // one contiguous column
-NEAR extern uint16_t map_row[2][32]; // two contiguous rows: left and right rows (2x32)
+
+extern uint16_t map_column[32]; // one contiguous column
+extern uint16_t map_row[2][32]; // two contiguous rows: left and right rows (2x32)
 
 extern const uint8_t * map_current;
 extern uint16_t map_extent_x;
@@ -145,11 +146,15 @@ extern uint16_t ani_bg_frame_coin;
 extern uint8_t * ani_bg_addr_coin;
 
 // Palette anims, non-HDMA
-NEAR extern uint16_t pal_ani_entries[8][2]; // Just enough for the magic circle
+extern uint16_t pal_ani_entries[8][2]; // Just enough for the magic circle
 extern uint16_t pal_ani_sel;
 
 // UI
 extern uint16_t system_ui_in_bg2;
+
+// rows x height, tilemap buffers in WRAM
+//extern uint16_t ui_tilemap_2bpp[26][32];
+//extern uint16_t ui_tilemap_4bpp[26][32];
 
 extern uint16_t ui_force_update;
 extern int32_t ui_cached_hp;
@@ -180,19 +185,19 @@ extern uint16_t spr_sprite_count_prev; // previous
 extern uint16_t spr_vram_slots[128]; // VRAM slots in sprite page
 
 extern uint16_t spr_front_count; // Rendered non-UI unsorted front-forced sprites this frame
-NEAR extern struct spr_queue_entry spr_queue_front[128];
+extern struct spr_queue_entry spr_queue_front[128];
 extern uint16_t spr_back_count; // Rendered non-UI unsorted back-forced sprites this frame (e.g. shadows)
-NEAR extern struct spr_queue_entry spr_queue_back[128];
+extern struct spr_queue_entry spr_queue_back[128];
 
 extern uint16_t spr_normal_count;
-NEAR extern uint8_t spr_depth_count[257]; // Count of sprites on each depth line
-NEAR extern struct spr_queue_entry spr_queue_normal[128]; // depth sorted sprite entries
+extern uint8_t spr_depth_count[257]; // Count of sprites on each depth line
+extern struct spr_queue_entry spr_queue_normal[128]; // depth sorted sprite entries
 
 // Shadow buffers
-NEAR extern union oam_buffer shadow_oam;
+extern union oam_buffer shadow_oam;
 extern union oam_buffer shadow_oam_copy; // copied during UI open so there's always a full copy ready to use
 
-NEAR extern union cgram_full shadow_cgram; // 256 palette entries, 2 bytes wide each
+extern union cgram_full shadow_cgram; // 256 palette entries, 2 bytes wide each
 
 // HDMA table for palettes and other purposes
 // 6 channels usable for HDMA, so 6 arrays each
