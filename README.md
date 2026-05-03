@@ -52,8 +52,7 @@ Primarily tested with [VBCC](http://www.compilers.de/vbcc.html) and [Mesen2](htt
 
 Out of the box, VBCC will compile and link the ROM as if it were on SlowROM. You can modify the linker configuration to take advantage of FastROM speeds.
 
-The [PVSnesLib](https://github.com/alekmaul/pvsneslib) header files included with VBCC are missing some defines for hardware registers that should have been there.
-Refer to the following pages to add any missing registers:
+It shouldn't happen with the modified included PVSnesLib header files now, but if you get errors with regard to undefined registers, refer to the following pages to add any missing registers:
 [MMIO](https://snes.nesdev.org/wiki/MMIO_registers)
 [PPU](https://snes.nesdev.org/wiki/PPU_registers)
 [DMA](https://snes.nesdev.org/wiki/DMA_registers)
