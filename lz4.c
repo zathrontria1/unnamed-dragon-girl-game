@@ -153,10 +153,14 @@ uint32_t LZ4_DecompressFrame(void * src, void * dest)
                 }
 
                 // write out the literals
-                for (uint16_t i = 0; i < temp_literal_count; i++)
+                /*for (uint16_t i = 0; i < temp_literal_count; i++)
                 {
                     (*ptr_write++) = (*ptr_read++);
-                }
+                }*/
+
+                LZ4_Internal_Copy(ptr_read, ptr_write, temp_literal_count);
+                ptr_write += temp_literal_count;
+                ptr_read += temp_literal_count;
 
                 temp_frame_bytes_written += temp_literal_count;
 
@@ -216,7 +220,8 @@ inline void LZ4_Internal_Copy(uint8_t * src, uint8_t * dest, uint16_t len)
         __asm(
         "\ta16\n"
 	    "\tx16\n"
-
+        "\tcmp #0\n"
+        "\tbeq LZ4_Internal_Skip\n"
         "\tphy\n"
         "\tphb\n"
         "\ttax\n"
@@ -239,6 +244,7 @@ inline void LZ4_Internal_Copy(uint8_t * src, uint8_t * dest, uint16_t len)
         "\tjsl >_LZ4_MVNCodeInWRAM;\n"
         "\tplb\n"
         "\tply\n"
+        "LZ4_Internal_Skip:\n"
         );
     #else
     // Source and destination bank independent, just can't cross banks
