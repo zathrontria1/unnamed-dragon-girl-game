@@ -51,6 +51,9 @@ uint32_t LZ4_UnpackToVRAM(void * src, uint16_t dest)
     return temp_length;
 }
 
+/*
+    Get content size of LZ4 frame
+*/
 int32_t LZ4_GetLength(void * src)
 {
     uint8_t * ptr_c = src;
@@ -153,11 +156,6 @@ uint32_t LZ4_DecompressFrame(void * src, void * dest)
                 }
 
                 // write out the literals
-                /*for (uint16_t i = 0; i < temp_literal_count; i++)
-                {
-                    (*ptr_write++) = (*ptr_read++);
-                }*/
-
                 LZ4_Internal_Copy(ptr_read, ptr_write, temp_literal_count);
                 ptr_write += temp_literal_count;
                 ptr_read += temp_literal_count;

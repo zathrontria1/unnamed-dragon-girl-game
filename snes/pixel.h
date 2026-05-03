@@ -36,18 +36,4 @@
 
 #include <snes/snestypes.h>
 
-/*!	\fn pixSetPixel(u8 x,u8 y, u8 color)
-    \brief Draw a dot
-    \param x x coordinate of dot
-    \param y y coordinate of dot
-    \param color color of pixel (must be 1, 2 or 3)
-*/
-void pixSetPixel(u8 x, u8 y, u8 color);
-
-/*!	\fn pixSetMode(u8 *pixPalette)
-    \brief Init pixel mode with SNES mode 0
-    \param pixPalette address of palette entry
-*/
-void pixSetMode(u8 *pixPalette);
-
 #endif

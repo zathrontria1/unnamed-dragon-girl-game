@@ -33,34 +33,4 @@
 
 #include <snes/snestypes.h>
 
-typedef struct
-{
-    u16 scolo;
-    u16 scohi;
-} scoMemory;
-
-/*! \brief clear a score memory
-    \param source the source to clear from
-*/
-void scoreClear(scoMemory *source);
-
-/*! \brief add a value to a score memory
-    \param source the source to clear from
-    \param value the value to add
-*/
-void scoreAdd(scoMemory *source, u16 value);
-
-/*! \brief copy a score memory to another score memory
-    \param source the source to copy from
-    \param dest the destination to copy to
-*/
-void scoreCpy(scoMemory *source, scoMemory *dest);
-
-/*! \brief compare a score memory to another score memory
-    \param source the source to compare from
-    \param dest the destination to compare to
-    \return	0 if equals, 0xFF if source greater than destination, 1 otherwise
-*/
-u8 scoreCmp(scoMemory *source, scoMemory *dest);
-
 #endif // SNES_SCORE_INCLUDE
