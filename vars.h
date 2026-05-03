@@ -194,7 +194,7 @@ NEAR extern uint8_t spr_depth_count[257]; // Count of sprites on each depth line
 extern struct spr_queue_entry spr_queue_normal[128]; // depth sorted sprite entries
 
 // Shadow buffers
-extern union oam_buffer shadow_oam;
+NEAR extern union oam_buffer shadow_oam;
 extern union oam_buffer shadow_oam_copy; // copied during UI open so there's always a full copy ready to use
 
 extern union cgram_full shadow_cgram; // 256 palette entries, 2 bytes wide each
