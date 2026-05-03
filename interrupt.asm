@@ -12,6 +12,16 @@ ___irq_vblank:
 	pha
 	phx
 	phy
+
+	phb
+	phd
+
+	lda #$0000
+	tcd
+	pha
+	plb ; Cannot phk, Program Bank is C0. Reuse the value in A.
+	plb
+
 	pei	(r28)
 	pei	(r29)
 	pei	(r30)
@@ -194,6 +204,10 @@ l29:
 	sta	r29
 	pla
 	sta	r28
+
+	pld
+	plb
+
 	ply
 	plx
 	pla

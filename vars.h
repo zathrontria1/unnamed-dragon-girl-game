@@ -190,7 +190,7 @@ extern uint16_t spr_back_count; // Rendered non-UI unsorted back-forced sprites 
 extern struct spr_queue_entry spr_queue_back[128];
 
 extern uint16_t spr_normal_count;
-extern uint8_t spr_depth_count[257]; // Count of sprites on each depth line
+NEAR extern uint8_t spr_depth_count[257]; // Count of sprites on each depth line
 extern struct spr_queue_entry spr_queue_normal[128]; // depth sorted sprite entries
 
 // Shadow buffers
