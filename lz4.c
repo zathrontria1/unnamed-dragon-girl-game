@@ -1,9 +1,11 @@
 #include <stdint.h>
 
+#include "vars.h"
+
 #include "lz4.h"
 #include "dma.h"
 
-#include "vars.h"
+uint8_t LZ4_MVNCodeInWRAM[4];
 
 /*
     Unpacks LZ4 compressed data to WRAM area
@@ -139,27 +141,21 @@ uint32_t LZ4_DecompressFrame(void * src, void * dest)
                 uint16_t temp_literal_count = (*ptr_read) >> 4;
                 uint16_t temp_copy_count = (*ptr_read++) & 0x000f;
 
-                //ptr_read++;
-
                 if (temp_literal_count == 15)
                 {
                     // token length max, add more bytes
                     while ((*ptr_read) == 255)
                     {
                         temp_literal_count += (*ptr_read++);
-                        //ptr_read++;
                     }
 
                     temp_literal_count += (*ptr_read++);
-                    //ptr_read++;
                 }
 
                 // write out the literals
                 for (uint16_t i = 0; i < temp_literal_count; i++)
                 {
                     (*ptr_write++) = (*ptr_read++);
-                    //ptr_write++;
-                    //ptr_read++;
                 }
 
                 temp_frame_bytes_written += temp_literal_count;
@@ -185,21 +181,16 @@ uint32_t LZ4_DecompressFrame(void * src, void * dest)
                     while ((*ptr_read) == 255)
                     {
                         temp_copy_count += (*ptr_read++);
-                        //ptr_read++;
                     }
 
                     temp_copy_count += (*ptr_read++);
-                    //ptr_read++;
                 }
                 temp_copy_count += 4; // hardcoded minimum
 
                 // write out the match string
-                for (uint16_t i = 0; i < temp_copy_count; i++)
-                {
-                    (*ptr_write++) = (*temp_past_ptr_read++);
-                    //ptr_write++;
-                    //temp_lit_ptr_read++;
-                }
+                LZ4_Internal_Copy(temp_past_ptr_read, ptr_write, temp_copy_count);
+
+                ptr_write += temp_copy_count;
 
                 temp_frame_bytes_written += temp_copy_count;
 
@@ -210,4 +201,52 @@ uint32_t LZ4_DecompressFrame(void * src, void * dest)
     }
 
     return temp_frame_bytes_written; 
+}
+
+#if VBCC_ASM == 1
+NO_INLINE void LZ4_Internal_Copy(__reg("r0/r1") uint8_t * src, __reg("r2/r3") uint8_t * dest, __reg("a") uint16_t len)
+#else
+inline void LZ4_Internal_Copy(uint8_t * src, uint8_t * dest, uint16_t len)
+#endif
+{
+    // r0 contains source
+    // r2 contains destination
+    // a contains bytes to copy
+    #if VBCC_ASM == 1
+        __asm(
+        "\ta16\n"
+	    "\tx16\n"
+
+        "\tphy\n"
+        "\tphb\n"
+        "\ttax\n"
+        "\ta8\n"
+        "\tsep #$20\n"
+        "\tlda #$6B\n" // RTL opcode
+        "\tsta >_LZ4_MVNCodeInWRAM+3\n"
+        "\tlda #$54\n" // MVN opcode
+        "\tsta >_LZ4_MVNCodeInWRAM\n"
+        "\tlda r3\n"
+        "\tsta >_LZ4_MVNCodeInWRAM+1\n" // write bank byte of source 
+        "\tlda r1\n"
+        "\tsta >_LZ4_MVNCodeInWRAM+2\n" // ditto for destination
+        "\ta16\n"
+        "\trep #$20\n"
+        "\ttxa\n"
+        "\tdec\n"
+        "\tldx r0\n"
+        "\tldy r2\n"
+        "\tjsl >_LZ4_MVNCodeInWRAM;\n"
+        "\tplb\n"
+        "\tply\n"
+        );
+    #else
+    // Source and destination bank independent, just can't cross banks
+    for (uint16_t i = 0; i < len; i++)
+    {
+        (*dest++) = (*src++);
+    }
+    #endif
+
+    return;
 }
