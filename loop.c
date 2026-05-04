@@ -227,11 +227,10 @@ void loop_mapdisplay_init()
 
     int i = 0;
     REG_VMAIN = VRAM_INCHIGH;
+    REG_VMADDLH = TILEMAP_ADDR_MAP_MAP;
     for (int j = 0; j < 1024; j++)
     {
-        REG_VMADDLH = TILEMAP_ADDR_MAP_MAP + j;
-        
-        if (((j & 0x1f) >= 24 )|| (i >= 576))
+        if (((j & 0x1f) >= 24) || (i >= 576))
         {
             REG_VMDATALH = 808; // the guaranteed empty tile in the OAM
         }
@@ -242,12 +241,74 @@ void loop_mapdisplay_init()
         }
     }
 
-    REG_VMADDLH = TILEMAP_ADDR_MAP_UI;
+    #if VBCC_ASM == 1
+        REG_VMAIN = VRAM_INCLOW;
+        REG_VMADDLH = TILEMAP_ADDR_MAP_UI;
 
-    for (int l = 0; l < 1024; l++)
-    {
-        REG_VMDATALH = 256;
-    }
+        __asm(
+            "\ta8\n"
+            "\tsep #$20\n"
+
+            "\tldx #256\n"
+            "\tstx r0\n"
+
+            "\tlda #$08\n"
+            "\tsta $4300\n"
+            
+            "\tldx #<r0\n"
+            "\tstx $4302\n"
+            "\tlda #^r0\n"
+            "\tsta $4304\n"
+
+            "\tldx #1024\n"
+            "\tstx $4305\n"
+
+            "\tlda #$18\n"
+            "\tsta $4301\n"
+
+            "\tlda #$01\n"
+            "\tsta $420b\n"
+
+            "\ta16\n"
+            "\trep #$20\n"
+        );
+
+        REG_VMAIN = VRAM_INCHIGH;
+        REG_VMADDLH = TILEMAP_ADDR_MAP_UI;
+
+        __asm(
+            "\ta8\n"
+            "\tsep #$20\n"
+
+            "\tlda #$08\n"
+            "\tsta $4300\n"
+            
+            "\tldx #<r0+1\n"
+            "\tstx $4302\n"
+            "\tlda #^r0\n"
+            "\tsta $4304\n"
+
+            "\tldx #1024\n"
+            "\tstx $4305\n"
+
+            "\tlda #$19\n"
+            "\tsta $4301\n"
+
+            "\tlda #$01\n"
+            "\tsta $420b\n"
+
+            "\ta16\n"
+            "\trep #$20\n"
+        );
+    #else
+        REG_VMAIN = VRAM_INCHIGH;
+        REG_VMADDLH = TILEMAP_ADDR_MAP_UI;
+
+        for (int l = 0; l < 1024; l++)
+        {
+            REG_VMDATALH = 256;
+        }
+    #endif
 
     ui_print_mode3((uint8_t *)&STR_UI_HELP_MAP, UI_MAPSCREEN_SL_START, UI_MARGIN_LEFT);
 
