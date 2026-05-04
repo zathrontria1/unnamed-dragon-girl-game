@@ -8,6 +8,7 @@ int16_t obj_instantiate(
     int16_t y, 
     uint16_t local_event_flag
 );
+void obj_set_function_pointer(struct game_object * o);
 uint16_t obj_instantiate_npcs(const struct obj_list_entry_spawns* list, int16_t offset_x, int16_t offset_y);
 uint16_t obj_instantiate_spawners(const struct obj_list_entry_spawners* list);
 uint16_t obj_instantiate_interactables(const struct obj_list_entry_interactable* list);
@@ -22,5 +23,6 @@ void move_nocol_fast(struct game_object * o);
 
 uint32_t ai_distance_squared(int16_t abs_x, int16_t abs_y);
 uint16_t ai_run(struct game_object * o, uint32_t dist, int16_t x, int16_t y);
-void ai_idle(struct game_object * o);
-uint16_t ai_get_facing(struct game_object * o);
+inline void ai_idle(struct game_object * o);
+inline uint16_t ai_get_facing(struct game_object * o);
+

@@ -77,8 +77,8 @@ inline struct game_object * hit_test_player(struct game_object * o)
                     {
                         hit = p;
                     }
-                    
-                    p->ttl = 1;
+
+                    p->struct_data.npc_data.ttl = 1;
                 }
 
                 temp_objects_encountered++;

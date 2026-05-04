@@ -29,24 +29,6 @@ ZP extern uint8_t shadow_inidisp;
 
 ZP extern uint16_t system_nmis_counted;
 
-// Event flags
-extern uint8_t event_flags_global[EVENT_FLAG_GLOBAL_MAX];
-extern uint8_t event_flags_local[EVENT_FLAG_LOCAL_MAX];
-
-extern int16_t event_interaction_x;
-extern int16_t event_interaction_y;
-
-extern uint16_t event_in_combat;
-extern uint16_t event_in_combat_shadow;
-
-extern uint16_t event_tutorial_shown;
-
-// Blocking colliders data
-extern struct tile_xy blocker_list[OBJ_MAX_COUNT];
-extern uint16_t blocker_active_count;
-extern uint16_t blocker_build_count;
-extern uint16_t blocker_build_count_shadow; 
-
 // Object system
 ZP extern uint16_t obj_first_available;
 extern struct game_object objects[OBJ_MAX_COUNT];
@@ -75,6 +57,24 @@ extern uint16_t hitbox_count_player;
 extern uint16_t hitbox_count_enemy;
 extern uint16_t hitbox_count_player_shadow;
 extern uint16_t hitbox_count_enemy_shadow;
+
+// Event flags
+extern uint8_t event_flags_global[EVENT_FLAG_GLOBAL_MAX];
+extern uint8_t event_flags_local[EVENT_FLAG_LOCAL_MAX];
+
+extern int16_t event_interaction_x;
+extern int16_t event_interaction_y;
+
+extern uint16_t event_in_combat;
+extern uint16_t event_in_combat_shadow;
+
+extern uint16_t event_tutorial_shown;
+
+// Blocking colliders data
+extern struct tile_xy blocker_list[OBJ_MAX_COUNT];
+extern uint16_t blocker_active_count;
+extern uint16_t blocker_build_count;
+extern uint16_t blocker_build_count_shadow; 
 
 // Random numbers
 extern int8_t rand_array[3];

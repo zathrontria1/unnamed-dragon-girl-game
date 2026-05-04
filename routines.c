@@ -55,7 +55,7 @@ void routines_player(struct game_object * o)
                 case KEY_LEFT:
                     if (o->state == STATE_IDLE)
                     {
-                        o->ani.frame = 0;
+                        o->struct_data.npc_data.ani.frame = 0;
                     }
                     o->state = STATE_MOVE_WALK;
                     o->facing = FACING_LEFT;
@@ -66,7 +66,7 @@ void routines_player(struct game_object * o)
                 case KEY_RIGHT:
                     if (o->state == STATE_IDLE)
                     {
-                        o->ani.frame = 0;
+                        o->struct_data.npc_data.ani.frame = 0;
                     }
                     o->state = STATE_MOVE_WALK;
                     o->facing = FACING_RIGHT;
@@ -81,7 +81,7 @@ void routines_player(struct game_object * o)
                 case KEY_UP:
                     if (o->state == STATE_IDLE)
                     {
-                        o->ani.frame = 0;
+                        o->struct_data.npc_data.ani.frame = 0;
                     }
                     o->state = STATE_MOVE_WALK;
                     o->facing = FACING_UP;
@@ -92,7 +92,7 @@ void routines_player(struct game_object * o)
                 case KEY_DOWN:
                     if (o->state == STATE_IDLE)
                     {
-                        o->ani.frame = 0;
+                        o->struct_data.npc_data.ani.frame = 0;
                     }
                     o->state = STATE_MOVE_WALK;
                     o->facing = FACING_DOWN;
@@ -206,9 +206,9 @@ void routines_player(struct game_object * o)
                     if (j >= 0)
                     {
                         struct game_object * p = &objects[j];
-                        p->attack = PLAYER_ATTACK_VALUE * PLAYER_ATTACK_MULT_MELEE;
+                        p->struct_data.npc_data.attack = PLAYER_ATTACK_VALUE * PLAYER_ATTACK_MULT_MELEE;
 
-                        p->ttl = 2; // Lasts exactly 2 frames
+                        p->struct_data.npc_data.ttl = 2; // Lasts exactly 2 frames
 
                         p->delta.x.a = 0;
                         p->delta.y.a = 0;
@@ -277,11 +277,11 @@ void routines_player(struct game_object * o)
                     if (j >= 0)
                     {
                         struct game_object * p = &objects[j];
-                        p->attack = PLAYER_ATTACK_VALUE * PLAYER_ATTACK_MULT_RANGED;
+                        p->struct_data.npc_data.attack = PLAYER_ATTACK_VALUE * PLAYER_ATTACK_MULT_RANGED;
 
                         int32_t temp_jitter = ((int32_t)((int16_t)rand_get16())) * (V_MUL * 2);
 
-                        p->ttl = PLAYER_ATTACK_TTL;
+                        p->struct_data.npc_data.ttl = PLAYER_ATTACK_TTL;
 
                         if (temp_facing == FACING_KEEPSAME)
                         {
@@ -357,7 +357,7 @@ void routines_player(struct game_object * o)
                     (o->state == STATE_ATTACK_BASIC) || 
                     (o->state == STATE_ATTACK_BASIC_MOVE)) 
                 {
-                    o->ani.frame = 0;
+                    o->struct_data.npc_data.ani.frame = 0;
                     o->state = STATE_IDLE;
                 }
             }
@@ -408,54 +408,56 @@ void routines_player(struct game_object * o)
                     {
                         struct game_object * q = &objects[k];
 
-                        q->ttl = 2;
+                        q->struct_data.npc_data.ttl = 2;
                     }
 
-                    if (o->invuln_time == 0)
+                    if (o->struct_data.npc_data.invuln_time == 0)
                     {
                         // If player is currently not invulnerable, trigger the damage
-                        int32_t temp_dmg = (p->attack - o->defense);
+                        int32_t temp_dmg = (p->struct_data.npc_data.attack - o->struct_data.npc_data.defense);
+                        
                         if (temp_dmg <= 0)
                         {
                             temp_dmg = 1;
                         }
-                        o->hp -= temp_dmg;
 
-                        if (o->hp < 0)
+                        o->struct_data.npc_data.hp -= temp_dmg;
+
+                        if (o->struct_data.npc_data.hp < 0)
                         {
-                            o->hp = 0; 
+                            o->struct_data.npc_data.hp = 0; 
                         }
                         else
                         {
                             // Give the player immunity
-                            o->invuln_time = 60 / V_MUL;
+                            o->struct_data.npc_data.invuln_time = 60 / V_MUL;
                         }
                     }
 
-                    p->ttl = 1; // despawn the object that triggered the hit
+                    o->struct_data.npc_data.ttl = 1; // despawn the object that triggered the hit
 
                     temp_invalidate_animation_frame = 1;
                 }
             }
 
-            if (o->invuln_time > 0)
+            if (o->struct_data.npc_data.invuln_time > 0)
             {
-                o->invuln_time--;
+                o->struct_data.npc_data.invuln_time--;
             }
 
             // Check if the player is dead
-            if ((o->hp <= 0) && (o->state != STATE_DIE))
+            if ((o->struct_data.npc_data.hp <= 0) && (o->state != STATE_DIE))
             {
                 o->state = STATE_DIE;
-                o->ani.frame = 0;
-                o->status_time = 64 / V_MUL;
-                o->invuln_time = 0;
+                o->struct_data.npc_data.ani.frame = 0;
+                o->struct_data.npc_data.status_time = 64 / V_MUL;
+                o->struct_data.npc_data.invuln_time = 0;
             }
         }
         else
         {
-            o->status_time--;
-            if (o->status_time == 0)
+            o->struct_data.npc_data.status_time--;
+            if (o->struct_data.npc_data.status_time == 0)
             {
                 obj_destroy(o->array_index);
 
@@ -475,7 +477,7 @@ void routines_player(struct game_object * o)
                 if (o->state != STATE_IDLE)
                 {
                     o->state = STATE_IDLE;
-                    o->ani.frame = 0;
+                    o->struct_data.npc_data.ani.frame = 0;
                 }
             }
         }
@@ -484,59 +486,59 @@ void routines_player(struct game_object * o)
         {
             case STATE_IDLE:
             case STATE_ATTACK_SPECIAL:
-                o->ani.frame = 0;
+                o->struct_data.npc_data.ani.frame = 0;
                 break;
             case STATE_MOVE_RUN:
                 // Update every 4 frames
                 if (((uint16_t)system_frames_elapsed & ANI_INTERVAL_4) == ANI_INTERVAL_4)
                 {
-                    o->ani.frame ^= 0x0001;
+                    o->struct_data.npc_data.ani.frame ^= 0x0001;
                 }
                 break;
             case STATE_DIE:
-                if ((((uint16_t)system_frames_elapsed & ANI_INTERVAL_8) == ANI_INTERVAL_8) && (o->ani.frame < 7))
+                if ((((uint16_t)system_frames_elapsed & ANI_INTERVAL_8) == ANI_INTERVAL_8) && (o->struct_data.npc_data.ani.frame < 7))
                 {
-                    o->ani.frame++;
+                    o->struct_data.npc_data.ani.frame++;
                 }
                 break;
             default:
                 // Update every 8 frames
                 if (((uint16_t)system_frames_elapsed & ANI_INTERVAL_8) == ANI_INTERVAL_8)
                 {
-                    o->ani.frame ^= 0x0001;
+                    o->struct_data.npc_data.ani.frame ^= 0x0001;
                 }
         }
     }
 
     uint8_t * temp_addr = ani_getframe_player(o);
 
-    if ((temp_addr != o->ani.last_address))
+    if ((temp_addr != o->struct_data.npc_data.ani.last_address))
     {
         // Save the requested frame into object's data
         // for comparison and in case it fails
-        o->ani.last_address = temp_addr;
+        o->struct_data.npc_data.ani.last_address = temp_addr;
 
         if (dma_queue_add(temp_addr, 0x6000, 128, VRAM_INCHIGH, 1))
         {
-            o->ani.last_dmafailed = 1;
+            o->struct_data.npc_data.ani.last_dmafailed = 1;
         }
         else
         {
-            o->ani.last_dmafailed = 0;
+            o->struct_data.npc_data.ani.last_dmafailed = 0;
         }        
     }
-    else if ((o->ani.last_dmafailed))
+    else if ((o->struct_data.npc_data.ani.last_dmafailed))
     {
         // The previous DMA failed. Attempt it again.
-        if (dma_queue_add(o->ani.last_address, 0x6000, 128, VRAM_INCHIGH, 1) == 0)
+        if (dma_queue_add(o->struct_data.npc_data.ani.last_address, 0x6000, 128, VRAM_INCHIGH, 1) == 0)
         {
-            o->ani.last_dmafailed = 0;
+            o->struct_data.npc_data.ani.last_dmafailed = 0;
         }     
     }
     
-    uint16_t temp_tileattrib = (o->ani.display | PAL_PLAYER << 9 | 2 << 12);
+    uint16_t temp_tileattrib = (o->struct_data.npc_data.ani.display | PAL_PLAYER << 9 | 2 << 12);
 
-    if ((o->invuln_time != 0) && (((uint16_t)system_frames_elapsed & 0x01) == 0x01))
+    if ((o->struct_data.npc_data.invuln_time != 0) && (((uint16_t)system_frames_elapsed & 0x01) == 0x01))
     {
         ;
     }
@@ -550,6 +552,8 @@ void routines_player(struct game_object * o)
 
 void routines_fireball(struct game_object * o)
 {
+    struct game_data_npc * d = (struct game_data_npc *)&(o->struct_data);
+
     snd_flame_active = 1;
 
     if (system_current_routine != ROUTINE_MSGBOX)
@@ -568,16 +572,16 @@ void routines_fireball(struct game_object * o)
         // Update every 8 frames
         if (((uint16_t)system_frames_elapsed & ANI_INTERVAL_8) == ANI_INTERVAL_8)
         {
-            o->ani.frame ^= 0x0001;
+            o->struct_data.npc_data.ani.frame ^= 0x0001;
 
-            o->ani.display = ani_getframe_fixed_fast(o);
+            o->struct_data.npc_data.ani.display = ani_getframe_fixed_fast(o);
         }
 
         // Decrement time to live
-        o->ttl--;
+        o->struct_data.npc_data.ttl--;
 
         // Check if the object is to be destroyed
-        if (o->ttl == 0)
+        if (o->struct_data.npc_data.ttl == 0)
         {
             obj_destroy(o->array_index);
         }
@@ -590,7 +594,7 @@ void routines_fireball(struct game_object * o)
     // Only draw every other frame for both visibility and performance
     if ((o->uid & 0x0001) == ((uint16_t)system_frames_elapsed & 0x0001))
     {
-        spr_queue_add_front(o, (o->ani.display | PAL_FIREBALL << 9 | 3 << 12));
+        spr_queue_add_front(o, (o->struct_data.npc_data.ani.display | PAL_FIREBALL << 9 | 3 << 12));
     }
 
     return;
@@ -606,22 +610,22 @@ void routines_fx_smoke(struct game_object * o)
         // Update every 8 frames
         if (((uint16_t)system_frames_elapsed & ANI_INTERVAL_8) == ANI_INTERVAL_8)
         {
-            o->ani.frame ^= 0x0001;
+            o->struct_data.npc_data.ani.frame ^= 0x0001;
 
-            o->ani.display = ani_getframe_fixed_fast(o);
+            o->struct_data.npc_data.ani.display = ani_getframe_fixed_fast(o);
         }
 
         // Decrement time to live
-        o->ttl--;
+        o->struct_data.npc_data.ttl--;
 
         // Check if the object is to be destroyed
-        if (o->ttl == 0)
+        if (o->struct_data.npc_data.ttl == 0)
         {
             obj_destroy(o->array_index);
         }
     }
 
-    uint16_t temp_tileattrib = (o->ani.display | PAL_FX_SMOKE << 9 | 3 << 12);
+    uint16_t temp_tileattrib = (o->struct_data.npc_data.ani.display | PAL_FX_SMOKE << 9 | 3 << 12);
 
     // Only draw every other frame for both visibility and performance
     if ((o->uid & 0x0001) == ((uint16_t)system_frames_elapsed & 0x0001))
@@ -642,10 +646,10 @@ void routines_fx_impact(struct game_object * o)
     }
 
     // Decrement time to live
-    o->ttl--;
+    o->struct_data.npc_data.ttl--;
 
     // Check if the object is to be destroyed
-    if (o->ttl == 0)
+    if (o->struct_data.npc_data.ttl == 0)
     {
         obj_destroy(o->array_index);
     }
@@ -661,10 +665,10 @@ void routines_hitbox_invis(struct game_object * o)
     }
 
     // Decrement time to live
-    o->ttl--;
+    o->struct_data.npc_data.ttl--;
 
     // Check if the object is to be destroyed
-    if (o->ttl == 0)
+    if (o->struct_data.npc_data.ttl == 0)
     {
         obj_destroy(o->array_index);
     }
@@ -684,10 +688,10 @@ void routines_hitbox_invis_e(struct game_object * o)
     }
 
     // Decrement time to live
-    o->ttl--;
+    o->struct_data.npc_data.ttl--;
 
     // Check if the object is to be destroyed
-    if (o->ttl == 0)
+    if (o->struct_data.npc_data.ttl == 0)
     {
         obj_destroy(o->array_index);
     }
@@ -707,7 +711,7 @@ void routines_interactable_switch(struct game_object * o)
 
         // Only test when the switch can react (i.e. after timeout)
         // And while not in combat
-        if (o->status_time == 0)
+        if (o->struct_data.interactable_data.delay_time == 0)
         {
             if (hit_test_interaction(o) != 0)
             {
@@ -716,8 +720,8 @@ void routines_interactable_switch(struct game_object * o)
                     snd_play_sfx(SFX_INTERACT_SWITCH,0);
                     
                     o->state ^= STATE_SWITCH_ON;
-                    event_flags_local[o->event_flag] = o->state;
-                    o->status_time = 15 / V_MUL; // responsive enough for punch clicks
+                    event_flags_local[o->struct_data.interactable_data.event_flag] = o->state;
+                    o->struct_data.interactable_data.delay_time = 15 / V_MUL; // responsive enough for punch clicks
 
                     // spawn an impact FX object
                     int16_t k = -1;
@@ -728,8 +732,7 @@ void routines_interactable_switch(struct game_object * o)
                     if (k >= 0)
                     {
                         struct game_object * q = &objects[k];
-
-                        q->ttl = 2;
+                        q->struct_data.npc_data.ttl = 2;
                     }
                 }
                 else
@@ -740,7 +743,7 @@ void routines_interactable_switch(struct game_object * o)
         }
         else
         {
-            o->status_time--;
+            o->struct_data.interactable_data.delay_time--;
         }
     }
 
@@ -755,7 +758,7 @@ void routines_interactable_sign(struct game_object * o)
     {
         // Check if a player hit is on the sign
         // And while not in combat
-        if (o->status_time == 0)
+        if (o->struct_data.interactable_data.delay_time == 0)
         {
             if (hit_test_interaction(o) != 0)
             {
@@ -763,12 +766,12 @@ void routines_interactable_sign(struct game_object * o)
                 {
                     snd_play_sfx(SFX_UI_CONFIRM, 0);
 
-                    ui_print_ml(o->string_ptr, UI_MSGBOX_ML_START, UI_MARGIN_LEFT);
+                    ui_print_ml(o->data_ptr, UI_MSGBOX_ML_START, UI_MARGIN_LEFT);
 
                     system_current_routine = ROUTINE_MSGBOX;
                     system_target_routine = ROUTINE_MSGBOX;
 
-                    o->status_time = 15 / V_MUL; // responsive enough for punch clicks
+                    o->struct_data.interactable_data.delay_time = 15 / V_MUL; // responsive enough for punch clicks
                 }
                 else
                 {
@@ -778,7 +781,7 @@ void routines_interactable_sign(struct game_object * o)
         }
         else
         {
-            o->status_time--;
+            o->struct_data.interactable_data.delay_time--;
         }
     }
 
@@ -789,7 +792,7 @@ void routines_interactable_sign(struct game_object * o)
 
 void routines_interactable_blocker(struct game_object * o)
 {
-    o->state = event_flags_local[o->event_flag];
+    o->state = event_flags_local[o->struct_data.interactable_data.event_flag];
 
     if (o->state == STATE_SWITCH_OFF)
     {
@@ -854,7 +857,7 @@ void routines_slime(struct game_object * o)
 
         if ((o->state != STATE_DIE) && (o->state != STATE_SPAWNING))
         {
-            if (o->hp_display_time > 0)
+            if (o->struct_data.npc_data.hp_display_time > 0)
             {
                 ui_show_enemy_health_bar(o);
             }
@@ -868,7 +871,6 @@ void routines_slime(struct game_object * o)
             if (temp_dist < DIST_AI_MAX)
             {
                 event_in_combat = 1;
-
                 
                 temp_invalidate_animation_frame = ai_run(o, temp_dist, temp_x, temp_y);
 
@@ -879,7 +881,7 @@ void routines_slime(struct game_object * o)
                 }
 
                 // If the object is attacking:
-                if (o->ai_makeattack)
+                if (o->struct_data.npc_data.ai_makeattack)
                 {
                     // Spawn a hit object
                     int16_t j = obj_instantiate(OBJID_BUBBLE_E, o->pos.x.lh.h, o->pos.y.lh.h, 0);
@@ -889,20 +891,20 @@ void routines_slime(struct game_object * o)
                         snd_play_sfx(SFX_ATK_SPLASH,0);
 
                         struct game_object * p = &objects[j];
-                        p->attack = ENEMY_ATTACK_VALUE * ENEMY_ATTACK_MULT_RANGED;
+                        p->struct_data.npc_data.attack = ENEMY_ATTACK_VALUE * ENEMY_ATTACK_MULT_RANGED;
                         
                         p->delta.x.a = data_cosine_1[o->angle] * V_MUL;
                         p->delta.y.a = data_sine_1[o->angle] * V_MUL;
 
-                        p->ttl = ENEMY_ATTACK_TTL;
+                        p->struct_data.npc_data.ttl = ENEMY_ATTACK_TTL;
                     }
 
-                    o->ai_makeattack = 0;
+                    o->struct_data.npc_data.ai_makeattack = 0;
                 }
 
                 // Stagger hit tests
                 // Only non-invuln objects perform hit tests
-                if (o->invuln_time == 0)
+                if (o->struct_data.npc_data.invuln_time == 0)
                 {
                     if ((o->uid & 0x0001) == ((unsigned int)system_frames_elapsed & 0x0001))
                     {
@@ -919,7 +921,7 @@ void routines_slime(struct game_object * o)
                             {
                                 struct game_object * q = &objects[k];
 
-                                q->ttl = 2;
+                                q->struct_data.npc_data.ttl = 2;
                             }
                             
                             // A hit
@@ -927,9 +929,9 @@ void routines_slime(struct game_object * o)
                             if (p->id == OBJID_FIREBALL)
                             {
                                 // DOT damage
-                                o->status = STATUS_BURNING;
-                                o->status_time = 60 / V_MUL;
-                                o->invuln_time = 60 / V_MUL;
+                                o->struct_data.npc_data.status = STATUS_BURNING;
+                                o->struct_data.npc_data.status_time = 60 / V_MUL;
+                                o->struct_data.npc_data.invuln_time = 60 / V_MUL;
 
                                 if (o->state == STATE_IDLE)
                                 {
@@ -943,27 +945,27 @@ void routines_slime(struct game_object * o)
                             else
                             {
                                 // Single frame damage
-                                o->invuln_time = 10 / V_MUL;
+                                o->struct_data.npc_data.invuln_time = 10 / V_MUL;
 
                                 snd_play_sfx(SFX_ATK_PUNCH, 0);
                             }
 
-                            long temp_dmg = (p->attack - o->defense);
+                            long temp_dmg = (p->struct_data.npc_data.attack - p->struct_data.npc_data.defense);
                             if (temp_dmg <= 0)
                             {
                                 temp_dmg = 1;
                             }
-                            o->hp -= temp_dmg;
+                            o->struct_data.npc_data.hp -= temp_dmg;
 
                             temp_invalidate_animation_frame = 1;
 
-                            o->hp_display_time = 60 / V_MUL;
+                            o->struct_data.npc_data.hp_display_time = 60 / V_MUL;
                         }
                     }
                 }
 
                 // burning objects produce vfx
-                if (o->status == STATUS_BURNING)
+                if (o->struct_data.npc_data.status == STATUS_BURNING)
                 {
                     if (snd_firecrackle_timeout == 0)
                     {
@@ -991,18 +993,18 @@ void routines_slime(struct game_object * o)
                             q->delta.x.a = temp;
                             q->delta.y.a = -(V_S_ONE / 2);
 
-                            q->ttl = FX_SMOKE_TTL;
+                            q->struct_data.npc_data.ttl = FX_SMOKE_TTL;
                         }
                     }
                 }
 
-                if (o->status_time > 0)
+                if (o->struct_data.npc_data.status_time > 0)
                 {
-                    o->status_time--;
+                    o->struct_data.npc_data.status_time--;
 
-                    if (o->status_time == 0)
+                    if (o->struct_data.npc_data.status_time == 0)
                     {
-                        o->status = STATUS_NORMAL;
+                        o->struct_data.npc_data.status = STATUS_NORMAL;
 
                         if (o->state == STATE_HURT_BURN_MOVE)
                         {
@@ -1017,24 +1019,24 @@ void routines_slime(struct game_object * o)
                     }
                 }
 
-                if (o->invuln_time > 0)
+                if (o->struct_data.npc_data.invuln_time > 0)
                 {
-                    o->invuln_time--;
+                    o->struct_data.npc_data.invuln_time--;
                 }
 
                 // Check if the slime is dead
-                if ((o->hp <= 0) && (o->state != STATE_DIE))
+                if ((o->struct_data.npc_data.hp <= 0) && (o->state != STATE_DIE))
                 {
                     o->state = STATE_DIE;
-                    o->ani.frame = 0;
-                    o->status_time = 64 / V_MUL;
+                    o->struct_data.npc_data.ani.frame = 0;
+                    o->struct_data.npc_data.status_time = 64 / V_MUL;
                 }
             }
         }
         else if (o->state == STATE_DIE)
         {
-            o->status_time--;
-            if (o->status_time == 0)
+            o->struct_data.npc_data.status_time--;
+            if (o->struct_data.npc_data.status_time == 0)
             {
                 int16_t k = -1;
                 int16_t temp_x = o->pos.x.lh.h;
@@ -1048,7 +1050,7 @@ void routines_slime(struct game_object * o)
                     {
                         struct game_object * q = &objects[k];
 
-                        q->money = o->money;
+                        q->struct_data.npc_data.money = o->struct_data.npc_data.money;
 
                         q->pos.z.a = 0;
                         q->delta.z.a = (4 * V_S_ONE);
@@ -1062,7 +1064,7 @@ void routines_slime(struct game_object * o)
                     {
                         struct game_object * q = &objects[k];
 
-                        q->hp = ENEMY_DROP_REC_AMOUNT;
+                        q->struct_data.npc_data.hp = ENEMY_DROP_REC_AMOUNT;
 
                         q->pos.z.a = 0;
                         q->delta.z.a = (4 * V_S_ONE);
@@ -1078,8 +1080,8 @@ void routines_slime(struct game_object * o)
         {
             event_in_combat = 1;
             
-            o->status_time--;
-            if (o->status_time == 0)
+            o->struct_data.npc_data.status_time--;
+            if (o->struct_data.npc_data.status_time == 0)
             {
                 o->state = STATE_IDLE;
             }
@@ -1090,20 +1092,20 @@ void routines_slime(struct game_object * o)
         {
             case STATE_IDLE:
             case STATE_HURT_BURN:
-                o->ani.frame = 0;
+                o->struct_data.npc_data.ani.frame = 0;
                 break;
             case STATE_DIE:
             case STATE_SPAWNING:
-                if ((((uint16_t)system_frames_elapsed & ANI_INTERVAL_8) == ANI_INTERVAL_8) && (o->ani.frame < 7))
+                if ((((uint16_t)system_frames_elapsed & ANI_INTERVAL_8) == ANI_INTERVAL_8) && (o->struct_data.npc_data.ani.frame < 7))
                 {
-                    o->ani.frame++;
+                    o->struct_data.npc_data.ani.frame++;
                 }
                 break;
             default:
                 // Update every 8 frames
                 if (((uint16_t)system_frames_elapsed & ANI_INTERVAL_8) == ANI_INTERVAL_8)
                 {
-                    o->ani.frame ^= 0x0001;
+                    o->struct_data.npc_data.ani.frame ^= 0x0001;
                 }
         }
 
@@ -1113,7 +1115,7 @@ void routines_slime(struct game_object * o)
         // Just draw the health bar if needed
         if ((o->state != STATE_DIE) && (o->state != STATE_SPAWNING))
         {
-            if (o->hp_display_time > 0)
+            if (o->struct_data.npc_data.hp_display_time > 0)
             {
                 ui_show_enemy_health_bar(o);
             }
@@ -1123,27 +1125,27 @@ void routines_slime(struct game_object * o)
     // Testing DMA on demand
     uint8_t * temp_addr = ani_getframe_dynamic(o);
 
-    if ((temp_addr != o->ani.last_address))
+    if ((temp_addr != o->struct_data.npc_data.ani.last_address))
     {
         // Save the requested frame into object's data
         // for comparison and in case it fails
-        o->ani.last_address = temp_addr;
+        o->struct_data.npc_data.ani.last_address = temp_addr;
 
-        if (dma_queue_add(temp_addr, 0x6000+(o->vram_addr), 128, VRAM_INCHIGH, 1))
+        if (dma_queue_add(temp_addr, 0x6000+(o->struct_data.npc_data.vram_addr), 128, VRAM_INCHIGH, 1))
         {
-            o->ani.last_dmafailed = 1;
+            o->struct_data.npc_data.ani.last_dmafailed = 1;
         }
         else
         {
-            o->ani.last_dmafailed = 0;
+            o->struct_data.npc_data.ani.last_dmafailed = 0;
         }        
     }
-    else if ((o->ani.last_dmafailed))
+    else if ((o->struct_data.npc_data.ani.last_dmafailed))
     {
         // The previous DMA failed. Attempt it again.
-        if (!dma_queue_add(o->ani.last_address, 0x6000+(o->vram_addr), 128, VRAM_INCHIGH, 1))
+        if (!dma_queue_add(o->struct_data.npc_data.ani.last_address, 0x6000+(o->struct_data.npc_data.vram_addr), 128, VRAM_INCHIGH, 1))
         {
-            o->ani.last_dmafailed = 0;
+            o->struct_data.npc_data.ani.last_dmafailed = 0;
         }     
     }
 
@@ -1152,11 +1154,11 @@ void routines_slime(struct game_object * o)
 
     if (((uint32_t)temp_addr & 0x80000000) == 0x80000000) // sign bit is used for flip
     {
-        temp_tileattrib = (o->tilenum | PAL_SLIME << 9 | 2 << 12 | 0x4000);
+        temp_tileattrib = (o->struct_data.npc_data.tilenum | PAL_SLIME << 9 | 2 << 12 | 0x4000);
     }
     else
     {
-        temp_tileattrib = (o->tilenum | PAL_SLIME << 9 | 2 << 12);
+        temp_tileattrib = (o->struct_data.npc_data.tilenum | PAL_SLIME << 9 | 2 << 12);
     }
 
     // Check if STAT77 is overflow
@@ -1187,14 +1189,14 @@ void routines_bubble_e(struct game_object * o)
         // Update every 8 frames
         if (((uint16_t)system_frames_elapsed & ANI_INTERVAL_8) == ANI_INTERVAL_8)
         {
-            o->ani.frame ^= 0x0001;
+            o->struct_data.npc_data.ani.frame ^= 0x0001;
         }
 
         // Decrement time to live
-        o->ttl--;
+        o->struct_data.npc_data.ttl--;
 
         // Check if the object is to be destroyed
-        if (o->ttl == 0)
+        if (o->struct_data.npc_data.ttl == 0)
         {
             obj_destroy(o->array_index);
         }
@@ -1206,27 +1208,27 @@ void routines_bubble_e(struct game_object * o)
 
     uint8_t * temp_addr = ani_getframe_dynamic_stateless(o);
 
-    if ((temp_addr != o->ani.last_address))
+    if ((temp_addr != o->struct_data.npc_data.ani.last_address))
     {
         // Save the requested frame into object's data
         // for comparison and in case it fails
-        o->ani.last_address = temp_addr;
+        o->struct_data.npc_data.ani.last_address = temp_addr;
 
-        if (dma_queue_add(temp_addr, 0x6000+(o->vram_addr), 128, VRAM_INCHIGH, 1))
+        if (dma_queue_add(temp_addr, 0x6000+(o->struct_data.npc_data.vram_addr), 128, VRAM_INCHIGH, 1))
         {
-            o->ani.last_dmafailed = 1;
+            o->struct_data.npc_data.ani.last_dmafailed = 1;
         }
         else
         {
-            o->ani.last_dmafailed = 0;
+            o->struct_data.npc_data.ani.last_dmafailed = 0;
         }        
     }
-    else if ((o->ani.last_dmafailed))
+    else if ((o->struct_data.npc_data.ani.last_dmafailed))
     {
         // The previous DMA failed. Attempt it again.
-        if (!dma_queue_add(o->ani.last_address, 0x6000+(o->vram_addr), 128, VRAM_INCHIGH, 1))
+        if (!dma_queue_add(o->struct_data.npc_data.ani.last_address, 0x6000+(o->struct_data.npc_data.vram_addr), 128, VRAM_INCHIGH, 1))
         {
-            o->ani.last_dmafailed = 0;
+            o->struct_data.npc_data.ani.last_dmafailed = 0;
         }     
     }
 
@@ -1234,7 +1236,7 @@ void routines_bubble_e(struct game_object * o)
     if ((o->uid & 0x0001) == ((uint16_t)system_frames_elapsed & 0x0001))
     {
         uint16_t temp_tileattrib;
-        temp_tileattrib = (o->tilenum | PAL_BUBBLE_E << 9 | 3 << 12);
+        temp_tileattrib = (o->struct_data.npc_data.tilenum | PAL_BUBBLE_E << 9 | 3 << 12);
 
         spr_queue_add_front(o, temp_tileattrib);
     }
@@ -1250,16 +1252,16 @@ void routines_spawner(struct game_object * o)
         int16_t y1 = objects[obj_player_index].pos.y.lh.h;
 
         // Check if the player is within the designated box
-        if (hit_test_extended(x1, o->spawn_area_x, y1, o->spawn_area_y, 16, o->spawn_area_w, 16, o->spawn_area_h) == 0)
+        if (hit_test_extended(x1, o->struct_data.interactable_data.spawn_area_x, y1, o->struct_data.interactable_data.spawn_area_y, 16, o->struct_data.interactable_data.spawn_area_w, 16, o->struct_data.interactable_data.spawn_area_h) == 0)
         {
-            obj_instantiate_npcs((struct obj_list_entry_spawns *)o->string_ptr, o->pos.x.lh.h, o->pos.y.lh.h);
+            obj_instantiate_npcs((struct obj_list_entry_spawns *)o->data_ptr, o->pos.x.lh.h, o->pos.y.lh.h);
 
             // Set the camera bounds
-            bg_scroll_x_bounds_min.full.high.a = o->screen_x;
-            bg_scroll_y_bounds_min.full.high.a = o->screen_y;
+            bg_scroll_x_bounds_min.full.high.a = o->struct_data.interactable_data.screen_x;
+            bg_scroll_y_bounds_min.full.high.a = o->struct_data.interactable_data.screen_y;
 
-            bg_scroll_x_bounds_max.full.high.a = (o->screen_x + o->screen_w) - 256;
-            bg_scroll_y_bounds_max.full.high.a = (o->screen_y + o->screen_h) - 224;
+            bg_scroll_x_bounds_max.full.high.a = (o->struct_data.interactable_data.screen_x + o->struct_data.interactable_data.screen_w) - 256;
+            bg_scroll_y_bounds_max.full.high.a = (o->struct_data.interactable_data.screen_y + o->struct_data.interactable_data.screen_h) - 224;
 
             if (bg_scroll_x_bounds_max.full.high.a < bg_scroll_x_bounds_min.full.high.a)
             {
@@ -1298,7 +1300,7 @@ void routines_drop_money(struct game_object * o)
             {
                 snd_play_sfx(SFX_DROP_COIN,0);
 
-                p->money += o->money;
+                p->struct_data.npc_data.money += o->struct_data.npc_data.money;
                 obj_destroy(o->array_index);
             }
         }
@@ -1324,19 +1326,19 @@ void routines_drop_rec_meat(struct game_object * o)
         if (o->pos.z.a == 0) // If item is on floor
         {
             struct game_object * p = (struct game_object *)&objects[obj_player_index];
-
+            
             // Check if the player is within the designated box
             if (hit_test(p, o) == 0)
             {
                 snd_play_sfx(SFX_DROP_BOUNCE,0);
                 
-                if (p->hp + o->hp >= p->hp_max)
+                if (p->struct_data.npc_data.hp + o->struct_data.npc_data.hp >= p->struct_data.npc_data.hp_max)
                 {
-                    p->hp = p->hp_max;
+                    p->struct_data.npc_data.hp = p->struct_data.npc_data.hp_max;
                 }
                 else
                 {
-                    p->hp += o->hp;
+                    p->struct_data.npc_data.hp += o->struct_data.npc_data.hp;
                 }
             
                 obj_destroy(o->array_index);
@@ -1349,5 +1351,10 @@ void routines_drop_rec_meat(struct game_object * o)
 
     spr_queue_add_normal(o, temp_tileattrib);
 
+    return;
+}
+
+void routines_dummy(struct game_object * o)
+{
     return;
 }

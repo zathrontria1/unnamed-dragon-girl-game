@@ -149,14 +149,14 @@ uint8_t * ani_getframe_player(struct game_object * o)
             }
 
             // Now add the frame offset.
-            temp_tilenum += o->ani.frame;
+            temp_tilenum += o->struct_data.npc_data.ani.frame;
         }
     }
     else
     {
         // Now add the frame offset.
         // Still needed
-        temp_tilenum += o->ani.frame;
+        temp_tilenum += o->struct_data.npc_data.ani.frame;
     }
     
     
@@ -186,17 +186,17 @@ uint8_t * ani_getframe_dynamic_stateless(struct game_object * o)
     }
 }
 
+// Return offset to a fixed sprite tilenum based on given information
+// object ID and frame only
+// shorter version for light objects
 uint16_t ani_getframe_fixed_fast(struct game_object * o)
 {
-    // Return offset to a fixed sprite tilenum based on given information
-    // object ID and frame only
-    // shorter version for light objects
     switch (o->id)
     {
         case OBJID_FX_SMOKE:
-            return 6+(o->ani.frame << 1);
+            return 6+(o->struct_data.npc_data.ani.frame << 1);
         case OBJID_FIREBALL:
-            return 2+(o->ani.frame << 1);
+            return 2+(o->struct_data.npc_data.ani.frame << 1);
         case OBJID_SYS_IMPACT:
             return 10;
         case OBJID_SYS_TARGET:
@@ -212,7 +212,7 @@ uint8_t * ani_getframe_dynamic_bubble(struct game_object * o)
     uint16_t temp_tilenum = 30;
 
     // Now add the frame offset.
-    temp_tilenum += o->ani.frame;
+    temp_tilenum += o->struct_data.npc_data.ani.frame;
 
     // Calculate the address
     return (uint8_t *)((uint32_t)&data_sprite_slime + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
@@ -256,7 +256,7 @@ uint8_t * ani_getframe_dynamic_slime(struct game_object * o)
             temp_tilenum += 32;
             break;
         case STATE_SPAWNING:
-            temp_tilenum += o->ani.frame;
+            temp_tilenum += o->struct_data.npc_data.ani.frame;
             return (uint8_t *)((uint32_t)&data_sprite_spawn_placeholder + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
         default:
             break;
@@ -305,7 +305,7 @@ uint8_t * ani_getframe_dynamic_slime(struct game_object * o)
     }
 
     // Now add the frame offset.
-    temp_tilenum += o->ani.frame;
+    temp_tilenum += o->struct_data.npc_data.ani.frame;
 
     // Calculate the tilenum
     if (temp_flip_x)

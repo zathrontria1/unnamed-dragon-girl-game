@@ -322,7 +322,9 @@ void loop_mapdisplay_init()
     struct game_object temp_icon_object = objects[obj_player_index];
     temp_icon_object.state = STATE_ICON_NORMAL;
     temp_icon_object.facing = FACING_DOWN;
-    temp_icon_object.ani.frame = 0;
+
+    struct game_data_npc * d = (struct game_data_npc *)&temp_icon_object.struct_data;
+    d->ani.frame = 0;
 
     obj_player_prev_sprframe = ani_getframe_player(o); 
     uint8_t * temp_addr = ani_getframe_player(&temp_icon_object);
@@ -383,7 +385,8 @@ void loop_mapdisplay()
     }
 
     // Note that the player palette is in a different location
-    uint16_t temp_tileattrib = (p->ani.display | 7 << 9 | 3 << 12);
+    struct game_data_npc * d = (struct game_data_npc *)&(p->struct_data);
+    uint16_t temp_tileattrib = (d->ani.display | 7 << 9 | 3 << 12);
 
     if (((uint16_t) system_frames_elapsed % (60 / V_MUL)) < (30 / V_MUL))
     {

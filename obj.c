@@ -47,7 +47,25 @@ void obj_run()
 
     struct game_object * ptr = &objects[0];
 
-    for (int i = 0; obj_process_count < obj_active_count;i++)
+    /*uint16_t obj_active_count_shadow = obj_active_count;
+
+    while (obj_process_count < obj_active_count_shadow)
+    {
+        if (ptr->id == OBJID_NULL)
+        {
+            ptr++;
+            continue;
+        }
+
+        void (*func)(struct game_object *) = ptr->func_ptr; 
+        func(ptr);
+        obj_process_count++;
+
+        ptr++;
+    }*/
+
+    // Original implementation as follows
+    while (obj_process_count < obj_active_count)
     {
         switch (ptr->id)
         {
@@ -117,7 +135,6 @@ void obj_run()
                 obj_process_count++;
                 break;
         }
-
         ptr++;
     }
 
@@ -192,13 +209,15 @@ void obj_reset()
         }
     #endif
 
-    // Then initialize the next pointers for all of them
+    // Then initialize the next pointers and function pointers for all of them
     for (int i = 0; i < (OBJ_MAX_COUNT - 1); i++)
     {
         objects[i].next_free = i+1;
+        objects[i].func_ptr = (void *)&routines_dummy;
     }
 
     objects[OBJ_MAX_COUNT - 1].next_free = 0xffff;
+    objects[OBJ_MAX_COUNT - 1].func_ptr = (void *)&routines_dummy;
 
     obj_first_available = 0;
 
@@ -250,9 +269,9 @@ int16_t obj_instantiate(
     p->pos.x.a = ((int32_t)x) << 16;
     p->pos.y.a = ((int32_t)y) << 16;
 
-    p->ttl = 0; // always reset
+    p->struct_data.npc_data.ttl = 0; // always reset
 
-    p->ani.frame = 0;
+    p->struct_data.npc_data.ani.frame = 0;
 
     if ((id >= OBJID_CONST_END_OF_UNSORTED_SPRITES) && ((id != OBJID_HITBOX_INVISIBLE) || (id != OBJID_HITBOX_INVISIBLE_E))) // mini objects don't need these
     {
@@ -264,43 +283,44 @@ int16_t obj_instantiate(
         
         p->state = STATE_IDLE;
 
-        p->status = STATUS_NORMAL;
-        p->status_time = 0;
-        p->invuln_time = 0;
+        p->struct_data.npc_data.status = STATUS_NORMAL;
+        p->struct_data.npc_data.status_time = 0;
+        p->struct_data.npc_data.invuln_time = 0;
 
-        p->ai_state = AI_STATE_IDLE;
-        p->ai_timer = 0;
+        p->struct_data.npc_data.ai_state = AI_STATE_IDLE;
+        p->struct_data.npc_data.ai_timer = 0;
 
         p->facing = FACING_DOWN;
 
-        p->ani.display = (uint16_t)((uint32_t)ani_getframe_dynamic(p));
+        p->struct_data.npc_data.ani.display = (uint16_t)((uint32_t)ani_getframe_dynamic(p));
     }
     else
     {
-        p->ani.display = ani_getframe_fixed_fast(p);
+        p->struct_data.npc_data.ani.display = ani_getframe_fixed_fast(p);
     }
 
     if ((id >= OBJID_START_OF_INTERACTABLES) && (id <= OBJID_END_OF_INTERACTABLES))
     {
         p->state = STATE_SWITCH_OFF;
-        p->event_flag = local_event_flag;
         p->tile.x = p->pos.x.lh.h >> 4;
         p->tile.y = p->pos.y.lh.h >> 4;
+
+        p->struct_data.interactable_data.event_flag = local_event_flag;
     }
 
     if (id == OBJID_PLAYER)
     {
         // Keep track of the previous image DMA'd
-        p->ani.last_address = 0;
-        p->ani.last_dmafailed = 0;
+        p->struct_data.npc_data.ani.last_address = 0;
+        p->struct_data.npc_data.ani.last_dmafailed = 0;
 
-        p->money = 0;
+        p->struct_data.npc_data.money = 0;
 
-        p->hp = PLAYER_HEALTH_STARTING;
-        p->hp_max = PLAYER_HEALTH_STARTING;
+        p->struct_data.npc_data.hp = PLAYER_HEALTH_STARTING;
+        p->struct_data.npc_data.hp_max = PLAYER_HEALTH_STARTING;
 
-        p->attack = PLAYER_ATTACK_VALUE;
-        p->defense = PLAYER_DEFENSE_VALUE;
+        p->struct_data.npc_data.attack = PLAYER_ATTACK_VALUE;
+        p->struct_data.npc_data.defense = PLAYER_DEFENSE_VALUE;
 
         p->w = 16;
         p->h = 16;
@@ -308,24 +328,24 @@ int16_t obj_instantiate(
 
     if (id == OBJID_SLIME)
     {
-        p->ani.last_address = 0;
-        p->ani.last_dmafailed = 0;
-        p->hp_tile_offset = 0;
-        p->hp_display_time = 0;
+        p->struct_data.npc_data.ani.last_address = 0;
+        p->struct_data.npc_data.ani.last_dmafailed = 0;
+        p->struct_data.npc_data.hp_tile_offset = 0;
+        p->struct_data.npc_data.hp_display_time = 0;
 
-        p->hp = ENEMY_HEALTH_STARTING;
-        p->hp_max = ENEMY_HEALTH_STARTING;
+        p->struct_data.npc_data.hp = ENEMY_HEALTH_STARTING;
+        p->struct_data.npc_data.hp_max = ENEMY_HEALTH_STARTING;
 
-        p->attack = ENEMY_ATTACK_VALUE;
-        p->defense = ENEMY_DEFENSE_VALUE;
+        p->struct_data.npc_data.attack = ENEMY_ATTACK_VALUE;
+        p->struct_data.npc_data.defense = ENEMY_DEFENSE_VALUE;
 
-        p->hp_cache = ENEMY_HEALTH_STARTING;
+        p->struct_data.npc_data.hp_cache = ENEMY_HEALTH_STARTING;
 
         p->state = STATE_SPAWNING;
-        p->status_time = 64 / V_MUL;
+        p->struct_data.npc_data.status_time = 64 / V_MUL;
 
         uint8_t temp_weight = (uint8_t)rand_get16();
-        p->money = (ENEMY_DROP_MONEY_MIN + (((ENEMY_DROP_MONEY_MAX - ENEMY_DROP_MONEY_MIN) * temp_weight) / 255));
+        p->struct_data.npc_data.money = (ENEMY_DROP_MONEY_MIN + (((ENEMY_DROP_MONEY_MAX - ENEMY_DROP_MONEY_MIN) * temp_weight) / 255));
 
         p->w = 16;
         p->h = 16;
@@ -362,6 +382,8 @@ int16_t obj_instantiate(
     {
         blocker_active_count++;
     }
+
+    obj_set_function_pointer(p);
 
     return i;
 }
@@ -425,16 +447,16 @@ uint16_t obj_instantiate_spawners(const struct obj_list_entry_spawners* list)
             break;
         }
 
-        objects[index].spawn_area_x = list->x;
-        objects[index].spawn_area_y = list->y;
-        objects[index].spawn_area_w = list->w;
-        objects[index].spawn_area_h = list->h;
-        objects[index].screen_x = list->screen_x;
-        objects[index].screen_y = list->screen_y;
-        objects[index].screen_w = list->screen_w;
-        objects[index].screen_h = list->screen_h;
-
-        objects[index].string_ptr = (uint8_t *)list->spawn_list;
+        objects[index].struct_data.interactable_data.spawn_area_x = list->x;
+        objects[index].struct_data.interactable_data.spawn_area_y = list->y;
+        objects[index].struct_data.interactable_data.spawn_area_w = list->w;
+        objects[index].struct_data.interactable_data.spawn_area_h = list->h;
+        objects[index].struct_data.interactable_data.screen_x = list->screen_x;
+        objects[index].struct_data.interactable_data.screen_y = list->screen_y;
+        objects[index].struct_data.interactable_data.screen_w = list->screen_w;
+        objects[index].struct_data.interactable_data.screen_h = list->screen_h;
+        
+        objects[index].data_ptr = (uint8_t *)list->spawn_list;
 
         struct obj_list_entry_spawns * temp_ptr = (struct obj_list_entry_spawns *)list->spawn_list;
 
@@ -489,7 +511,7 @@ uint16_t obj_instantiate_interactables(const struct obj_list_entry_interactable*
         if (temp_objid == OBJID_INTERACTABLE_SIGN_WALL)
         {
             uint8_t * string_ptr = (uint8_t *)(list->flag);
-            objects[index].string_ptr = string_ptr;
+            objects[index].data_ptr = string_ptr;
         }
 
         list++;
@@ -536,6 +558,9 @@ void obj_cleanup()
         // Thread back the object to the next free
         objects[obj_delete_queue[i]].next_free = obj_first_available;
         obj_first_available = obj_delete_queue[i];
+
+        // Fix the object function to dummy
+        objects[obj_delete_queue[i]].func_ptr = (void *)&routines_dummy;
     }
     
     obj_active_count -= obj_delete_queue_count;
@@ -556,6 +581,67 @@ inline uint16_t obj_get_uid()
     }
 
     return temp_uid;
+}
+
+void obj_set_function_pointer(struct game_object * o)
+{
+    switch (o->id)
+    {
+        case OBJID_NULL:
+            o->func_ptr = (void *)&routines_dummy;
+            break;
+        case OBJID_PLAYER:
+            o->func_ptr = (void *)&routines_player;
+            break;
+        case OBJID_FIREBALL:
+            o->func_ptr = (void *)&routines_fireball;
+            break;
+        case OBJID_SLIME:
+            o->func_ptr = (void *)&routines_slime;
+            break;
+        case OBJID_BUBBLE_E:
+            o->func_ptr = (void *)&routines_bubble_e;
+            break;
+        case OBJID_FX_SMOKE:
+            o->func_ptr = (void *)&routines_fx_smoke;
+            break;
+        case OBJID_DROP_REC_MEAT:
+            o->func_ptr = (void *)&routines_drop_rec_meat;
+            break;
+        case OBJID_DROP_MONEY:
+            o->func_ptr = (void *)&routines_drop_money;
+            break;
+        case OBJID_HITBOX_INVISIBLE:
+            o->func_ptr = (void *)&routines_hitbox_invis;
+            break;
+        case OBJID_HITBOX_INVISIBLE_E:
+            o->func_ptr = (void *)&routines_hitbox_invis_e;
+            break;
+        case OBJID_SYS_IMPACT:
+            o->func_ptr = (void *)&routines_fx_impact;
+            break;
+        case OBJID_INTERACTABLE_SWITCH_WALL:
+        case OBJID_INTERACTABLE_SWITCH_FLOOR:
+            o->func_ptr = (void *)&routines_interactable_switch;
+            break;
+        case OBJID_INTERACTABLE_BLOCKER_FLOOR:
+        case OBJID_INTERACTABLE_BLOCKER_DOOR_NS:
+        case OBJID_INTERACTABLE_BLOCKER_DOOR_EW:
+            o->func_ptr = (void *)&routines_interactable_blocker;
+            break;
+        case OBJID_INTERACTABLE_SIGN_WALL:
+            o->func_ptr = (void *)&routines_interactable_sign;
+            break;
+        case OBJID_SPAWNER_ENEMY:
+            o->func_ptr = (void *)&routines_spawner;
+            break;
+        default:
+            // Unimplemented object
+            o->func_ptr = (void *)&routines_dummy;
+            break;
+    }
+
+    return;
 }
 
 uint16_t move(struct game_object * o)
@@ -794,27 +880,27 @@ uint16_t ai_run(struct game_object * o, uint32_t dist, int16_t x, int16_t y)
 
     // Do some AI interruption given some conditions
     if (
-        (((dist <= DIST_MELEE) && o->ai_state != AI_STATE_IDLE) ||
-        (o->status == STATUS_BURNING)) && (o->ai_state != AI_STATE_ATTACK)
+        (((dist <= DIST_MELEE) && o->struct_data.npc_data.ai_state != AI_STATE_IDLE) ||
+        (o->struct_data.npc_data.status == STATUS_BURNING)) && (o->struct_data.npc_data.ai_state != AI_STATE_ATTACK)
         )
     {
         // If AI gets too close to the player AND the AI isn't idling (i.e. moving)
         // OR if the AI is on fire, HOWEVER
         // Do not let the AI get interrupted if mid-attack
-        o->ai_timer = 0;
+        o->struct_data.npc_data.ai_timer = 0;
         temp_interrupted = 1;
     }
 
-    if (o->ai_timer == 0) // Only process AI state changes when this timer hits 0
+    if (o->struct_data.npc_data.ai_timer == 0) // Only process AI state changes when this timer hits 0
     {
         uint8_t temp_rand = (uint8_t)rand_get16();
         
         // If the AI is idling, attacked the player, or gets interrupted by the player while not attacking...
-        if (o->ai_state == AI_STATE_IDLE || (temp_interrupted && (o->ai_state != AI_STATE_ATTACK)))
+        if (o->struct_data.npc_data.ai_state == AI_STATE_IDLE || (temp_interrupted && (o->struct_data.npc_data.ai_state != AI_STATE_ATTACK)))
         {
             // Object has finished idling, time to move once more.
             // Check if a minimum distance is met or not
-            if ((dist > DIST_MELEE) && (o->status != STATUS_BURNING))
+            if ((dist > DIST_MELEE) && (o->struct_data.npc_data.status != STATUS_BURNING))
             {
                 // Enemy is far away from player
                 uint8_t temp_angle = atan2_uint8(y, x) + (temp_rand & 0x0f) - 8;
@@ -824,7 +910,7 @@ uint16_t ai_run(struct game_object * o, uint32_t dist, int16_t x, int16_t y)
                 o->delta.x.a = data_cosine_1[temp_angle] * V_MUL;
                 o->delta.y.a = data_sine_1[temp_angle] * V_MUL;
 
-                o->ai_state = AI_STATE_MOVE_TOWARDS;
+                o->struct_data.npc_data.ai_state = AI_STATE_MOVE_TOWARDS;
                 if ((o->state == STATE_HURT_BURN || o->state == STATE_HURT_BURN_MOVE))
                 {
                     o->state = STATE_HURT_BURN_MOVE;
@@ -838,7 +924,7 @@ uint16_t ai_run(struct game_object * o, uint32_t dist, int16_t x, int16_t y)
 
                 temp_invalidate_animation_frame = 1;
             }
-            else if (o->ai_state != AI_STATE_MOVE_AWAY) // don't recalc for anything already moving away.
+            else if (o->struct_data.npc_data.ai_state != AI_STATE_MOVE_AWAY) // don't recalc for anything already moving away.
             {
                 // Enemy is close to player
                 uint8_t temp_angle = (atan2_uint8(y, x)) + (temp_rand & 0x0f) - 136;
@@ -848,7 +934,7 @@ uint16_t ai_run(struct game_object * o, uint32_t dist, int16_t x, int16_t y)
                 o->delta.x.a = data_cosine_1[temp_angle] * V_MUL;
                 o->delta.y.a = data_sine_1[temp_angle] * V_MUL;
 
-                o->ai_state = AI_STATE_MOVE_AWAY;
+                o->struct_data.npc_data.ai_state = AI_STATE_MOVE_AWAY;
 
                 if ((o->state == STATE_HURT_BURN || o->state == STATE_HURT_BURN_MOVE))
                 {
@@ -864,15 +950,15 @@ uint16_t ai_run(struct game_object * o, uint32_t dist, int16_t x, int16_t y)
                 temp_invalidate_animation_frame = 1;
             }
 
-            o->ai_timer = (30 + (temp_rand & 0x1f)) / V_MUL;
+            o->struct_data.npc_data.ai_timer = (30 + (temp_rand & 0x1f)) / V_MUL;
         }
-        else if ((o->ai_state == AI_STATE_MOVE_TOWARDS) || (o->ai_state == AI_STATE_MOVE_AWAY))
+        else if ((o->struct_data.npc_data.ai_state == AI_STATE_MOVE_TOWARDS) || (o->struct_data.npc_data.ai_state == AI_STATE_MOVE_AWAY))
         {
             // Object has finished its movement time and should decide on a possible action.
             o->delta.x.a = 0;
             o->delta.y.a = 0;
 
-            if (o->ai_state == AI_STATE_MOVE_AWAY)
+            if (o->struct_data.npc_data.ai_state == AI_STATE_MOVE_AWAY)
             {
                 o->angle = (o->angle) + 128;
                 o->facing = ai_get_facing(o);
@@ -885,7 +971,7 @@ uint16_t ai_run(struct game_object * o, uint32_t dist, int16_t x, int16_t y)
                 // During this situation, check the previous state
                 // to pick the correct attack for the range.
 
-                if (o->ai_state == AI_STATE_MOVE_TOWARDS)
+                if (o->struct_data.npc_data.ai_state == AI_STATE_MOVE_TOWARDS)
                 {
                     o->state = STATE_ATTACK_BASIC;
                 }
@@ -895,16 +981,16 @@ uint16_t ai_run(struct game_object * o, uint32_t dist, int16_t x, int16_t y)
                 }
 
                 // For now, duplicate of the other case.
-                o->ai_state = AI_STATE_ATTACK;
+                o->struct_data.npc_data.ai_state = AI_STATE_ATTACK;
                 
-                o->ai_timer = (15) / V_MUL;
+                o->struct_data.npc_data.ai_timer = (15) / V_MUL;
 
-                o->ai_makeattack = 1;
+                o->struct_data.npc_data.ai_makeattack = 1;
             }
             else
             {
                 // Not attacking. Fix the state so the animation makes sense.
-                o->ai_state = AI_STATE_IDLE;
+                o->struct_data.npc_data.ai_state = AI_STATE_IDLE;
 
                 if ((o->state == STATE_HURT_BURN || o->state == STATE_HURT_BURN_MOVE))
                 {
@@ -915,15 +1001,15 @@ uint16_t ai_run(struct game_object * o, uint32_t dist, int16_t x, int16_t y)
                     o->state = STATE_IDLE;
                 }
 
-                o->ai_timer = (30 + (temp_rand & 0x1f)) / V_MUL;
+                o->struct_data.npc_data.ai_timer = (30 + (temp_rand & 0x1f)) / V_MUL;
             } 
 
             temp_invalidate_animation_frame = 1;
         }
-        else if (o->ai_state == AI_STATE_ATTACK)
+        else if (o->struct_data.npc_data.ai_state == AI_STATE_ATTACK)
         {
             // Reset the AI to idle
-            o->ai_state = AI_STATE_IDLE;
+            o->struct_data.npc_data.ai_state = AI_STATE_IDLE;
 
             if ((o->state == STATE_HURT_BURN || o->state == STATE_HURT_BURN_MOVE))
             {
@@ -934,7 +1020,7 @@ uint16_t ai_run(struct game_object * o, uint32_t dist, int16_t x, int16_t y)
                 o->state = STATE_IDLE;
             }
 
-            o->ai_timer = (30 + (temp_rand & 0x1f)) / V_MUL;
+            o->struct_data.npc_data.ai_timer = (30 + (temp_rand & 0x1f)) / V_MUL;
 
             temp_invalidate_animation_frame = 1;
         }
@@ -945,14 +1031,14 @@ uint16_t ai_run(struct game_object * o, uint32_t dist, int16_t x, int16_t y)
     return temp_invalidate_animation_frame;
 }
 
-void ai_idle(struct game_object * o)
+inline void ai_idle(struct game_object * o)
 {
-    o->ai_timer--;
+    o->struct_data.npc_data.ai_timer--;
 
     return;
 }
 
-uint16_t ai_get_facing(struct game_object * o)
+inline uint16_t ai_get_facing(struct game_object * o)
 {
     // Adjust the facing based on angle.
     if (o->angle < 32)

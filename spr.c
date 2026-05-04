@@ -205,10 +205,9 @@ uint16_t spr_get_vram_slot_16(uint16_t i)
             temp_tilenum |= (j & 0x02) << 4;
             temp_tilenum |= (j & 0x01) << 1;
             // (RRRR * 64) + (CC * 4) + (r * 32) + (c * 2);
-            
-            objects[i].tilenum = temp_tilenum;
 
-            objects[i].vram_addr = objects[i].tilenum << 4; // mul by 16, size of a 8x8 tile - this is in words
+            objects[i].struct_data.npc_data.tilenum = temp_tilenum;
+            objects[i].struct_data.npc_data.vram_addr = temp_tilenum << 4; // mul by 16, size of a 8x8 tile - this is in words
 
             return j;
         }
@@ -240,9 +239,8 @@ uint16_t spr_get_vram_slot_32(uint16_t i)
             temp_tilenum |= (j & 0x01) << 1;
             // (RRRR * 64) + (CC * 4) + (r * 32) + (c * 2);
             
-            objects[i].tilenum = temp_tilenum;
-
-            objects[i].vram_addr = objects[i].tilenum << 4; // mul by 16, size of a 8x8 tile - this is in words
+            objects[i].struct_data.npc_data.tilenum = temp_tilenum;
+            objects[i].struct_data.npc_data.vram_addr = temp_tilenum << 4; // mul by 16, size of a 8x8 tile - this is in words
 
             return j;
         }

@@ -12,14 +12,14 @@
 
 void ui_process()
 {
-    if ((ui_cached_hp != objects[obj_player_index].hp) ||
-        (ui_cached_hp_max != objects[obj_player_index].hp_max) || (ui_force_update != 0))
+    if ((ui_cached_hp != objects[obj_player_index].struct_data.npc_data.hp) ||
+        (ui_cached_hp_max != objects[obj_player_index].struct_data.npc_data.hp_max) || (ui_force_update != 0))
     {
         // HP changed
         ui_update_health();
     }
 
-    if ((ui_cached_money != objects[obj_player_index].money) || (ui_force_update != 0))
+    if ((ui_cached_money != objects[obj_player_index].struct_data.npc_data.money) || (ui_force_update != 0))
     {
         // Amount of money held changed
         ui_update_money();
@@ -39,8 +39,8 @@ void ui_process()
 void ui_update_health()
 {
     // Copy these values
-    uint32_t temp_hp = objects[obj_player_index].hp;
-    uint32_t temp_hp_max = objects[obj_player_index].hp_max;
+    int32_t temp_hp = objects[obj_player_index].struct_data.npc_data.hp;
+    int32_t temp_hp_max = objects[obj_player_index].struct_data.npc_data.hp_max;
 
     // Calculate the amount of pixels the health bar would have
     uint16_t temp_bar_length_fill;
@@ -252,11 +252,10 @@ void ui_update_health()
 void ui_show_enemy_health_bar(struct game_object * o)
 {
     // get fraction of health if it's not changed
-    if (o->hp_cache != o->hp)
-    //if (1)
+    if (o->struct_data.npc_data.hp_cache != o->struct_data.npc_data.hp)
     {
-        uint32_t temp_hp = o->hp;
-        uint32_t temp_hp_max = o->hp_max;
+        uint32_t temp_hp = o->struct_data.npc_data.hp;
+        uint32_t temp_hp_max = o->struct_data.npc_data.hp_max;
 
         while (temp_hp_max >= 0x10000)
         {
@@ -282,24 +281,24 @@ void ui_show_enemy_health_bar(struct game_object * o)
 
         if (temp_fraction > 4)
         {
-            o->hp_tile_offset = 96 + ((temp_fraction - 5) << 1);
+            o->struct_data.npc_data.hp_tile_offset = 96 + ((temp_fraction - 5) << 1);
         }
         else
         {
-            o->hp_tile_offset = 64 + ((temp_fraction - 1) << 1);
+            o->struct_data.npc_data.hp_tile_offset = 64 + ((temp_fraction - 1) << 1);
         }
 
-        o->hp_cache = o->hp;
+        o->struct_data.npc_data.hp_cache = o->struct_data.npc_data.hp;
     }
 
     spr_queue_add_ui(
         o->pos.x.lh.h - bg_scroll_x.full.high.a, 
         o->pos.y.lh.h - bg_scroll_y.full.high.a -8, 
-        (o->hp_tile_offset | PAL_SYS_IMPACT << 9 | 3 << 12));
+        (o->struct_data.npc_data.hp_tile_offset | PAL_SYS_IMPACT << 9 | 3 << 12));
 
     if (system_current_routine != ROUTINE_MSGBOX)
     {
-        o->hp_display_time--;
+        o->struct_data.npc_data.hp_display_time--;
     }
 
     return;
@@ -308,7 +307,7 @@ void ui_show_enemy_health_bar(struct game_object * o)
 void ui_update_money()
 {
     // Copy these values
-    uint32_t temp_money = objects[obj_player_index].money;
+    uint32_t temp_money = objects[obj_player_index].struct_data.npc_data.money;
 
     uint8_t temp_string[6] = "     " ; // 5 spaces
 
@@ -454,11 +453,11 @@ void ui_print_ml_special(uint8_t * string_ptr)
         Play time:        %6u:%02u:%02u
     */
 
-    uint16_t temp_hp = objects[obj_player_index].hp;
-    uint16_t temp_hp_max = objects[obj_player_index].hp_max;
-    uint16_t temp_attack = objects[obj_player_index].attack;
-    uint16_t temp_defense = objects[obj_player_index].defense;
-    uint16_t temp_money = objects[obj_player_index].money;
+    uint16_t temp_hp = objects[obj_player_index].struct_data.npc_data.hp;
+    uint16_t temp_hp_max = objects[obj_player_index].struct_data.npc_data.hp_max;
+    uint16_t temp_attack = objects[obj_player_index].struct_data.npc_data.attack;
+    uint16_t temp_defense = objects[obj_player_index].struct_data.npc_data.defense;
+    uint16_t temp_money = objects[obj_player_index].struct_data.npc_data.money;
     uint16_t temp_h = (uint16_t)((system_frames_elapsed / FPS) / (3600l));
     uint16_t temp_m = (uint16_t)(((system_frames_elapsed / FPS) % (3600l)) / 60);
     uint16_t temp_s = (uint16_t)((system_frames_elapsed / FPS) % 60);

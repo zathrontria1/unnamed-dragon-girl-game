@@ -170,41 +170,17 @@ struct ani_data
 {   
     uint16_t frame; // timer of current frame
     uint16_t display; // currently displayed frame
-    uint8_t * last_address; // Address of previous rendered frame
+    void * last_address; // Address of previous rendered frame
     uint16_t last_dmafailed; // Did the previous DMA fail?
 };
 
-struct game_object
+struct game_data_npc
 {
-    // Object type
-    uint16_t id;
-    // Object and parent information
-    uint16_t uid; // UID generated on instantiation
-    uint32_t * parent_map; // The map the object belonged to
-
-    uint16_t array_index;
-    
-    // Positions
-    struct coords pos;
-    struct coords delta;
-    uint16_t state;
-    uint16_t facing;
-    uint8_t angle;
-    struct tile_xy tile; // Used for blockers to simplify calcs. Also used for cached tile tests
-    uint16_t w;
-    uint16_t h;
-
+    // Case one: Player, NPCs, and particles
     // Animation system
-    //uint16_t oam_index; // the index number of the OAM slot it had
     uint16_t tilenum; // tile number in sprite VRAM page
     uint16_t vram_addr; // vram address in sprite VRAM, offset from 0x6000
     struct ani_data ani;
-
-    // AI data
-    uint16_t ai_state;
-    uint16_t ai_timer;
-
-    uint16_t ai_makeattack;
 
     // Game data
     uint16_t ttl; // time remaining for auto-despawn
@@ -213,7 +189,6 @@ struct game_object
     uint16_t status; // current abnormal status
     uint16_t status_time; // abnormal status remaining time
     uint16_t invuln_time; // invuln time
-
     uint32_t hp_cache; // cached HP value to reduce load
     uint16_t hp_display_time; // time to display mini health bar
     uint16_t hp_tile_offset; // cached tile offset to use if no recalc
@@ -221,11 +196,19 @@ struct game_object
     int16_t attack;
     int16_t defense;
 
-    uint16_t event_flag; // the local event flag it's tied to
-
     uint32_t money; // held money
 
-    uint8_t * string_ptr;
+    // AI data
+    uint16_t ai_state;
+    uint16_t ai_timer;
+    uint16_t ai_makeattack;
+};
+
+struct game_data_interactable
+{
+    // Case two: interactables and spawners (i.e. non-NPCs)
+    uint16_t event_flag; // the local event flag it's tied to
+    uint16_t delay_time; // timer
 
     uint16_t spawn_area_x;
     uint16_t spawn_area_y;
@@ -236,12 +219,41 @@ struct game_object
     int16_t screen_y; 
     uint16_t screen_w; // screen size
     uint16_t screen_h;
+};
+
+union game_data
+{
+    uint8_t size[72];
+    struct game_data_npc npc_data;
+    struct game_data_interactable interactable_data; 
+};
+
+struct game_object
+{
+    // Object type
+    uint16_t id;
+    // Object and parent information
+    uint16_t uid; // UID generated on instantiation
+    uint16_t array_index;
+    
+    // Positions
+    struct coords pos;
+    struct coords delta;
+    uint16_t state;
+    uint16_t facing;
+    uint16_t angle;
+    struct tile_xy tile; // Used for blockers to simplify calcs. Also used for cached tile tests
+    uint16_t w;
+    uint16_t h;
 
     uint16_t hit_type; // hitbox type
 
+    void * data_ptr; // generic data pointer
+    void * func_ptr; // generic function pointer
     uint16_t next_free; // next free object index
-    
-    uint8_t padding[3]; 
+
+    // Everything after this can go to the same area
+    union game_data struct_data;
 };
 
 struct oam_entry_low
