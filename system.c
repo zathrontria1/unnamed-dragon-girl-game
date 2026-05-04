@@ -21,6 +21,8 @@
 #include "snd.h"
 #include "ui.h"
 
+uint8_t system_MVNCodeInWRAM[4];
+
 /*
     VBCC doesn't initialize the zero page variables
     So do it for it
@@ -122,6 +124,24 @@ void system_init_regs(void)
 
 void system_init()
 {
+    // Write out the MVN program code
+    #if VBCC_ASM == 1
+    __asm(
+        "\ta16\n"
+	    "\tx16\n"
+        "\ta8\n"
+        "\tsep #$20\n"
+        "\tlda #$6B\n" // RTL opcode
+        "\tsta >_system_MVNCodeInWRAM+3\n"
+        "\tlda #$54\n" // MVN opcode
+        "\tsta >_system_MVNCodeInWRAM\n"
+        "\ta16\n"
+        "\trep #$20\n");
+    #else
+        system_MVNCodeInWRAM[0] = 0x54;
+        system_MVNCodeInWRAM[3] = 0x6b;
+    #endif
+
     // Set current and target routines to init to prevent issues
     system_current_routine = ROUTINE_INIT;
     system_target_routine = ROUTINE_INIT;

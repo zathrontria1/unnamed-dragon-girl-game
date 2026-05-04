@@ -4,8 +4,7 @@
 
 #include "lz4.h"
 #include "dma.h"
-
-uint8_t LZ4_MVNCodeInWRAM[4];
+#include "system.h"
 
 /*
     Unpacks LZ4 compressed data to WRAM area
@@ -225,21 +224,17 @@ inline void LZ4_Internal_Copy(uint8_t * src, uint8_t * dest, uint16_t len)
         "\ttax\n"
         "\ta8\n"
         "\tsep #$20\n"
-        "\tlda #$6B\n" // RTL opcode
-        "\tsta >_LZ4_MVNCodeInWRAM+3\n"
-        "\tlda #$54\n" // MVN opcode
-        "\tsta >_LZ4_MVNCodeInWRAM\n"
         "\tlda r3\n"
-        "\tsta >_LZ4_MVNCodeInWRAM+1\n" // write bank byte of source 
+        "\tsta >_system_MVNCodeInWRAM+1\n" // write bank byte of source 
         "\tlda r1\n"
-        "\tsta >_LZ4_MVNCodeInWRAM+2\n" // ditto for destination
+        "\tsta >_system_MVNCodeInWRAM+2\n" // ditto for destination
         "\ta16\n"
         "\trep #$20\n"
         "\ttxa\n"
         "\tdec\n"
         "\tldx r0\n"
         "\tldy r2\n"
-        "\tjsl >_LZ4_MVNCodeInWRAM;\n"
+        "\tjsl >_system_MVNCodeInWRAM;\n"
         "\tplb\n"
         "\tply\n"
         "LZ4_Internal_Skip:\n"

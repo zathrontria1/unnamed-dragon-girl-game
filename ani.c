@@ -40,7 +40,7 @@ uint16_t ani_animate_drop_gravity(struct game_object * o)
             uint16_t temp_tileattrib;
             temp_tileattrib = 0x0e | PAL_FX_SHADOW << 9 | 2 << 12;
 
-            spr_queue_add_back_wrapper(&temp, temp_tileattrib);
+            spr_queue_add_back(&temp, temp_tileattrib);
         }
     }
 

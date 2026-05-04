@@ -3,6 +3,7 @@
 #include "vars.h"
 
 #include "spr.h"
+#include "system.h"
 
 /*
     Adds a sprite to the draw queue
@@ -10,7 +11,7 @@
     It is the responsibility of the caller select the right queue and 
     to ensure that the written sprite is valid
 */
-inline void spr_queue_add_ui_wrapper(int16_t x, int16_t y, uint16_t tileattrib)
+inline void spr_queue_add_ui(int16_t x, int16_t y, uint16_t tileattrib)
 {
     struct spr_queue_entry s;
     s.x = x;
@@ -39,33 +40,37 @@ inline void spr_queue_add_ui_wrapper(int16_t x, int16_t y, uint16_t tileattrib)
     return;
 }
 
-inline void spr_queue_add_front_wrapper(struct game_object * o, uint16_t tileattrib)
+inline void spr_queue_add_front(struct game_object * o, uint16_t tileattrib)
 {
     if (spr_front_count >= 128)
     {
         return;
     }
 
-    struct spr_queue_entry s;
-    s.x = o->pos.x.lh.h - bg_scroll_x.full.high.a;
+    int16_t temp_x;
+    int16_t temp_y;
 
-    if ((s.x > -16) && (s.x < 256))
+    temp_x = o->pos.x.lh.h - bg_scroll_x.full.high.a;
+
+    if ((temp_x > -16) && (temp_x < 256))
     {
-        if (s.x < 0)
+        if (temp_x < 0)
         {
-            s.signsize = 0x40;
+            spr_queue_front[spr_front_count].signsize = 0x40;
         }
         else
         {
-            s.signsize = 0x00;
+            spr_queue_front[spr_front_count].signsize = 0x00;
         }
-        s.y = o->pos.y.lh.h - o->pos.z.lh.h - bg_scroll_y.full.high.a;
+        temp_y = o->pos.y.lh.h - o->pos.z.lh.h - bg_scroll_y.full.high.a;
 
-        if ((s.y > -16) && (s.y < 224))
+        if ((temp_y > -16) && (temp_y < 224))
         {
-            s.tileattrib = tileattrib;
-            s.depth = (uint8_t)(s.y + 15);
-            spr_queue_add(&s, &spr_queue_front[spr_front_count]);
+            spr_queue_front[spr_front_count].tileattrib = tileattrib;
+            spr_queue_front[spr_front_count].x = temp_x;
+            spr_queue_front[spr_front_count].y = temp_y;
+            spr_queue_front[spr_front_count].depth = (temp_y + 15);
+
             spr_front_count++;
 
             return;
@@ -75,33 +80,37 @@ inline void spr_queue_add_front_wrapper(struct game_object * o, uint16_t tileatt
     return;
 }
 
-inline void spr_queue_add_normal_wrapper(struct game_object * o, uint16_t tileattrib)
+inline void spr_queue_add_normal(struct game_object * o, uint16_t tileattrib)
 {
     if (spr_normal_count >= 128)
     {
         return;
     }
 
-    struct spr_queue_entry s;
-    s.x = o->pos.x.lh.h - bg_scroll_x.full.high.a;
+    int16_t temp_x;
+    int16_t temp_y;
 
-    if ((s.x > -16) && (s.x < 256))
+    temp_x = o->pos.x.lh.h - bg_scroll_x.full.high.a;
+
+    if ((temp_x > -16) && (temp_x < 256))
     {
-        if (s.x < 0)
+        if (temp_x < 0)
         {
-            s.signsize = 0x40;
+            spr_queue_normal[spr_normal_count].signsize = 0x40;
         }
         else
         {
-            s.signsize = 0x00;
+            spr_queue_normal[spr_normal_count].signsize = 0x00;
         }
-        s.y = o->pos.y.lh.h - o->pos.z.lh.h - bg_scroll_y.full.high.a;
+        temp_y = o->pos.y.lh.h - o->pos.z.lh.h - bg_scroll_y.full.high.a;
 
-        if ((s.y > -16) && (s.y < 224))
+        if ((temp_y > -16) && (temp_y < 224))
         {
-            s.tileattrib = tileattrib;
-            s.depth = (uint8_t)(s.y + 15);
-            spr_queue_add(&s, &spr_queue_normal[spr_normal_count]);
+            spr_queue_normal[spr_normal_count].x = temp_x;
+            spr_queue_normal[spr_normal_count].y = temp_y;
+            spr_queue_normal[spr_normal_count].tileattrib = tileattrib;
+            spr_queue_normal[spr_normal_count].depth = (temp_y + 15);
+
             spr_normal_count++;
 
             return;
@@ -111,74 +120,42 @@ inline void spr_queue_add_normal_wrapper(struct game_object * o, uint16_t tileat
     return;
 }
 
-inline void spr_queue_add_back_wrapper(struct game_object * o, uint16_t tileattrib)
+inline void spr_queue_add_back(struct game_object * o, uint16_t tileattrib)
 {
     if (spr_back_count >= 128)
     {
         return;
     }
 
-    struct spr_queue_entry s;
-    s.x = o->pos.x.lh.h - bg_scroll_x.full.high.a;
+    int16_t temp_x;
+    int16_t temp_y;
 
-    if ((s.x > -16) && (s.x < 256))
+    temp_x = o->pos.x.lh.h - bg_scroll_x.full.high.a;
+
+    if ((temp_x > -16) && (temp_x < 256))
     {
-        if (s.x < 0)
+        if (temp_x < 0)
         {
-            s.signsize = 0x40;
+            spr_queue_back[spr_back_count].signsize = 0x40;
         }
         else
         {
-            s.signsize = 0x00;
+            spr_queue_back[spr_back_count].signsize = 0x00;
         }
-        s.y = o->pos.y.lh.h - o->pos.z.lh.h - bg_scroll_y.full.high.a;
+        temp_y = o->pos.y.lh.h - o->pos.z.lh.h - bg_scroll_y.full.high.a;
 
-        if ((s.y > -16) && (s.y < 224))
+        if ((temp_y > -16) && (temp_y < 224))
         {
-            s.tileattrib = tileattrib;
-            s.depth = (uint8_t)(s.y + 15);
-            spr_queue_add(&s, &spr_queue_back[spr_back_count]);
+            spr_queue_back[spr_back_count].tileattrib = tileattrib;
+            spr_queue_back[spr_back_count].x = temp_x;
+            spr_queue_back[spr_back_count].y = temp_y;
+            spr_queue_back[spr_back_count].depth = (temp_y + 15);
+
             spr_back_count++;
 
             return;
         }
     }
-
-    return;
-}
-
-#if VBCC_ASM == 1
-    NO_INLINE void spr_queue_add(__reg("r0/r1") struct spr_queue_entry * s, __reg("r2/r3") struct spr_queue_entry * target_queue)
-#else
-    void spr_queue_add(struct spr_queue_entry * s, struct spr_queue_entry * target_queue)
-#endif
-{
-    #if VBCC_ASM == 1
-        __asm(
-        "\ta16\n"
-        "\tx16\n"
-
-        "\tphy\n"
-        "\tlda [r0]\n"
-        "\tsta [r2]\n"
-        "\tldy #2\n"
-        "\tlda [r0],y\n"
-        "\tsta [r2],y\n"
-        "\tldy #4\n"
-        "\tlda [r0],y\n"
-        "\tsta [r2],y\n"
-        "\tldy #6\n"
-        "\tlda [r0],y\n"
-        "\tsta [r2],y\n"
-
-        "\tply\n");
-    #else
-        target_queue->x = s->x;
-        target_queue->y = s->y;
-        target_queue->tileattrib = s->tileattrib;
-        target_queue->depth = s->depth;
-        target_queue->signsize = s->signsize;
-    #endif
 
     return;
 }
@@ -315,7 +292,7 @@ void spr_queue_process()
         "\tjsl >_spr_draw\n"
         "\tlda r0\n"
         "\tclc\n"
-        "\tadc #8\n"
+        "\tadc #16\n"
         "\tsta r0\n"
         "\tdey\n"
         "\tbne .loop_drawfrontsprites\n"
@@ -382,7 +359,7 @@ void spr_queue_process()
         "\tbeq .end\n"
         "\tsta r2\n"
         "\tlda #$0000\n"
-        "\tldy #7\n"
+        "\tldy #8\n"
         "\ta8\n"
         "\tsep #$20\n"
         "\tphb\n"
@@ -396,7 +373,7 @@ void spr_queue_process()
         "\tinx\n"
         "\tinc !_spr_depth_count,x\n"
         "\tlda r0\n"
-        "\tadc #8\n"
+        "\tadc #16\n"
         "\tsta r0 \n"
         "\tbcc .depthtally_nocarry\n"
         "\tclc \n"
@@ -516,7 +493,7 @@ void spr_queue_process()
         ".loop_spritewrite:\n"
         // Decrement the depth count
         "\tlda #$0000\n"
-        "\tldy #7 \n" 
+        "\tldy #8 \n" 
         "\tsep #$20\n"
         "\ta8\n"
         "\tlda [r0],y\n"
@@ -558,7 +535,7 @@ void spr_queue_process()
         
         "\tlda r0\n"
         "\tclc \n"
-        "\tadc #8\n"
+        "\tadc #16\n"
         "\tsta r0 \n"
         "\tdec r2 \n"
         "\tbne .loop_spritewrite\n"
@@ -597,7 +574,7 @@ void spr_queue_process()
         "\tjsl >_spr_draw\n"
         "\tlda r0\n"
         "\tclc\n"
-        "\tadc #8\n"
+        "\tadc #16\n"
         "\tsta r0\n"
         "\tdey\n"
         "\tbne .loop_drawbacksprites\n"

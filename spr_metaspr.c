@@ -9,7 +9,12 @@
 inline void spr_metaspr_draw(struct game_object * o, const struct spr_metaspr_definition * m)
 {
     struct spr_queue_entry s;
-    s.depth = (o->pos.y.lh.h + 15) - bg_scroll_y.full.high.a;
+    
+    int16_t temp_x;
+    int16_t temp_y;
+    uint16_t temp_depth;
+
+    temp_depth = (o->pos.y.lh.h + 15) - bg_scroll_y.full.high.a;
 
     while (m->size != 0xffff)
     {
@@ -18,50 +23,57 @@ inline void spr_metaspr_draw(struct game_object * o, const struct spr_metaspr_de
             break;
         }
         
-        s.x = o->pos.x.lh.h + m->offset_x - bg_scroll_x.full.high.a;
+        temp_x = o->pos.x.lh.h + m->offset_x - bg_scroll_x.full.high.a;
 
         if (m->size == 0) // 16px sprite
         {
-            if ((s.x > -16) && (s.x < 256))
+            if ((temp_x > -16) && (temp_x < 256))
             {
                 
-                if (s.x < 0)
+                if (temp_x < 0)
                 {
-                    s.signsize = 0x40;
+                    spr_queue_normal[spr_normal_count].signsize = 0x40;
                 }
                 else
                 {
-                    s.signsize = 0x00;
+                    spr_queue_normal[spr_normal_count].signsize = 0x00;
                 }
-                s.y = o->pos.y.lh.h + m->offset_y - bg_scroll_y.full.high.a;
 
-                if ((s.y > -16) && (s.y < 224))
+                temp_y = o->pos.y.lh.h + m->offset_y - bg_scroll_y.full.high.a;
+
+                if ((temp_y > -16) && (temp_y < 224))
                 {
-                    s.tileattrib = m->tileattrib;
-                    spr_queue_add(&s, &spr_queue_normal[spr_normal_count]);
+                    spr_queue_normal[spr_normal_count].x = temp_x;
+                    spr_queue_normal[spr_normal_count].y = temp_y;
+                    spr_queue_normal[spr_normal_count].tileattrib = m->tileattrib;
+                    spr_queue_normal[spr_normal_count].depth = temp_depth;
+                    //spr_queue_add(&s, &spr_queue_normal[spr_normal_count]);
                     spr_normal_count++;
                 }
             }
         }
         else
         {
-            if ((s.x > -32) && (s.x < 256))
+            if ((temp_x > -32) && (temp_x < 256))
             {
-                if (s.x < 0)
+                if (temp_x < 0)
                 {
-                    s.signsize = 0xc0;
+                    spr_queue_normal[spr_normal_count].signsize = 0xc0;
                 }
                 else
                 {
-                    s.signsize = 0x80;
+                    spr_queue_normal[spr_normal_count].signsize = 0x80;
                 }
 
-                s.y = o->pos.y.lh.h + m->offset_y - bg_scroll_y.full.high.a;
+                temp_y = o->pos.y.lh.h + m->offset_y - bg_scroll_y.full.high.a;
 
-                if ((s.y > -32) && (s.y < 224))
+                if ((temp_y > -32) && (temp_y < 224))
                 {
-                    s.tileattrib = m->tileattrib;
-                    spr_queue_add(&s, &spr_queue_normal[spr_normal_count]);
+                    spr_queue_normal[spr_normal_count].x = temp_x;
+                    spr_queue_normal[spr_normal_count].y = temp_y;
+                    spr_queue_normal[spr_normal_count].tileattrib = m->tileattrib;
+                    spr_queue_normal[spr_normal_count].depth = temp_depth;
+                    //spr_queue_add(&s, &spr_queue_normal[spr_normal_count]);
                     spr_normal_count++;
                 }
             }

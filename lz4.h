@@ -1,5 +1,3 @@
-extern uint8_t LZ4_MVNCodeInWRAM[4];
-
 uint32_t LZ4_UnpackToWRAM(void * src, uint32_t dest);
 uint32_t LZ4_UnpackToVRAM(void * src, uint16_t dest);
 int32_t LZ4_GetLength(void * src);

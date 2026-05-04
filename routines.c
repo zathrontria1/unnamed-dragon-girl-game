@@ -542,7 +542,7 @@ void routines_player(struct game_object * o)
     }
     else
     {
-        spr_queue_add_normal_wrapper(o, temp_tileattrib);
+        spr_queue_add_normal(o, temp_tileattrib);
     }
 
     return;
@@ -590,7 +590,7 @@ void routines_fireball(struct game_object * o)
     // Only draw every other frame for both visibility and performance
     if ((o->uid & 0x0001) == ((uint16_t)system_frames_elapsed & 0x0001))
     {
-        spr_queue_add_front_wrapper(o, (o->ani.display | PAL_FIREBALL << 9 | 3 << 12));
+        spr_queue_add_front(o, (o->ani.display | PAL_FIREBALL << 9 | 3 << 12));
     }
 
     return;
@@ -626,7 +626,7 @@ void routines_fx_smoke(struct game_object * o)
     // Only draw every other frame for both visibility and performance
     if ((o->uid & 0x0001) == ((uint16_t)system_frames_elapsed & 0x0001))
     {
-        spr_queue_add_front_wrapper(o, temp_tileattrib);
+        spr_queue_add_front(o, temp_tileattrib);
     }   
 
     return;
@@ -634,7 +634,7 @@ void routines_fx_smoke(struct game_object * o)
 
 void routines_fx_impact(struct game_object * o)
 {
-    spr_queue_add_front_wrapper(o, (ani_getframe_fixed_fast(o) | PAL_SYS_IMPACT << 9 | 3 << 12));
+    spr_queue_add_front(o, (ani_getframe_fixed_fast(o) | PAL_SYS_IMPACT << 9 | 3 << 12));
 
     if (system_current_routine == ROUTINE_MSGBOX)
     {
@@ -744,7 +744,7 @@ void routines_interactable_switch(struct game_object * o)
         }
     }
 
-    spr_queue_add_back_wrapper(o, (0x20 + (o->state << 1)) | PAL_INTERACTABLE_SWITCH_WALL << 9 | 2 << 12);
+    spr_queue_add_back(o, (0x20 + (o->state << 1)) | PAL_INTERACTABLE_SWITCH_WALL << 9 | 2 << 12);
 
     return;
 }
@@ -782,7 +782,7 @@ void routines_interactable_sign(struct game_object * o)
         }
     }
 
-    spr_queue_add_back_wrapper(o, 0x28 | PAL_INTERACTABLE_SIGN_WALL << 9 | 2 << 12);
+    spr_queue_add_back(o, 0x28 | PAL_INTERACTABLE_SIGN_WALL << 9 | 2 << 12);
 
     return;
 }
@@ -796,7 +796,7 @@ void routines_interactable_blocker(struct game_object * o)
         switch (o->id)
         {
             case OBJID_INTERACTABLE_BLOCKER_FLOOR:
-                spr_queue_add_back_wrapper(o, 0x0e | PAL_INTERACTABLE_BLOCKER_FLOOR << 9 | 2 << 12);
+                spr_queue_add_back(o, 0x0e | PAL_INTERACTABLE_BLOCKER_FLOOR << 9 | 2 << 12);
                 break;
             case OBJID_INTERACTABLE_BLOCKER_DOOR_NS:
                 spr_metaspr_draw(o, &data_metaspr_door_ns[0]);
@@ -1165,12 +1165,12 @@ void routines_slime(struct game_object * o)
         // Do not perform a draw every other frame
         if ((o->uid & 0x0001) == ((uint16_t)system_frames_elapsed & 0x0001))
         {
-            spr_queue_add_normal_wrapper(o, temp_tileattrib);
+            spr_queue_add_normal(o, temp_tileattrib);
         }
     }
     else
     {
-        spr_queue_add_normal_wrapper(o, temp_tileattrib);
+        spr_queue_add_normal(o, temp_tileattrib);
     }
 
     return;
@@ -1236,7 +1236,7 @@ void routines_bubble_e(struct game_object * o)
         uint16_t temp_tileattrib;
         temp_tileattrib = (o->tilenum | PAL_BUBBLE_E << 9 | 3 << 12);
 
-        spr_queue_add_front_wrapper(o, temp_tileattrib);
+        spr_queue_add_front(o, temp_tileattrib);
     }
 
     return;
@@ -1307,7 +1307,7 @@ void routines_drop_money(struct game_object * o)
     uint16_t temp_tileattrib;
     temp_tileattrib = (0x2a | PAL_DROP_MONEY << 9 | 2 << 12);
 
-    spr_queue_add_normal_wrapper(o, temp_tileattrib);
+    spr_queue_add_normal(o, temp_tileattrib);
 
     return;
 }
@@ -1347,7 +1347,7 @@ void routines_drop_rec_meat(struct game_object * o)
     uint16_t temp_tileattrib;
     temp_tileattrib = (0x0c | PAL_DROP_REC_MEAT << 9 | 2 << 12);
 
-    spr_queue_add_normal_wrapper(o, temp_tileattrib);
+    spr_queue_add_normal(o, temp_tileattrib);
 
     return;
 }

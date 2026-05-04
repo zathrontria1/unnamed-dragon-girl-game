@@ -118,8 +118,9 @@ struct spr_queue_entry
     int16_t x; 
     int16_t y;
     uint16_t tileattrib;
-    uint8_t signsize;
-    uint8_t depth;
+    uint16_t signsize;
+    uint16_t depth;
+    uint8_t padding[6];
 };
 
 struct pos_lh32

@@ -1,3 +1,5 @@
+extern uint8_t system_MVNCodeInWRAM[4];
+
 void system_init_zp(void);
 void system_init_regs(void);
 void system_init(void);

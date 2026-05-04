@@ -366,7 +366,7 @@ void loop_mapdisplay()
 
     if (((uint16_t) system_frames_elapsed % (60 / V_MUL)) < (30 / V_MUL))
     {
-        spr_queue_add_ui_wrapper(temp_x - bg_scroll_x.full.high.a - 6,temp_y - bg_scroll_y.full.high.a - 6, temp_tileattrib);
+        spr_queue_add_ui(temp_x - bg_scroll_x.full.high.a - 6,temp_y - bg_scroll_y.full.high.a - 6, temp_tileattrib);
     }
 
     spr_queue_process();
