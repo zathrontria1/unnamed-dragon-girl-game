@@ -234,6 +234,8 @@ void system_init_display(uint16_t routine)
             REG_TM = TM_MODE3; // BG1, BG2, and OBJ
             break;
     }
+
+    return;
 }
 
 // Set background tile entries and tilemap locations
@@ -256,7 +258,6 @@ void system_setup_tilemap_display(uint16_t routine)
             REG_BG2SC = TILEMAP_ADDR_MAP_UI >> 8;
             break;
     }
-    
 
     return;
 }
@@ -270,11 +271,13 @@ void system_wait_vblank()
     {
         emitWAI();
     }  
+
+    system_poll_input();
         
     return;
 }
 
-void system_poll_input()
+inline void system_poll_input()
 {
     // Check if input is ready.
     while ((REG_HVBJOY & PAD_BUSY) == PAD_BUSY)
@@ -291,7 +294,7 @@ void system_poll_input()
     // then AND with current frame
     input_pad0_new = ((temp_pad0 ^ input_pad0) & input_pad0);
 
-    // Repeat for the other pad.
+    // The game only supports 1 pad
     /*uint16_t temp_pad1 = input_pad1; 
 
     input_pad1 = REG_JOYxLH(1); 

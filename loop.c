@@ -32,8 +32,7 @@
 void loop_fadein()
 {
     system_wait_vblank();
-    system_poll_input();
-    
+
     shadow_inidisp += 1;
 
     if (shadow_inidisp >= 15)
@@ -47,8 +46,7 @@ void loop_fadein()
 void loop_fadeout()
 {
     system_wait_vblank();
-    system_poll_input();
-    
+
     shadow_inidisp -= 1;
 
     if (shadow_inidisp == 0)
@@ -62,7 +60,6 @@ void loop_fadeout()
 void loop_messagebox()
 {
     system_wait_vblank();
-    system_poll_input();
 
     obj_run();
 
@@ -73,14 +70,8 @@ void loop_messagebox()
     spr_reset_sprites();
     spr_pack_oam();
 
-    #ifndef _WIN32
-        if (system_check_for_key(KEY_A))
-        {
-    #endif
-    #ifdef _WIN32
-        if (1)
-        {
-    #endif
+    if (system_check_for_key(KEY_A))
+    {
         snd_play_sfx(SFX_UI_CONFIRM, 0);
         
         ui_show_message_ttl = 0;
@@ -111,7 +102,6 @@ void loop_messagebox()
 void loop_game()
 {
     system_wait_vblank();
-    system_poll_input();
     
     ui_process();
 
@@ -127,14 +117,8 @@ void loop_game()
         return;
     }
 
-    #ifndef _WIN32
-        if (system_check_for_key(KEY_X))
-        {
-    #endif
-    #ifdef _WIN32
-        if (1)
-        {
-    #endif
+    if (system_check_for_key(KEY_X))
+    {
         snd_play_sfx(SFX_UI_CONFIRM, 0);
         
         ui_print_ml_special((uint8_t *)&STR_UI_PLAYERINFO_ML);
@@ -171,26 +155,14 @@ void loop_game()
     // Don't bother checking for input if the player is dying
     if (objects[obj_player_index].state != STATE_DIE)
     {
-        #ifndef _WIN32
         if (system_check_for_key(KEY_SELECT))
         {
-        #endif
-        #ifdef _WIN32
-        if (1)
-        {
-        #endif
             shadow_inidisp = 0x0f;
             system_current_routine = ROUTINE_FADEOUT;
             system_target_routine = ROUTINE_MAPDISPLAY_INIT;
         }
-        #ifndef _WIN32
         else if (system_check_for_key(KEY_START))
         {
-        #endif
-        #ifdef _WIN32
-        else if (1)
-        {
-        #endif
             system_target_routine = ROUTINE_PAUSE;
             system_current_routine = ROUTINE_PAUSE;
             shadow_inidisp = 0x08;
@@ -203,16 +175,9 @@ void loop_game()
 void loop_pause()
 {
     system_wait_vblank();
-    system_poll_input();
 
-    #ifndef _WIN32
     if (system_check_for_key(KEY_START))
     {
-    #endif
-    #ifdef _WIN32
-    if (1)
-    {
-    #endif
         system_target_routine = ROUTINE_GAMELOOP;
         system_current_routine = ROUTINE_GAMELOOP;
         shadow_inidisp = 0x0f;
@@ -223,12 +188,10 @@ void loop_pause()
 
 void loop_mapdisplay_init()
 {
-    #ifndef _WIN32
-        system_interrupt_disable();
-        REG_INIDISP = 0x8f;
+    system_interrupt_disable();
+    REG_INIDISP = 0x8f;
 
-        REG_HDMAEN = 0x00;
-    #endif
+    REG_HDMAEN = 0x00;
 
     // Silence the looping fire sound
     if (snd_flame_playing == 1)
@@ -240,7 +203,6 @@ void loop_mapdisplay_init()
     bg_scroll_x_saved = bg_scroll_x;
     bg_scroll_y_saved = bg_scroll_y;
 
-    #ifndef _WIN32
     REG_BG2HOFS = 0;
     REG_BG2HOFS = 0;
     REG_BG2VOFS = 0xff;
@@ -249,7 +211,6 @@ void loop_mapdisplay_init()
     // Copy the ROM palette into shadow
     dma_copy_to_wram((unsigned long int)level_data_ptr->map_overview_palette, (unsigned long int)&shadow_cgram, 480);
     dma_copy_to_wram((unsigned long int)(level_data_ptr->tileset_palette)+256, (unsigned long int)(&shadow_cgram)+480, 32);
-    #endif
 
     // Copy the current OAM into the copy
     shadow_oam_copy = shadow_oam;
@@ -319,7 +280,6 @@ void loop_mapdisplay_init()
 void loop_mapdisplay()
 {
     system_wait_vblank();
-    system_poll_input();
 
     // The minimap is always 192x192 pixels.
     // minimap position = (real position / map extent) * 192
