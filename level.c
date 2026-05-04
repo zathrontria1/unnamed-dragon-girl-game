@@ -67,19 +67,116 @@ void level_load_tileset_and_palette(const struct level_data * level)
     LZ4_UnpackToVRAM((void *)&data_ui_fixed_2bpp_lz4, TILEDATA_ADDR_GAME_UI_2BPP);
 
     // flush the BG1 tilemap with the correct null tiles
-    REG_VMADDLH = TILEMAP_ADDR_GAME_UI_4BPP;
+    #if VBCC_ASM == 1
+        REG_VMAIN = VRAM_INCLOW;
+        REG_VMADDLH = TILEMAP_ADDR_GAME_UI_4BPP;
 
-    for (int i = 0; i < 1024; i++)
-    {
-        REG_VMDATALH = 256;
-    }
+        __asm(
+            "\ta8\n"
+            "\tsep #$20\n"
 
-    REG_VMADDLH = TILEMAP_ADDR_GAME_UI_2BPP;
+            "\tldx #256\n"
+            "\tstx r0\n"
 
-    for (int i = 0; i < 1024; i++)
-    {
-        REG_VMDATALH = 0;
-    }
+            "\tlda #$08\n"
+            "\tsta $4300\n"
+            
+            "\tldx #<r0\n"
+            "\tstx $4302\n"
+            "\tlda #^r0\n"
+            "\tsta $4304\n"
+
+            "\tldx #1024\n"
+            "\tstx $4305\n"
+
+            "\tlda #$18\n"
+            "\tsta $4301\n"
+
+            "\tlda #$01\n"
+            "\tsta $420b\n"
+
+            "\ta16\n"
+            "\trep #$20\n"
+        );
+
+        REG_VMAIN = VRAM_INCHIGH;
+        REG_VMADDLH = TILEMAP_ADDR_GAME_UI_4BPP;
+
+        __asm(
+            "\ta8\n"
+            "\tsep #$20\n"
+
+            "\tlda #$08\n"
+            "\tsta $4300\n"
+            
+            "\tldx #<r0+1\n"
+            "\tstx $4302\n"
+            "\tlda #^r0\n"
+            "\tsta $4304\n"
+
+            "\tldx #1024\n"
+            "\tstx $4305\n"
+
+            "\tlda #$19\n"
+            "\tsta $4301\n"
+
+            "\tlda #$01\n"
+            "\tsta $420b\n"
+
+            "\ta16\n"
+            "\trep #$20\n"
+        );
+    #else
+        REG_VMAIN = VRAM_INCHIGH;
+        REG_VMADDLH = TILEMAP_ADDR_GAME_UI_4BPP;
+
+        for (int i = 0; i < 1024; i++)
+        {
+            REG_VMDATALH = 256;
+        }
+    #endif
+
+    // Repeat for BG3
+    #if VBCC_ASM == 1
+        REG_VMAIN = VRAM_INCHIGH;
+        REG_VMADDLH = TILEMAP_ADDR_GAME_UI_2BPP;
+
+        __asm(
+            "\ta8\n"
+            "\tsep #$20\n"
+
+            "\tldx #$00000\n"
+            "\tstx r0\n"
+
+            "\tlda #$09\n"
+            "\tsta $4300\n"
+            
+            "\tldx #<r0\n"
+            "\tstx $4302\n"
+            "\tlda #^r0\n"
+            "\tsta $4304\n"
+
+            "\tldx #2048\n"
+            "\tstx $4305\n"
+
+            "\tlda #$18\n"
+            "\tsta $4301\n"
+
+            "\tlda #$01\n"
+            "\tsta $420b\n"
+
+            "\ta16\n"
+            "\trep #$20\n"
+        );
+    #else
+        REG_VMAIN = VRAM_INCHIGH;
+        REG_VMADDLH = TILEMAP_ADDR_GAME_UI_2BPP;
+
+        for (int i = 0; i < 1024; i++)
+        {
+            REG_VMDATALH = 0;
+        }
+    #endif
 
     return;
 }
