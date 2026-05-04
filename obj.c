@@ -47,9 +47,8 @@ void obj_run()
 
     struct game_object * ptr = &objects[0];
 
-    /*uint16_t obj_active_count_shadow = obj_active_count;
-
-    while (obj_process_count < obj_active_count_shadow)
+    // New implementation
+    for (int i = 0; i < OBJ_MAX_COUNT; i++)
     {
         if (ptr->id == OBJID_NULL)
         {
@@ -62,80 +61,11 @@ void obj_run()
         obj_process_count++;
 
         ptr++;
-    }*/
 
-    // Original implementation as follows
-    while (obj_process_count < obj_active_count)
-    {
-        switch (ptr->id)
+        if (obj_process_count >= obj_active_count)
         {
-            case OBJID_NULL:
-                break;
-            case OBJID_PLAYER:
-                routines_player(ptr);
-                obj_process_count++;
-                break;
-            case OBJID_FIREBALL:
-                routines_fireball(ptr);
-                obj_process_count++;
-                break;
-            case OBJID_SLIME:
-                routines_slime(ptr);
-                obj_process_count++;
-                break;
-            case OBJID_BUBBLE_E:
-                routines_bubble_e(ptr);
-                obj_process_count++;
-                break;
-            case OBJID_FX_SMOKE:
-                routines_fx_smoke(ptr);
-                obj_process_count++;
-                break;
-            case OBJID_DROP_REC_MEAT:
-                routines_drop_rec_meat(ptr);
-                obj_process_count++;
-                break;
-            case OBJID_DROP_MONEY:
-                routines_drop_money(ptr);
-                obj_process_count++;
-                break;
-            case OBJID_HITBOX_INVISIBLE:
-                routines_hitbox_invis(ptr);
-                obj_process_count++;
-                break;
-            case OBJID_HITBOX_INVISIBLE_E:
-                routines_hitbox_invis_e(ptr);
-                obj_process_count++;
-                break;
-            case OBJID_SYS_IMPACT:
-                routines_fx_impact(ptr);
-                obj_process_count++;
-                break;
-            case OBJID_INTERACTABLE_SWITCH_WALL:
-            case OBJID_INTERACTABLE_SWITCH_FLOOR:
-                routines_interactable_switch(ptr);
-                obj_process_count++;
-                break;
-            case OBJID_INTERACTABLE_BLOCKER_FLOOR:
-            case OBJID_INTERACTABLE_BLOCKER_DOOR_NS:
-            case OBJID_INTERACTABLE_BLOCKER_DOOR_EW:
-                routines_interactable_blocker(ptr);
-                obj_process_count++;
-                break;
-            case OBJID_INTERACTABLE_SIGN_WALL:
-                routines_interactable_sign(ptr);
-                obj_process_count++;
-                break;
-            case OBJID_SPAWNER_ENEMY:
-                routines_spawner(ptr);
-                obj_process_count++;
-                break;
-            default:
-                // Unimplemented object
-                obj_process_count++;
-                break;
+            break;
         }
-        ptr++;
     }
 
     blocker_build_count_shadow = blocker_build_count;
