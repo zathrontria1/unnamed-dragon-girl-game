@@ -238,8 +238,10 @@ struct game_object
     uint16_t screen_h;
 
     uint16_t hit_type; // hitbox type
+
+    uint16_t next_free; // next free object index
     
-    uint8_t padding[5]; 
+    uint8_t padding[3]; 
 };
 
 struct oam_entry_low

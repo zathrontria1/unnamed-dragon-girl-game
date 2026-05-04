@@ -42,6 +42,8 @@ void system_init_zp()
     ani_bg_water_dma_ready = 0;
     ani_bg_tallbg_dma_ready = 0;
 
+    obj_first_available = 0;
+
     return;
 }
 

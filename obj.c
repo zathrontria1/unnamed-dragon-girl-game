@@ -157,30 +157,50 @@ void obj_run()
     return;
 }
 
-uint16_t obj_find_free_slot()
-{
-    for (int i = 0; i < OBJ_MAX_COUNT; i++)
-    {
-        if (objects[i].id == 0)
-        {
-            return i;
-        }
-    }
-
-    return OBJ_MAX_COUNT;
-}
-
 /*
     Reset object memory thoroughly (completely wipe)
 */
 void obj_reset()
 {
-    uint8_t * ptr = (uint8_t *)&objects[0];
-    for (uint16_t i = 0; i < (OBJ_MAX_COUNT * (uint16_t)sizeof(struct game_object)); i++)
+    #if VBCC_ASM == 1 // Write the first byte as zero, then use MVN to copy the rest.
+        __asm(
+            "\ta16\n"
+            "\tx16\n"
+            "\tphy\n"
+            "\tphb\n"
+            "\ta8\n"
+            "\tsep #$20\n"
+            "\tlda #$00\n"
+            "\tsta >_objects\n"
+            "\tlda #^_objects\n"
+            "\tsta >_system_MVNCodeInWRAM+1\n" // write bank byte of source 
+            "\tsta >_system_MVNCodeInWRAM+2\n" // ditto for destination
+            "\ta16\n"
+            "\trep #$20\n"
+            "\tlda #((64 * 128) - 2)\n"
+            "\tldx #<_objects\n"
+            "\tldy #<_objects+1\n"
+            "\tjsl >_system_MVNCodeInWRAM;\n"
+            "\tplb\n"
+            "\tply\n");
+    #else
+        uint8_t * ptr = (uint8_t *)&objects[0];
+        for (int i = 0; i < (OBJ_MAX_COUNT * (uint16_t)sizeof(struct game_object)); i++)
+        {
+            *ptr = 0x00;
+            ptr++;
+        }
+    #endif
+
+    // Then initialize the next pointers for all of them
+    for (int i = 0; i < (OBJ_MAX_COUNT - 1); i++)
     {
-        *ptr = 0x00;
-        ptr++;
+        objects[i].next_free = i+1;
     }
+
+    objects[OBJ_MAX_COUNT - 1].next_free = 0xffff;
+
+    obj_first_available = 0;
 
     return;
 }
@@ -196,13 +216,12 @@ int16_t obj_instantiate(
     uint16_t local_event_flag
 )
 {
-    uint16_t i = obj_find_free_slot();
-
-    if (i >= OBJ_MAX_COUNT)
+    uint16_t i = obj_first_available;
+    if (obj_first_available == 0xffff)
     {
-        // Out of memory
         return -1;
     }
+    obj_first_available = objects[i].next_free;
 
     uint16_t j = 0;
     // perform additional checks for sprite slots
@@ -228,8 +247,8 @@ int16_t obj_instantiate(
     p->uid = obj_get_uid();
     p->array_index = i;
     
-    p->pos.x.lh.h = x;
-    p->pos.y.lh.h = y;
+    p->pos.x.a = ((int32_t)x) << 16;
+    p->pos.y.a = ((int32_t)y) << 16;
 
     p->ttl = 0; // always reset
 
@@ -237,8 +256,6 @@ int16_t obj_instantiate(
 
     if ((id >= OBJID_CONST_END_OF_UNSORTED_SPRITES) && ((id != OBJID_HITBOX_INVISIBLE) || (id != OBJID_HITBOX_INVISIBLE_E))) // mini objects don't need these
     {
-        p->pos.x.lh.l = 0;
-        p->pos.x.lh.l = 0;
         p->delta.x.a = 0;
         p->delta.y.a = 0;
 
@@ -246,7 +263,6 @@ int16_t obj_instantiate(
         p->delta.z.a = 0;
         
         p->state = STATE_IDLE;
-        p->facing = FACING_DOWN;
 
         p->status = STATUS_NORMAL;
         p->status_time = 0;
@@ -254,6 +270,8 @@ int16_t obj_instantiate(
 
         p->ai_state = AI_STATE_IDLE;
         p->ai_timer = 0;
+
+        p->facing = FACING_DOWN;
 
         p->ani.display = (uint16_t)((uint32_t)ani_getframe_dynamic(p));
     }
@@ -276,13 +294,13 @@ int16_t obj_instantiate(
         p->ani.last_address = 0;
         p->ani.last_dmafailed = 0;
 
+        p->money = 0;
+
         p->hp = PLAYER_HEALTH_STARTING;
         p->hp_max = PLAYER_HEALTH_STARTING;
 
         p->attack = PLAYER_ATTACK_VALUE;
         p->defense = PLAYER_DEFENSE_VALUE;
-
-        p->money = 0;
 
         p->w = 16;
         p->h = 16;
@@ -292,6 +310,8 @@ int16_t obj_instantiate(
     {
         p->ani.last_address = 0;
         p->ani.last_dmafailed = 0;
+        p->hp_tile_offset = 0;
+        p->hp_display_time = 0;
 
         p->hp = ENEMY_HEALTH_STARTING;
         p->hp_max = ENEMY_HEALTH_STARTING;
@@ -300,8 +320,6 @@ int16_t obj_instantiate(
         p->defense = ENEMY_DEFENSE_VALUE;
 
         p->hp_cache = ENEMY_HEALTH_STARTING;
-        p->hp_tile_offset = 0;
-        p->hp_display_time = 0;
 
         p->state = STATE_SPAWNING;
         p->status_time = 64 / V_MUL;
@@ -321,8 +339,6 @@ int16_t obj_instantiate(
 
     obj_active_count++;
 
-    p->hit_type = 0x0000;
-
     if ((id == OBJID_FIREBALL) || (id == OBJID_HITBOX_INVISIBLE))
     {
         p->hit_type = 0x0001;
@@ -337,7 +353,12 @@ int16_t obj_instantiate(
         p->w = 16;
         p->h = 16;
     }
-    else if (id == OBJID_INTERACTABLE_BLOCKER_FLOOR)
+    else
+    {
+        p->hit_type = 0x0000;
+    }
+
+    if (id == OBJID_INTERACTABLE_BLOCKER_FLOOR)
     {
         blocker_active_count++;
     }
@@ -481,7 +502,7 @@ uint16_t obj_instantiate_interactables(const struct obj_list_entry_interactable*
 
     \brief Adds the object whose slot i into the deletion queue.
 */
-void obj_destroy(uint16_t i)
+inline void obj_destroy(uint16_t i)
 {
     obj_delete_queue[obj_delete_queue_count] = i;
 
@@ -511,8 +532,12 @@ void obj_cleanup()
         }
 
         objects[obj_delete_queue[i]].id = OBJID_NULL;
-    }
 
+        // Thread back the object to the next free
+        objects[obj_delete_queue[i]].next_free = obj_first_available;
+        obj_first_available = obj_delete_queue[i];
+    }
+    
     obj_active_count -= obj_delete_queue_count;
     blocker_active_count -= temp_blocker_count;
 
@@ -520,7 +545,7 @@ void obj_cleanup()
     return;
 }
 
-uint16_t obj_get_uid()
+inline uint16_t obj_get_uid()
 {
     uint16_t temp_uid = obj_next_uid;
     obj_next_uid++;

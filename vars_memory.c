@@ -69,6 +69,7 @@ uint16_t blocker_build_count;
 uint16_t blocker_build_count_shadow; 
 
 // Object system
+ZP uint16_t obj_first_available;
 struct game_object objects[OBJ_MAX_COUNT];
 
 uint16_t obj_delete_queue[OBJ_MAX_COUNT];

@@ -48,6 +48,7 @@ extern uint16_t blocker_build_count;
 extern uint16_t blocker_build_count_shadow; 
 
 // Object system
+ZP extern uint16_t obj_first_available;
 extern struct game_object objects[OBJ_MAX_COUNT];
 
 extern uint16_t obj_delete_queue[OBJ_MAX_COUNT];
