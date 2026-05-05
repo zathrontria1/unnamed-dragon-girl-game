@@ -4,11 +4,15 @@
 // Game data (non-audio)
 extern const uint8_t data_palette[];
 extern const uint8_t data_palette_map_8bpp[];
+extern const uint8_t data_palette_splash[];
 
 extern const uint8_t data_bg_dungeon_lz4[]; // dungeon tiles
 extern const uint8_t data_bg_dungeon_anim_water[]; // dungeon water animation tiles
 extern const uint8_t data_bg_dungeon_anim_torch[]; // dungeon torch animation tiles
 extern const uint8_t data_bg_map_dungeon_8bpp_lz4[]; // dungeon map, compressed
+
+extern const uint8_t data_bg_splash[]; // loading splash
+extern const uint8_t data_tilemap_splash[]; // loading splash tilemap
 
 extern const uint8_t data_ui_fixed_4bpp_lz4[]; // 4bpp UI
 extern const uint8_t data_ui_fixed_2bpp_lz4[]; // 2bpp UI
