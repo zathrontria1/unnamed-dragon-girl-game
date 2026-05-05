@@ -15,6 +15,7 @@
 
 #include "snd.h"
 #include "consts_snd.h"
+#include "system.h"
 
 void obj_run() 
 {
@@ -45,28 +46,63 @@ void obj_run()
         }
     }
 
-    struct game_object * ptr = &objects[0];
-
     // New implementation
-    for (int i = 0; i < OBJ_MAX_COUNT; i++)
-    {
-        if (ptr->id == OBJID_NULL)
+    #if VBCC_ASM == 1
+        __asm(
+        "\ta16\n"
+	    "\tx16\n"
+        "\tphy\n"
+        "\tldx #<_objects\n"
+        "\tldy #0\n"
+        ".object_process_loop:\n"
+        "\tlda $7e0000,x\n" // assumes object memory is in bank 7e
+        "\tbeq .object_process_increment\n"
+        "\tiny\n"
+        "\tlda $7e0033,x\n"
+        "\tsta >_system_JMLCodeInWRAM+2\n"
+        "\tlda $7e0032,x\n"
+        "\tsta >_system_JMLCodeInWRAM+1\n"
+        "\tphy\n"
+        "\tphx\n"
+        "\ttxa\n"
+        "\tldx #^_objects\n"
+        "\tjsl >_system_JMLCodeInWRAM\n"
+        "\tplx\n"
+        "\tply\n"
+        ".object_process_increment:\n"
+        "\ttxa\n"
+        "\tclc\n"
+        "\tadc #128\n"
+        "\tcmp #<_objects+8192\n"
+        "\tbcs .object_break_loop\n"
+        "\ttax\n"
+        "\tcpy _obj_active_count\n"
+        "\tbcc .object_process_loop\n"
+        ".object_break_loop:\n"
+        "\tply\n");
+    #else
+        struct game_object * ptr = &objects[0];
+
+        for (int i = 0; i < OBJ_MAX_COUNT; i++)
         {
+            if (ptr->id == OBJID_NULL)
+            {
+                ptr++;
+                continue;
+            }
+
+            void (*func)(struct game_object *) = ptr->func_ptr; 
+            func(ptr);
+            obj_process_count++;
+
             ptr++;
-            continue;
+
+            if (obj_process_count >= obj_active_count)
+            {
+                break;
+            }
         }
-
-        void (*func)(struct game_object *) = ptr->func_ptr; 
-        func(ptr);
-        obj_process_count++;
-
-        ptr++;
-
-        if (obj_process_count >= obj_active_count)
-        {
-            break;
-        }
-    }
+    #endif
 
     blocker_build_count_shadow = blocker_build_count;
     event_in_combat_shadow = event_in_combat;

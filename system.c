@@ -22,6 +22,7 @@
 #include "ui.h"
 
 uint8_t system_MVNCodeInWRAM[4];
+uint8_t system_JMLCodeInWRAM[4];
 
 /*
     VBCC doesn't initialize the zero page variables
@@ -126,7 +127,7 @@ void system_init_regs(void)
 
 void system_init()
 {
-    // Write out the MVN program code
+    // Write out the MVN and JML program codes
     #if VBCC_ASM == 1
     __asm(
         "\ta16\n"
@@ -137,11 +138,15 @@ void system_init()
         "\tsta >_system_MVNCodeInWRAM+3\n"
         "\tlda #$54\n" // MVN opcode
         "\tsta >_system_MVNCodeInWRAM\n"
+        "\tlda #$5c\n" // JML opcode
+        "\tsta >_system_JMLCodeInWRAM\n"
         "\ta16\n"
         "\trep #$20\n");
     #else
         system_MVNCodeInWRAM[0] = 0x54;
         system_MVNCodeInWRAM[3] = 0x6b;
+
+        system_JMLCodeInWRAM[0] = 0x5c;
     #endif
 
     // Set current and target routines to init to prevent issues

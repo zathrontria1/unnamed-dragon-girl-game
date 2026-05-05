@@ -1,4 +1,5 @@
 extern uint8_t system_MVNCodeInWRAM[4];
+extern uint8_t system_JMLCodeInWRAM[4];
 
 void system_init_zp(void);
 void system_init_regs(void);
