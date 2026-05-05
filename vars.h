@@ -153,10 +153,6 @@ extern uint16_t pal_ani_sel;
 // UI
 extern uint16_t system_ui_in_bg2;
 
-// rows x height, tilemap buffers in WRAM
-//extern uint16_t ui_tilemap_2bpp[26][32];
-//extern uint16_t ui_tilemap_4bpp[26][32];
-
 extern uint16_t ui_force_update;
 extern int32_t ui_cached_hp;
 extern int32_t ui_cached_hp_max;
