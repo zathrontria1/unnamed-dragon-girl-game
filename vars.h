@@ -54,12 +54,13 @@ extern uint8_t * obj_player_prev_sprframe;
 
 // Hitbox data
 ZP extern uint16_t hitbox_player_first_available;
-extern struct game_object hitbox_player[OBJ_MAX_COUNT];
+extern struct game_object hitbox_player[HIT_MAX_COUNT];
 
-extern uint16_t hitbox_player_delete_queue[OBJ_MAX_COUNT];
+extern uint16_t hitbox_player_delete_queue[HIT_MAX_COUNT];
 extern uint16_t hitbox_player_delete_queue_count;
 
 extern uint16_t hitbox_count_player;
+extern uint16_t hitbox_process_count_player;
 extern uint16_t hitbox_count_enemy;
 extern uint16_t hitbox_count_player_shadow;
 extern uint16_t hitbox_count_enemy_shadow;

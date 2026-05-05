@@ -151,6 +151,7 @@ void loop_game()
     spr_pack_oam();
 
     obj_cleanup();
+    obj_cleanup_hitbox_player();
 
     // Don't bother checking for input if the player is dying
     if (objects[obj_player_index].state != STATE_DIE)

@@ -44,6 +44,7 @@ void system_init_zp()
     ani_bg_tallbg_dma_ready = 0;
 
     obj_first_available = 0;
+    hitbox_player_first_available = 0;
 
     return;
 }
@@ -175,7 +176,8 @@ void system_init()
     REG_OBSEL = OBJ_SIZE16_L32|3;
 
     // Reset object system
-    obj_reset();
+    obj_reset(0); // The first time this is done, reset all objects
+    obj_reset_hit_list(); // also reset hitbox list
     obj_player_index = 0xffff;
 
     // Initialize BG scroll systems. Must be done before the map is loaded.

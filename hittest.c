@@ -10,25 +10,20 @@ inline struct game_object * hit_test_enemy(struct game_object * o)
 {
     int temp_objects_encountered = 0;
 
-    struct game_object * p = &objects[0];
+    struct game_object * p = &hitbox_player[0];
 
     // There's a bug with the cached list.
     // For now reverted to testing all objects.
-    for (int i = 0; temp_objects_encountered < hitbox_count_player_shadow; i++)
+    for (int i = 0; i < HIT_MAX_COUNT; i++)
     {
         if (p->id != OBJID_NULL)
         {
-            if (p->hit_type == 0x0001)
+            if (hit_test(o, p) == 0)
             {
-                if (hit_test(o, p) == 0)
-                {
-                    return p;
-                }
-
-                temp_objects_encountered++;
+                return p;
             }
         }
-
+        
         p++;
     }
 

@@ -121,8 +121,7 @@
 #define DIST_AI_MAX DIST_TILE_40
 
 #define OBJ_MAX_COUNT 64
-#define SPR_MAX_PER_LINE 32
-#define SPR_DEPTH_LINES 256
+#define HIT_MAX_COUNT 32
 
 #define STATE_IDLE 0
 #define STATE_SWITCH_OFF 0

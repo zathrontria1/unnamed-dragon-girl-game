@@ -202,10 +202,10 @@ void routines_player(struct game_object * o)
                     }
                 
                     
-                    int16_t j = obj_instantiate(OBJID_HITBOX_INVISIBLE, o->pos.x.lh.h, o->pos.y.lh.h, 0);
+                    int16_t j = obj_instantiate_hitbox_player(OBJID_HITBOX_INVISIBLE, o->pos.x.lh.h, o->pos.y.lh.h);
                     if (j >= 0)
                     {
-                        struct game_object * p = &objects[j];
+                        struct game_object * p = &hitbox_player[j];
                         p->struct_data.npc_data.attack = PLAYER_ATTACK_VALUE * PLAYER_ATTACK_MULT_MELEE;
 
                         p->struct_data.npc_data.ttl = 2; // Lasts exactly 2 frames
@@ -273,10 +273,10 @@ void routines_player(struct game_object * o)
 
                 if (obj_player_attack_interval == 0)
                 {
-                    int16_t j = obj_instantiate(OBJID_FIREBALL, o->pos.x.lh.h, o->pos.y.lh.h, 0);
+                    int16_t j = obj_instantiate_hitbox_player(OBJID_FIREBALL, o->pos.x.lh.h, o->pos.y.lh.h);
                     if (j >= 0)
                     {
-                        struct game_object * p = &objects[j];
+                        struct game_object * p = &hitbox_player[j];
                         p->struct_data.npc_data.attack = PLAYER_ATTACK_VALUE * PLAYER_ATTACK_MULT_RANGED;
 
                         int32_t temp_jitter = ((int32_t)((int16_t)rand_get16())) * (V_MUL * 2);
@@ -583,11 +583,11 @@ void routines_fireball(struct game_object * o)
         // Check if the object is to be destroyed
         if (o->struct_data.npc_data.ttl == 0)
         {
-            obj_destroy(o->array_index);
+            obj_destroy_hitbox_player(o->array_index);
         }
         else
         {
-            hitbox_count_player++;
+            //hitbox_count_player++;
         }
     }
 
@@ -670,11 +670,11 @@ void routines_hitbox_invis(struct game_object * o)
     // Check if the object is to be destroyed
     if (o->struct_data.npc_data.ttl == 0)
     {
-        obj_destroy(o->array_index);
+        obj_destroy_hitbox_player(o->array_index);
     }
     else
     {
-        hitbox_count_player++;
+        //hitbox_count_player++;
     }
 
     return;

@@ -20,9 +20,10 @@
 void obj_run() 
 {
     hitbox_count_enemy = 0;
-    hitbox_count_player = 0;
 
     obj_process_count = 0;
+    hitbox_process_count_player = 0;
+
     blocker_build_count = 0;
     
     event_in_combat = 0;
@@ -104,6 +105,65 @@ void obj_run()
         }
     #endif
 
+    // Repeat for hitboxes
+    #if VBCC_ASM == 1
+        __asm(
+        "\ta16\n"
+	    "\tx16\n"
+        "\tphy\n"
+        "\tldx #<_hitbox_player\n"
+        "\tldy #0\n"
+        ".hitbox_player_process_loop:\n"
+        "\tlda $7e0000,x\n" // assumes object memory is in bank 7e
+        "\tbeq .hitbox_player_process_increment\n"
+        "\tiny\n"
+        "\tlda $7e0033,x\n"
+        "\tsta >_system_JMLCodeInWRAM+2\n"
+        "\tlda $7e0032,x\n"
+        "\tsta >_system_JMLCodeInWRAM+1\n"
+        "\tphy\n"
+        "\tphx\n"
+        "\ttxa\n"
+        "\tldx #^_hitbox_player\n"
+        "\tjsl >_system_JMLCodeInWRAM\n"
+        "\tplx\n"
+        "\tply\n"
+        ".hitbox_player_process_increment:\n"
+        "\ttxa\n"
+        "\tclc\n"
+        "\tadc #128\n"
+        "\tcmp #<_hitbox_player+4096\n"
+        "\tbcs .hitbox_player_break_loop\n"
+        "\ttax\n"
+        "\tcpy _hitbox_count_player\n"
+        "\tbcc .hitbox_player_process_loop\n"
+        ".hitbox_player_break_loop:\n"
+        "\tply\n");
+    #else
+        struct game_object * ptr = &hitbox_player[0];
+
+        for (int i = 0; i < HIT_MAX_COUNT; i++)
+        {
+            if (ptr->id == OBJID_NULL)
+            {
+                ptr++;
+                continue;
+            }
+
+            void (*func)(struct game_object *) = ptr->func_ptr; 
+            func(ptr);
+
+            hitbox_process_count_player++;
+
+            ptr++;
+
+            if (hitbox_process_count_player >= hitbox_count_player)
+            {
+                break;
+            }
+        }
+    #endif
+
     blocker_build_count_shadow = blocker_build_count;
     event_in_combat_shadow = event_in_combat;
 
@@ -143,32 +203,44 @@ void obj_run()
 /*
     Reset object memory thoroughly (completely wipe)
 */
-void obj_reset()
+void obj_reset(int start_index)
 {
     #if VBCC_ASM == 1 // Write the first byte as zero, then use MVN to copy the rest.
         __asm(
             "\ta16\n"
             "\tx16\n"
+            "\txba\n" 
+            "\tlsr\n" // mul 128
+            "\tsta r0\n" // offset of start, also subtract length with this
+            "\tlda #8192\n"
+            "\tsec\n"
+            "\tsbc r0\n"
+            "\tsta r1\n" // actual transfer length
             "\tphy\n"
             "\tphb\n"
             "\ta8\n"
             "\tsep #$20\n"
             "\tlda #$00\n"
-            "\tsta >_objects\n"
+            "\tsta >_objects\n" // write first zero byte
             "\tlda #^_objects\n"
             "\tsta >_system_MVNCodeInWRAM+1\n" // write bank byte of source 
             "\tsta >_system_MVNCodeInWRAM+2\n" // ditto for destination
             "\ta16\n"
-            "\trep #$20\n"
-            "\tlda #((64 * 128) - 2)\n"
-            "\tldx #<_objects\n"
-            "\tldy #<_objects+1\n"
+            "\trep #$21\n"
+            "\tlda r0\n" // load source address
+            "\tadc #<_objects\n" 
+            "\ttax\n" 
+            "\ttay\n" 
+            "\tiny\n" // destination address
+            "\tlda r1\n" // load transfer length
+            "\tdec\n" 
+            "\tdec\n" // Decrement by 2 to remove the first byte and MVN implied byte
             "\tjsl >_system_MVNCodeInWRAM;\n"
             "\tplb\n"
             "\tply\n");
     #else
-        uint8_t * ptr = (uint8_t *)&objects[0];
-        for (int i = 0; i < (OBJ_MAX_COUNT * (uint16_t)sizeof(struct game_object)); i++)
+        uint8_t * ptr = (uint8_t *)&objects[start_index];
+        for (int i = start_index; i < (OBJ_MAX_COUNT * (uint16_t)sizeof(struct game_object)); i++)
         {
             *ptr = 0x00;
             ptr++;
@@ -176,7 +248,7 @@ void obj_reset()
     #endif
 
     // Then initialize the next pointers and function pointers for all of them
-    for (int i = 0; i < (OBJ_MAX_COUNT - 1); i++)
+    for (int i = start_index; i < (OBJ_MAX_COUNT - 1); i++)
     {
         objects[i].next_free = i+1;
         objects[i].func_ptr = (void *)&routines_dummy;
@@ -186,6 +258,66 @@ void obj_reset()
     objects[OBJ_MAX_COUNT - 1].func_ptr = (void *)&routines_dummy;
 
     obj_first_available = 0;
+
+    return;
+}
+
+/*
+    Player hitboxes (e.g. fireballs) reset too, in a separate list for performance reasons
+*/
+void obj_reset_hit_list()
+{
+    #if VBCC_ASM == 1 // Write the first byte as zero, then use MVN to copy the rest.
+        __asm(
+            "\ta16\n"
+            "\tx16\n"
+            "\tstz r0\n" // offset of start, also subtract length with this
+            "\tlda #4096\n"
+            "\tsec\n"
+            "\tsbc r0\n"
+            "\tsta r1\n" // actual transfer length
+            "\tphy\n"
+            "\tphb\n"
+            "\ta8\n"
+            "\tsep #$20\n"
+            "\tlda #$00\n"
+            "\tsta >_hitbox_player\n" // write first zero byte
+            "\tlda #^_hitbox_player\n"
+            "\tsta >_system_MVNCodeInWRAM+1\n" // write bank byte of source 
+            "\tsta >_system_MVNCodeInWRAM+2\n" // ditto for destination
+            "\ta16\n"
+            "\trep #$21\n"
+            "\tlda r0\n" // load source address
+            "\tadc #<_hitbox_player\n" 
+            "\ttax\n" 
+            "\ttay\n" 
+            "\tiny\n" // destination address
+            "\tlda r1\n" // load transfer length
+            "\tdec\n" 
+            "\tdec\n" // Decrement by 2 to remove the first byte and MVN implied byte
+            "\tjsl >_system_MVNCodeInWRAM;\n"
+            "\tplb\n"
+            "\tply\n");
+    #else
+        uint8_t * ptr = (uint8_t *)&hitbox_player[0];
+        for (int i = 0; i < (HIT_MAX_COUNT * (uint16_t)sizeof(struct game_object)); i++)
+        {
+            *ptr = 0x00;
+            ptr++;
+        }
+    #endif
+
+    // Then initialize the next pointers and function pointers for all of them
+    for (int i = 0; i < (HIT_MAX_COUNT - 1); i++)
+    {
+        hitbox_player[i].next_free = i+1;
+        hitbox_player[i].func_ptr = (void *)&routines_dummy;
+    }
+
+    hitbox_player[HIT_MAX_COUNT - 1].next_free = 0xffff;
+    hitbox_player[HIT_MAX_COUNT - 1].func_ptr = (void *)&routines_dummy;
+
+    hitbox_player_first_available = 0;
 
     return;
 }
@@ -354,6 +486,56 @@ int16_t obj_instantiate(
     return i;
 }
 
+/*
+    Player hitboxes should call this instead
+*/
+int16_t obj_instantiate_hitbox_player(
+    uint16_t id,
+    int16_t x,
+    int16_t y
+)
+{
+    uint16_t i = hitbox_player_first_available;
+    if (hitbox_player_first_available == 0xffff)
+    {
+        return -1;
+    }
+    hitbox_player_first_available = hitbox_player[i].next_free;
+
+    uint16_t j = 0;
+
+    // Player hitboxes don't need VRAM
+    struct game_object * p = &hitbox_player[i];
+
+    p->id = id;
+    p->uid = obj_get_uid(); 
+    p->array_index = i;
+    
+    p->pos.x.a = ((int32_t)x) << 16;
+    p->pos.y.a = ((int32_t)y) << 16;
+
+    p->struct_data.npc_data.ttl = 0; // always reset
+    
+    p->struct_data.npc_data.ani.frame = 0;
+
+    p->pos.z.a = 0;
+    p->delta.z.a = 0;
+
+    p->struct_data.npc_data.ani.display = ani_getframe_fixed_fast(p);
+
+    //obj_active_count++;
+    hitbox_count_player++;
+
+    p->hit_type = 0x0001;
+
+    p->w = 16;
+    p->h = 16;
+
+    obj_set_function_pointer(p);
+
+    return i;
+}
+
 uint16_t obj_instantiate_npcs(const struct obj_list_entry_spawns* list, int16_t offset_x, int16_t offset_y)
 {
     while (list->id != OBJID_NULL)
@@ -499,6 +681,16 @@ inline void obj_destroy(uint16_t i)
     return;
 }
 
+// Ditto for player hitboxes
+inline void obj_destroy_hitbox_player(uint16_t i)
+{
+    hitbox_player_delete_queue[hitbox_player_delete_queue_count] = i;
+
+    hitbox_player_delete_queue_count++;
+
+    return;
+}
+
 /*! \def obj_cleanup
 
     \brief Deletes all objects whose slot i is within the deletion queue.
@@ -533,6 +725,26 @@ void obj_cleanup()
     blocker_active_count -= temp_blocker_count;
 
     obj_delete_queue_count = 0;
+    return;
+}
+
+void obj_cleanup_hitbox_player()
+{
+    for (int i = 0; i < hitbox_player_delete_queue_count; i++)
+    {
+        hitbox_player[hitbox_player_delete_queue[i]].id = OBJID_NULL;
+
+        // Thread back the object to the next free
+        hitbox_player[hitbox_player_delete_queue[i]].next_free = hitbox_player_first_available;
+        hitbox_player_first_available = hitbox_player_delete_queue[i];
+
+        // Fix the object function to dummy
+        hitbox_player[hitbox_player_delete_queue[i]].func_ptr = (void *)&routines_dummy;
+    }
+    
+    hitbox_count_player -= hitbox_player_delete_queue_count;
+
+    hitbox_player_delete_queue_count = 0;
     return;
 }
 
