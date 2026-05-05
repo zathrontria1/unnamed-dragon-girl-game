@@ -296,7 +296,7 @@ void ui_show_enemy_health_bar(struct game_object * o)
         o->pos.y.lh.h - bg_scroll_y.full.high.a -8, 
         (o->struct_data.npc_data.hp_tile_offset | PAL_SYS_IMPACT << 9 | 3 << 12));
 
-    if (system_current_routine != ROUTINE_MSGBOX)
+    if (!system_game_paused)
     {
         o->struct_data.npc_data.hp_display_time--;
     }

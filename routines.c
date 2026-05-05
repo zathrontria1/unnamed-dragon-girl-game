@@ -26,7 +26,7 @@
 
 void routines_player(struct game_object * o)
 {
-    if (system_current_routine != ROUTINE_MSGBOX)
+    if (!system_game_paused)
     {
         if (snd_punch_timeout != 0)
         {
@@ -556,7 +556,7 @@ void routines_fireball(struct game_object * o)
 
     snd_flame_active = 1;
 
-    if (system_current_routine != ROUTINE_MSGBOX)
+    if (!system_game_paused)
     {
         // The sound effect should only play when not paused
         if (snd_flame_playing == 0)
@@ -602,7 +602,7 @@ void routines_fireball(struct game_object * o)
 
 void routines_fx_smoke(struct game_object * o)
 {
-    if (system_current_routine != ROUTINE_MSGBOX)
+    if (!system_game_paused)
     {
         // Move the object based on the stored delta
         move_nocol_fast(o);
@@ -640,7 +640,7 @@ void routines_fx_impact(struct game_object * o)
 {
     spr_queue_add_front(o, (ani_getframe_fixed_fast(o) | PAL_SYS_IMPACT << 9 | 3 << 12));
 
-    if (system_current_routine == ROUTINE_MSGBOX)
+    if (system_game_paused)
     {
         return;
     }
@@ -659,7 +659,7 @@ void routines_fx_impact(struct game_object * o)
 
 void routines_hitbox_invis(struct game_object * o)
 {
-    if (system_current_routine == ROUTINE_MSGBOX)
+    if (system_game_paused)
     {
         return;
     }
@@ -682,7 +682,7 @@ void routines_hitbox_invis(struct game_object * o)
 
 void routines_hitbox_invis_e(struct game_object * o)
 {
-    if (system_current_routine == ROUTINE_MSGBOX)
+    if (system_game_paused)
     {
         return;
     }
@@ -705,7 +705,7 @@ void routines_hitbox_invis_e(struct game_object * o)
 
 void routines_interactable_switch(struct game_object * o)
 {
-    if (system_current_routine != ROUTINE_MSGBOX)
+    if (!system_game_paused)
     {
         // Check if a player hit is on the switch
 
@@ -754,7 +754,7 @@ void routines_interactable_switch(struct game_object * o)
 
 void routines_interactable_sign(struct game_object * o)
 {
-    if (system_current_routine != ROUTINE_MSGBOX)
+    if (!system_game_paused)
     {
         // Check if a player hit is on the sign
         // And while not in combat
@@ -810,7 +810,7 @@ void routines_interactable_blocker(struct game_object * o)
         }
         
 
-        if (system_current_routine != ROUTINE_MSGBOX)
+        if (!system_game_paused)
         {
             struct tile_xy temp;
 
@@ -846,7 +846,7 @@ void routines_interactable_blocker(struct game_object * o)
 
 void routines_slime(struct game_object * o)
 {
-    if (system_current_routine != ROUTINE_MSGBOX)
+    if (!system_game_paused)
     {
         uint16_t temp_invalidate_animation_frame = 0;
 
@@ -1181,7 +1181,7 @@ void routines_slime(struct game_object * o)
 
 void routines_bubble_e(struct game_object * o)
 {
-    if (system_current_routine != ROUTINE_MSGBOX)
+    if (!system_game_paused)
     {
         // Move the object based on the stored delta
         move_nocol_fast(o);
@@ -1246,7 +1246,7 @@ void routines_bubble_e(struct game_object * o)
 
 void routines_spawner(struct game_object * o)
 {
-    if (system_current_routine != ROUTINE_MSGBOX)
+    if (!system_game_paused)
     {
         int16_t x1 = objects[obj_player_index].pos.x.lh.h;
         int16_t y1 = objects[obj_player_index].pos.y.lh.h;
@@ -1284,7 +1284,7 @@ void routines_spawner(struct game_object * o)
 
 void routines_drop_money(struct game_object * o)
 {
-    if (system_current_routine != ROUTINE_MSGBOX)
+    if (!system_game_paused)
     {
         if (ani_animate_drop_gravity(o))
         {
@@ -1316,7 +1316,7 @@ void routines_drop_money(struct game_object * o)
 
 void routines_drop_rec_meat(struct game_object * o)
 {
-    if (system_current_routine != ROUTINE_MSGBOX)
+    if (!system_game_paused)
     {
         if (ani_animate_drop_gravity(o))
         {

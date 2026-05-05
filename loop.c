@@ -61,6 +61,8 @@ void loop_messagebox()
 {
     system_wait_vblank();
 
+    system_game_paused = 1;
+
     obj_run();
 
     ui_dma_ui_tiles();
@@ -86,6 +88,8 @@ void loop_messagebox()
             {
                 event_tutorial_shown = 1;
             }
+            
+            system_game_paused = 0;
 
             system_current_routine = ROUTINE_GAMELOOP;
             system_target_routine = ROUTINE_GAMELOOP;

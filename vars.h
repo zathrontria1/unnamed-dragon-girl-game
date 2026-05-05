@@ -29,6 +29,8 @@ ZP extern uint8_t shadow_inidisp;
 
 ZP extern uint16_t system_nmis_counted;
 
+ZP extern uint16_t system_game_paused;
+
 // Object system
 ZP extern uint16_t obj_first_available;
 extern struct game_object objects[OBJ_MAX_COUNT];

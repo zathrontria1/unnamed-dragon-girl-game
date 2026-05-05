@@ -50,6 +50,8 @@ ZP uint8_t shadow_inidisp;
 
 ZP uint16_t system_nmis_counted;
 
+ZP uint16_t system_game_paused;
+
 // Object system
 ZP uint16_t obj_first_available;
 struct game_object objects[OBJ_MAX_COUNT];

@@ -30,7 +30,7 @@ void obj_run()
 
     snd_flame_active = 0;
 
-    if (system_current_routine != ROUTINE_MSGBOX)
+    if (!system_game_paused)
     {
         if (snd_firecrackle_timeout != 0)
         {

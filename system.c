@@ -46,6 +46,8 @@ void system_init_zp()
     obj_first_available = 0;
     hitbox_player_first_available = 0;
 
+    system_game_paused = 0;
+
     return;
 }
 
