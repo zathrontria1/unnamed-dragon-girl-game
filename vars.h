@@ -52,7 +52,13 @@ extern uint16_t obj_player_attack_interval;
 extern uint16_t obj_player_prev_facing;
 extern uint8_t * obj_player_prev_sprframe;
 
-// Hitbox data is not done due to stale cache issues.
+// Hitbox data
+ZP extern uint16_t hitbox_player_first_available;
+extern struct game_object hitbox_player[OBJ_MAX_COUNT];
+
+extern uint16_t hitbox_player_delete_queue[OBJ_MAX_COUNT];
+extern uint16_t hitbox_player_delete_queue_count;
+
 extern uint16_t hitbox_count_player;
 extern uint16_t hitbox_count_enemy;
 extern uint16_t hitbox_count_player_shadow;

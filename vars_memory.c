@@ -73,7 +73,13 @@ uint16_t obj_player_attack_interval;
 uint16_t obj_player_prev_facing;
 uint8_t * obj_player_prev_sprframe;
 
-// Hitbox data is not done due to stale cache issues.
+// Hitbox data
+ZP uint16_t hitbox_player_first_available;
+struct game_object hitbox_player[OBJ_MAX_COUNT];
+
+uint16_t hitbox_player_delete_queue[OBJ_MAX_COUNT];
+uint16_t hitbox_player_delete_queue_count;
+
 uint16_t hitbox_count_player;
 uint16_t hitbox_count_enemy;
 uint16_t hitbox_count_player_shadow;
