@@ -55,6 +55,8 @@ void obj_run()
         "\tphy\n"
         "\tldx #<_objects\n"
         "\tldy #0\n"
+        "\tcpy _obj_active_count\n"
+        "\tbcs .object_break_loop\n"
         ".object_process_loop:\n"
         "\tlda $7e0000,x\n" // assumes object memory is in bank 7e
         "\tbeq .object_process_increment\n"
@@ -74,7 +76,7 @@ void obj_run()
         "\ttxa\n"
         "\tclc\n"
         "\tadc #128\n"
-        "\tcmp #<_objects+8192\n"
+        "\tcmp #<_objects+6144\n"
         "\tbcs .object_break_loop\n"
         "\ttax\n"
         "\tcpy _obj_active_count\n"
@@ -113,6 +115,8 @@ void obj_run()
         "\tphy\n"
         "\tldx #<_hitbox_player\n"
         "\tldy #0\n"
+        "\tcpy _hitbox_count_player\n"
+        "\tbcs .hitbox_player_break_loop\n"
         ".hitbox_player_process_loop:\n"
         "\tlda $7e0000,x\n" // assumes object memory is in bank 7e
         "\tbeq .hitbox_player_process_increment\n"
@@ -132,7 +136,7 @@ void obj_run()
         "\ttxa\n"
         "\tclc\n"
         "\tadc #128\n"
-        "\tcmp #<_hitbox_player+4096\n"
+        "\tcmp #<_hitbox_player+2048\n"
         "\tbcs .hitbox_player_break_loop\n"
         "\ttax\n"
         "\tcpy _hitbox_count_player\n"
@@ -212,7 +216,7 @@ void obj_reset(int start_index)
             "\txba\n" 
             "\tlsr\n" // mul 128
             "\tsta r0\n" // offset of start, also subtract length with this
-            "\tlda #8192\n"
+            "\tlda #6144\n"
             "\tsec\n"
             "\tsbc r0\n"
             "\tsta r1\n" // actual transfer length
@@ -272,7 +276,7 @@ void obj_reset_hit_list()
             "\ta16\n"
             "\tx16\n"
             "\tstz r0\n" // offset of start, also subtract length with this
-            "\tlda #4096\n"
+            "\tlda #2048\n"
             "\tsec\n"
             "\tsbc r0\n"
             "\tsta r1\n" // actual transfer length

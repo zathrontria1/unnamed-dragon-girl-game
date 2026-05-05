@@ -8,12 +8,8 @@
 // Call from an enemy to hit test
 inline struct game_object * hit_test_enemy(struct game_object * o)
 {
-    int temp_objects_encountered = 0;
-
     struct game_object * p = &hitbox_player[0];
-
-    // There's a bug with the cached list.
-    // For now reverted to testing all objects.
+    
     for (int i = 0; i < HIT_MAX_COUNT; i++)
     {
         if (p->id != OBJID_NULL)
