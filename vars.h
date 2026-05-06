@@ -26,6 +26,7 @@ ZP extern uint32_t system_frames_elapsed;
 
 ZP extern uint8_t shadow_stat77;
 ZP extern uint8_t shadow_inidisp;
+ZP extern uint8_t shadow_mosaic;
 
 ZP extern uint16_t system_nmis_counted;
 
@@ -198,6 +199,11 @@ extern struct spr_queue_entry spr_queue_back[128];
 extern uint16_t spr_normal_count;
 NEAR extern uint8_t spr_depth_count[257]; // Count of sprites on each depth line
 extern struct spr_queue_entry spr_queue_normal[128]; // depth sorted sprite entries
+
+// Graphics effects
+extern uint16_t gfx_mosaic_layers;
+extern int16_t gfx_mosaic_intensity;
+extern int16_t gfx_mosaic_change;
 
 // Shadow buffers
 NEAR extern union oam_buffer shadow_oam;

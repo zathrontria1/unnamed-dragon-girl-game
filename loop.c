@@ -33,6 +33,8 @@ void loop_fadein()
 {
     system_wait_vblank();
 
+    shadow_mosaic = 0x00; // Always reset mosaic during fades
+
     shadow_inidisp += 1;
 
     if (shadow_inidisp >= 15)
@@ -46,6 +48,8 @@ void loop_fadein()
 void loop_fadeout()
 {
     system_wait_vblank();
+
+    shadow_mosaic = 0x00; // Always reset mosaic during fades
 
     shadow_inidisp -= 1;
 
@@ -173,6 +177,8 @@ void loop_game()
             shadow_inidisp = 0x08;
         }
     }
+
+    gfx_process_mosaic();
     
     return;
 }

@@ -64,6 +64,9 @@
             REG_BG1VOFS = bg_scroll_y_mod.full.high.lh.h;
         }
 
+        // Write the current MOSAIC value
+        REG_MOSAIC = shadow_mosaic;
+
         system_frames_elapsed++;
     }
     else if (system_current_routine != ROUTINE_MAPDISPLAY)

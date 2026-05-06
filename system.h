@@ -20,4 +20,4 @@ void system_interrupt_disable(void);
 inline void system_check_for_soft_reset(void);
 void system_reset(void);
 
-
+void gfx_process_mosaic();

@@ -432,6 +432,11 @@ void routines_player(struct game_object * o)
                             // Give the player immunity
                             o->struct_data.npc_data.invuln_time = 60 / V_MUL;
                         }
+
+                        // Also trigger the mosaic
+                        gfx_mosaic_change = -1;
+                        gfx_mosaic_intensity = 4;
+                        gfx_mosaic_layers = 0x02;
                     }
 
                     o->struct_data.npc_data.ttl = 1; // despawn the object that triggered the hit

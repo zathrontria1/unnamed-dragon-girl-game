@@ -38,6 +38,7 @@ void system_init_zp()
     system_frames_elapsed = 0;
     shadow_stat77 = 0;
     shadow_inidisp = 0;
+    shadow_mosaic = 0;
     system_nmis_counted = 0;
     bg_scroll_x.a = 0;
     bg_scroll_y.a = 0;
@@ -413,8 +414,8 @@ void system_display_splash()
     dma_copy_palette();
 
     // Run a quick fade
-    shadow_inidisp = 0x00;
 
+    shadow_inidisp = 0x00;
     while (shadow_inidisp <= 0x0f)
     {
         while ((REG_HVBJOY & VBL_READY) != VBL_READY)
@@ -423,6 +424,9 @@ void system_display_splash()
         }
 
         REG_INIDISP = shadow_inidisp;
+        REG_MOSAIC = shadow_mosaic;
+
+        shadow_mosaic = (((0x0f - shadow_inidisp) << 4) | 0x01);
 
         while ((REG_HVBJOY & VBL_READY) == VBL_READY)
         {
@@ -431,12 +435,14 @@ void system_display_splash()
 
         if (shadow_inidisp >= 0x0f)
         {
+            shadow_mosaic = 0x00;
             break;
         }
 
         shadow_inidisp += 1;
     }
 
+    REG_MOSAIC = shadow_mosaic;
     REG_INIDISP = shadow_inidisp;
 
     // Check the SRAM contents
@@ -473,6 +479,10 @@ void system_display_splash()
 
         REG_INIDISP = shadow_inidisp;
 
+        REG_MOSAIC = shadow_mosaic;
+
+        shadow_mosaic = (((0x0f - shadow_inidisp) << 4) | 0x01);
+
         while ((REG_HVBJOY & VBL_READY) == VBL_READY)
         {
             ;
@@ -481,6 +491,9 @@ void system_display_splash()
         shadow_inidisp -= 1;
     }
 
+    shadow_mosaic = 0x00;
+
+    REG_MOSAIC = shadow_mosaic;
     REG_INIDISP = 0x8f;
     shadow_inidisp = 0;
 
@@ -628,6 +641,51 @@ void system_reset_ui_tilemap()
             REG_VMDATALH = 0;
         }
     #endif
+
+    return;
+}
+
+/*
+    Manage mosaic function
+
+    mosaic layer is set directly
+    mosaic intensity and change can be tweaked to adjust both speed and size at runtime too
+*/
+void gfx_process_mosaic()
+{
+    if (gfx_mosaic_change != 0)
+    {
+        gfx_mosaic_intensity += gfx_mosaic_change;
+
+        if (gfx_mosaic_intensity < 0)
+        {
+            gfx_mosaic_intensity = 0;
+
+            if (gfx_mosaic_change < 0)
+            {
+                gfx_mosaic_change = 0;
+            }
+        }
+        else if (gfx_mosaic_intensity > 16)
+        {
+            gfx_mosaic_intensity = 16;
+
+            if (gfx_mosaic_change > 0)
+            {
+                gfx_mosaic_change = 0;
+            }
+        }
+    }
+
+    if (gfx_mosaic_intensity == 0)
+    {
+        shadow_mosaic = 0x00;
+        gfx_mosaic_layers = 0x0000;
+    }
+    else
+    {
+        shadow_mosaic = (gfx_mosaic_layers | ((gfx_mosaic_intensity - 1) << 4));
+    }
 
     return;
 }
