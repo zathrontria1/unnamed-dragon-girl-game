@@ -1,7 +1,7 @@
 @echo off
 REM Compile using VBCC 
 set cmd_asm1=interrupt.c
-set cmd_code=main.c system.c interrupt.asm sram_management.c dma.c asm.c math_int.c level.c loop.c map.c obj.c routines.c hittest.c ani.c ani_bg.c ani_fixedspr.c ani_pal.c ani_pal_hdma.c spr.c spr_metaspr.c ui.c snd.c lz4.c 
+set cmd_code=main.c system.c interrupt.asm interrupt_sub.c sram_management.c dma.c asm.c math_int.c level.c loop.c map.c obj.c routines.c hittest.c ani.c ani_bg.c ani_fixedspr.c ani_pal.c ani_pal_hdma.c spr.c spr_metaspr.c ui.c snd.c lz4.c 
 set cmd_data=vars_memory.c data_strings.c data_palette.asm data_sprite.asm data_bg.asm data_ui.asm data_snd.asm data_samples.asm
 set sfc_name=main
 

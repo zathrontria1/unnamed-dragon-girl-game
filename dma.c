@@ -126,7 +126,7 @@ void dma_copy_oam()
 void dma_copy_palette()
 {
     // Update CGRAM from shadow
-     #if VBCC_ASM == 1
+    #if VBCC_ASM == 1
         __asm(
             "\ta8\n"
             "\tsep #$20\n"
@@ -177,20 +177,60 @@ void dma_copy_palette()
     start = the CGRAM palette entry to refresh
     length = amount of entries
 */
-void dma_copy_palette_subset(uint16_t start, uint16_t len)
+#if VBCC_ASM == 1
+    NO_INLINE void dma_copy_palette_subset(uint16_t start, uint16_t len)
+#else
+    void dma_copy_palette_subset(uint16_t start, uint16_t len)
+#endif
 {
-    REG_CGADD = start; //reset palette address
+    #if VBCC_ASM == 1
+        __asm(
+            "\ta8\n"
+            "\tsep #$20\n"
 
-    REG_DMAP0 = 0x00; //byte reg write
+            "\tsta $2121\n"
+            "\tstz $4300\n"
 
-    REG_A1T0LH = (uint16_t)(((uint32_t)&shadow_cgram)) + (start << 1);
-    REG_A1B0 = (uint8_t)(((uint32_t)&shadow_cgram >> 16));
+            "\ta16\n"
+            "\trep #$21\n"
 
-    REG_BBAD0 = 0x22; // CGDATA
+            "\tasl\n"
+            "\tadc #<_shadow_cgram\n"
+            "\tsta $4302\n"
 
-    REG_DAS0LH = len << 1;
+            "\tlda 4,s\n"
+            "\tasl\n"
+            "\tsta $4305\n"
 
-    REG_MDMAEN = 0x01;
+            "\ta8\n"
+            "\tsep #$20\n"
+
+            "\tlda #^_shadow_cgram\n"
+            "\tsta $4304\n"
+
+            "\tlda #$22\n"
+            "\tsta $4301\n"
+
+            "\tlda #$01\n"
+            "\tsta $420b\n"
+
+            "\ta16\n"
+            "\trep #$20\n"
+        );
+    #else
+        REG_CGADD = start; //reset palette address
+
+        REG_DMAP0 = 0x00; //byte reg write
+
+        REG_A1T0LH = (uint16_t)(((uint32_t)&shadow_cgram)) + (start << 1);
+        REG_A1B0 = (uint8_t)(((uint32_t)&shadow_cgram >> 16));
+
+        REG_BBAD0 = 0x22; // CGDATA
+
+        REG_DAS0LH = len << 1;
+
+        REG_MDMAEN = 0x01;
+    #endif
 
     return;
 }
@@ -201,19 +241,52 @@ void dma_copy_palette_subset(uint16_t start, uint16_t len)
 */
 void dma_copy_bg_water_anim()
 {
-    // Handle the background tile DMA here specifically
-    REG_DMAP0 = 0x01; // word reg write
-    REG_BBAD0 = 0x18; // VMDATAL
+    #if VBCC_ASM == 1
+        __asm(
+            "\ta8\n"
+            "\tsep #$20\n"
 
-    REG_VMAIN = 0x80;
-    REG_VMADDLH = ani_bg_dest_water;
+            "\tlda #$01\n"
+            "\tsta $4300\n"
+            "\tlda #$18\n"
+            "\tsta $4301\n"
 
-    REG_A1T0LH = (uint16_t)((uint32_t)ani_bg_addr_water);
-    REG_A1B0 = (uint8_t)(((uint32_t)ani_bg_addr_water) >> 16);
+            "\tlda #$80\n"
+            "\tsta $2115\n"
 
-    REG_DAS0LH = 512;
+            "\tldx _ani_bg_dest_water\n"
+            "\tstx $2116\n"
 
-    REG_MDMAEN = 0x01;
+            "\tldx _ani_bg_addr_water\n"
+            "\tstx $4302\n"
+
+            "\tlda _ani_bg_addr_water+2\n"
+            "\tsta $4304\n"
+
+            "\tldx #512\n"
+            "\tstx $4305\n"
+
+            "\tlda #$01\n"
+            "\tsta $420b\n"
+
+            "\ta16\n"
+            "\trep #$20\n"
+        );
+    #else
+        // Handle the background tile DMA here specifically
+        REG_DMAP0 = 0x01; // word reg write
+        REG_BBAD0 = 0x18; // VMDATAL
+
+        REG_VMAIN = 0x80;
+        REG_VMADDLH = ani_bg_dest_water;
+
+        REG_A1T0LH = (uint16_t)((uint32_t)ani_bg_addr_water);
+        REG_A1B0 = (uint8_t)(((uint32_t)ani_bg_addr_water) >> 16);
+
+        REG_DAS0LH = 512;
+
+        REG_MDMAEN = 0x01;
+    #endif
 
     return;
 }
@@ -224,19 +297,52 @@ void dma_copy_bg_water_anim()
 */
 void dma_copy_bg_64height_anim()
 {
-    // Handle the background tile DMA here specifically
-    REG_DMAP0 = 0x01; // word reg write
-    REG_BBAD0 = 0x18; // VMDATAL
+    #if VBCC_ASM == 1
+        __asm(
+            "\ta8\n"
+            "\tsep #$20\n"
 
-    REG_VMAIN = 0x80;
-    REG_VMADDLH = ani_bg_dest_tallbg;
+            "\tlda #$01\n"
+            "\tsta $4300\n"
+            "\tlda #$18\n"
+            "\tsta $4301\n"
 
-    REG_A1T0LH = (uint16_t)((uint32_t)ani_bg_addr_tallbg);
-    REG_A1B0 = (uint8_t)(((uint32_t)ani_bg_addr_tallbg) >> 16);
+            "\tlda #$80\n"
+            "\tsta $2115\n"
 
-    REG_DAS0LH = 2048; // 512 bytes x 4 rows of 8px = 2048
+            "\tldx _ani_bg_dest_tallbg\n"
+            "\tstx $2116\n"
 
-    REG_MDMAEN = 0x01;
+            "\tldx _ani_bg_addr_tallbg\n"
+            "\tstx $4302\n"
+
+            "\tlda _ani_bg_addr_tallbg+2\n"
+            "\tsta $4304\n"
+
+            "\tldx #2048\n"
+            "\tstx $4305\n"
+
+            "\tlda #$01\n"
+            "\tsta $420b\n"
+
+            "\ta16\n"
+            "\trep #$20\n"
+        );
+    #else
+        // Handle the background tile DMA here specifically
+        REG_DMAP0 = 0x01; // word reg write
+        REG_BBAD0 = 0x18; // VMDATAL
+
+        REG_VMAIN = 0x80;
+        REG_VMADDLH = ani_bg_dest_tallbg;
+
+        REG_A1T0LH = (uint16_t)((uint32_t)ani_bg_addr_tallbg);
+        REG_A1B0 = (uint8_t)(((uint32_t)ani_bg_addr_tallbg) >> 16);
+
+        REG_DAS0LH = 2048; // 512 bytes x 4 rows of 8px = 2048
+
+        REG_MDMAEN = 0x01;
+    #endif
 
     return;
 }
