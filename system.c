@@ -415,7 +415,7 @@ void system_display_splash()
     // Run a quick fade
     shadow_inidisp = 0x00;
 
-    while (shadow_inidisp != 0x0f)
+    while (shadow_inidisp <= 0x0f)
     {
         while ((REG_HVBJOY & VBL_READY) != VBL_READY)
         {
@@ -429,6 +429,11 @@ void system_display_splash()
             ;
         }
 
+        if (shadow_inidisp >= 0x0f)
+        {
+            break;
+        }
+
         shadow_inidisp += 1;
     }
 
@@ -438,6 +443,13 @@ void system_display_splash()
     sram_check();
 
     snd_start(); // start the SPC
+
+    // The SPC takes a while to init itself, so do something else in the meantime.
+    system_init(); // Do the init here too
+    
+    // Load the level
+    level_data_ptr = LEVEL_INITIAL; // Set the initial level here
+    level_load(level_data_ptr); // non-VRAM hitting parts here
 
     // Upload instrument and music sequence data
     // TODO: describe a sequence pointer and structure so this can be handled as a single pointer to pass to a function
@@ -451,12 +463,6 @@ void system_display_splash()
     //snd_upload_sequence((struct seq_command *)&data_seq_test_t5[0], 4); // Drum test sequence
     //snd_upload_sequence((struct seq_command *)&data_seq_test_t6[0], 5); // Drum + instrument test sequence
     snd_set_tempo(120);
-
-    system_init(); // Do the init here too
-    
-    // Load the level
-    level_data_ptr = LEVEL_INITIAL; // Set the initial level here
-    level_load(level_data_ptr); // non-VRAM hitting parts here
 
     while (shadow_inidisp != 0x00)
     {
@@ -478,10 +484,14 @@ void system_display_splash()
     REG_INIDISP = 0x8f;
     shadow_inidisp = 0;
 
-    // Screen is forced blank again. Do anything that touches VRAM here.
-    system_init_graphics();
-    level_load_graphics(level_data_ptr); // and the rest of graphics
+    // Screen is forced blank again. Do anything that touches PPU regs here now
 
+    // DMA graphics in its entirety
+    dma_copy_to_vram(0x007f0000, 0x0000, 0);
+
+    // Finish initializing graphics
+    system_init_graphics();
+    
     return;
 }
 
@@ -497,12 +507,127 @@ void system_init_graphics(void)
     // Set up sprite display
     REG_OBSEL = OBJ_SIZE16_L32|3;
 
-    // Copy the sprite data into VRAM
-    LZ4_UnpackToVRAM((void *)&data_sprite_fixed_lz4, TILEDATA_ADDR_SPRITES); // permanent effects and system, upload first
-    // Most sprites are dynamically allocated
+    // Regenerate the tilemaps
+    map_regenerate();
 
-    // initialize UI DMA tiles
-    ui_dma_ui_tiles();
+    system_reset_ui_tilemap();
+
+    return;
+}
+
+void system_reset_ui_tilemap()
+{
+    // flush the BG1 tilemap with the correct null tiles
+    #if VBCC_ASM == 1
+        REG_VMAIN = VRAM_INCLOW;
+        REG_VMADDLH = TILEMAP_ADDR_GAME_UI_4BPP;
+
+        __asm(
+            "\ta8\n"
+            "\tsep #$20\n"
+
+            "\tldx #256\n"
+            "\tstx r0\n"
+
+            "\tlda #$08\n"
+            "\tsta $4300\n"
+            
+            "\tldx #<r0\n"
+            "\tstx $4302\n"
+            "\tlda #^r0\n"
+            "\tsta $4304\n"
+
+            "\tldx #1024\n"
+            "\tstx $4305\n"
+
+            "\tlda #$18\n"
+            "\tsta $4301\n"
+
+            "\tlda #$01\n"
+            "\tsta $420b\n"
+
+            "\ta16\n"
+            "\trep #$20\n"
+        );
+
+        REG_VMAIN = VRAM_INCHIGH;
+        REG_VMADDLH = TILEMAP_ADDR_GAME_UI_4BPP;
+
+        __asm(
+            "\ta8\n"
+            "\tsep #$20\n"
+
+            "\tlda #$08\n"
+            "\tsta $4300\n"
+            
+            "\tldx #<r0+1\n"
+            "\tstx $4302\n"
+            "\tlda #^r0\n"
+            "\tsta $4304\n"
+
+            "\tldx #1024\n"
+            "\tstx $4305\n"
+
+            "\tlda #$19\n"
+            "\tsta $4301\n"
+
+            "\tlda #$01\n"
+            "\tsta $420b\n"
+
+            "\ta16\n"
+            "\trep #$20\n"
+        );
+    #else
+        REG_VMAIN = VRAM_INCHIGH;
+        REG_VMADDLH = TILEMAP_ADDR_GAME_UI_4BPP;
+
+        for (int i = 0; i < 1024; i++)
+        {
+            REG_VMDATALH = 256;
+        }
+    #endif
+
+    // Repeat for BG3
+    #if VBCC_ASM == 1
+        REG_VMAIN = VRAM_INCHIGH;
+        REG_VMADDLH = TILEMAP_ADDR_GAME_UI_2BPP;
+
+        __asm(
+            "\ta8\n"
+            "\tsep #$20\n"
+
+            "\tldx #$00000\n"
+            "\tstx r0\n"
+
+            "\tlda #$09\n"
+            "\tsta $4300\n"
+            
+            "\tldx #<r0\n"
+            "\tstx $4302\n"
+            "\tlda #^r0\n"
+            "\tsta $4304\n"
+
+            "\tldx #2048\n"
+            "\tstx $4305\n"
+
+            "\tlda #$18\n"
+            "\tsta $4301\n"
+
+            "\tlda #$01\n"
+            "\tsta $420b\n"
+
+            "\ta16\n"
+            "\trep #$20\n"
+        );
+    #else
+        REG_VMAIN = VRAM_INCHIGH;
+        REG_VMADDLH = TILEMAP_ADDR_GAME_UI_2BPP;
+
+        for (int i = 0; i < 1024; i++)
+        {
+            REG_VMDATALH = 0;
+        }
+    #endif
 
     return;
 }

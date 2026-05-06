@@ -20,9 +20,9 @@ uint32_t LZ4_UnpackToWRAM(void * src, uint32_t dest)
             temp_length += 1; // pad to nearest even number
         }
 
-        LZ4_DecompressFrame(src, (void *)LZ4_BUFFER_ADDR);
+        LZ4_DecompressFrame(src, (void *)dest);
 
-        dma_copy_to_wram((uint32_t)LZ4_BUFFER_ADDR, dest, temp_length);
+        //dma_copy_to_wram((uint32_t)LZ4_BUFFER_ADDR, dest, temp_length);
     }
 
     return temp_length;

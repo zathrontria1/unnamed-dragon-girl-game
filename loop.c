@@ -430,7 +430,11 @@ void loop_game_reload()
     // Copy the old OAM into the current
     shadow_oam = shadow_oam_copy;
 
+    // DMA just the background and BG3 tiles
+    dma_copy_to_vram(((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_MAP << 1)), TILEDATA_ADDR_GAME_MAP, 24576);
+    dma_copy_to_vram(((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_UI_2BPP << 1)), TILEDATA_ADDR_GAME_UI_2BPP, 8192);
     map_regenerate();
+    system_reset_ui_tilemap();
 
     system_target_routine = ROUTINE_GAMELOOP;
     system_current_routine = ROUTINE_FADEIN;

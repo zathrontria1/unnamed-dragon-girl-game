@@ -9,6 +9,7 @@ void system_init_graphics(void);
 void system_reset_bg_scroll_regs(void);
 void system_init_display(uint16_t routine);
 void system_setup_tilemap_display(uint16_t routine);
+void system_reset_ui_tilemap();
 
 void system_wait_vblank(void);
 inline void system_poll_input(void);

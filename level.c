@@ -39,6 +39,7 @@ void level_load(const struct level_data * level)
     ani_bg_addr_water = (uint8_t *)&data_bg_dungeon_anim_water;
     ani_bg_addr_coin = (uint8_t *)&data_sprite_drop_coin;
     
+    level_load_graphics(level); // Now no longer hits VRAM
     level_load_palette(level); // Must do before making palette calcs
     ani_pal_precalc_entries();
     ani_pal_hdma_setup();
@@ -68,124 +69,19 @@ void level_load_graphics(const struct level_data * level)
 */
 void level_load_tileset(const struct level_data * level)
 {
-    // Copy the background graphics into VRAM
-    LZ4_UnpackToVRAM(level->tileset_tiles_lz4, TILEDATA_ADDR_GAME_MAP);
+    // Copy fixed sprite graphics
+    LZ4_UnpackToWRAM((void *)&data_sprite_fixed_lz4, ((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_SPRITES << 1))); 
+    //LZ4_UnpackToVRAM((void *)&data_sprite_fixed_lz4, TILEDATA_ADDR_SPRITES);
 
-    // Copy the UI graphics into VRAM
-    LZ4_UnpackToVRAM((void *)&data_ui_fixed_4bpp_lz4, TILEDATA_ADDR_GAME_UI_4BPP);
-    LZ4_UnpackToVRAM((void *)&data_ui_fixed_2bpp_lz4, TILEDATA_ADDR_GAME_UI_2BPP);
+    // Copy the background graphics into WRAM
+    LZ4_UnpackToWRAM(level->tileset_tiles_lz4, ((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_MAP << 1))); 
+    //LZ4_UnpackToVRAM(level->tileset_tiles_lz4, TILEDATA_ADDR_GAME_MAP);
 
-    // flush the BG1 tilemap with the correct null tiles
-    #if VBCC_ASM == 1
-        REG_VMAIN = VRAM_INCLOW;
-        REG_VMADDLH = TILEMAP_ADDR_GAME_UI_4BPP;
-
-        __asm(
-            "\ta8\n"
-            "\tsep #$20\n"
-
-            "\tldx #256\n"
-            "\tstx r0\n"
-
-            "\tlda #$08\n"
-            "\tsta $4300\n"
-            
-            "\tldx #<r0\n"
-            "\tstx $4302\n"
-            "\tlda #^r0\n"
-            "\tsta $4304\n"
-
-            "\tldx #1024\n"
-            "\tstx $4305\n"
-
-            "\tlda #$18\n"
-            "\tsta $4301\n"
-
-            "\tlda #$01\n"
-            "\tsta $420b\n"
-
-            "\ta16\n"
-            "\trep #$20\n"
-        );
-
-        REG_VMAIN = VRAM_INCHIGH;
-        REG_VMADDLH = TILEMAP_ADDR_GAME_UI_4BPP;
-
-        __asm(
-            "\ta8\n"
-            "\tsep #$20\n"
-
-            "\tlda #$08\n"
-            "\tsta $4300\n"
-            
-            "\tldx #<r0+1\n"
-            "\tstx $4302\n"
-            "\tlda #^r0\n"
-            "\tsta $4304\n"
-
-            "\tldx #1024\n"
-            "\tstx $4305\n"
-
-            "\tlda #$19\n"
-            "\tsta $4301\n"
-
-            "\tlda #$01\n"
-            "\tsta $420b\n"
-
-            "\ta16\n"
-            "\trep #$20\n"
-        );
-    #else
-        REG_VMAIN = VRAM_INCHIGH;
-        REG_VMADDLH = TILEMAP_ADDR_GAME_UI_4BPP;
-
-        for (int i = 0; i < 1024; i++)
-        {
-            REG_VMDATALH = 256;
-        }
-    #endif
-
-    // Repeat for BG3
-    #if VBCC_ASM == 1
-        REG_VMAIN = VRAM_INCHIGH;
-        REG_VMADDLH = TILEMAP_ADDR_GAME_UI_2BPP;
-
-        __asm(
-            "\ta8\n"
-            "\tsep #$20\n"
-
-            "\tldx #$00000\n"
-            "\tstx r0\n"
-
-            "\tlda #$09\n"
-            "\tsta $4300\n"
-            
-            "\tldx #<r0\n"
-            "\tstx $4302\n"
-            "\tlda #^r0\n"
-            "\tsta $4304\n"
-
-            "\tldx #2048\n"
-            "\tstx $4305\n"
-
-            "\tlda #$18\n"
-            "\tsta $4301\n"
-
-            "\tlda #$01\n"
-            "\tsta $420b\n"
-
-            "\ta16\n"
-            "\trep #$20\n"
-        );
-    #else
-        REG_VMAIN = VRAM_INCHIGH;
-        REG_VMADDLH = TILEMAP_ADDR_GAME_UI_2BPP;
-
-        for (int i = 0; i < 1024; i++)
-        {
-            REG_VMDATALH = 0;
-        }
-    #endif
+    // Copy the UI graphics into WRAM
+    LZ4_UnpackToWRAM((void *)&data_ui_fixed_4bpp_lz4, ((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_UI_4BPP << 1))); 
+    //LZ4_UnpackToVRAM((void *)&data_ui_fixed_4bpp_lz4, TILEDATA_ADDR_GAME_UI_4BPP);
+    LZ4_UnpackToWRAM((void *)&data_ui_fixed_2bpp_lz4, ((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_UI_2BPP << 1))); 
+    //LZ4_UnpackToVRAM((void *)&data_ui_fixed_2bpp_lz4, TILEDATA_ADDR_GAME_UI_2BPP);
 
     return;
 }

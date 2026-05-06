@@ -26,8 +26,6 @@ void map_load(const uint8_t * map, const uint16_t * lut, const uint8_t * col)
     // Ensure that the camera is at a valid position
     map_camera_adjust(1);
 
-    map_regenerate();
-
     return;
 }
 
