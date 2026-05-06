@@ -24,11 +24,7 @@ int main()
 
     rand_array[0] = 1; // Set the seed here
 
-    system_display_splash(); // SPC and basic init is here
-
-    // Load the level
-    level_data_ptr = LEVEL_INITIAL; // Set the initial level here
-    level_load(level_data_ptr);
+    system_display_splash(); // A good amount of init is here.
 
     system_current_routine = ROUTINE_FADEIN;
     system_target_routine = ROUTINE_GAMELOOP;

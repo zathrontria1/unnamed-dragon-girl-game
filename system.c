@@ -15,6 +15,7 @@
 #include "map.h"
 #include "math_int.h"
 #include "sram_management.h"
+#include "level.h"
 
 #include "ani_pal.h"
 #include "ani_pal_hdma.h"
@@ -452,6 +453,10 @@ void system_display_splash()
     snd_set_tempo(120);
 
     system_init(); // Do the init here too
+    
+    // Load the level
+    level_data_ptr = LEVEL_INITIAL; // Set the initial level here
+    level_load(level_data_ptr); // non-VRAM hitting parts here
 
     while (shadow_inidisp != 0x00)
     {
@@ -475,6 +480,7 @@ void system_display_splash()
 
     // Screen is forced blank again. Do anything that touches VRAM here.
     system_init_graphics();
+    level_load_graphics(level_data_ptr); // and the rest of graphics
 
     return;
 }

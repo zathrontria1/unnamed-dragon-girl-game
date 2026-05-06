@@ -17,6 +17,8 @@
 
 /*
     Load level data in pointer
+
+    Split into two parts so part of it can be done while the screen is turned on
 */
 void level_load(const struct level_data * level)
 {
@@ -28,23 +30,16 @@ void level_load(const struct level_data * level)
         0); 
     obj_player_prev_facing = FACING_DOWN;
 
-    // Load the actual map data - must be done after the player is instantiated first
-    // so it knows what tilemap to load. Also specify the metatile LUT.
-    map_load(
-        level->map_cells, 
-        level->map_lut, 
-        level->map_lut_col);
-
     // Instantiate enemies
     obj_instantiate_spawners(level->spawner_ptr);
     obj_instantiate_interactables(level->interactable_ptr);
-
+    
     // initialize global DMA tile animation
     // TODO: currently hardcoded. In the future, pointers may be part of map data.
     ani_bg_addr_water = (uint8_t *)&data_bg_dungeon_anim_water;
     ani_bg_addr_coin = (uint8_t *)&data_sprite_drop_coin;
-
-    level_load_tileset_and_palette(level); // Must do before making palette calcs
+    
+    level_load_palette(level); // Must do before making palette calcs
     ani_pal_precalc_entries();
     ani_pal_hdma_setup();
 
@@ -52,13 +47,27 @@ void level_load(const struct level_data * level)
 }
 
 /*
-    Reload level tileset and palette, when changing screens or video modes
+    Map graphics that require fblank go here
 */
-void level_load_tileset_and_palette(const struct level_data * level)
+void level_load_graphics(const struct level_data * level)
 {
-    // Copy the ROM palette into shadow
-    dma_copy_to_wram((uint32_t)level->tileset_palette, (uint32_t)&shadow_cgram, 512);
+    // Load the actual map data - must be done after the player is instantiated first
+    // so it knows what tilemap to load. Also specify the metatile LUT.
+    map_load(
+        level->map_cells, 
+        level->map_lut, 
+        level->map_lut_col);
+
+    level_load_tileset(level); 
     
+    return;
+}
+
+/*
+    Reload level tileset, when changing screens or video modes
+*/
+void level_load_tileset(const struct level_data * level)
+{
     // Copy the background graphics into VRAM
     LZ4_UnpackToVRAM(level->tileset_tiles_lz4, TILEDATA_ADDR_GAME_MAP);
 
@@ -177,6 +186,17 @@ void level_load_tileset_and_palette(const struct level_data * level)
             REG_VMDATALH = 0;
         }
     #endif
+
+    return;
+}
+
+/*
+    Same for the palette
+*/
+void level_load_palette(const struct level_data * level)
+{
+    // Copy the ROM palette into shadow
+    dma_copy_to_wram((uint32_t)level->tileset_palette, (uint32_t)&shadow_cgram, 512);
 
     return;
 }

@@ -424,7 +424,8 @@ void loop_game_reload()
     bg_scroll_y = bg_scroll_y_saved;
 
     // Perform a partial load
-    level_load_tileset_and_palette(level_data_ptr);
+    level_load_tileset(level_data_ptr);
+    level_load_palette(level_data_ptr);
 
     // Copy the old OAM into the current
     shadow_oam = shadow_oam_copy;
