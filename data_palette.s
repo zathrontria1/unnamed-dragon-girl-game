@@ -22,3 +22,6 @@ data_palette:
     .global data_palette_map_8bpp
 data_palette_map_8bpp:
     .incbin "palette/palette_bg_map_dungeon_8bpp.bin"
+    .global data_palette_splash
+data_palette_splash:
+    .incbin "splash/palette_splash.bin"

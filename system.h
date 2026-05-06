@@ -1,3 +1,5 @@
+#include <snes/console.h>
+
 extern uint8_t system_MVNCodeInWRAM[4];
 extern uint8_t system_JMLCodeInWRAM[4];
 

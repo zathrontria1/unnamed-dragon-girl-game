@@ -1,7 +1,7 @@
 #include "asm.h"
 
 #ifdef __CALYPSI__
-    #include <calypsi/intrinsics65816.h>;
+    #include <calypsi/intrinsics65816.h>
 #endif
 
 // assembly for instructions that can't be directly specified in C

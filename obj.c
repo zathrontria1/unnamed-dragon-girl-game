@@ -84,7 +84,7 @@ void obj_run()
         ".object_break_loop:\n"
         "\tply\n");
     #else
-        struct game_object * ptr = &objects[0];
+        struct game_object * ptr = (struct game_object *)&objects[0];
 
         for (int i = 0; i < OBJ_MAX_COUNT; i++)
         {
@@ -144,7 +144,7 @@ void obj_run()
         ".hitbox_player_break_loop:\n"
         "\tply\n");
     #else
-        struct game_object * ptr = &hitbox_player[0];
+        ptr = (struct game_object *)&hitbox_player[0];
 
         for (int i = 0; i < HIT_MAX_COUNT; i++)
         {
