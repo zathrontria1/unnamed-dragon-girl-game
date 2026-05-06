@@ -14,6 +14,7 @@
 #include "loop.h"
 #include "map.h"
 #include "math_int.h"
+#include "sram_management.h"
 
 #include "ani_pal.h"
 #include "ani_pal_hdma.h"
@@ -128,6 +129,9 @@ void system_init_regs(void)
     return;
 }
 
+/*
+    First part of initialization that doesn't touch graphics (can be done during the splash screen)
+*/
 void system_init()
 {
     // Write out the MVN and JML program codes
@@ -156,26 +160,13 @@ void system_init()
     system_current_routine = ROUTINE_INIT;
     system_target_routine = ROUTINE_INIT;
 
-    // Clear video memory
-    dma_clear_vram();
-
     spr_init_vram_slot();
-
-    // Copy the sprite data into VRAM
-    LZ4_UnpackToVRAM((void *)&data_sprite_fixed_lz4, TILEDATA_ADDR_SPRITES); // permanent effects and system, upload first
-    // Most sprites are dynamically allocated
-
-    // Write BG1, BG2, BG3 and BG4 scroll to 0 on X and negative 1 on Y axis
-    system_reset_bg_scroll_regs();
-
+    
     // Reset sprites
     spr_sprite_count_prev = 128;
     spr_sprite_count = 0;
     spr_reset_sprites();
     spr_pack_oam();
-
-    // Set up sprite display
-    REG_OBSEL = OBJ_SIZE16_L32|3;
 
     // Reset object system
     obj_reset(0); // The first time this is done, reset all objects
@@ -197,9 +188,6 @@ void system_init()
     ui_cached_hp_max = -1;
     ui_cached_money = 4294967295;
     ui_cached_enemy_counter = 65535;
-
-    // initialize UI DMA tiles
-    ui_dma_ui_tiles();
 
     return;
 }
@@ -395,6 +383,120 @@ inline void system_check_for_soft_reset()
             system_reset();
         }
     }
+
+    return;
+}
+
+/*
+    Throw a splash screen during initialization to prevent extended black screens
+    Put as many init parts as possible here
+*/
+void system_display_splash()
+{
+    // Clear video memory
+    system_reset_bg_scroll_regs();
+
+    REG_BGMODE = 0x09; // Mode 1, high priority bg3
+    REG_TM = 0x01; // BG1 only
+    REG_BG12NBA = 0 << 4 | 0;
+
+    REG_BG1SC = 0x4000 >> 8;
+
+    //dma_clear_vram();
+
+    // Upload the splash
+    dma_copy_to_vram((uint32_t)data_bg_splash, 0x0000, 28672);
+    dma_copy_to_vram((uint32_t)data_tilemap_splash, 0x4000, 1792);
+    dma_copy_to_wram((uint32_t)data_palette_splash, (uint32_t)&shadow_cgram, 32);
+
+    dma_copy_palette();
+
+    // Run a quick fade
+    shadow_inidisp = 0x00;
+
+    while (shadow_inidisp != 0x0f)
+    {
+        while ((REG_HVBJOY & VBL_READY) != VBL_READY)
+        {
+            ;
+        }
+
+        REG_INIDISP = shadow_inidisp;
+
+        while ((REG_HVBJOY & VBL_READY) == VBL_READY)
+        {
+            ;
+        }
+
+        shadow_inidisp += 1;
+    }
+
+    REG_INIDISP = shadow_inidisp;
+
+    // Check the SRAM contents
+    sram_check();
+
+    snd_start(); // start the SPC
+
+    // Upload instrument and music sequence data
+    // TODO: describe a sequence pointer and structure so this can be handled as a single pointer to pass to a function
+    // Upload SFX data (shared for entire game)
+    snd_upload_sample_list((struct sample_list_entry *)&data_snd_samples[0]);
+    snd_upload_instrument_list((struct sample_list_entry_ins *)&data_snd_instruments[0]);
+    snd_upload_sequence((struct seq_command *)&data_seq_test_t1[0], 0); // Drum 1
+    snd_upload_sequence((struct seq_command *)&data_seq_test_t2[0], 1); // Drum 2
+    snd_upload_sequence((struct seq_command *)&data_seq_test_t3[0], 2); // Bass
+    snd_upload_sequence((struct seq_command *)&data_seq_test_t4[0], 3); // Secondary
+    //snd_upload_sequence((struct seq_command *)&data_seq_test_t5[0], 4); // Drum test sequence
+    //snd_upload_sequence((struct seq_command *)&data_seq_test_t6[0], 5); // Drum + instrument test sequence
+    snd_set_tempo(120);
+
+    system_init(); // Do the init here too
+
+    while (shadow_inidisp != 0x00)
+    {
+        while ((REG_HVBJOY & VBL_READY) != VBL_READY)
+        {
+            ;
+        }
+
+        REG_INIDISP = shadow_inidisp;
+
+        while ((REG_HVBJOY & VBL_READY) == VBL_READY)
+        {
+            ;
+        }
+
+        shadow_inidisp -= 1;
+    }
+
+    REG_INIDISP = 0x8f;
+    shadow_inidisp = 0;
+
+    // Screen is forced blank again. Do anything that touches VRAM here.
+    system_init_graphics();
+
+    return;
+}
+
+/*
+    Initialization of fixed sprites that touch VRAM must be done in fblank
+    Also for safety, PPU registers that are touched also go here
+*/
+void system_init_graphics(void)
+{
+    // Write BG1, BG2, BG3 and BG4 scroll to 0 on X and negative 1 on Y axis
+    system_reset_bg_scroll_regs();
+
+    // Set up sprite display
+    REG_OBSEL = OBJ_SIZE16_L32|3;
+
+    // Copy the sprite data into VRAM
+    LZ4_UnpackToVRAM((void *)&data_sprite_fixed_lz4, TILEDATA_ADDR_SPRITES); // permanent effects and system, upload first
+    // Most sprites are dynamically allocated
+
+    // initialize UI DMA tiles
+    ui_dma_ui_tiles();
 
     return;
 }
