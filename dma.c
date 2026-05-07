@@ -409,19 +409,20 @@ void dma_queue_process()
 {
     #if VBCC_ASM == 1
         __asm(
-            "\tlda _dma_queue_count\n"
-            "\tsep #32\n"
+            "\tsep #$20\n"
             "\ta8\n"
-            "\tlda #1\n"
-            "\tsta 17152\n"
-            "\tlda #24\n"
-            "\tsta 17153\n"
             "\tlda _dma_queue_count\n"
             "\tbeq .dma_queue_empty\n"
             "\tphd\n"
             "\tpea $4300\n"
             "\tpld\n"
             "\tsta $0b\n"
+
+            "\tlda #$01\n"
+            "\tsta $00\n"
+            "\tlda #$18\n"
+            "\tsta $01\n"
+            
             "\tphy\n"
             "\tldy #0\n"
         ".loop_dma_queue:\n"
