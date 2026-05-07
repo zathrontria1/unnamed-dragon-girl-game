@@ -67,6 +67,13 @@
         // Write the current MOSAIC value
         REG_MOSAIC = shadow_mosaic;
 
+        // Write the current colour math values
+        REG_CGWSEL = shadow_cgwsub;
+        REG_CGADSUB = shadow_cgadsub;
+        REG_COLDATA = shadow_coldata_r;
+        REG_COLDATA = shadow_coldata_g;
+        REG_COLDATA = shadow_coldata_b;
+
         system_frames_elapsed++;
     }
     else if (system_current_routine != ROUTINE_MAPDISPLAY)

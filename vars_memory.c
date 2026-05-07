@@ -46,8 +46,16 @@ ZP uint16_t system_target_routine;
 ZP uint32_t system_frames_elapsed;
 
 ZP uint8_t shadow_stat77;
+
 ZP uint8_t shadow_inidisp;
+
 ZP uint8_t shadow_mosaic;
+
+ZP uint8_t shadow_cgwsub;
+ZP uint8_t shadow_cgadsub;
+ZP uint8_t shadow_coldata_r;
+ZP uint8_t shadow_coldata_g;
+ZP uint8_t shadow_coldata_b;
 
 ZP uint16_t system_nmis_counted;
 
@@ -225,6 +233,12 @@ struct spr_queue_entry spr_queue_normal[128]; // depth sorted sprite entries
 uint16_t gfx_mosaic_layers;
 int16_t gfx_mosaic_intensity;
 int16_t gfx_mosaic_change;
+
+int16_t gfx_cmath_change;
+
+int16_t gfx_cmath_r;
+int16_t gfx_cmath_g;
+int16_t gfx_cmath_b;
 
 // Shadow buffers
 NEAR union oam_buffer shadow_oam;

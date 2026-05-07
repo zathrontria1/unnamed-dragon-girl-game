@@ -24,6 +24,8 @@
 
 #include "hittest.h"
 
+#include "gfx.h"
+
 void routines_player(struct game_object * o)
 {
     if (!system_game_paused)
@@ -1301,6 +1303,12 @@ void routines_drop_money(struct game_object * o)
                 snd_play_sfx(SFX_DROP_COIN,0);
 
                 p->struct_data.npc_data.money += o->struct_data.npc_data.money;
+
+                /*gfx_cmath_set(4,4,0);
+                gfx_cmath_change = -1;
+                shadow_cgwsub = 0x00;
+                shadow_cgadsub = 0x22;*/
+
                 obj_destroy(o->array_index);
             }
         }
@@ -1340,6 +1348,11 @@ void routines_drop_rec_meat(struct game_object * o)
                 {
                     p->struct_data.npc_data.hp += o->struct_data.npc_data.hp;
                 }
+
+                gfx_cmath_set(0,4,0);
+                gfx_cmath_change = -1;
+                shadow_cgwsub = 0x00;
+                shadow_cgadsub = 0x22;
             
                 obj_destroy(o->array_index);
             }

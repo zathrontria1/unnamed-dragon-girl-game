@@ -49,3 +49,67 @@ void gfx_process_mosaic()
 
     return;
 }
+
+void gfx_process_screen_cmath()
+{
+    if (gfx_cmath_change != 0)
+    {
+        gfx_cmath_r += gfx_cmath_change;
+        gfx_cmath_g += gfx_cmath_change;
+        gfx_cmath_b += gfx_cmath_change;
+
+        if (gfx_cmath_change > 0)
+        {
+            if (gfx_cmath_r > 31) gfx_cmath_r = 31;
+            if (gfx_cmath_g > 31) gfx_cmath_g = 31;
+            if (gfx_cmath_b > 31) gfx_cmath_b = 31;
+
+            if ((gfx_cmath_r == 31) && (gfx_cmath_g == 31) && (gfx_cmath_b == 31))
+            {
+                gfx_cmath_change = 0;
+            }
+        }
+        else if (gfx_cmath_change < 0)
+        {
+            if (gfx_cmath_r < 0) gfx_cmath_r = 0;
+            if (gfx_cmath_g < 0) gfx_cmath_g = 0;
+            if (gfx_cmath_b < 0) gfx_cmath_b = 0;
+
+            if ((gfx_cmath_r | gfx_cmath_g | gfx_cmath_b) == 0x00)
+            {
+                gfx_cmath_change = 0;
+            }
+        }
+    }
+
+    // CGWSUB and CGADSUB shadows can be set directly
+    if ((gfx_cmath_r | gfx_cmath_g | gfx_cmath_b) == 0x00)
+    {
+        //shadow_cgwsub = 0x00;
+        //shadow_cgadsub = 0x00;
+
+        shadow_coldata_r = 0x20;
+        shadow_coldata_g = 0x40;
+        shadow_coldata_b = 0x80;
+    }
+    else
+    {
+        //shadow_cgwsub = 0x02;
+        //shadow_cgadsub = 0x22;
+
+        shadow_coldata_r = 0x20 | gfx_cmath_r;
+        shadow_coldata_g = 0x40 | gfx_cmath_g;
+        shadow_coldata_b = 0x80 | gfx_cmath_b;
+    }
+
+    return;
+}
+
+inline void gfx_cmath_set(int16_t r, int16_t g, int16_t b)
+{
+    gfx_cmath_r = r;
+    gfx_cmath_g = g;
+    gfx_cmath_b = b;
+
+    return;
+}

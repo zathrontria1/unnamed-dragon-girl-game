@@ -34,7 +34,15 @@ void loop_fadein()
 {
     system_wait_vblank();
 
-    shadow_mosaic = 0x00; // Always reset mosaic during fades
+    // Always reset mosaic during fades
+    shadow_mosaic = 0x00; 
+
+    // Always reset colour math during fades
+    shadow_cgwsub = 0x00;
+    shadow_cgadsub = 0x00;
+    shadow_coldata_r = 0x00;
+    shadow_coldata_g = 0x00;
+    shadow_coldata_b = 0x00;
 
     shadow_inidisp += 1;
 
@@ -50,7 +58,15 @@ void loop_fadeout()
 {
     system_wait_vblank();
 
-    shadow_mosaic = 0x00; // Always reset mosaic during fades
+    // Always reset mosaic during fades
+    shadow_mosaic = 0x00; 
+
+    // Always reset colour math during fades
+    shadow_cgwsub = 0x00;
+    shadow_cgadsub = 0x00;
+    shadow_coldata_r = 0x00;
+    shadow_coldata_g = 0x00;
+    shadow_coldata_b = 0x00;
 
     shadow_inidisp -= 1;
 
@@ -180,6 +196,7 @@ void loop_game()
     }
 
     gfx_process_mosaic();
+    gfx_process_screen_cmath();
     
     return;
 }

@@ -37,10 +37,17 @@ void system_init_zp()
     system_current_routine = 0;
     system_target_routine = 0;
     system_frames_elapsed = 0;
+
     shadow_stat77 = 0;
     shadow_inidisp = 0;
     shadow_mosaic = 0;
     system_nmis_counted = 0;
+    shadow_cgwsub = 0;
+    shadow_cgadsub = 0;
+    shadow_coldata_r = 0;
+    shadow_coldata_g = 0;
+    shadow_coldata_b = 0;
+
     bg_scroll_x.a = 0;
     bg_scroll_y.a = 0;
     bg_scroll_y_mod.a = 0;
@@ -51,6 +58,8 @@ void system_init_zp()
     hitbox_player_first_available = 0;
 
     system_game_paused = 0;
+
+
 
     return;
 }
