@@ -453,10 +453,32 @@ void loop_game_reload()
     system_ui_in_bg2 = 0;
     ui_force_update = 1;
 
+    loop_game_partial();
+
     ani_pal_hdma_enable();
 
     shadow_inidisp = 0x00;
     system_interrupt_enable();
+
+    return;
+}
+
+/*
+    Run during initialization or scene reload to make sure everything that is supposed to be there, is
+*/
+void loop_game_partial(void)
+{
+    // Make a copy of the current paused state
+    uint16_t temp_game_paused_copy = system_game_paused;
+
+    system_game_paused = 1;
+    ui_process();
+    obj_run();
+
+    spr_queue_process();
+    spr_reset_sprites();
+    spr_pack_oam();
+    system_game_paused = temp_game_paused_copy;
 
     return;
 }
