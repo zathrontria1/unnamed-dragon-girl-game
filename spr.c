@@ -11,7 +11,7 @@
     It is the responsibility of the caller select the right queue and 
     to ensure that the written sprite is valid
 */
-inline void spr_queue_add_ui(int16_t x, int16_t y, uint16_t tileattrib)
+void spr_queue_add_ui(int16_t x, int16_t y, uint16_t tileattrib)
 {
     struct spr_queue_entry s;
     s.x = x;
@@ -40,7 +40,7 @@ inline void spr_queue_add_ui(int16_t x, int16_t y, uint16_t tileattrib)
     return;
 }
 
-inline void spr_queue_add_front(struct game_object * o, uint16_t tileattrib)
+void spr_queue_add_front(struct game_object * o, uint16_t tileattrib)
 {
     if (spr_front_count >= 128)
     {
@@ -80,7 +80,7 @@ inline void spr_queue_add_front(struct game_object * o, uint16_t tileattrib)
     return;
 }
 
-inline void spr_queue_add_normal(struct game_object * o, uint16_t tileattrib)
+void spr_queue_add_normal(struct game_object * o, uint16_t tileattrib)
 {
     if (spr_normal_count >= 128)
     {
@@ -120,7 +120,7 @@ inline void spr_queue_add_normal(struct game_object * o, uint16_t tileattrib)
     return;
 }
 
-inline void spr_queue_add_back(struct game_object * o, uint16_t tileattrib)
+void spr_queue_add_back(struct game_object * o, uint16_t tileattrib)
 {
     if (spr_back_count >= 128)
     {

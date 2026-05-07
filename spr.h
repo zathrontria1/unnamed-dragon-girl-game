@@ -1,7 +1,7 @@
-inline void spr_queue_add_ui(int16_t x, int16_t y, uint16_t tileattrib);
-inline void spr_queue_add_front(struct game_object * o, uint16_t tileattrib);
-inline void spr_queue_add_normal(struct game_object * o, uint16_t tileattrib);
-inline void spr_queue_add_back(struct game_object * o, uint16_t tileattrib);
+void spr_queue_add_ui(int16_t x, int16_t y, uint16_t tileattrib);
+void spr_queue_add_front(struct game_object * o, uint16_t tileattrib);
+void spr_queue_add_normal(struct game_object * o, uint16_t tileattrib);
+void spr_queue_add_back(struct game_object * o, uint16_t tileattrib);
 
 void spr_queue_process(void);
 

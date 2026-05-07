@@ -813,12 +813,9 @@ void routines_interactable_blocker(struct game_object * o)
                 spr_metaspr_draw(o, &data_metaspr_door_ew[0]);
                 break;
         }
-        
 
         if (!system_game_paused)
         {
-            struct tile_xy temp;
-
             switch (o->id)
             {
                 case OBJID_INTERACTABLE_BLOCKER_FLOOR:
@@ -828,17 +825,15 @@ void routines_interactable_blocker(struct game_object * o)
                 case OBJID_INTERACTABLE_BLOCKER_DOOR_NS:
                     blocker_list[blocker_build_count] = o->tile;
                     blocker_build_count++;
-                    temp = o->tile;
-                    temp.x = o->tile.x + 1;
-                    blocker_list[blocker_build_count] = temp;
+                    blocker_list[blocker_build_count].x = blocker_list[blocker_build_count-1].x + 1;
+                    blocker_list[blocker_build_count].y = blocker_list[blocker_build_count-1].y;
                     blocker_build_count++;
                     break;
                 case OBJID_INTERACTABLE_BLOCKER_DOOR_EW:
                     blocker_list[blocker_build_count] = o->tile;
                     blocker_build_count++;
-                    temp = o->tile;
-                    temp.y = o->tile.y - 1;
-                    blocker_list[blocker_build_count] = temp;
+                    blocker_list[blocker_build_count].x = blocker_list[blocker_build_count-1].x ;
+                    blocker_list[blocker_build_count].y = blocker_list[blocker_build_count-1].y - 1;
                     blocker_build_count++;
                     break;
             }
