@@ -223,7 +223,7 @@ struct game_data_interactable
 
 union game_data
 {
-    uint8_t size[72];
+    uint8_t size[68];
     struct game_data_npc npc_data;
     struct game_data_interactable interactable_data; 
 };
@@ -245,6 +245,8 @@ struct game_object
     struct tile_xy tile; // Used for blockers to simplify calcs. Also used for cached tile tests
     uint16_t w;
     uint16_t h;
+    int16_t r; // right edge
+    int16_t b; // bottom edge - used to save time in calcs
 
     uint16_t hit_type; // hitbox type
 

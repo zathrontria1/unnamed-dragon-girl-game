@@ -61,9 +61,9 @@ void obj_run()
         "\tlda $7e0000,x\n" // assumes object memory is in bank 7e
         "\tbeq .object_process_increment\n"
         "\tiny\n"
-        "\tlda $7e0033,x\n"
+        "\tlda $7e0037,x\n"
         "\tsta >_system_JMLCodeInWRAM+2\n"
-        "\tlda $7e0032,x\n"
+        "\tlda $7e0036,x\n"
         "\tsta >_system_JMLCodeInWRAM+1\n"
         "\tphy\n"
         "\tphx\n"
@@ -121,9 +121,9 @@ void obj_run()
         "\tlda $7e0000,x\n" // assumes object memory is in bank 7e
         "\tbeq .hitbox_player_process_increment\n"
         "\tiny\n"
-        "\tlda $7e0033,x\n"
+        "\tlda $7e0037,x\n"
         "\tsta >_system_JMLCodeInWRAM+2\n"
-        "\tlda $7e0032,x\n"
+        "\tlda $7e0036,x\n"
         "\tsta >_system_JMLCodeInWRAM+1\n"
         "\tphy\n"
         "\tphx\n"
@@ -487,6 +487,9 @@ int16_t obj_instantiate(
 
     obj_set_function_pointer(p);
 
+    p->r = p->pos.x.lh.h + p->w;
+    p->b = p->pos.y.lh.h + p->h;
+
     return i;
 }
 
@@ -536,6 +539,9 @@ int16_t obj_instantiate_hitbox_player(
     p->h = 16;
 
     obj_set_function_pointer(p);
+
+    p->r = p->pos.x.lh.h + p->w;
+    p->b = p->pos.y.lh.h + p->h;
 
     return i;
 }
@@ -1013,6 +1019,10 @@ uint16_t move(struct game_object * o)
     // X must be done as the final calculation
     o->pos.x.a += o->delta.x.a; // Always saved
 
+    // Update right and bottom edges
+    o->r = o->pos.x.lh.h + o->w;
+    o->b = o->pos.y.lh.h + o->h;
+
     return 0;
 }
 
@@ -1021,6 +1031,24 @@ void move_nocol_fast(struct game_object * o)
     // Move an object ignoring everything
     // Useful for light objects that do not need to test anything.
     // optionally also ignoring map edge
+
+    o->pos.x.a += o->delta.x.a;
+    o->pos.y.a += o->delta.y.a;
+
+    // Update right and bottom edges
+    o->r = o->pos.x.lh.h + o->w;
+    o->b = o->pos.y.lh.h + o->h;
+
+    return;
+}
+
+void move_nocol_veryfast(struct game_object * o)
+{
+    // Move an object ignoring everything
+    // Useful for light objects that do not need to test anything.
+    // optionally also ignoring map edge
+
+    // This version will not update edges, so should be used for no-collision checking objects only
 
     o->pos.x.a += o->delta.x.a;
     o->pos.y.a += o->delta.y.a;

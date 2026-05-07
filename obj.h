@@ -30,6 +30,7 @@ void obj_cleanup_hitbox_player(void);
 
 uint16_t move(struct game_object * o);
 void move_nocol_fast(struct game_object * o);
+void move_nocol_veryfast(struct game_object * o);
 
 uint32_t ai_distance_squared(int16_t abs_x, int16_t abs_y);
 uint16_t ai_run(struct game_object * o, uint32_t dist, int16_t x, int16_t y);

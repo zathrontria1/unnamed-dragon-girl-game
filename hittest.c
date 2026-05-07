@@ -6,8 +6,46 @@
 #include "hittest.h"
 
 // Call from an enemy to hit test
-inline struct game_object * hit_test_enemy(struct game_object * o)
+#if VBCC_ASM == 1
+    NO_INLINE struct game_object * hit_test_enemy(__reg("r0/r1") struct game_object * o)
+#else
+    inline struct game_object * hit_test_enemy(struct game_object * o)
+#endif
 {
+    #if VBCC_ASM == 1 // place addresses at r0 and r2
+        __asm(
+        "\ta16\n"
+	    "\tx16\n"
+        "\tphy\n"
+        "\tlda #<_hitbox_player\n"
+        "\tsta r2\n"
+        "\tlda #^_hitbox_player\n"
+        "\tsta r3\n"
+        "\tlda _hitbox_count_player\n"
+        "\tbeq .hittest_enemy2player_break_loop\n"
+        "\tsta r4\n"
+        ".hittest_enemy2player_process_loop:\n"
+        "\tlda [r2]\n" // assumes object memory is in bank 7e
+        "\tbeq .hittest_enemy2player_increment\n"
+        "\tjsl >_hit_test\n"
+        "\tcmp #0\n"
+        "\tbne .hittest_enemy2player_increment\n"
+        "\tply\n"
+        "\tlda r2\n"
+        "\tldx r3\n"
+        "\trtl\n"
+        ".hittest_enemy2player_increment:\n"
+        "\tlda r2\n"
+        "\tclc\n"
+        "\tadc #128\n"
+        "\tcmp #<_hitbox_player+2048\n"
+        "\tbcs .hittest_enemy2player_break_loop\n"
+        "\tsta r2\n"
+        "\tdec r4\n"
+        "\tbne .hittest_enemy2player_process_loop\n"
+        ".hittest_enemy2player_break_loop:\n"
+        "\tply\n");
+    #else
     struct game_object * p = &hitbox_player[0];
     
     for (int i = 0; i < HIT_MAX_COUNT; i++)
@@ -22,6 +60,7 @@ inline struct game_object * hit_test_enemy(struct game_object * o)
         
         p++;
     }
+    #endif
 
     return NULL;
 }
@@ -87,9 +126,36 @@ inline struct game_object * hit_test_player(struct game_object * o)
 /*
     Two game objects
 */
-inline uint16_t hit_test(struct game_object * a, struct game_object * b)
+#if VBCC_ASM == 1
+    NO_INLINE uint16_t hit_test(__reg("r0/r1") struct game_object * a, __reg("r2/r3") struct game_object * b)
+#else
+    inline uint16_t hit_test(struct game_object * a, struct game_object * b)
+#endif
 {
     // a.x < b.x + b.w && b.x < a.x + a.w
+    if ((b->r) < a->pos.x.lh.h)
+    {
+        return 1;
+    }
+    else if ((a->r) < b->pos.x.lh.h)
+    {
+        return 1;
+    }
+
+    // a.y < b.y + b.h && b.y < a.y + a.h
+    if ((a->b) < b->pos.y.lh.h)
+    {
+        return 1;
+    }
+    else if ((b->b) < a->pos.y.lh.h)
+    {
+        return 1;
+    }
+    return 0;
+
+    // Original code follows.
+
+    /*// a.x < b.x + b.w && b.x < a.x + a.w
     if ((b->pos.x.lh.h + b->w) < a->pos.x.lh.h)
     {
         return 1;
@@ -108,7 +174,7 @@ inline uint16_t hit_test(struct game_object * a, struct game_object * b)
     {
         return 1;
     }
-    return 0;
+    return 0;*/
 }
 
 /*

@@ -610,7 +610,7 @@ void routines_fx_smoke(struct game_object * o)
     if (!system_game_paused)
     {
         // Move the object based on the stored delta
-        move_nocol_fast(o);
+        move_nocol_veryfast(o);
 
         // Update every 8 frames
         if (((uint16_t)system_frames_elapsed & ANI_INTERVAL_8) == ANI_INTERVAL_8)
