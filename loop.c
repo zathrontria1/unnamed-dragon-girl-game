@@ -17,6 +17,7 @@
 #include "loop.h"
 #include "obj.h"
 #include "map.h"
+#include "gfx.h"
 
 #include "ui.h"
 
