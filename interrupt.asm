@@ -18,7 +18,13 @@ ___irq_vblank:
 
 	; pseudoregisters are not used in NMI
 
+	lda <_system_use_alternate_nmi
+	bne .quick_nmi
 	jsl	>_interrupt_vblank_sub
+	bra .end_nmi
+	.quick_nmi:
+	jsl	>_interrupt_vblank_alt
+	.end_nmi:
 
 	rep	#$30
 

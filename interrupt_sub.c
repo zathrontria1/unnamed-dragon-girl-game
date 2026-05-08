@@ -100,3 +100,48 @@
     return;
 }
 
+/*
+    This special NMI routine is used to only perform the fader for visual consistency
+    during heavy processing elsewhere
+*/
+#if VBCC_ASM == 1
+    NO_INLINE void interrupt_vblank_alt()
+#else
+    void interrupt_vblank_alt()
+#endif
+{
+    // Write the current INIDISP value
+    REG_INIDISP = shadow_inidisp;
+
+    // Adjust the INIDISP value based on the change
+    if ((shadow_inidisp == 0x00) && (shadow_inidisp_change < 0))
+    {
+        shadow_inidisp_change = 0;
+    }
+
+    if ((shadow_inidisp >= 0x0f) && (shadow_inidisp_change > 0))
+    {
+        shadow_inidisp_change = 0;
+    }
+
+    if (shadow_inidisp_change != 0)
+    {
+        shadow_inidisp += shadow_inidisp_change;
+    }
+
+    // Do not interfere with HDMA
+
+    // Write the current MOSAIC value
+    REG_MOSAIC = shadow_mosaic;
+
+    // Write the current colour math values
+    REG_CGWSEL = shadow_cgwsub;
+    REG_CGADSUB = shadow_cgadsub;
+    REG_COLDATA = shadow_coldata_r;
+    REG_COLDATA = shadow_coldata_g;
+    REG_COLDATA = shadow_coldata_b;
+
+    // Do not update the frame counter
+
+    return;
+}

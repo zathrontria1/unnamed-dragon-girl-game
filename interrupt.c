@@ -13,7 +13,14 @@
     NEAR INTERRUPT void __irq_vblank(void)
 #endif
 {
-    interrupt_vblank_sub();
+    if (system_use_alternate_nmi == 0)
+    {
+        interrupt_vblank_sub();
+    }
+    else
+    {
+        interrupt_vblank_alt();
+    }
     
     return;
 }

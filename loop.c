@@ -183,9 +183,16 @@ void loop_game()
     {
         if (system_check_for_key(KEY_SELECT))
         {
+            // Let's try using the new alternate NMI part
             shadow_inidisp = 0x0f;
-            system_current_routine = ROUTINE_FADEOUT;
+            system_use_alternate_nmi = 1;
+            shadow_inidisp_change = -1;
+            system_current_routine = ROUTINE_MAPDISPLAY_INIT;
             system_target_routine = ROUTINE_MAPDISPLAY_INIT;
+            
+            /*shadow_inidisp = 0x0f;
+            system_current_routine = ROUTINE_FADEOUT;
+            system_target_routine = ROUTINE_MAPDISPLAY_INIT;*/
         }
         else if (system_check_for_key(KEY_START))
         {
@@ -217,11 +224,6 @@ void loop_pause()
 
 void loop_mapdisplay_init()
 {
-    system_interrupt_disable();
-    REG_INIDISP = 0x8f;
-
-    REG_HDMAEN = 0x00;
-
     // Silence the looping fire sound
     if (snd_flame_playing == 1)
     {
@@ -232,6 +234,44 @@ void loop_mapdisplay_init()
     bg_scroll_x_saved = bg_scroll_x;
     bg_scroll_y_saved = bg_scroll_y;
 
+    bg_scroll_x.full.high.a = -32;
+    bg_scroll_y.full.high.a = -8;
+
+    // Copy the current OAM into the copy
+    shadow_oam_copy = shadow_oam;
+
+    spr_queue_process();
+    spr_reset_sprites();
+    spr_pack_oam();
+
+    struct game_object * o = &objects[obj_player_index];
+    struct game_object temp_icon_object = objects[obj_player_index];
+    temp_icon_object.state = STATE_ICON_NORMAL;
+    temp_icon_object.facing = FACING_DOWN;
+
+    struct game_data_npc * d = (struct game_data_npc *)&temp_icon_object.struct_data;
+    d->ani.frame = 0;
+
+    obj_player_prev_sprframe = ani_getframe_player(o); 
+    uint8_t * temp_addr = ani_getframe_player(&temp_icon_object);
+
+    dma_queue_add(temp_addr, 0x6000, 128, VRAM_INCHIGH, 1);
+
+    system_ui_in_bg2 = 1;
+
+    LZ4_UnpackToWRAM(level_data_ptr->map_overview_tiles_lz4, 0x007f0000);
+
+    while (shadow_inidisp != 0x00)
+    {
+        ; // Prevent execution from continuing to VRAM writing parts while the display is turned on
+    }
+
+    // Try to move as many things as possible before here.
+    system_interrupt_disable();
+    REG_INIDISP = 0x8f;
+
+    REG_HDMAEN = 0x00;
+
     REG_BG2HOFS = 0;
     REG_BG2HOFS = 0;
     REG_BG2VOFS = 0xff;
@@ -240,19 +280,9 @@ void loop_mapdisplay_init()
     // Copy the ROM palette into shadow
     dma_copy_to_wram((unsigned long int)level_data_ptr->map_overview_palette, (unsigned long int)&shadow_cgram, 480);
     dma_copy_to_wram((unsigned long int)(level_data_ptr->tileset_palette)+256, (unsigned long int)(&shadow_cgram)+480, 32);
-
-    // Copy the current OAM into the copy
-    shadow_oam_copy = shadow_oam;
-
-    spr_queue_process();
-    spr_reset_sprites();
-    spr_pack_oam();
     
     // Copy the background graphics into VRAM
-    LZ4_UnpackToVRAM(level_data_ptr->map_overview_tiles_lz4, 0x0000);
-
-    bg_scroll_x.full.high.a = -32;
-    bg_scroll_y.full.high.a = -8;
+    dma_copy_to_vram(0x007f0000, 0x0000, 0x9000);
 
     int i = 0;
     REG_VMAIN = VRAM_INCHIGH;
@@ -347,22 +377,11 @@ void loop_mapdisplay_init()
     system_setup_tilemap_display(system_target_routine);
     system_init_display(system_target_routine);
 
-    struct game_object * o = &objects[obj_player_index];
-    struct game_object temp_icon_object = objects[obj_player_index];
-    temp_icon_object.state = STATE_ICON_NORMAL;
-    temp_icon_object.facing = FACING_DOWN;
-
-    struct game_data_npc * d = (struct game_data_npc *)&temp_icon_object.struct_data;
-    d->ani.frame = 0;
-
-    obj_player_prev_sprframe = ani_getframe_player(o); 
-    uint8_t * temp_addr = ani_getframe_player(&temp_icon_object);
-
-    dma_queue_add(temp_addr, 0x6000, 128, VRAM_INCHIGH, 1);
-
-    system_ui_in_bg2 = 1;
-
     shadow_inidisp = 0x00;
+
+    system_use_alternate_nmi = 0;
+    shadow_inidisp_change = 0;
+
     system_interrupt_enable();
 
     return;

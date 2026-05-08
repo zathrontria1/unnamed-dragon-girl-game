@@ -27,6 +27,7 @@ ZP extern uint32_t system_frames_elapsed;
 ZP extern uint8_t shadow_stat77;
 
 ZP extern uint8_t shadow_inidisp;
+ZP extern int8_t shadow_inidisp_change;
 
 ZP extern uint8_t shadow_mosaic;
 
@@ -37,6 +38,7 @@ ZP extern uint8_t shadow_coldata_g;
 ZP extern uint8_t shadow_coldata_b;
 
 ZP extern uint16_t system_nmis_counted;
+ZP extern uint16_t system_use_alternate_nmi;
 
 ZP extern uint16_t system_game_paused;
 

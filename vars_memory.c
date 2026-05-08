@@ -48,6 +48,7 @@ ZP uint32_t system_frames_elapsed;
 ZP uint8_t shadow_stat77;
 
 ZP uint8_t shadow_inidisp;
+ZP int8_t shadow_inidisp_change;
 
 ZP uint8_t shadow_mosaic;
 
@@ -58,6 +59,7 @@ ZP uint8_t shadow_coldata_g;
 ZP uint8_t shadow_coldata_b;
 
 ZP uint16_t system_nmis_counted;
+ZP uint16_t system_use_alternate_nmi;
 
 ZP uint16_t system_game_paused;
 

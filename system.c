@@ -40,6 +40,7 @@ void system_init_zp()
 
     shadow_stat77 = 0;
     shadow_inidisp = 0;
+    shadow_inidisp_change = 0;
     shadow_mosaic = 0;
     system_nmis_counted = 0;
     shadow_cgwsub = 0;
@@ -58,8 +59,7 @@ void system_init_zp()
     hitbox_player_first_available = 0;
 
     system_game_paused = 0;
-
-
+    system_use_alternate_nmi = 0;
 
     return;
 }
