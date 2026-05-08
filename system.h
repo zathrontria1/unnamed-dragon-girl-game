@@ -5,6 +5,7 @@ extern uint8_t system_JMLCodeInWRAM[4];
 
 void system_init_zp(void);
 void system_init_regs(void);
+void system_init_wram_functions(void);
 void system_display_splash();
 void system_init(void);
 void system_init_graphics(void);

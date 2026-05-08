@@ -141,10 +141,8 @@ void system_init_regs(void)
     return;
 }
 
-/*
-    First part of initialization that doesn't touch graphics (can be done during the splash screen)
-*/
-void system_init()
+// Write out the MVN and JML opcodes here so that they can be used ASAP
+void system_init_wram_functions(void)
 {
     // Write out the MVN and JML program codes
     #if VBCC_ASM == 1
@@ -168,6 +166,14 @@ void system_init()
         system_JMLCodeInWRAM[0] = 0x5c;
     #endif
 
+    return;
+}
+
+/*
+    First part of initialization that doesn't touch graphics (can be done during the splash screen)
+*/
+void system_init()
+{
     // Set current and target routines to init to prevent issues
     system_current_routine = ROUTINE_INIT;
     system_target_routine = ROUTINE_INIT;

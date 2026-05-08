@@ -17,11 +17,10 @@
 
 int main()
 {
-    system_init_regs();
+    system_init_regs(); // Display will be turned off within this
     system_init_zp(); // Wipe ZP
-
-    REG_INIDISP = 0x8f;
-
+    system_init_wram_functions(); // Write opcodes for WRAM functions
+    
     rand_array[0] = 1; // Set the seed here
 
     system_display_splash(); // A good amount of init is here.
