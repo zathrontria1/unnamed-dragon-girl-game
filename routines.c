@@ -202,7 +202,6 @@ void routines_player(struct game_object * o)
 
                         snd_punch_timeout = (8 / V_MUL);
                     }
-                
                     
                     int16_t j = obj_instantiate_hitbox_player(OBJID_HITBOX_INVISIBLE, o->pos.x.lh.h, o->pos.y.lh.h);
                     if (j >= 0)
@@ -220,34 +219,48 @@ void routines_player(struct game_object * o)
                         switch (o->facing)
                         {
                             case FACING_UP:
-                                p->pos.y.lh.h -= 16;
+                                p->pos.y.lh.h -= 8;
+                                p->w = 32;
                                 break;
                             case FACING_DOWN:
-                                p->pos.y.lh.h += 16;
+                                p->pos.y.lh.h += 8;
+                                p->w = 32;
                                 break;
                             case FACING_LEFT:
-                                p->pos.x.lh.h -= 16;
+                                p->pos.x.lh.h -= 8;
+                                p->h = 32;
                                 break;
                             case FACING_RIGHT:
-                                p->pos.x.lh.h += 16;
+                                p->pos.x.lh.h += 8;
+                                p->h = 32;
                                 break;
                             case FACING_UPLEFT:
-                                p->pos.x.lh.h -= 12;
-                                p->pos.y.lh.h -= 12;
+                                p->pos.x.lh.h -= 6;
+                                p->pos.y.lh.h -= 6;
+                                p->w = 32;
+                                p->h = 32;
                                 break;
                             case FACING_UPRIGHT:
-                                p->pos.x.lh.h += 12;
-                                p->pos.y.lh.h -= 12;
+                                p->pos.x.lh.h += 6;
+                                p->pos.y.lh.h -= 6;
+                                p->w = 32;
+                                p->h = 32;
                                 break;
                             case FACING_DOWNLEFT:
-                                p->pos.x.lh.h -= 12;
-                                p->pos.y.lh.h += 12;
+                                p->pos.x.lh.h -= 6;
+                                p->pos.y.lh.h += 6;
+                                p->w = 32;
+                                p->h = 32;
                                 break;
                             case FACING_DOWNRIGHT:
-                                p->pos.x.lh.h += 12;
-                                p->pos.y.lh.h += 12;
+                                p->pos.x.lh.h += 6;
+                                p->pos.y.lh.h += 6;
+                                p->w = 32;
+                                p->h = 32;
                                 break;
                         }
+
+                        move_nocol_fast(p);
 
                         event_interaction_x = p->pos.x.lh.h;
                         event_interaction_y = p->pos.y.lh.h;
