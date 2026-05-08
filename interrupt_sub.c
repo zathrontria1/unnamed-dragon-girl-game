@@ -6,6 +6,7 @@
 #include "dma.h"
 #include "interrupt.h"
 #include "interrupt_sub.h"
+#include "gfx.h"
 
 #if VBCC_ASM == 1
     NO_INLINE void interrupt_vblank_sub()
@@ -130,6 +131,9 @@
     }
 
     // Do not interfere with HDMA
+
+    // Reuse the existing mosaic code, plenty of time
+    gfx_process_mosaic();
 
     // Write the current MOSAIC value
     REG_MOSAIC = shadow_mosaic;

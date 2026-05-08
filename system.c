@@ -170,6 +170,259 @@ void system_init_wram_functions(void)
 }
 
 /*
+    Throw a splash screen during initialization to prevent extended black screens
+    Put as many init parts as possible here
+*/
+void system_display_splash()
+{
+    // Set up the PPU regs to what we want.
+    system_reset_bg_scroll_regs();
+
+    REG_BGMODE = 0x09; // Mode 1, high priority bg3
+    REG_TM = 0x01; // BG1 only
+    REG_BG12NBA = 0 << 4 | 0;
+
+    REG_BG1SC = 0x3800 >> 8; // The image is 28KB. Have the tilemap go to the 28Kth byte.
+
+    // Decompress the splash and tilemap
+    LZ4_UnpackToWRAM(&data_bg_splash_lz4, 0x007f0000);
+    LZ4_UnpackToWRAM(&data_tilemap_splash_lz4, 0x007f7000);
+    
+    // Copy the palette
+    dma_copy_to_wram((uint32_t)data_palette_splash, (uint32_t)&shadow_cgram, 32);
+
+    // Upload the splash
+    dma_copy_to_vram(0x007f0000, 0x0000, 0x7800);
+    dma_copy_palette();
+
+    // Set up a fade-in. Doing this so that we can actually run the other steps
+    // while the game is still setting up.
+    shadow_inidisp_change = 1;
+    gfx_mosaic_change = -1;
+    gfx_mosaic_layers = 0x01; // BG1
+    gfx_mosaic_intensity = 16; // Max intensity
+    system_use_alternate_nmi = 1;
+
+    shadow_inidisp = 0x00;
+
+    system_interrupt_enable();
+
+    // Check the SRAM contents
+    sram_check();
+
+    // The SPC takes a while to init itself, so do something else in the meantime.
+    system_init(); // Do the init here too
+    
+    // Load the level
+    level_data_ptr = LEVEL_INITIAL; // Set the initial level here
+    level_load(level_data_ptr); // non-VRAM hitting parts here
+    
+    while (shadow_inidisp != 0x0f)
+    {
+        ; // Prevent execution from continuing to SPC upload while the screen isn't fully bright
+    }
+
+    // In case the above initialization take too short this should prevent issues
+    system_interrupt_disable(); // uploading the SPC while interrupts are on can cause lock-ups
+    snd_start(); // start the SPC
+
+    // Upload instrument and music sequence data
+    // TODO: describe a sequence pointer and structure so this can be handled as a single pointer to pass to a function
+    // Upload SFX data (shared for entire game)
+    snd_upload_sample_list((struct sample_list_entry *)&data_snd_samples[0]);
+    snd_upload_instrument_list((struct sample_list_entry_ins *)&data_snd_instruments[0]);
+    snd_upload_sequence((struct seq_command *)&data_seq_test_t1[0], 0); // Drum 1
+    snd_upload_sequence((struct seq_command *)&data_seq_test_t2[0], 1); // Drum 2
+    snd_upload_sequence((struct seq_command *)&data_seq_test_t3[0], 2); // Bass
+    snd_upload_sequence((struct seq_command *)&data_seq_test_t4[0], 3); // Secondary
+    //snd_upload_sequence((struct seq_command *)&data_seq_test_t5[0], 4); // Drum test sequence
+    //snd_upload_sequence((struct seq_command *)&data_seq_test_t6[0], 5); // Drum + instrument test sequence
+    snd_set_tempo(120);
+
+    shadow_inidisp_change = 0;
+    gfx_mosaic_change = 0;
+    system_use_alternate_nmi = 0;
+
+    while (shadow_inidisp != 0x00)
+    {
+        while ((REG_HVBJOY & VBL_READY) != VBL_READY)
+        {
+            ;
+        }
+
+        REG_INIDISP = shadow_inidisp;
+
+        REG_MOSAIC = shadow_mosaic;
+
+        shadow_mosaic = (((0x0f - shadow_inidisp) << 4) | 0x01);
+
+        while ((REG_HVBJOY & VBL_READY) == VBL_READY)
+        {
+            ;
+        }
+
+        shadow_inidisp -= 1;
+    }
+
+    shadow_mosaic = 0x00;
+
+    REG_MOSAIC = shadow_mosaic;
+    REG_INIDISP = 0x8f;
+    shadow_inidisp = 0;
+
+    // Screen is forced blank again. Do anything that touches PPU regs here now
+
+    // DMA graphics in its entirety
+    dma_copy_to_vram(0x007f0000, 0x0000, 0);
+
+    // Finish initializing graphics
+    system_init_graphics();
+
+    // Run one frame of partial game logic to draw sprites
+    loop_game_partial();
+    
+    return;
+}
+
+/*
+    Initialization of fixed sprites that touch VRAM must be done in fblank
+    Also for safety, PPU registers that are touched also go here
+*/
+void system_init_graphics(void)
+{
+    // Write BG1, BG2, BG3 and BG4 scroll to 0 on X and negative 1 on Y axis
+    system_reset_bg_scroll_regs();
+
+    // Set up sprite display
+    REG_OBSEL = OBJ_SIZE16_L32|3;
+
+    // Regenerate the tilemaps
+    map_regenerate();
+
+    system_reset_ui_tilemap();
+
+    return;
+}
+
+void system_reset_ui_tilemap()
+{
+    // flush the BG1 tilemap with the correct null tiles
+    #if VBCC_ASM == 1
+        REG_VMAIN = VRAM_INCLOW;
+        REG_VMADDLH = TILEMAP_ADDR_GAME_UI_4BPP;
+
+        __asm(
+            "\ta8\n"
+            "\tsep #$20\n"
+
+            "\tldx #256\n"
+            "\tstx r0\n"
+
+            "\tlda #$08\n"
+            "\tsta $4300\n"
+            
+            "\tldx #<r0\n"
+            "\tstx $4302\n"
+            "\tlda #^r0\n"
+            "\tsta $4304\n"
+
+            "\tldx #1024\n"
+            "\tstx $4305\n"
+
+            "\tlda #$18\n"
+            "\tsta $4301\n"
+
+            "\tlda #$01\n"
+            "\tsta $420b\n"
+
+            "\ta16\n"
+            "\trep #$20\n"
+        );
+
+        REG_VMAIN = VRAM_INCHIGH;
+        REG_VMADDLH = TILEMAP_ADDR_GAME_UI_4BPP;
+
+        __asm(
+            "\ta8\n"
+            "\tsep #$20\n"
+
+            "\tlda #$08\n"
+            "\tsta $4300\n"
+            
+            "\tldx #<r0+1\n"
+            "\tstx $4302\n"
+            "\tlda #^r0\n"
+            "\tsta $4304\n"
+
+            "\tldx #1024\n"
+            "\tstx $4305\n"
+
+            "\tlda #$19\n"
+            "\tsta $4301\n"
+
+            "\tlda #$01\n"
+            "\tsta $420b\n"
+
+            "\ta16\n"
+            "\trep #$20\n"
+        );
+    #else
+        REG_VMAIN = VRAM_INCHIGH;
+        REG_VMADDLH = TILEMAP_ADDR_GAME_UI_4BPP;
+
+        for (int i = 0; i < 1024; i++)
+        {
+            REG_VMDATALH = 256;
+        }
+    #endif
+
+    // Repeat for BG3
+    #if VBCC_ASM == 1
+        REG_VMAIN = VRAM_INCHIGH;
+        REG_VMADDLH = TILEMAP_ADDR_GAME_UI_2BPP;
+
+        __asm(
+            "\ta8\n"
+            "\tsep #$20\n"
+
+            "\tldx #$00000\n"
+            "\tstx r0\n"
+
+            "\tlda #$09\n"
+            "\tsta $4300\n"
+            
+            "\tldx #<r0\n"
+            "\tstx $4302\n"
+            "\tlda #^r0\n"
+            "\tsta $4304\n"
+
+            "\tldx #2048\n"
+            "\tstx $4305\n"
+
+            "\tlda #$18\n"
+            "\tsta $4301\n"
+
+            "\tlda #$01\n"
+            "\tsta $420b\n"
+
+            "\ta16\n"
+            "\trep #$20\n"
+        );
+    #else
+        REG_VMAIN = VRAM_INCHIGH;
+        REG_VMADDLH = TILEMAP_ADDR_GAME_UI_2BPP;
+
+        for (int i = 0; i < 1024; i++)
+        {
+            REG_VMDATALH = 0;
+        }
+    #endif
+
+    return;
+}
+
+
+/*
     First part of initialization that doesn't touch graphics (can be done during the splash screen)
 */
 void system_init()
@@ -419,265 +672,6 @@ inline void system_check_for_soft_reset()
             system_reset();
         }
     }
-
-    return;
-}
-
-/*
-    Throw a splash screen during initialization to prevent extended black screens
-    Put as many init parts as possible here
-*/
-void system_display_splash()
-{
-    // Clear video memory
-    system_reset_bg_scroll_regs();
-
-    REG_BGMODE = 0x09; // Mode 1, high priority bg3
-    REG_TM = 0x01; // BG1 only
-    REG_BG12NBA = 0 << 4 | 0;
-
-    REG_BG1SC = 0x4000 >> 8;
-
-    //dma_clear_vram();
-
-    // Upload the splash
-    dma_copy_to_vram((uint32_t)data_bg_splash, 0x0000, 28672);
-    dma_copy_to_vram((uint32_t)data_tilemap_splash, 0x4000, 1792);
-    dma_copy_to_wram((uint32_t)data_palette_splash, (uint32_t)&shadow_cgram, 32);
-
-    dma_copy_palette();
-
-    // Run a quick fade
-
-    shadow_inidisp = 0x00;
-    while (shadow_inidisp <= 0x0f)
-    {
-        while ((REG_HVBJOY & VBL_READY) != VBL_READY)
-        {
-            ;
-        }
-
-        REG_INIDISP = shadow_inidisp;
-        REG_MOSAIC = shadow_mosaic;
-
-        shadow_mosaic = (((0x0f - shadow_inidisp) << 4) | 0x01);
-
-        while ((REG_HVBJOY & VBL_READY) == VBL_READY)
-        {
-            ;
-        }
-
-        if (shadow_inidisp >= 0x0f)
-        {
-            shadow_mosaic = 0x00;
-            break;
-        }
-
-        shadow_inidisp += 1;
-    }
-
-    REG_MOSAIC = shadow_mosaic;
-    REG_INIDISP = shadow_inidisp;
-
-    // Check the SRAM contents
-    sram_check();
-
-    snd_start(); // start the SPC
-
-    // The SPC takes a while to init itself, so do something else in the meantime.
-    system_init(); // Do the init here too
-    
-    // Load the level
-    level_data_ptr = LEVEL_INITIAL; // Set the initial level here
-    level_load(level_data_ptr); // non-VRAM hitting parts here
-
-    // Upload instrument and music sequence data
-    // TODO: describe a sequence pointer and structure so this can be handled as a single pointer to pass to a function
-    // Upload SFX data (shared for entire game)
-    snd_upload_sample_list((struct sample_list_entry *)&data_snd_samples[0]);
-    snd_upload_instrument_list((struct sample_list_entry_ins *)&data_snd_instruments[0]);
-    snd_upload_sequence((struct seq_command *)&data_seq_test_t1[0], 0); // Drum 1
-    snd_upload_sequence((struct seq_command *)&data_seq_test_t2[0], 1); // Drum 2
-    snd_upload_sequence((struct seq_command *)&data_seq_test_t3[0], 2); // Bass
-    snd_upload_sequence((struct seq_command *)&data_seq_test_t4[0], 3); // Secondary
-    //snd_upload_sequence((struct seq_command *)&data_seq_test_t5[0], 4); // Drum test sequence
-    //snd_upload_sequence((struct seq_command *)&data_seq_test_t6[0], 5); // Drum + instrument test sequence
-    snd_set_tempo(120);
-
-    while (shadow_inidisp != 0x00)
-    {
-        while ((REG_HVBJOY & VBL_READY) != VBL_READY)
-        {
-            ;
-        }
-
-        REG_INIDISP = shadow_inidisp;
-
-        REG_MOSAIC = shadow_mosaic;
-
-        shadow_mosaic = (((0x0f - shadow_inidisp) << 4) | 0x01);
-
-        while ((REG_HVBJOY & VBL_READY) == VBL_READY)
-        {
-            ;
-        }
-
-        shadow_inidisp -= 1;
-    }
-
-    shadow_mosaic = 0x00;
-
-    REG_MOSAIC = shadow_mosaic;
-    REG_INIDISP = 0x8f;
-    shadow_inidisp = 0;
-
-    // Screen is forced blank again. Do anything that touches PPU regs here now
-
-    // DMA graphics in its entirety
-    dma_copy_to_vram(0x007f0000, 0x0000, 0);
-
-    // Finish initializing graphics
-    system_init_graphics();
-
-    // Run one frame of partial game logic to draw sprites
-    loop_game_partial();
-    
-    return;
-}
-
-/*
-    Initialization of fixed sprites that touch VRAM must be done in fblank
-    Also for safety, PPU registers that are touched also go here
-*/
-void system_init_graphics(void)
-{
-    // Write BG1, BG2, BG3 and BG4 scroll to 0 on X and negative 1 on Y axis
-    system_reset_bg_scroll_regs();
-
-    // Set up sprite display
-    REG_OBSEL = OBJ_SIZE16_L32|3;
-
-    // Regenerate the tilemaps
-    map_regenerate();
-
-    system_reset_ui_tilemap();
-
-    return;
-}
-
-void system_reset_ui_tilemap()
-{
-    // flush the BG1 tilemap with the correct null tiles
-    #if VBCC_ASM == 1
-        REG_VMAIN = VRAM_INCLOW;
-        REG_VMADDLH = TILEMAP_ADDR_GAME_UI_4BPP;
-
-        __asm(
-            "\ta8\n"
-            "\tsep #$20\n"
-
-            "\tldx #256\n"
-            "\tstx r0\n"
-
-            "\tlda #$08\n"
-            "\tsta $4300\n"
-            
-            "\tldx #<r0\n"
-            "\tstx $4302\n"
-            "\tlda #^r0\n"
-            "\tsta $4304\n"
-
-            "\tldx #1024\n"
-            "\tstx $4305\n"
-
-            "\tlda #$18\n"
-            "\tsta $4301\n"
-
-            "\tlda #$01\n"
-            "\tsta $420b\n"
-
-            "\ta16\n"
-            "\trep #$20\n"
-        );
-
-        REG_VMAIN = VRAM_INCHIGH;
-        REG_VMADDLH = TILEMAP_ADDR_GAME_UI_4BPP;
-
-        __asm(
-            "\ta8\n"
-            "\tsep #$20\n"
-
-            "\tlda #$08\n"
-            "\tsta $4300\n"
-            
-            "\tldx #<r0+1\n"
-            "\tstx $4302\n"
-            "\tlda #^r0\n"
-            "\tsta $4304\n"
-
-            "\tldx #1024\n"
-            "\tstx $4305\n"
-
-            "\tlda #$19\n"
-            "\tsta $4301\n"
-
-            "\tlda #$01\n"
-            "\tsta $420b\n"
-
-            "\ta16\n"
-            "\trep #$20\n"
-        );
-    #else
-        REG_VMAIN = VRAM_INCHIGH;
-        REG_VMADDLH = TILEMAP_ADDR_GAME_UI_4BPP;
-
-        for (int i = 0; i < 1024; i++)
-        {
-            REG_VMDATALH = 256;
-        }
-    #endif
-
-    // Repeat for BG3
-    #if VBCC_ASM == 1
-        REG_VMAIN = VRAM_INCHIGH;
-        REG_VMADDLH = TILEMAP_ADDR_GAME_UI_2BPP;
-
-        __asm(
-            "\ta8\n"
-            "\tsep #$20\n"
-
-            "\tldx #$00000\n"
-            "\tstx r0\n"
-
-            "\tlda #$09\n"
-            "\tsta $4300\n"
-            
-            "\tldx #<r0\n"
-            "\tstx $4302\n"
-            "\tlda #^r0\n"
-            "\tsta $4304\n"
-
-            "\tldx #2048\n"
-            "\tstx $4305\n"
-
-            "\tlda #$18\n"
-            "\tsta $4301\n"
-
-            "\tlda #$01\n"
-            "\tsta $420b\n"
-
-            "\ta16\n"
-            "\trep #$20\n"
-        );
-    #else
-        REG_VMAIN = VRAM_INCHIGH;
-        REG_VMADDLH = TILEMAP_ADDR_GAME_UI_2BPP;
-
-        for (int i = 0; i < 1024; i++)
-        {
-            REG_VMDATALH = 0;
-        }
-    #endif
 
     return;
 }

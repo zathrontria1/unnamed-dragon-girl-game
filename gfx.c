@@ -44,7 +44,24 @@ void gfx_process_mosaic()
     }
     else
     {
-        shadow_mosaic = (gfx_mosaic_layers | ((gfx_mosaic_intensity - 1) << 4));
+        #if VBCC_ASM == 1
+            __asm(
+                "\ta8\n"
+                "\tsep #$20\n"
+                "\tlda _gfx_mosaic_intensity\n"
+                "\tdec\n"
+                "\tasl\n"
+                "\tasl\n"
+                "\tasl\n"
+                "\tasl\n"
+                "\tora _gfx_mosaic_layers\n"
+                "\tsta <_shadow_mosaic\n"
+                "\ta16\n"
+                "\trep #$20\n"
+            );
+        #else
+            shadow_mosaic = (gfx_mosaic_layers | ((gfx_mosaic_intensity - 1) << 4));
+        #endif
     }
 
     return;
