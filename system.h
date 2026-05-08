@@ -14,7 +14,7 @@ void system_setup_tilemap_display(uint16_t routine);
 void system_reset_ui_tilemap();
 
 void system_wait_vblank(void);
-inline void system_poll_input(void);
+void system_poll_input(void);
 inline uint16_t system_check_for_key(enum KEYPAD_BITS k);
 inline uint16_t system_check_for_key_hold(enum KEYPAD_BITS k);
 void system_interrupt_enable(void);

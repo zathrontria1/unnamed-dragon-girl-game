@@ -286,28 +286,46 @@ void system_wait_vblank()
     return;
 }
 
-inline void system_poll_input()
+void system_poll_input()
 {
-    // Check if input is ready.
-    while ((REG_HVBJOY & PAD_BUSY) == PAD_BUSY)
-        ;
+    #if VBCC_ASM == 1 // Don't bother changing memory bit
+        __asm(
+            "\ta16\n"
+            "\tx16\n"
+            ".input_wait:\n"
+            "\tlda $4212\n"
+            "\tand #$01\n"
+            "\tbne .input_wait\n"
+            "\tlda _input_pad0\n"
+            "\tsta r0\n"
+            "\tlda $4218\n"
+            "\tsta _input_pad0\n"
+            "\teor r0\n"
+            "\tand _input_pad0\n"
+            "\tsta _input_pad0_new\n"
+        );
+    #else
+        // Check if input is ready.
+        while ((REG_HVBJOY & PAD_BUSY) == PAD_BUSY)
+            ;
 
-    // Store last frame's input temporarily.
-    uint16_t temp_pad0 = input_pad0; 
+        // Store last frame's input temporarily.
+        uint16_t temp_pad0 = input_pad0; 
 
-    // Current frame input
-    input_pad0 = REG_JOYxLH(0); 
+        // Current frame input
+        input_pad0 = REG_JOYxLH(0); 
 
-    // Now to figure out what keys were newly pressed
-    // XOR with previous frame, 
-    // then AND with current frame
-    input_pad0_new = ((temp_pad0 ^ input_pad0) & input_pad0);
+        // Now to figure out what keys were newly pressed
+        // XOR with previous frame, 
+        // then AND with current frame
+        input_pad0_new = ((temp_pad0 ^ input_pad0) & input_pad0);
 
-    // The game only supports 1 pad
-    /*uint16_t temp_pad1 = input_pad1; 
+        // The game only supports 1 pad
+        /*uint16_t temp_pad1 = input_pad1; 
 
-    input_pad1 = REG_JOYxLH(1); 
-    input_pad1_new = ((temp_pad1 ^ input_pad1) & input_pad1);*/
+        input_pad1 = REG_JOYxLH(1); 
+        input_pad1_new = ((temp_pad1 ^ input_pad1) & input_pad1);*/
+    #endif
 
     system_check_for_soft_reset(); // Place the soft reset check at the end of input polling
     
