@@ -387,22 +387,20 @@ void ui_update_money()
 void ui_update_enemy_counters()
 {
     // Copy these values
-    uint16_t temp_enemy_defeated = obj_enemies_defeated;
-    uint16_t temp_enemy_max = obj_enemies_max_count;
-
     char temp_string[8] = "   /   "; // 3 spaces, a /, and another 3 spaces
 
     // The icon
     ui_enemy_counter[0] = 0x016e | 0x2000 | (PAL_UI_4BPP << 10);
 
-    snprintf((char *)&temp_string, 8, "%3u/%3u", temp_enemy_defeated, temp_enemy_max);
+    snprintf((char *)&temp_string, 8, "%3u/%3u", obj_enemies_defeated, obj_enemies_max_count);
 
     for (int i = 0; i < 8; i++)
     {
         ui_enemy_counter[i+1] = (0x00e0 + temp_string[i]) | 0x2000 | (PAL_UI_4BPP << 10);
     }
 
-    if (temp_enemy_defeated == temp_enemy_max)
+    //if (obj_enemies_defeated == obj_enemies_max_count)
+    if (obj_enemies_defeated >= obj_enemies_target_count)
     {
         for (int i = 0; i < 5; i++)
         {
@@ -436,7 +434,7 @@ void ui_update_enemy_counters()
         0
         ) == 0)
     {
-        ui_cached_enemy_counter = temp_enemy_defeated;
+        ui_cached_enemy_counter = obj_enemies_defeated;
     }
 
     return;
