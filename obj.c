@@ -17,6 +17,8 @@
 #include "consts_snd.h"
 #include "system.h"
 
+#include "gfx.h"
+
 void obj_run() 
 {
     hitbox_count_enemy = 0;
@@ -107,7 +109,9 @@ void obj_run()
         }
     #endif
 
-    // Repeat for hitboxes
+    // Repeat for player hitboxes
+    obj_player_active_fireballs = 0;
+
     #if VBCC_ASM == 1
         __asm(
         "\ta16\n"
@@ -168,6 +172,14 @@ void obj_run()
         }
     #endif
 
+    if (obj_player_active_fireballs > 0)
+    {
+        gfx_cmath_set(obj_player_active_fireballs,0,0);
+        gfx_cmath_change = -64 * V_MUL;
+        shadow_cgwsub = 0x00;
+        shadow_cgadsub = 0x32;
+    }
+
     blocker_build_count_shadow = blocker_build_count;
     event_in_combat_shadow = event_in_combat;
 
@@ -199,7 +211,6 @@ void obj_run()
     }
 
     hitbox_count_enemy_shadow = hitbox_count_enemy;
-    hitbox_count_player_shadow = hitbox_count_player;
 
     return;
 }

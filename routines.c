@@ -605,10 +605,6 @@ void routines_fireball(struct game_object * o)
         {
             obj_destroy_hitbox_player(o->array_index);
         }
-        else
-        {
-            //hitbox_count_player++;
-        }
     }
 
     // Only draw every other frame for both visibility and performance
@@ -617,10 +613,7 @@ void routines_fireball(struct game_object * o)
         spr_queue_add_front(o, (o->struct_data.npc_data.ani.display | PAL_FIREBALL << 9 | 3 << 12));
     }
 
-    gfx_cmath_set(hitbox_count_player,0,0);
-    gfx_cmath_change = -128;
-    shadow_cgwsub = 0x00;
-    shadow_cgadsub = 0x32;
+    obj_player_active_fireballs++;
 
     return;
 }
@@ -696,10 +689,6 @@ void routines_hitbox_invis(struct game_object * o)
     if (o->struct_data.npc_data.ttl == 0)
     {
         obj_destroy_hitbox_player(o->array_index);
-    }
-    else
-    {
-        //hitbox_count_player++;
     }
 
     return;
@@ -1363,7 +1352,7 @@ void routines_drop_rec_meat(struct game_object * o)
                 }
 
                 gfx_cmath_set(0,4,0);
-                gfx_cmath_change = -128;
+                gfx_cmath_change = -64 * V_MUL;
                 shadow_cgwsub = 0x00;
                 shadow_cgadsub = 0x32;
                 

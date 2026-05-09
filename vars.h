@@ -64,6 +64,7 @@ extern uint16_t obj_enemies_max_count;
 extern uint16_t obj_player_attack_interval;
 extern uint16_t obj_player_prev_facing;
 extern uint8_t * obj_player_prev_sprframe;
+extern uint16_t obj_player_active_fireballs;
 
 // Hitbox data
 ZP extern uint16_t hitbox_player_first_available;
@@ -75,7 +76,7 @@ extern uint16_t hitbox_player_delete_queue_count;
 extern uint16_t hitbox_count_player;
 extern uint16_t hitbox_process_count_player;
 extern uint16_t hitbox_count_enemy;
-extern uint16_t hitbox_count_player_shadow;
+
 extern uint16_t hitbox_count_enemy_shadow;
 
 // Event flags
