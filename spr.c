@@ -42,7 +42,7 @@ void spr_queue_add_ui(int16_t x, int16_t y, uint16_t tileattrib)
 
 void spr_queue_add_front(struct game_object * o, uint16_t tileattrib)
 {
-    if (spr_front_count >= 128)
+    if (spr_front_count >= SPR_COUNT_MAX_FRONT)
     {
         return;
     }
@@ -82,7 +82,7 @@ void spr_queue_add_front(struct game_object * o, uint16_t tileattrib)
 
 void spr_queue_add_normal(struct game_object * o, uint16_t tileattrib)
 {
-    if (spr_normal_count >= 128)
+    if (spr_normal_count >= SPR_COUNT_MAX_SORTED)
     {
         return;
     }
@@ -122,7 +122,7 @@ void spr_queue_add_normal(struct game_object * o, uint16_t tileattrib)
 
 void spr_queue_add_back(struct game_object * o, uint16_t tileattrib)
 {
-    if (spr_back_count >= 128)
+    if (spr_back_count >= SPR_COUNT_MAX_BACK)
     {
         return;
     }

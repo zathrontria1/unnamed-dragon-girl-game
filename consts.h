@@ -232,4 +232,9 @@
 #define TM_MODE1_MSGBOX 0x07 // BG1, BG2, BG3, and OBJ
 #define TM_MODE3 0x13 // BG1, BG2, and OBJ
 
+// Sprite management defines
+#define SPR_COUNT_MAX_FRONT 64
+#define SPR_COUNT_MAX_SORTED 64
+#define SPR_COUNT_MAX_BACK 64
+
 #define LEVEL_INITIAL &data_level_test_0

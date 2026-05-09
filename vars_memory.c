@@ -223,13 +223,13 @@ uint16_t spr_sprite_count_prev; // previous
 uint16_t spr_vram_slots[128];
 
 uint16_t spr_front_count; // Rendered non-UI unsorted front-forced sprites this frame
-struct spr_queue_entry spr_queue_front[128];
+struct spr_queue_entry spr_queue_front[SPR_COUNT_MAX_FRONT];
 uint16_t spr_back_count; // Rendered non-UI unsorted back-forced sprites this frame (e.g. background impostors and shadows)
-struct spr_queue_entry spr_queue_back[128];
+struct spr_queue_entry spr_queue_back[SPR_COUNT_MAX_BACK];
 
 uint16_t spr_normal_count;
 NEAR uint8_t spr_depth_count[257]; // Count of sprites on each depth line
-struct spr_queue_entry spr_queue_normal[128]; // depth sorted sprite entries
+struct spr_queue_entry spr_queue_normal[SPR_COUNT_MAX_SORTED]; // depth sorted sprite entries
 
 // Graphics effects
 uint16_t gfx_mosaic_layers;
