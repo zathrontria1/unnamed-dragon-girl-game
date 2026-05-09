@@ -54,6 +54,10 @@ void loop_fadein()
     return;
 }
 
+/*
+    This loop is only used by the soft reset on game over routine.
+    It's very likely it'll be gone entirely once a Game Over screen is implemented.
+*/
 void loop_fadeout()
 {
     system_wait_vblank();
@@ -448,27 +452,50 @@ void loop_mapdisplay()
 
     if (system_check_for_key(KEY_SELECT))
     {
+        // Let's try using the new alternate NMI part
         shadow_inidisp = 0x0f;
-        system_current_routine = ROUTINE_FADEOUT;
+        system_use_alternate_nmi = 1;
+        shadow_inidisp_change = -1;
+        system_current_routine = ROUTINE_GAMELOOP_RELOAD;
         system_target_routine = ROUTINE_GAMELOOP_RELOAD;
+
+        /*shadow_inidisp = 0x0f;
+        system_current_routine = ROUTINE_FADEOUT;
+        system_target_routine = ROUTINE_GAMELOOP_RELOAD;*/
     }
 
     return;
 }
 
+/*
+    Used when going from another mode to the game (e.g. map screens)
+*/
 
 void loop_game_reload()
 {
+    // Perform a partial load
+    level_load_tileset(level_data_ptr);
+    level_load_palette(level_data_ptr);
+
+    system_ui_in_bg2 = 0;
+    ui_force_update = 1;
+
+    bg_scroll_x = bg_scroll_x_saved;
+    bg_scroll_y = bg_scroll_y_saved;
+
+    dma_queue_add(obj_player_prev_sprframe, 0x6000, 128, VRAM_INCHIGH, 1);
+
+    while (shadow_inidisp != 0x00)
+    {
+        ; // Prevent execution from continuing to VRAM writing parts while the display is turned on
+    }
+
+    // Try to move as many things as possible before here.
     system_interrupt_disable();
     REG_INIDISP = 0x8f;
 
     system_reset_bg_scroll_regs();
-    bg_scroll_x = bg_scroll_x_saved;
-    bg_scroll_y = bg_scroll_y_saved;
-
-    // Perform a partial load
-    level_load_tileset(level_data_ptr);
-    level_load_palette(level_data_ptr);
+    
 
     // Copy the old OAM into the current
     shadow_oam = shadow_oam_copy;
@@ -485,16 +512,15 @@ void loop_game_reload()
     system_setup_tilemap_display(system_target_routine);
     system_init_display(system_target_routine);
 
-    dma_queue_add(obj_player_prev_sprframe, 0x6000, 128, VRAM_INCHIGH, 1);
-
-    system_ui_in_bg2 = 0;
-    ui_force_update = 1;
-
     loop_game_partial();
 
-    ani_pal_hdma_enable();
+    ani_pal_hdma_enable(); 
 
     shadow_inidisp = 0x00;
+
+    system_use_alternate_nmi = 0;
+    shadow_inidisp_change = 0;
+
     system_interrupt_enable();
 
     return;

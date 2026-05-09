@@ -184,7 +184,7 @@ void obj_run()
     event_in_combat_shadow = event_in_combat;
 
     if ((event_in_combat == 0) && 
-    (system_current_routine != ROUTINE_MSGBOX) &&
+    (!system_game_paused) &&
     (bg_scroll_x_bounds_min.full.high.a != -32768) &&
     (bg_scroll_y_bounds_min.full.high.a != -32768))
     {
