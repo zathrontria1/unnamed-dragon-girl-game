@@ -617,6 +617,11 @@ void routines_fireball(struct game_object * o)
         spr_queue_add_front(o, (o->struct_data.npc_data.ani.display | PAL_FIREBALL << 9 | 3 << 12));
     }
 
+    gfx_cmath_set(hitbox_count_player,0,0);
+    gfx_cmath_change = -128;
+    shadow_cgwsub = 0x00;
+    shadow_cgadsub = 0x32;
+
     return;
 }
 
@@ -1317,11 +1322,6 @@ void routines_drop_money(struct game_object * o)
 
                 p->struct_data.npc_data.money += o->struct_data.npc_data.money;
 
-                /*gfx_cmath_set(4,4,0);
-                gfx_cmath_change = -1;
-                shadow_cgwsub = 0x00;
-                shadow_cgadsub = 0x22;*/
-
                 obj_destroy(o->array_index);
             }
         }
@@ -1363,10 +1363,10 @@ void routines_drop_rec_meat(struct game_object * o)
                 }
 
                 gfx_cmath_set(0,4,0);
-                gfx_cmath_change = -1;
+                gfx_cmath_change = -128;
                 shadow_cgwsub = 0x00;
-                shadow_cgadsub = 0x22;
-            
+                shadow_cgadsub = 0x32;
+                
                 obj_destroy(o->array_index);
             }
         }
