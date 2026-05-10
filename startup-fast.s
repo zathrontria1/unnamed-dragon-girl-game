@@ -107,47 +107,79 @@ ___start:
 
  jsl copy_blockmove
 .clear_done:
- lda #<__NDS
- sta r0
- lda #^__NDS
- sta r1
- lda #<__NDC
- sta r2
+
+; Begin copying.
+; C is the location of the source. S is destination.
+ sep #$20
+ a8
  lda #^__NDC
- sta r3
+ sta r7
+ lda #^__NDS
+ sta r6+1 ; Source and destination are different. Note that in code the banks are "destination, source"
+
+ rep #$30 ; axy16
+ a16
+ x16
+
  lda #<__NDE
- sta r4
- lda #^__NDE
- sta r5
- jsl copy
+ sec
+ sbc #<__NDS+1
 
- lda #<__FDS
- sta r0
- lda #^__FDS
- sta r1
- lda #<__FDC
- sta r2
+ bcc .copyfar
+
+ ldx #<__NDC ; Copy source
+ ldy #<__NDS ; Copy dest
+
+ jsl copy_blockmove
+
+.copyfar:
+ sep #$20
+ a8
  lda #^__FDC
- sta r3
- lda #<__FDE
- sta r4
- lda #^__FDE
- sta r5
- jsl copy
+ sta r7
+ lda #^__FDS
+ sta r6+1 ; Source and destination are different. Note that in code the banks are "destination, source"
 
- lda #<__HDS
- sta r0
- lda #^__HDS
- sta r1
- lda #<__HDC
- sta r2
+ rep #$30 ; axy16
+ a16
+ x16
+
+ lda #<__FDE
+ sec
+ sbc #<__FDS+1
+
+ bcc .copyhuge
+
+ ldx #<__FDC ; Copy source
+ ldy #<__FDS ; Copy dest
+
+ jsl copy_blockmove
+
+
+.copyhuge:
+ sep #$20
+ a8
  lda #^__HDC
- sta r3
+ sta r7
+ lda #^__HDS
+ sta r6+1 ; Source and destination are different. Note that in code the banks are "destination, source"
+
+ rep #$30 ; axy16
+ a16
+ x16
+
  lda #<__HDE
- sta r4
- lda #^__HDE
- sta r5
- jsl copy
+ sec
+ sbc #<__HDS+1
+
+ bcc .copy_done
+
+ ldx #<__HDC ; Copy source
+ ldy #<__HDS ; Copy dest
+
+ jsl copy_blockmove
+
+.copy_done:
 
  ; Clear the stack. Must be manually done without subroutine calls.
  rep #$30
@@ -161,7 +193,6 @@ ___start:
 
  ; DB should be at bank $00. Change it to $80 here.
  ; Change data bank to $80
-
  sep #$20
  a8
  lda #__DBR_init
@@ -190,59 +221,12 @@ ___start:
  txa
  txy
 
- 
- 
+ pha
+ pla ; also clear the stack value with 0 for good measure
 
  jsl ___main
 ___exit:
  jmp ___exit
-
-
-copy:
- jmp l5
-l3:
- sep #32
- a8
- lda [r2]
- sta [r0]
- rep #32
- a16
- inc r0
- bne l4
- inc r1
-l4:
- inc r2
- bne l5
- inc r3
-l5:
- lda r0
- cmp r4
- bne l3
- lda r1
- cmp r5
- bne l3
- rtl
-
-clear:
- jmp l2
-l1:
- sep #32
- a8
- lda #0
- sta [r0]
- rep #32
- a16
- inc r0
- bne l2
- inc r1
-l2:
- lda r0
- cmp r4
- bne l1
- lda r1
- cmp r5
- bne l1
- rtl
 
 copy_blockmove:
  phb
