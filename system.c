@@ -32,8 +32,11 @@ uint8_t system_JMLCodeInWRAM[4];
 /*
     VBCC doesn't initialize the zero page variables
     So do it for it
+
+    Now using custom startup that does indeed init ZP, so commented out
 */
-void system_init_zp()
+
+/*void system_init_zp()
 {
     system_in_vblank = 0;
     system_current_routine = 0;
@@ -64,7 +67,7 @@ void system_init_zp()
     system_use_alternate_nmi = 0;
 
     return;
-}
+}*/
 
 /*
     Initialize all system registers. In case something else was running beforehand

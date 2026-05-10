@@ -18,7 +18,7 @@
 int main()
 {
     system_init_regs(); // Display will be turned off within this
-    system_init_zp(); // Wipe ZP
+    //system_init_zp(); // Wipe ZP // Now done within startup
     system_init_wram_functions(); // Write opcodes for WRAM functions
     
     rand_array[0] = 1; // Set the seed here
