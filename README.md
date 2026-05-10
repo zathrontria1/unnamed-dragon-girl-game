@@ -57,6 +57,8 @@ It shouldn't happen with the modified included PVSnesLib header files now, but i
 [PPU](https://snes.nesdev.org/wiki/PPU_registers)
 [DMA](https://snes.nesdev.org/wiki/DMA_registers)
 
+This project uses the definition of bool as defined in the C standard. PVSnesLib uses a non-standard definition (true is 0xff instead of 0x01). The header files included with this project use the C definition for bool and will not compile with PVSnesLib headers as is, if your compiler provides them. [See here for what definitions are expected](https://cppreference.com/c/header/stdbool).
+
 A work-in-progress Makefile and SCM is also provided for [Calypsi](https://www.calypsi.cc/) but is currently still not fully functional.
 
 Other C compilers are not tested at all, and may or may not result in a functional binary.

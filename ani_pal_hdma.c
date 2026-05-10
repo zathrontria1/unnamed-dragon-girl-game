@@ -1,5 +1,8 @@
-#include <stdint.h>
 #include <snes/console.h>
+
+#include <stdint.h>
+#include <stdbool.h>
+
 #include "ani_pal_hdma.h"
 
 #include "vars.h"

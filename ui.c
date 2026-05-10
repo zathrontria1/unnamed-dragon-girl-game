@@ -1,7 +1,10 @@
+#include <snes/console.h>
+
 #include <stdlib.h>
 #include <stdio.h>
+
 #include <stdint.h>
-#include <snes/console.h>
+#include <stdbool.h>
 
 #include "vars.h"
 

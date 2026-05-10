@@ -1,5 +1,7 @@
 #include <snes/console.h>
+
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "vars.h"
 

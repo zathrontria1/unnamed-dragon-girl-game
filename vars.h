@@ -1,4 +1,5 @@
-#include <stdint.h> // DO NOT REMOVE THIS
+#include <stdint.h>
+#include <stdbool.h> // DO NOT REMOVE THIS
 
 #include "consts.h"
 #include "defs_objects.h"

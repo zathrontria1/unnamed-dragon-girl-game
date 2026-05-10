@@ -1,4 +1,6 @@
 #include <stdint.h>
+#include <stdbool.h>
+
 #include "data_strings.h"
 
 const uint8_t STR_MSG_TEST_SINGLELINE[] = "The quick brown fox jumps over";

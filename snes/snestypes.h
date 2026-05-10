@@ -58,11 +58,11 @@ typedef __near volatile long vint32;
 typedef void (*VoidFn)(void);
 
 //! boolean definitions
-typedef unsigned char bool;
+/*typedef unsigned char bool;
 #define FALSE 0
 #define TRUE 0xff
 #define false 0
-#define true 0xff
+#define true 0xff*/
 
 // stdio definitions
 //#define NULL 0
