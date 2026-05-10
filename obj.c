@@ -1088,7 +1088,11 @@ uint16_t move(struct game_object * o)
     return;
 }
 
-void move_nocol_veryfast(struct game_object * o)
+#if VBCC_ASM == 1
+    NO_INLINE void move_nocol_veryfast(__reg("a/x") struct game_object * o)
+#else
+    inline void move_nocol_veryfast(struct game_object * o)
+#endif
 {
     // Move an object ignoring everything
     // Useful for light objects that do not need to test anything.
@@ -1096,8 +1100,33 @@ void move_nocol_veryfast(struct game_object * o)
 
     // This version will not update edges, so should be used for no-collision checking objects only
 
-    o->pos.x.a += o->delta.x.a;
-    o->pos.y.a += o->delta.y.a;
+    #if VBCC_ASM == 1
+        __asm(
+            "\ta16\n"
+            "\tx16\n"
+            "\ttax\n" // Set up the pointer
+
+            "\tlda $7e0006,x\n"
+            "\tclc\n"
+            "\tadc $7e0012,x\n"
+            "\tsta $7e0006,x\n"
+            "\tlda $7e0008,x\n"
+            "\tadc $7e0014,x\n"
+            "\tsta $7e0008,x\n"
+
+            "\tlda $7e000a,x\n"
+            "\tclc\n"
+            "\tadc $7e0016,x\n"
+            "\tsta $7e000a,x\n"
+            "\tlda $7e000c,x\n"
+            "\tadc $7e0018,x\n"
+            "\tsta $7e000c,x\n"
+            )   ;
+
+    #else
+        o->pos.x.a += o->delta.x.a;
+        o->pos.y.a += o->delta.y.a;
+    #endif
 
     return;
 }
