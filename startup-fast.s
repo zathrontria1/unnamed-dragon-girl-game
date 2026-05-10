@@ -159,7 +159,14 @@ ___start:
  ldy #___stack+1
  mvn #$00, #$00
 
- ; DB should be at bank $00 after that, so can be left alone
+ ; DB should be at bank $00. Change it to $80 here.
+ ; Change data bank to $80
+
+ sep #$20
+ a8
+ lda #__DBR_init
+ pha
+ plb
 
  ; Clear the zero page
  rep #$20
@@ -182,6 +189,9 @@ ___start:
  lda #0
  txa
  txy
+
+ 
+ 
 
  jsl ___main
 ___exit:
