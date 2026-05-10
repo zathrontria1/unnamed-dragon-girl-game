@@ -64,9 +64,9 @@ void obj_run()
         "\tbeq .object_process_increment\n"
         "\tiny\n"
         "\tlda $7e0037,x\n"
-        "\tsta >_system_JMLCodeInWRAM+2\n"
+        "\tsta _system_JMLCodeInWRAM+2\n"
         "\tlda $7e0036,x\n"
-        "\tsta >_system_JMLCodeInWRAM+1\n"
+        "\tsta _system_JMLCodeInWRAM+1\n"
         "\tphy\n"
         "\tphx\n"
         "\ttxa\n"
@@ -126,9 +126,9 @@ void obj_run()
         "\tbeq .hitbox_player_process_increment\n"
         "\tiny\n"
         "\tlda $7e0037,x\n"
-        "\tsta >_system_JMLCodeInWRAM+2\n"
+        "\tsta _system_JMLCodeInWRAM+2\n"
         "\tlda $7e0036,x\n"
-        "\tsta >_system_JMLCodeInWRAM+1\n"
+        "\tsta _system_JMLCodeInWRAM+1\n"
         "\tphy\n"
         "\tphx\n"
         "\ttxa\n"
@@ -1037,18 +1037,53 @@ uint16_t move(struct game_object * o)
     return 0;
 }
 
-void move_nocol_fast(struct game_object * o)
+#if VBCC_ASM == 1
+    NO_INLINE void move_nocol_fast(__reg("a/x") struct game_object * o)
+#else
+    inline void move_nocol_fast(struct game_object * o)
+#endif
 {
     // Move an object ignoring everything
     // Useful for light objects that do not need to test anything.
     // optionally also ignoring map edge
 
-    o->pos.x.a += o->delta.x.a;
-    o->pos.y.a += o->delta.y.a;
+    #if VBCC_ASM == 1
+        __asm(
+            "\ta16\n"
+            "\tx16\n"
+            "\ttax\n" // Set up the pointer
 
-    // Update right and bottom edges
-    o->r = o->pos.x.lh.h + o->w;
-    o->b = o->pos.y.lh.h + o->h;
+            "\tlda $7e0006,x\n"
+            "\tclc\n"
+            "\tadc $7e0012,x\n"
+            "\tsta $7e0006,x\n"
+            "\tlda $7e0008,x\n"
+            "\tadc $7e0014,x\n"
+            "\tsta $7e0008,x\n"
+            "\tclc\n"
+            "\tadc $7e0028,x\n"
+            "\tsta $7e002c,x\n"
+
+            "\tlda $7e000a,x\n"
+            "\tclc\n"
+            "\tadc $7e0016,x\n"
+            "\tsta $7e000a,x\n"
+            "\tlda $7e000c,x\n"
+            "\tadc $7e0018,x\n"
+            "\tsta $7e000c,x\n"
+            "\tclc\n"
+            "\tadc $7e002a,x\n"
+            "\tsta $7e002e,x\n"
+            )   ;
+
+    #else
+        o->pos.x.a += o->delta.x.a;
+        o->pos.y.a += o->delta.y.a;
+
+        // Update right and bottom edges
+        o->r = o->pos.x.lh.h + o->w;
+        o->b = o->pos.y.lh.h + o->h;
+    #endif
 
     return;
 }

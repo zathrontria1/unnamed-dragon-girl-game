@@ -572,8 +572,6 @@ void routines_player(struct game_object * o)
 
 void routines_fireball(struct game_object * o)
 {
-    struct game_data_npc * d = (struct game_data_npc *)&(o->struct_data);
-
     snd_flame_active = 1;
 
     if (!system_game_paused)

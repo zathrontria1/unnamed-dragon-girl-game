@@ -29,7 +29,12 @@ void obj_cleanup(void);
 void obj_cleanup_hitbox_player(void);
 
 uint16_t move(struct game_object * o);
-void move_nocol_fast(struct game_object * o);
+#if VBCC_ASM == 1
+    NO_INLINE void move_nocol_fast(__reg("a/x") struct game_object * o);
+#else
+    inline void move_nocol_fast(struct game_object * o);
+#endif
+
 void move_nocol_veryfast(struct game_object * o);
 
 uint32_t ai_distance_squared(int16_t abs_x, int16_t abs_y);
