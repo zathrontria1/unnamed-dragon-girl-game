@@ -1,4 +1,4 @@
-STACKLEN   =?    0x400;
+STACKLEN   =?    0x200;
 WRAMSTART  =? 0x7E0000;
 WRAMSIZE   =?  0x20000;
 LORAMSTART =?   0x0000;
@@ -24,7 +24,6 @@ MEMORY
 
 SECTIONS
 {
-
   xrom  : {*(.ctors) *(.dtors) *(*_text.far.*) *(*_rodata.far.*) *(*_text.huge.*) *(*_rodata.huge.*) } >xrom AT>out
   fillx : {.=0xc08000;} >xrom AT>out
   nrom  : {*(*_text.startup) *(*_text.near.*) *(*_rodata.near.*) *(.ctors) *(.dtors) *(text) *(*_text*) *(*_rodata.*) } >lrom AT>out
