@@ -50,7 +50,7 @@ SECTIONS
   ___heapend = WRAMSTART+WRAMSIZE;
 
   ___stack = LORAMSTART+LORAMSIZE-STACKLEN;
-  ___stackend = LORAMSTART+LORAMSIZE+STACKLEN-1;
+  ___stackend = LORAMSTART+LORAMSIZE-1;
   ___stacklen = STACKLEN;
 
   __NDS = ADDR(ndata);

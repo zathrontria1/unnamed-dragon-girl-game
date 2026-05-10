@@ -12,7 +12,7 @@ ___start:
  a16
  x16
 
- lda #$1fff
+ lda #___stackend
  tcs
  lda #r0
  and #$ff00
