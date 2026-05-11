@@ -26,6 +26,8 @@
 
 #include "gfx.h"
 
+#include "movement.h"
+
 #include "main.h"
 
 void routines_player(struct game_object * o)
