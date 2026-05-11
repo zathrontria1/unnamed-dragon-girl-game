@@ -45,7 +45,7 @@ void obj_run()
         // Silence the looping fire sound
         if (snd_flame_playing == 1)
         {
-            snd_stop_sfx(SFX_ATK_FIRE_BREATH);
+            SoundInterface_StopSfx(SFX_ATK_FIRE_BREATH);
             snd_flame_playing = 0;
         }
     }
@@ -206,7 +206,7 @@ void obj_run()
     {
         if (snd_flame_playing == 1)
         {
-            snd_stop_sfx(SFX_ATK_FIRE_BREATH);
+            SoundInterface_StopSfx(SFX_ATK_FIRE_BREATH);
             snd_flame_playing = 0;
         }
     }
@@ -364,7 +364,7 @@ int16_t obj_instantiate(
         if (((id >= OBJID_START_OF_DMA_SPRITES) && (id <= OBJID_END_OF_DMA_SPRITES)) ||
             ((id >= OBJID_START_OF_DMA_LIGHT_SPRITES) && (id <= OBJID_END_OF_DMA_LIGHT_SPRITES)) )
         {
-            uint16_t k = spr_get_vram_slot_16(i);
+            uint16_t k = SpriteEngine_GetVramSlot16(i);
             
             if (k >= 128)
             {
@@ -730,7 +730,7 @@ void obj_cleanup()
 
         if (objects[obj_delete_queue[i]].id == OBJID_BUBBLE_E)
         {
-            spr_release_vram_slot(obj_delete_queue[i], 1);
+            SpriteEngine_ReleaseVramSlot(obj_delete_queue[i], 1);
         }
 
         objects[obj_delete_queue[i]].id = OBJID_NULL;

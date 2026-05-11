@@ -39,7 +39,7 @@ int main()
 
     ani_pal_hdma_enable();
 
-    snd_music_play(); 
+    SoundInterface_PlayMusic(); 
     
     system_interrupt_enable();
     
@@ -97,7 +97,7 @@ void * main_GetFunctionPointer(uint16_t routine)
 */
 void main_Reset()
 {
-    snd_reset();
+    SoundInterface_ResetAPU();
     system_reset();
 
     // Unreachable

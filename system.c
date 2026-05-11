@@ -229,20 +229,20 @@ void system_display_splash()
 
     // In case the above initialization take too short this should prevent issues
     system_interrupt_disable(); // uploading the SPC while interrupts are on can cause lock-ups
-    snd_start(); // start the SPC
+    SoundInterface_StartSoundEngine(); // start the SPC
 
     // Upload instrument and music sequence data
     // TODO: describe a sequence pointer and structure so this can be handled as a single pointer to pass to a function
     // Upload SFX data (shared for entire game)
-    snd_upload_sample_list((struct sample_list_entry *)&data_snd_samples[0]);
-    snd_upload_instrument_list((struct sample_list_entry_ins *)&data_snd_instruments[0]);
-    snd_upload_sequence((struct seq_command *)&data_seq_test_t1[0], 0); // Drum 1
-    snd_upload_sequence((struct seq_command *)&data_seq_test_t2[0], 1); // Drum 2
-    snd_upload_sequence((struct seq_command *)&data_seq_test_t3[0], 2); // Bass
-    snd_upload_sequence((struct seq_command *)&data_seq_test_t4[0], 3); // Secondary
-    //snd_upload_sequence((struct seq_command *)&data_seq_test_t5[0], 4); // Drum test sequence
-    //snd_upload_sequence((struct seq_command *)&data_seq_test_t6[0], 5); // Drum + instrument test sequence
-    snd_set_tempo(120);
+    SoundInterface_UploadSampleList((struct sample_list_entry *)&data_snd_samples[0]);
+    SoundInterface_UploadInstrumentList((struct sample_list_entry_ins *)&data_snd_instruments[0]);
+    SoundInterface_UploadMusicSequence((struct seq_command *)&data_seq_test_t1[0], 0); // Drum 1
+    SoundInterface_UploadMusicSequence((struct seq_command *)&data_seq_test_t2[0], 1); // Drum 2
+    SoundInterface_UploadMusicSequence((struct seq_command *)&data_seq_test_t3[0], 2); // Bass
+    SoundInterface_UploadMusicSequence((struct seq_command *)&data_seq_test_t4[0], 3); // Secondary
+    //SoundInterface_UploadMusicSequence((struct seq_command *)&data_seq_test_t5[0], 4); // Drum test sequence
+    //SoundInterface_UploadMusicSequence((struct seq_command *)&data_seq_test_t6[0], 5); // Drum + instrument test sequence
+    SoundInterface_SetMusicTempo(120);
 
     shadow_inidisp_change = 0;
     gfx_mosaic_change = 0;
@@ -433,13 +433,13 @@ void system_reset_ui_tilemap()
 void system_init()
 {
     // Initialize VRAM slot allocator
-    spr_init_vram_slot();
+    SpriteEngine_InitVramSlot();
     
     // Reset sprites
     spr_sprite_count_prev = 128;
     spr_sprite_count = 0;
-    spr_reset_sprites();
-    spr_pack_oam();
+    SpriteEngine_ResetOam();
+    SpriteEngine_PackOamHighTable();
 
     // Reset object system
     obj_reset(0); // The first time this is done, reset all objects
@@ -670,7 +670,7 @@ inline void system_check_for_soft_reset()
     {
         if ((input_pad0 & 0x000f) == 0) // check signature
         {
-            snd_reset(); // Reset the SPC too
+            SoundInterface_ResetAPU(); // Reset the SPC too
             system_reset();
         }
     }

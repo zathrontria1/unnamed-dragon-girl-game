@@ -294,7 +294,7 @@ void ui_show_enemy_health_bar(struct game_object * o)
         o->struct_data.npc_data.hp_cache = o->struct_data.npc_data.hp;
     }
 
-    spr_queue_add_ui(
+    SpriteEngine_DrawUISprite(
         o->pos.x.lh.h - bg_scroll_x.full.high.a, 
         o->pos.y.lh.h - bg_scroll_y.full.high.a -8, 
         (o->struct_data.npc_data.hp_tile_offset | PAL_SYS_IMPACT << 9 | 3 << 12));

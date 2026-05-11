@@ -26,7 +26,7 @@
     APU1-3 will be set to 0x000000
 */
 
-void snd_start()
+void SoundInterface_StartSoundEngine()
 {
     // Wait for SPC to become ready
     while (REG_APU0001 != 0xbbaa)
@@ -50,7 +50,7 @@ void snd_start()
     }
 
     // Address is now set
-    snd_upload_data((uint8_t *)&data_soundengine_binary, 2048);
+    SoundInterface_UploadData((uint8_t *)&data_soundengine_binary, 2048);
 
     // Start the engine
     // Write start address
@@ -75,9 +75,9 @@ void snd_start()
 }
 
 #if VBCC_ASM == 1
-    NO_INLINE void snd_upload_data(uint8_t * data_ptr, uint16_t len)
+    NO_INLINE void SoundInterface_UploadData(uint8_t * data_ptr, uint16_t len)
 #else
-    void snd_upload_data(uint8_t * data_ptr, uint16_t len)
+    void SoundInterface_UploadData(uint8_t * data_ptr, uint16_t len)
 #endif
 {
     // i compare with size of the binary blob
@@ -133,7 +133,7 @@ void snd_start()
     return;
 }
 
-inline void snd_busy_ack()
+inline void SoundInterface_AcknowledgeBusy()
 {
     while (REG_APU00 != SND_SIG_CLEAR)
     {
@@ -143,7 +143,7 @@ inline void snd_busy_ack()
     return;
 }
 
-inline void snd_nop_ack()
+inline void SoundInterface_AcknowledgeNop()
 {
     REG_APU01 = SND_CMD_NOP;
 
@@ -155,9 +155,9 @@ inline void snd_nop_ack()
     return;
 }
 
-inline void snd_play_sfx(uint8_t sfx_id, int8_t pan)
+inline void SoundInterface_PlaySfx(uint8_t sfx_id, int8_t pan)
 {
-    snd_busy_ack();
+    SoundInterface_AcknowledgeBusy();
 
     REG_APU02 = sfx_id;
     REG_APU03 = pan;
@@ -169,14 +169,14 @@ inline void snd_play_sfx(uint8_t sfx_id, int8_t pan)
         ; // Wait for opcode echo.
     }
 
-    snd_nop_ack();
+    SoundInterface_AcknowledgeNop();
 
     return;
 }
 
-inline void snd_play_sfx_extend(uint8_t sfx_id, int8_t vol_l, int8_t vol_r, int8_t pitch)
+inline void SoundInterface_PlaySfx_Ex(uint8_t sfx_id, int8_t vol_l, int8_t vol_r, int8_t pitch)
 {
-    snd_busy_ack();
+    SoundInterface_AcknowledgeBusy();
     
     REG_APU02 = sfx_id;
     REG_APU03 = pitch;
@@ -200,15 +200,15 @@ inline void snd_play_sfx_extend(uint8_t sfx_id, int8_t vol_l, int8_t vol_r, int8
 
     REG_APU01 = SND_CMD_NOP;
 
-    snd_nop_ack();
+    SoundInterface_AcknowledgeNop();
 
     return;
 }
 
 // stop an SFX
-inline void snd_stop_sfx(uint8_t sfx_id)
+inline void SoundInterface_StopSfx(uint8_t sfx_id)
 {
-    snd_busy_ack();
+    SoundInterface_AcknowledgeBusy();
 
     REG_APU02 = sfx_id;
 
@@ -219,7 +219,7 @@ inline void snd_stop_sfx(uint8_t sfx_id)
         ; // Wait for opcode echo.
     }
 
-    snd_nop_ack();
+    SoundInterface_AcknowledgeNop();
 
     return;
 }
@@ -228,9 +228,9 @@ inline void snd_stop_sfx(uint8_t sfx_id)
     Set up a DSP register from main CPU by calling this function
 */
 
-void snd_set_dsp_reg(uint8_t dsp_reg, uint8_t dsp_data)
+void SoundInterface_SetDspRegister(uint8_t dsp_reg, uint8_t dsp_data)
 {
-    snd_busy_ack();
+    SoundInterface_AcknowledgeBusy();
 
     REG_APU02 = dsp_reg;
     REG_APU03 = dsp_data;
@@ -242,7 +242,7 @@ void snd_set_dsp_reg(uint8_t dsp_reg, uint8_t dsp_data)
         ; // Wait for opcode echo.
     }
 
-    snd_nop_ack();
+    SoundInterface_AcknowledgeNop();
 
     return;
 }
@@ -252,9 +252,9 @@ void snd_set_dsp_reg(uint8_t dsp_reg, uint8_t dsp_data)
 
     Run this if soft resetting, otherwise game will hang during startup.
 */
-void snd_reset()
+void SoundInterface_ResetAPU()
 {
-    snd_busy_ack();
+    SoundInterface_AcknowledgeBusy();
 
     REG_APU01 = SND_CMD_SOFTRESET;
 
@@ -266,9 +266,9 @@ void snd_reset()
     return;
 }
 
-void snd_upload_sample(struct sample_list_entry * s)
+void SoundInterface_UploadSample(struct sample_list_entry * s)
 {
-    snd_busy_ack();
+    SoundInterface_AcknowledgeBusy();
     
     REG_APU0203 = s->len;
     REG_APU01 = SND_CMD_DATA_SAMPLE_UPLOAD; // Initial
@@ -333,22 +333,22 @@ void snd_upload_sample(struct sample_list_entry * s)
 
     ptr += 2;
     
-    snd_upload_data(ptr, s->len);
+    SoundInterface_UploadData(ptr, s->len);
     //snd_upload_data_3byte(data_ptr, len);
 
     uint8_t temp_lobyte = (uint8_t)(REG_APU00 + 2);
     REG_APU00 = temp_lobyte; 
 
-    snd_nop_ack();
+    SoundInterface_AcknowledgeNop();
 
     return;
 }
 
-void snd_upload_sample_list(struct sample_list_entry * s)
+void SoundInterface_UploadSampleList(struct sample_list_entry * s)
 {
     while (s->len != 0)
     {
-        snd_upload_sample(s);
+        SoundInterface_UploadSample(s);
 
         s++;
     }
@@ -356,12 +356,12 @@ void snd_upload_sample_list(struct sample_list_entry * s)
     return;
 }
 
-void snd_upload_instrument_list(struct sample_list_entry_ins * s)
+void SoundInterface_UploadInstrumentList(struct sample_list_entry_ins * s)
 {
     while (s->len != 0)
     {
-        snd_upload_sample((struct sample_list_entry *)s); // cast it
-        snd_set_tune(s->id, s->tune);
+        SoundInterface_UploadSample((struct sample_list_entry *)s); // cast it
+        SoundInterface_SetSampleTune(s->id, s->tune);
 
         s++;
     }
@@ -369,9 +369,9 @@ void snd_upload_instrument_list(struct sample_list_entry_ins * s)
     return;
 }
 
-void snd_set_tune(uint8_t ins_id, uint8_t tune)
+void SoundInterface_SetSampleTune(uint8_t ins_id, uint8_t tune)
 {
-    snd_busy_ack();
+    SoundInterface_AcknowledgeBusy();
 
     REG_APU03 = tune;
     REG_APU02 = ins_id;
@@ -382,7 +382,7 @@ void snd_set_tune(uint8_t ins_id, uint8_t tune)
         ; // Wait for opcode echo.
     }
 
-    snd_nop_ack();
+    SoundInterface_AcknowledgeNop();
 
     return;
 }
@@ -391,9 +391,9 @@ void snd_set_tune(uint8_t ins_id, uint8_t tune)
     Convert a BPM into the equivalent in 
     timer ticks + intervals
 */
-void snd_set_tempo(uint16_t tempo)
+void SoundInterface_SetMusicTempo(uint16_t tempo)
 {
-    snd_busy_ack();
+    SoundInterface_AcknowledgeBusy();
 
     uint8_t temp_t2timer;
     uint16_t temp_interval = 1;
@@ -435,12 +435,12 @@ void snd_set_tempo(uint16_t tempo)
         ; // Wait for opcode echo.
     }
 
-    snd_nop_ack();
+    SoundInterface_AcknowledgeNop();
 
     return;
 }
 
-void snd_upload_sequence(struct seq_command * s, uint8_t track)
+void SoundInterface_UploadMusicSequence(struct seq_command * s, uint8_t track)
 {
     // Scan the sequence to get its length first
     uint16_t temp_len = 4; // Include the terminator
@@ -453,7 +453,7 @@ void snd_upload_sequence(struct seq_command * s, uint8_t track)
         temp_ptr++;
     }
 
-    snd_busy_ack();
+    SoundInterface_AcknowledgeBusy();
     
     REG_APU0203 = temp_len;
     REG_APU01 = SND_CMD_SEQ_UPLOAD; // Initial
@@ -475,19 +475,19 @@ void snd_upload_sequence(struct seq_command * s, uint8_t track)
     // Begin transfer.
     uint8_t * ptr = (uint8_t *)s;
     
-    snd_upload_data(ptr, temp_len);
+    SoundInterface_UploadData(ptr, temp_len);
 
     uint8_t temp_lobyte = (uint8_t)(REG_APU00 + 2);
     REG_APU00 = temp_lobyte; 
 
-    snd_nop_ack();
+    SoundInterface_AcknowledgeNop();
 
     return;
 }
 
-void snd_music_play()
+void SoundInterface_PlayMusic()
 {
-    snd_busy_ack();
+    SoundInterface_AcknowledgeBusy();
 
     REG_APU01 = SND_CMD_MUS_START;
 
@@ -499,9 +499,9 @@ void snd_music_play()
     return;
 }
 
-void snd_music_pause()
+void SoundInterface_PauseMusic()
 {
-    snd_busy_ack();
+    SoundInterface_AcknowledgeBusy();
 
     REG_APU01 = SND_CMD_MUS_PAUSE;
 
@@ -513,9 +513,9 @@ void snd_music_pause()
     return;
 }
 
-void snd_music_stop()
+void SoundInterface_StopMusic()
 {
-    snd_busy_ack();
+    SoundInterface_AcknowledgeBusy();
 
     REG_APU01 = SND_CMD_MUS_STOP;
 

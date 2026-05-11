@@ -12,7 +12,7 @@
     It is the responsibility of the caller select the right queue and 
     to ensure that the written sprite is valid
 */
-void spr_queue_add_ui(int16_t x, int16_t y, uint16_t tileattrib)
+void SpriteEngine_DrawUISprite(int16_t x, int16_t y, uint16_t tileattrib)
 {
     struct spr_queue_entry s;
     s.x = x;
@@ -32,7 +32,7 @@ void spr_queue_add_ui(int16_t x, int16_t y, uint16_t tileattrib)
         if ((s.y > -16) && (s.y < 224))
         {
             s.tileattrib = tileattrib;
-            spr_draw(&s);
+            SpriteEngine_DrawSprite(&s);
 
             return;
         }
@@ -41,7 +41,7 @@ void spr_queue_add_ui(int16_t x, int16_t y, uint16_t tileattrib)
     return;
 }
 
-void spr_queue_add_front(struct game_object * o, uint16_t tileattrib)
+void SpriteEngine_AddToFrontLayer(struct game_object * o, uint16_t tileattrib)
 {
     if (spr_front_count >= SPR_COUNT_MAX_FRONT)
     {
@@ -81,7 +81,7 @@ void spr_queue_add_front(struct game_object * o, uint16_t tileattrib)
     return;
 }
 
-void spr_queue_add_normal(struct game_object * o, uint16_t tileattrib)
+void SpriteEngine_AddToSortedLayer(struct game_object * o, uint16_t tileattrib)
 {
     if (spr_normal_count >= SPR_COUNT_MAX_SORTED)
     {
@@ -121,7 +121,7 @@ void spr_queue_add_normal(struct game_object * o, uint16_t tileattrib)
     return;
 }
 
-void spr_queue_add_back(struct game_object * o, uint16_t tileattrib)
+void SpriteEngine_AddToBackLayer(struct game_object * o, uint16_t tileattrib)
 {
     if (spr_back_count >= SPR_COUNT_MAX_BACK)
     {
@@ -165,7 +165,7 @@ void spr_queue_add_back(struct game_object * o, uint16_t tileattrib)
     Initialize the sprite VRAM slot array
 */
 
-void spr_init_vram_slot()
+void SpriteEngine_InitVramSlot()
 {
     for (int i = 0; i < 128; i++)
     {
@@ -191,7 +191,7 @@ void spr_init_vram_slot()
 }
 
 // for 16x16px sprite slots
-uint16_t spr_get_vram_slot_16(uint16_t i)
+uint16_t SpriteEngine_GetVramSlot16(uint16_t i)
 {
     for (int j = 48; j < 128; j++)
     {
@@ -218,7 +218,7 @@ uint16_t spr_get_vram_slot_16(uint16_t i)
 }
 
 // for 32x32px sprite slots
-uint16_t spr_get_vram_slot_32(uint16_t i)
+uint16_t SpriteEngine_GetVramSlot32(uint16_t i)
 {
     for (int j = 48; j < 128; j += 4)
     {
@@ -250,7 +250,7 @@ uint16_t spr_get_vram_slot_32(uint16_t i)
     return 128;
 }
 
-void spr_release_vram_slot(uint16_t i, uint16_t slot_count)
+void SpriteEngine_ReleaseVramSlot(uint16_t i, uint16_t slot_count)
 {
     if (slot_count < 1)
     {
@@ -272,7 +272,7 @@ void spr_release_vram_slot(uint16_t i, uint16_t slot_count)
     return;
 }
 
-void spr_queue_process()
+void SpriteEngine_ProcessSpriteLists()
 {
     #if VBCC_ASM == 1
         __asm(
@@ -288,7 +288,7 @@ void spr_queue_process()
         "\tsta r1\n"
         
         ".loop_drawfrontsprites:\n"
-        "\tjsl >_spr_draw\n"
+        "\tjsl >_SpriteEngine_DrawSprite\n"
         "\tlda r0\n"
         "\tclc\n"
         "\tadc #16\n"
@@ -300,7 +300,7 @@ void spr_queue_process()
     #else
         for (int i = 0; i < spr_front_count; i++)
         {
-            spr_draw(&spr_queue_front[i]); 
+            SpriteEngine_DrawSprite(&spr_queue_front[i]); 
         }
     #endif
 
@@ -570,7 +570,7 @@ void spr_queue_process()
         "\tsta r1\n"
         
         ".loop_drawbacksprites:\n"
-        "\tjsl >_spr_draw\n"
+        "\tjsl >_SpriteEngine_DrawSprite\n"
         "\tlda r0\n"
         "\tclc\n"
         "\tadc #16\n"
@@ -582,7 +582,7 @@ void spr_queue_process()
     #else
         for (int i = 0; i < spr_back_count; i++)
         {
-            spr_draw(&spr_queue_back[i]); 
+            SpriteEngine_DrawSprite(&spr_queue_back[i]); 
         }
     #endif
 
@@ -596,9 +596,9 @@ void spr_queue_process()
 */
 
 #if VBCC_ASM == 1
-    NO_INLINE void spr_draw(__reg("r0/r1") struct spr_queue_entry * s)
+    NO_INLINE void SpriteEngine_DrawSprite(__reg("r0/r1") struct spr_queue_entry * s)
 #else
-    void spr_draw(struct spr_queue_entry * s)
+    void SpriteEngine_DrawSprite(struct spr_queue_entry * s)
 #endif
 {
     // Draws a sprite
@@ -646,7 +646,7 @@ void spr_queue_process()
     return;
 }
 
-void spr_pack_oam()
+void SpriteEngine_PackOamHighTable()
 {
     // Packs high OAM bytes into the 32 bytes following the low OAM
     #if VBCC_ASM == 1
@@ -751,7 +751,7 @@ void spr_pack_oam()
 /* 
     Clears all unused sprites from OAM
 */
-void spr_reset_sprites()
+void SpriteEngine_ResetOam()
 {
     #if VBCC_ASM == 1
         __asm(

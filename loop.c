@@ -92,14 +92,14 @@ void loop_messagebox()
 
     ui_dma_ui_tiles();
 
-    spr_queue_process();
+    SpriteEngine_ProcessSpriteLists();
 
-    spr_reset_sprites();
-    spr_pack_oam();
+    SpriteEngine_ResetOam();
+    SpriteEngine_PackOamHighTable();
 
     if (system_check_for_key(KEY_A))
     {
-        snd_play_sfx(SFX_UI_CONFIRM, 0);
+        SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
         
         ui_show_message_ttl = 0;
         ui_show_message_cleared = 1;
@@ -135,7 +135,7 @@ void loop_game()
 
     if (!event_tutorial_shown)
     {
-        snd_play_sfx(SFX_UI_CONFIRM, 0);
+        SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
 
         ui_print_ml((uint8_t *)&STR_MSG_TUTORIAL_MP, UI_MSGBOX_ML_START, UI_MARGIN_LEFT);
 
@@ -148,7 +148,7 @@ void loop_game()
 
     if (system_check_for_key(KEY_X))
     {
-        snd_play_sfx(SFX_UI_CONFIRM, 0);
+        SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
         
         ui_print_ml_special((uint8_t *)&STR_UI_PLAYERINFO_ML);
 
@@ -176,9 +176,9 @@ void loop_game()
 
     obj_run();
 
-    spr_queue_process();
-    spr_reset_sprites();
-    spr_pack_oam();
+    SpriteEngine_ProcessSpriteLists();
+    SpriteEngine_ResetOam();
+    SpriteEngine_PackOamHighTable();
 
     obj_cleanup();
     obj_cleanup_hitbox_player();
@@ -218,7 +218,7 @@ void loop_pause()
     // Silence the looping fire sound
     if (snd_flame_playing == 1)
     {
-        snd_stop_sfx(SFX_ATK_FIRE_BREATH);
+        SoundInterface_StopSfx(SFX_ATK_FIRE_BREATH);
         snd_flame_playing = 0;
     }
     
@@ -239,7 +239,7 @@ void loop_mapdisplay_init()
     // Silence the looping fire sound
     if (snd_flame_playing == 1)
     {
-        snd_stop_sfx(SFX_ATK_FIRE_BREATH);
+        SoundInterface_StopSfx(SFX_ATK_FIRE_BREATH);
         snd_flame_playing = 0;
     }
 
@@ -252,9 +252,9 @@ void loop_mapdisplay_init()
     // Copy the current OAM into the copy
     shadow_oam_copy = shadow_oam;
 
-    spr_queue_process();
-    spr_reset_sprites();
-    spr_pack_oam();
+    SpriteEngine_ProcessSpriteLists();
+    SpriteEngine_ResetOam();
+    SpriteEngine_PackOamHighTable();
 
     struct game_object * o = &objects[obj_player_index];
     struct game_object temp_icon_object = objects[obj_player_index];
@@ -450,13 +450,13 @@ void loop_mapdisplay()
 
     if (((uint16_t) system_frames_elapsed % (60 / V_MUL)) < (30 / V_MUL))
     {
-        spr_queue_add_ui(temp_x - bg_scroll_x.full.high.a - 6,temp_y - bg_scroll_y.full.high.a - 6, temp_tileattrib);
+        SpriteEngine_DrawUISprite(temp_x - bg_scroll_x.full.high.a - 6,temp_y - bg_scroll_y.full.high.a - 6, temp_tileattrib);
     }
 
-    spr_queue_process();
+    SpriteEngine_ProcessSpriteLists();
 
-    spr_reset_sprites();
-    spr_pack_oam();
+    SpriteEngine_ResetOam();
+    SpriteEngine_PackOamHighTable();
 
     if (system_check_for_key(KEY_SELECT))
     {
@@ -546,9 +546,9 @@ void loop_game_partial(void)
     ui_process();
     obj_run();
 
-    spr_queue_process();
-    spr_reset_sprites();
-    spr_pack_oam();
+    SpriteEngine_ProcessSpriteLists();
+    SpriteEngine_ResetOam();
+    SpriteEngine_PackOamHighTable();
     system_game_paused = temp_game_paused_copy;
 
     return;

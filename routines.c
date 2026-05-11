@@ -202,7 +202,7 @@ void routines_player(struct game_object * o)
                 {
                     if (snd_punch_timeout == 0)
                     {
-                        snd_play_sfx(SFX_ATK_SWING, 0);
+                        SoundInterface_PlaySfx(SFX_ATK_SWING, 0);
 
                         snd_punch_timeout = (8 / V_MUL);
                     }
@@ -392,8 +392,8 @@ void routines_player(struct game_object * o)
 
                 if (snd_footstep_timeout == 0)
                 {
-                    snd_play_sfx(SFX_MOV_FOOTSTEP,0);
-                    //snd_play_sfx_extend(SFX_MOV_FOOTSTEP,127,127,255);
+                    SoundInterface_PlaySfx(SFX_MOV_FOOTSTEP,0);
+                    //SoundInterface_PlaySfx_Ex(SFX_MOV_FOOTSTEP,127,127,255);
                     
                     if (temp_is_dashing == 1)
                     {
@@ -415,7 +415,7 @@ void routines_player(struct game_object * o)
                 struct game_object * p = hit_test_player(o);
                 if (p != NULL)
                 {
-                    snd_play_sfx(SFX_ATK_SPLAT_HIT, 0);
+                    SoundInterface_PlaySfx(SFX_ATK_SPLAT_HIT, 0);
 
                     // spawn an impact FX object
                     int16_t k = -1;
@@ -569,7 +569,7 @@ void routines_player(struct game_object * o)
     }
     else
     {
-        spr_queue_add_normal(o, temp_tileattrib);
+        SpriteEngine_AddToSortedLayer(o, temp_tileattrib);
     }
 
     return;
@@ -584,7 +584,7 @@ void routines_fireball(struct game_object * o)
         // The sound effect should only play when not paused
         if (snd_flame_playing == 0)
         {
-            snd_play_sfx(SFX_ATK_FIRE_BREATH, 0);
+            SoundInterface_PlaySfx(SFX_ATK_FIRE_BREATH, 0);
 
             snd_flame_playing = 1;
         }
@@ -613,7 +613,7 @@ void routines_fireball(struct game_object * o)
     // Only draw every other frame for both visibility and performance
     if ((o->uid & 0x0001) == ((uint16_t)system_frames_elapsed & 0x0001))
     {
-        spr_queue_add_front(o, (o->struct_data.npc_data.ani.display | PAL_FIREBALL << 9 | 3 << 12));
+        SpriteEngine_AddToFrontLayer(o, (o->struct_data.npc_data.ani.display | PAL_FIREBALL << 9 | 3 << 12));
     }
 
     obj_player_active_fireballs++;
@@ -651,7 +651,7 @@ void routines_fx_smoke(struct game_object * o)
     // Only draw every other frame for both visibility and performance
     if ((o->uid & 0x0001) == ((uint16_t)system_frames_elapsed & 0x0001))
     {
-        spr_queue_add_front(o, temp_tileattrib);
+        SpriteEngine_AddToFrontLayer(o, temp_tileattrib);
     }   
 
     return;
@@ -659,7 +659,7 @@ void routines_fx_smoke(struct game_object * o)
 
 void routines_fx_impact(struct game_object * o)
 {
-    spr_queue_add_front(o, (ani_getframe_fixed_fast(o) | PAL_SYS_IMPACT << 9 | 3 << 12));
+    SpriteEngine_AddToFrontLayer(o, (ani_getframe_fixed_fast(o) | PAL_SYS_IMPACT << 9 | 3 << 12));
 
     if (system_game_paused)
     {
@@ -734,7 +734,7 @@ void routines_interactable_switch(struct game_object * o)
             {
                 if (!event_in_combat_shadow)
                 {
-                    snd_play_sfx(SFX_INTERACT_SWITCH,0);
+                    SoundInterface_PlaySfx(SFX_INTERACT_SWITCH,0);
                     
                     o->state ^= STATE_SWITCH_ON;
                     event_flags_local[o->struct_data.interactable_data.event_flag] = o->state;
@@ -764,7 +764,7 @@ void routines_interactable_switch(struct game_object * o)
         }
     }
 
-    spr_queue_add_back(o, (0x20 + (o->state << 1)) | PAL_INTERACTABLE_SWITCH_WALL << 9 | 2 << 12);
+    SpriteEngine_AddToBackLayer(o, (0x20 + (o->state << 1)) | PAL_INTERACTABLE_SWITCH_WALL << 9 | 2 << 12);
 
     return;
 }
@@ -781,7 +781,7 @@ void routines_interactable_sign(struct game_object * o)
             {
                 if (!event_in_combat_shadow)
                 {
-                    snd_play_sfx(SFX_UI_CONFIRM, 0);
+                    SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
 
                     ui_print_ml(o->data_ptr, UI_MSGBOX_ML_START, UI_MARGIN_LEFT);
 
@@ -803,7 +803,7 @@ void routines_interactable_sign(struct game_object * o)
         }
     }
 
-    spr_queue_add_back(o, 0x28 | PAL_INTERACTABLE_SIGN_WALL << 9 | 2 << 12);
+    SpriteEngine_AddToBackLayer(o, 0x28 | PAL_INTERACTABLE_SIGN_WALL << 9 | 2 << 12);
 
     return;
 }
@@ -817,7 +817,7 @@ void routines_interactable_blocker(struct game_object * o)
         switch (o->id)
         {
             case OBJID_INTERACTABLE_BLOCKER_FLOOR:
-                spr_queue_add_back(o, 0x0e | PAL_INTERACTABLE_BLOCKER_FLOOR << 9 | 2 << 12);
+                SpriteEngine_AddToBackLayer(o, 0x0e | PAL_INTERACTABLE_BLOCKER_FLOOR << 9 | 2 << 12);
                 break;
             case OBJID_INTERACTABLE_BLOCKER_DOOR_NS:
                 spr_metaspr_draw(o, &data_metaspr_door_ns[0]);
@@ -901,7 +901,7 @@ void routines_slime(struct game_object * o)
 
                     if (j >= 0)
                     {
-                        snd_play_sfx(SFX_ATK_SPLASH,0);
+                        SoundInterface_PlaySfx(SFX_ATK_SPLASH,0);
 
                         struct game_object * p = &objects[j];
                         p->struct_data.npc_data.attack = ENEMY_ATTACK_VALUE * ENEMY_ATTACK_MULT_RANGED;
@@ -960,7 +960,7 @@ void routines_slime(struct game_object * o)
                                 // Single frame damage
                                 o->struct_data.npc_data.invuln_time = 10 / V_MUL;
 
-                                snd_play_sfx(SFX_ATK_PUNCH, 0);
+                                SoundInterface_PlaySfx(SFX_ATK_PUNCH, 0);
                             }
 
                             long temp_dmg = (p->struct_data.npc_data.attack - p->struct_data.npc_data.defense);
@@ -982,7 +982,7 @@ void routines_slime(struct game_object * o)
                 {
                     if (snd_firecrackle_timeout == 0)
                     {
-                        snd_play_sfx(SFX_ATK_FIRE_CRACKLE, 0);
+                        SoundInterface_PlaySfx(SFX_ATK_FIRE_CRACKLE, 0);
 
                         snd_firecrackle_timeout = (8 / V_MUL);
                     }
@@ -1180,12 +1180,12 @@ void routines_slime(struct game_object * o)
         // Do not perform a draw every other frame
         if ((o->uid & 0x0001) == ((uint16_t)system_frames_elapsed & 0x0001))
         {
-            spr_queue_add_normal(o, temp_tileattrib);
+            SpriteEngine_AddToSortedLayer(o, temp_tileattrib);
         }
     }
     else
     {
-        spr_queue_add_normal(o, temp_tileattrib);
+        SpriteEngine_AddToSortedLayer(o, temp_tileattrib);
     }
 
     return;
@@ -1251,7 +1251,7 @@ void routines_bubble_e(struct game_object * o)
         uint16_t temp_tileattrib;
         temp_tileattrib = (o->struct_data.npc_data.tilenum | PAL_BUBBLE_E << 9 | 3 << 12);
 
-        spr_queue_add_front(o, temp_tileattrib);
+        SpriteEngine_AddToFrontLayer(o, temp_tileattrib);
     }
 
     return;
@@ -1301,7 +1301,7 @@ void routines_drop_money(struct game_object * o)
     {
         if (ani_animate_drop_gravity(o))
         {
-            snd_play_sfx(SFX_DROP_COIN,0);
+            SoundInterface_PlaySfx(SFX_DROP_COIN,0);
         }
 
         if (o->pos.z.a == 0) // If item is on floor
@@ -1311,7 +1311,7 @@ void routines_drop_money(struct game_object * o)
             // Check if the player is within the designated box
             if (hit_test(p, o) == 0)
             {
-                snd_play_sfx(SFX_DROP_COIN,0);
+                SoundInterface_PlaySfx(SFX_DROP_COIN,0);
 
                 p->struct_data.npc_data.money += o->struct_data.npc_data.money;
 
@@ -1323,7 +1323,7 @@ void routines_drop_money(struct game_object * o)
     uint16_t temp_tileattrib;
     temp_tileattrib = (0x2a | PAL_DROP_MONEY << 9 | 2 << 12);
 
-    spr_queue_add_normal(o, temp_tileattrib);
+    SpriteEngine_AddToSortedLayer(o, temp_tileattrib);
 
     return;
 }
@@ -1334,7 +1334,7 @@ void routines_drop_rec_meat(struct game_object * o)
     {
         if (ani_animate_drop_gravity(o))
         {
-            snd_play_sfx(SFX_DROP_BOUNCE,0);
+            SoundInterface_PlaySfx(SFX_DROP_BOUNCE,0);
         }
 
         if (o->pos.z.a == 0) // If item is on floor
@@ -1344,7 +1344,7 @@ void routines_drop_rec_meat(struct game_object * o)
             // Check if the player is within the designated box
             if (hit_test(p, o) == 0)
             {
-                snd_play_sfx(SFX_DROP_BOUNCE,0);
+                SoundInterface_PlaySfx(SFX_DROP_BOUNCE,0);
                 
                 if (p->struct_data.npc_data.hp + o->struct_data.npc_data.hp >= p->struct_data.npc_data.hp_max)
                 {
@@ -1368,7 +1368,7 @@ void routines_drop_rec_meat(struct game_object * o)
     uint16_t temp_tileattrib;
     temp_tileattrib = (0x0c | PAL_DROP_REC_MEAT << 9 | 2 << 12);
 
-    spr_queue_add_normal(o, temp_tileattrib);
+    SpriteEngine_AddToSortedLayer(o, temp_tileattrib);
 
     return;
 }

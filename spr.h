@@ -1,21 +1,21 @@
-void spr_queue_add_ui(int16_t x, int16_t y, uint16_t tileattrib);
-void spr_queue_add_front(struct game_object * o, uint16_t tileattrib);
-void spr_queue_add_normal(struct game_object * o, uint16_t tileattrib);
-void spr_queue_add_back(struct game_object * o, uint16_t tileattrib);
+void SpriteEngine_DrawUISprite(int16_t x, int16_t y, uint16_t tileattrib);
+void SpriteEngine_AddToFrontLayer(struct game_object * o, uint16_t tileattrib);
+void SpriteEngine_AddToSortedLayer(struct game_object * o, uint16_t tileattrib);
+void SpriteEngine_AddToBackLayer(struct game_object * o, uint16_t tileattrib);
 
-void spr_queue_process(void);
+void SpriteEngine_ProcessSpriteLists(void);
 
 #if VBCC_ASM == 1
-    NO_INLINE void spr_draw(__reg("r0/r1") struct spr_queue_entry * s);
+    NO_INLINE void SpriteEngine_DrawSprite(__reg("r0/r1") struct spr_queue_entry * s);
 #else
-    void spr_draw(struct spr_queue_entry * s);
+    void SpriteEngine_DrawSprite(struct spr_queue_entry * s);
 #endif
 
-void spr_init_vram_slot(void);
-uint16_t spr_get_vram_slot_16(uint16_t i);
-uint16_t spr_get_vram_slot_32(uint16_t i);
-void spr_release_vram_slot(uint16_t i, uint16_t slot_count);
+void SpriteEngine_InitVramSlot(void);
+uint16_t SpriteEngine_GetVramSlot16(uint16_t i);
+uint16_t SpriteEngine_GetVramSlot32(uint16_t i);
+void SpriteEngine_ReleaseVramSlot(uint16_t i, uint16_t slot_count);
 
-void spr_pack_oam(void);
-void spr_reset_sprites(void);
+void SpriteEngine_PackOamHighTable(void);
+void SpriteEngine_ResetOam(void);
 
