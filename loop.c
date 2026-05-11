@@ -36,8 +36,6 @@
 
 void loop_fadein()
 {
-    system_wait_vblank();
-
     // Always reset mosaic during fades
     shadow_mosaic = 0x00; 
 
@@ -65,8 +63,6 @@ void loop_fadein()
 */
 void loop_fadeout()
 {
-    system_wait_vblank();
-
     // Always reset mosaic during fades
     shadow_mosaic = 0x00; 
 
@@ -90,8 +86,6 @@ void loop_fadeout()
 
 void loop_messagebox()
 {
-    system_wait_vblank();
-
     system_game_paused = 1;
 
     obj_run();
@@ -137,8 +131,6 @@ void loop_messagebox()
 
 void loop_game()
 {
-    system_wait_vblank();
-    
     ui_process();
 
     if (!event_tutorial_shown)
@@ -223,8 +215,6 @@ void loop_game()
 
 void loop_pause()
 {
-    system_wait_vblank();
-
     if (system_check_for_key(KEY_START))
     {
         system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_GAMELOOP);
@@ -407,8 +397,6 @@ void loop_mapdisplay_init()
 
 void loop_mapdisplay()
 {
-    system_wait_vblank();
-
     // The minimap is always 192x192 pixels.
     // minimap position = (real position / map extent) * 192
 

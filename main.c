@@ -45,40 +45,10 @@ int main()
     
     while (1)
     {   
+        system_wait_vblank();
+
         void (*func)() = system_loop_func_ptr;
         func();
-        
-        /*switch (system_current_routine)
-        {
-            case ROUTINE_GAMELOOP:
-                loop_game();
-                break;
-            case ROUTINE_GAMELOOP_RELOAD:
-                loop_game_reload();
-                break;
-            case ROUTINE_PAUSE:
-                loop_pause();
-                break;
-            case ROUTINE_MAPDISPLAY:
-                loop_mapdisplay();
-                break;
-            case ROUTINE_MAPDISPLAY_INIT:
-                loop_mapdisplay_init();
-                break;
-            case ROUTINE_MSGBOX:
-                loop_messagebox();
-                break;
-            case ROUTINE_FADEIN:
-                loop_fadein();
-                break;
-            case ROUTINE_FADEOUT:
-                loop_fadeout();
-                break;
-            case ROUTINE_RESET:
-                snd_reset();
-                system_reset();
-                break;
-        }*/
     }
 
     return 0;

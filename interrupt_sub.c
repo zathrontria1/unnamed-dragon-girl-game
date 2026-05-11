@@ -116,6 +116,10 @@
     // Write the current INIDISP value
     REG_INIDISP = shadow_inidisp;
 
+    // Always reset them if an alternate NMI is used
+    system_in_vblank = 0; // Clear the vblank flag now to prevent problems later.
+    system_nmis_counted = 0;
+
     // Adjust the INIDISP value based on the change
     if ((shadow_inidisp == 0x00) && (shadow_inidisp_change < 0))
     {
