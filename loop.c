@@ -215,6 +215,13 @@ void loop_game()
 
 void loop_pause()
 {
+    // Silence the looping fire sound
+    if (snd_flame_playing == 1)
+    {
+        snd_stop_sfx(SFX_ATK_FIRE_BREATH);
+        snd_flame_playing = 0;
+    }
+    
     if (system_check_for_key(KEY_START))
     {
         system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_GAMELOOP);
