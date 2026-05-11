@@ -432,10 +432,7 @@ void system_reset_ui_tilemap()
 */
 void system_init()
 {
-    // Set current and target routines to init to prevent issues
-    system_current_routine = ROUTINE_INIT;
-    system_target_routine = ROUTINE_INIT;
-
+    // Initialize VRAM slot allocator
     spr_init_vram_slot();
     
     // Reset sprites

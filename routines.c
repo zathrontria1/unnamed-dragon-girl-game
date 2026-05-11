@@ -26,6 +26,8 @@
 
 #include "gfx.h"
 
+#include "main.h"
+
 void routines_player(struct game_object * o)
 {
     if (!system_game_paused)
@@ -483,7 +485,8 @@ void routines_player(struct game_object * o)
 
                 // Initiate the soft reset handler
                 // TODO: game over?
-                system_current_routine = ROUTINE_FADEOUT;
+
+                system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_FADEOUT);
                 system_target_routine = ROUTINE_RESET;
                 shadow_inidisp = 0x0f;
                 return;
@@ -780,7 +783,8 @@ void routines_interactable_sign(struct game_object * o)
 
                     ui_print_ml(o->data_ptr, UI_MSGBOX_ML_START, UI_MARGIN_LEFT);
 
-                    system_current_routine = ROUTINE_MSGBOX;
+                    system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_MSGBOX);
+                    //system_current_routine = ROUTINE_MSGBOX;
                     system_target_routine = ROUTINE_MSGBOX;
 
                     o->struct_data.interactable_data.delay_time = 15 / V_MUL; // responsive enough for punch clicks

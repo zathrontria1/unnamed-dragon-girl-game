@@ -43,6 +43,8 @@ ZP extern uint16_t system_use_alternate_nmi;
 
 ZP extern uint16_t system_game_paused;
 
+ZP extern void * system_loop_func_ptr;
+
 // Object system
 ZP extern uint16_t obj_first_available;
 extern struct game_object objects[OBJ_MAX_COUNT];

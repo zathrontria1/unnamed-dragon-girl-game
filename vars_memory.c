@@ -64,6 +64,8 @@ ZP uint16_t system_use_alternate_nmi;
 
 ZP uint16_t system_game_paused;
 
+ZP void * system_loop_func_ptr;
+
 // Object system
 ZP uint16_t obj_first_available;
 struct game_object objects[OBJ_MAX_COUNT];

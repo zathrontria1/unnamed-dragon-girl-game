@@ -32,6 +32,8 @@
 #include "snd.h"
 #include "consts_snd.h"
 
+#include "main.h"
+
 void loop_fadein()
 {
     system_wait_vblank();
@@ -50,7 +52,8 @@ void loop_fadein()
 
     if (shadow_inidisp >= 15)
     {
-        system_current_routine = system_target_routine;
+        system_loop_func_ptr = main_GetFunctionPointer(system_target_routine);
+        //system_current_routine = system_target_routine;
     }
 
     return;
@@ -78,7 +81,8 @@ void loop_fadeout()
 
     if (shadow_inidisp == 0)
     {
-        system_current_routine = system_target_routine;
+        system_loop_func_ptr = main_GetFunctionPointer(system_target_routine);
+        //system_current_routine = system_target_routine;
     }
 
     return;
@@ -118,7 +122,8 @@ void loop_messagebox()
             
             system_game_paused = 0;
 
-            system_current_routine = ROUTINE_GAMELOOP;
+            system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_GAMELOOP);
+            //system_current_routine = ROUTINE_GAMELOOP;
             system_target_routine = ROUTINE_GAMELOOP;
         }
         else if (ui_show_message_page != 0)
@@ -142,7 +147,8 @@ void loop_game()
 
         ui_print_ml((uint8_t *)&STR_MSG_TUTORIAL_MP, UI_MSGBOX_ML_START, UI_MARGIN_LEFT);
 
-        system_current_routine = ROUTINE_MSGBOX;
+        system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_MSGBOX);
+        //system_current_routine = ROUTINE_MSGBOX;
         system_target_routine = ROUTINE_MSGBOX;
 
         return;
@@ -154,7 +160,8 @@ void loop_game()
         
         ui_print_ml_special((uint8_t *)&STR_UI_PLAYERINFO_ML);
 
-        system_current_routine = ROUTINE_MSGBOX;
+        system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_MSGBOX);
+        //system_current_routine = ROUTINE_MSGBOX;
         system_target_routine = ROUTINE_MSGBOX;
 
         return;
@@ -193,17 +200,17 @@ void loop_game()
             shadow_inidisp = 0x0f;
             system_use_alternate_nmi = 1;
             shadow_inidisp_change = -1;
-            system_current_routine = ROUTINE_MAPDISPLAY_INIT;
+
+            system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_MAPDISPLAY_INIT);
+            //system_current_routine = ROUTINE_MAPDISPLAY_INIT;
             system_target_routine = ROUTINE_MAPDISPLAY_INIT;
-            
-            /*shadow_inidisp = 0x0f;
-            system_current_routine = ROUTINE_FADEOUT;
-            system_target_routine = ROUTINE_MAPDISPLAY_INIT;*/
         }
         else if (system_check_for_key(KEY_START))
         {
+            system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_PAUSE);
+            //system_current_routine = ROUTINE_PAUSE;
             system_target_routine = ROUTINE_PAUSE;
-            system_current_routine = ROUTINE_PAUSE;
+
             shadow_inidisp = 0x08;
         }
     }
@@ -220,8 +227,10 @@ void loop_pause()
 
     if (system_check_for_key(KEY_START))
     {
+        system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_GAMELOOP);
+        //system_current_routine = ROUTINE_GAMELOOP;
         system_target_routine = ROUTINE_GAMELOOP;
-        system_current_routine = ROUTINE_GAMELOOP;
+        
         shadow_inidisp = 0x0f;
     }
 
@@ -378,8 +387,10 @@ void loop_mapdisplay_init()
     ui_print_mode3((uint8_t *)&STR_UI_HELP_MAP, UI_MAPSCREEN_SL_START, UI_MARGIN_LEFT);
 
     system_target_routine = ROUTINE_MAPDISPLAY;
-    system_current_routine = ROUTINE_FADEIN;
 
+    system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_FADEIN);
+    //system_current_routine = ROUTINE_FADEIN;
+    
     system_setup_tilemap_display(system_target_routine);
     system_init_display(system_target_routine);
 
@@ -458,12 +469,10 @@ void loop_mapdisplay()
         shadow_inidisp = 0x0f;
         system_use_alternate_nmi = 1;
         shadow_inidisp_change = -1;
-        system_current_routine = ROUTINE_GAMELOOP_RELOAD;
-        system_target_routine = ROUTINE_GAMELOOP_RELOAD;
 
-        /*shadow_inidisp = 0x0f;
-        system_current_routine = ROUTINE_FADEOUT;
-        system_target_routine = ROUTINE_GAMELOOP_RELOAD;*/
+        system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_GAMELOOP_RELOAD);
+        //system_current_routine = ROUTINE_GAMELOOP_RELOAD;
+        system_target_routine = ROUTINE_GAMELOOP_RELOAD;
     }
 
     return;
@@ -508,8 +517,10 @@ void loop_game_reload()
     map_regenerate();
     system_reset_ui_tilemap();
 
+    system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_FADEIN);
+    //system_current_routine = ROUTINE_FADEIN;
     system_target_routine = ROUTINE_GAMELOOP;
-    system_current_routine = ROUTINE_FADEIN;
+    
 
     system_setup_tilemap_display(system_target_routine);
     system_init_display(system_target_routine);

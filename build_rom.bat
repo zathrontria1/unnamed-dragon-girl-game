@@ -11,7 +11,12 @@ vasm6502_oldstyle -816 -quiet -nowarn=62 -opt-branch -ldots -Fvobj -o .\startup-
 REM the below was a workaround for broken interrupt assembly code generation
 REM uncomment if the source code is changed, then comment it back after editing the assembly code to fix a crash bug
 REM vc +snes-hi -O4 -size -msfp4 -lms4 -S %cmd_asm1% 
+
+REM the below uses the custom startup code, which should let the game start faster
 vc +vlink-config -O4 -size -msfp4 -lms4 -no-inline-peephole %cmd_code% %cmd_data% -o %sfc_name%.sfc
+
+REM the below uses the stock startup code provided by VBCC
+REM vc +vlink-config-stockstartup -O4 -size -msfp4 -lms4 -no-inline-peephole %cmd_code% %cmd_data% -o %sfc_name%.sfc
 
 REM Also compile using calypsi for testing purposes
 REM this will invoke make.

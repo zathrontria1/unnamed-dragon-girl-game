@@ -1,5 +1,10 @@
 #include <snes/console.h>
 
+#include <stdlib.h>
+
+#include <stdint.h>
+#include <stdbool.h>
+
 #include "vars.h"
 
 #include "system.h"
@@ -25,7 +30,8 @@ int main()
 
     system_display_splash(); // A good amount of init is here.
 
-    system_current_routine = ROUTINE_FADEIN;
+    system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_FADEIN);
+    //system_current_routine = ROUTINE_FADEIN;
     system_target_routine = ROUTINE_GAMELOOP;
 
     system_setup_tilemap_display(system_target_routine);
@@ -39,7 +45,10 @@ int main()
     
     while (1)
     {   
-        switch (system_current_routine)
+        void (*func)() = system_loop_func_ptr;
+        func();
+        
+        /*switch (system_current_routine)
         {
             case ROUTINE_GAMELOOP:
                 loop_game();
@@ -69,8 +78,59 @@ int main()
                 snd_reset();
                 system_reset();
                 break;
-        }
+        }*/
     }
 
     return 0;
+}
+
+void * main_GetFunctionPointer(uint16_t routine)
+{
+    system_current_routine = routine; // Also set this for code that don't want to read function pointers
+
+    switch (routine)
+    {
+        case ROUTINE_GAMELOOP:
+            return (void *)&loop_game;
+            break;
+        case ROUTINE_GAMELOOP_RELOAD:
+            return (void *)&loop_game_reload;
+            break;
+        case ROUTINE_PAUSE:
+            return (void *)&loop_pause;
+            break;
+        case ROUTINE_MAPDISPLAY:
+            return (void *)&loop_mapdisplay;
+            break;
+        case ROUTINE_MAPDISPLAY_INIT:
+            return (void *)&loop_mapdisplay_init;
+            break;
+        case ROUTINE_MSGBOX:
+            return (void *)&loop_messagebox;
+            break;
+        case ROUTINE_FADEIN:
+            return (void *)&loop_fadein;
+            break;
+        case ROUTINE_FADEOUT:
+            return (void *)&loop_fadeout;
+            break;
+        case ROUTINE_RESET: // Special cased to immediately reset
+            return (void *)&main_Reset;
+            break;
+    }
+
+    return NULL;
+}
+
+/*
+    Call to soft reset.
+*/
+void main_Reset()
+{
+    snd_reset();
+    system_reset();
+
+    // Unreachable
+
+    return;
 }
