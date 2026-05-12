@@ -177,29 +177,6 @@ inline struct game_object * hit_test_player(struct game_object * o)
         return 1;
     }
     return 0;
-
-    // Original code follows.
-
-    /*// a.x < b.x + b.w && b.x < a.x + a.w
-    if ((b->pos.x.lh.h + b->w) < a->pos.x.lh.h)
-    {
-        return 1;
-    }
-    else if ((a->pos.x.lh.h + a->w) < b->pos.x.lh.h)
-    {
-        return 1;
-    }
-
-    // a.y < b.y + b.h && b.y < a.y + a.h
-    if ((a->pos.y.lh.h + a->h) < b->pos.y.lh.h)
-    {
-        return 1;
-    }
-    else if ((b->pos.y.lh.h + b->h) < a->pos.y.lh.h)
-    {
-        return 1;
-    }
-    return 0;*/
 }
 
 /*
@@ -267,6 +244,14 @@ inline uint16_t hit_test_extended(int16_t x1, int16_t x2, int16_t y1, int16_t y2
 {
     #if VBCC_ASM == 1
         __asm(
+            "\ta16\n"
+            "\tx16\n"
+
+            "\tphy\n"
+
+            "\tpei (r2)\n"
+            "\tpei (r3)\n"
+
             "\tlda _blocker_build_count_shadow\n"
             "\tbeq .no_hits\n"
 
@@ -274,9 +259,9 @@ inline uint16_t hit_test_extended(int16_t x1, int16_t x2, int16_t y1, int16_t y2
             "\tasl\n"
             "\ttax\n"
 
-            "\tlda 4,s\n"
+            "\tlda 10,s\n"
             "\tsta r2\n"
-            "\tlda 6,s\n"
+            "\tlda 12,s\n"
             "\tsta r3\n"
         ".check_blocker:\n"
             "\tlda r2\n"
@@ -286,6 +271,13 @@ inline uint16_t hit_test_extended(int16_t x1, int16_t x2, int16_t y1, int16_t y2
             "\tlda r3\n"
             "\tcmp >_blocker_list+2,x\n"
             "\tbne .check_next_blocker\n"
+
+            "\tply\n"
+            "\tsty r3\n"
+            "\tply\n"
+            "\tsty r2\n"
+            
+            "\tply\n"
             
             "\tlda #1\n"
 
@@ -298,6 +290,12 @@ inline uint16_t hit_test_extended(int16_t x1, int16_t x2, int16_t y1, int16_t y2
 
             "\tbpl .check_blocker\n"
         ".no_hits:\n"
+            "\tply\n"
+            "\tsty r3\n"
+            "\tply\n"
+            "\tsty r2\n"
+            
+            "\tply\n"
         );
     #else
         for (int k = 0; k < blocker_build_count_shadow; k++)

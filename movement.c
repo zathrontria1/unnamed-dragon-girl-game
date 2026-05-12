@@ -22,7 +22,6 @@
 
 #include "gfx.h"
 
-
 uint16_t move(struct game_object * o)
 {
     // one axis needs to be tested at a time

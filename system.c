@@ -318,7 +318,10 @@ void system_reset_ui_tilemap()
 
         __asm(
             "\ta8\n"
+            "\tx16\n"
             "\tsep #$20\n"
+
+            "\tpei (r0)\n"
 
             "\tldx #256\n"
             "\tstx r0\n"
@@ -342,6 +345,9 @@ void system_reset_ui_tilemap()
 
             "\ta16\n"
             "\trep #$20\n"
+
+            "\tplx\n"
+            "\tstx r0\n"
         );
 
         REG_VMAIN = VRAM_INCHIGH;
@@ -349,7 +355,13 @@ void system_reset_ui_tilemap()
 
         __asm(
             "\ta8\n"
+            "\tx16\n"
             "\tsep #$20\n"
+
+            "\tpei (r0)\n"
+
+            "\tldx #256\n"
+            "\tstx r0\n"
 
             "\tlda #$08\n"
             "\tsta $4300\n"
@@ -370,6 +382,9 @@ void system_reset_ui_tilemap()
 
             "\ta16\n"
             "\trep #$20\n"
+
+            "\tplx\n"
+            "\tstx r0\n"
         );
     #else
         REG_VMAIN = VRAM_INCHIGH;
@@ -388,7 +403,10 @@ void system_reset_ui_tilemap()
 
         __asm(
             "\ta8\n"
+            "\tx16\n"
             "\tsep #$20\n"
+
+            "\tpei (r0)\n"
 
             "\tldx #$00000\n"
             "\tstx r0\n"
@@ -412,6 +430,9 @@ void system_reset_ui_tilemap()
 
             "\ta16\n"
             "\trep #$20\n"
+
+            "\tplx\n"
+            "\tstx r0\n"
         );
     #else
         REG_VMAIN = VRAM_INCHIGH;
@@ -553,6 +574,9 @@ void system_poll_input()
         __asm(
             "\ta16\n"
             "\tx16\n"
+
+            "\tpei (r0)\n"
+            
             ".input_wait:\n"
             "\tlda $4212\n"
             "\tand #$01\n"
@@ -564,6 +588,9 @@ void system_poll_input()
             "\teor r0\n"
             "\tand _input_pad0\n"
             "\tsta _input_pad0_new\n"
+
+            "\tplx\n"
+            "\tstx r0\n"
         );
     #else
         // Check if input is ready.

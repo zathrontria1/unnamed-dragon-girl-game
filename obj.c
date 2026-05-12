@@ -225,6 +225,13 @@ void obj_reset(int start_index)
         __asm(
             "\ta16\n"
             "\tx16\n"
+
+            "\tphy\n"
+            "\tphb\n"
+
+            "\tpei (r0)\n"
+            "\tpei (r1)\n"
+
             "\txba\n" 
             "\tlsr\n" // mul 128
             "\tsta r0\n" // offset of start, also subtract length with this
@@ -232,8 +239,9 @@ void obj_reset(int start_index)
             "\tsec\n"
             "\tsbc r0\n"
             "\tsta r1\n" // actual transfer length
-            "\tphy\n"
-            "\tphb\n"
+
+            
+
             "\ta8\n"
             "\tsep #$20\n"
             "\tlda #$00\n"
@@ -241,6 +249,7 @@ void obj_reset(int start_index)
             "\tlda #^_objects\n"
             "\tsta >_system_MVNCodeInWRAM+1\n" // write bank byte of source 
             "\tsta >_system_MVNCodeInWRAM+2\n" // ditto for destination
+
             "\ta16\n"
             "\trep #$21\n"
             "\tlda r0\n" // load source address
@@ -252,8 +261,15 @@ void obj_reset(int start_index)
             "\tdec\n" 
             "\tdec\n" // Decrement by 2 to remove the first byte and MVN implied byte
             "\tjsl >_system_MVNCodeInWRAM;\n"
+
+            "\tply\n"
+            "\tsty r1\n"
+            "\tply\n"
+            "\tsty r0\n"
+
             "\tplb\n"
-            "\tply\n");
+            "\tply\n"
+        );
     #else
         uint8_t * ptr = (uint8_t *)&objects[start_index];
         for (int i = start_index; i < (OBJ_MAX_COUNT * (uint16_t)sizeof(struct game_object)); i++)
@@ -287,13 +303,19 @@ void obj_reset_hit_list()
         __asm(
             "\ta16\n"
             "\tx16\n"
+
+            "\tphy\n"
+            "\tphb\n"
+
+            "\tpei (r0)\n"
+            "\tpei (r1)\n"
+
             "\tstz r0\n" // offset of start, also subtract length with this
             "\tlda #2048\n"
             "\tsec\n"
             "\tsbc r0\n"
             "\tsta r1\n" // actual transfer length
-            "\tphy\n"
-            "\tphb\n"
+
             "\ta8\n"
             "\tsep #$20\n"
             "\tlda #$00\n"
@@ -301,6 +323,7 @@ void obj_reset_hit_list()
             "\tlda #^_hitbox_player\n"
             "\tsta >_system_MVNCodeInWRAM+1\n" // write bank byte of source 
             "\tsta >_system_MVNCodeInWRAM+2\n" // ditto for destination
+
             "\ta16\n"
             "\trep #$21\n"
             "\tlda r0\n" // load source address
@@ -312,6 +335,12 @@ void obj_reset_hit_list()
             "\tdec\n" 
             "\tdec\n" // Decrement by 2 to remove the first byte and MVN implied byte
             "\tjsl >_system_MVNCodeInWRAM;\n"
+
+            "\tply\n"
+            "\tsty r1\n"
+            "\tply\n"
+            "\tsty r0\n"
+
             "\tplb\n"
             "\tply\n");
     #else

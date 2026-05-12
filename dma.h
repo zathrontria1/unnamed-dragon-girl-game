@@ -26,7 +26,7 @@ void dma_clear_vram(void);
     void dma_copy_palette_subset(uint16_t start, uint16_t len);
 #endif
 
-inline uint16_t dma_queue_add(
+uint16_t dma_queue_add(
     uint8_t * src, 
     uint16_t dest, 
     uint16_t length,
@@ -50,5 +50,3 @@ inline uint16_t dma_queue_add(
 #else
     void dma_copy_bg_64height_anim(void);
 #endif
-
-

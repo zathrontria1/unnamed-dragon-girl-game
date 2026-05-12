@@ -278,9 +278,14 @@ void SpriteEngine_ProcessSpriteLists()
         __asm(
         "\ta16\n"
         "\tx16\n"
+
+        "\tphy\n"
+        "\tpei (r0)\n"
+        "\tpei (r1)\n"
+
         "\tlda _spr_front_count\n"
         "\tbeq .end_drawfront\n"
-        "\tphy\n"
+        
         "\ttay\n"
         "\tlda #<_spr_queue_front\n"
         "\tsta r0\n"
@@ -288,15 +293,22 @@ void SpriteEngine_ProcessSpriteLists()
         "\tsta r1\n"
         
         ".loop_drawfrontsprites:\n"
-        "\tjsl >_SpriteEngine_DrawSprite\n"
-        "\tlda r0\n"
-        "\tclc\n"
-        "\tadc #16\n"
-        "\tsta r0\n"
-        "\tdey\n"
-        "\tbne .loop_drawfrontsprites\n"
-        "\tply\n"
-        ".end_drawfront:\n");
+            "\tjsl >_SpriteEngine_DrawSprite\n"
+            "\tlda r0\n"
+            "\tclc\n"
+            "\tadc #16\n"
+            "\tsta r0\n"
+            "\tdey\n"
+            "\tbne .loop_drawfrontsprites\n"
+            
+        ".end_drawfront:\n"
+            "\tply\n"
+            "\tsty r1\n"
+            "\tply\n"
+            "\tsty r0\n"
+
+            "\tply\n"
+        );
     #else
         for (int i = 0; i < spr_front_count; i++)
         {
@@ -349,16 +361,24 @@ void SpriteEngine_ProcessSpriteLists()
         __asm(
         "\ta16\n"
         "\tx16\n"
+
+        "\tphy\n"
+        "\tpei (r0)\n"
+        "\tpei (r1)\n"
+        "\tpei (r2)\n"
+
         "\tlda #<_spr_queue_normal\n"
         "\tsta r0\n"
         "\tlda #^_spr_queue_normal\n"
         "\tsta r1\n"
-        "\tphy\n"
+        
         "\tlda _spr_normal_count\n"
         "\tbeq .end\n"
         "\tsta r2\n"
+
         "\tlda #$0000\n"
         "\tldy #8\n"
+
         "\ta8\n"
         "\tsep #$20\n"
         "\tphb\n"
@@ -366,25 +386,35 @@ void SpriteEngine_ProcessSpriteLists()
         "\tpha\n"
         "\tplb\n"
         "\tclc \n"
+
         ".loop_depthtally:\n"
-        "\tlda [r0],y\n"
-        "\ttax\n"
-        "\tinx\n"
-        "\tinc !_spr_depth_count,x\n"
-        "\tlda r0\n"
-        "\tadc #16\n"
-        "\tsta r0 \n"
-        "\tbcc .depthtally_nocarry\n"
-        "\tclc \n"
-        "\tinc r0+1\n"
-        ".depthtally_nocarry:\n"
-        "\tdec r2 \n"
-        "\tbne .loop_depthtally\n"
-        "\ta16\n"
-        "\trep #$20\n"
-        "\tplb\n"
+            "\tlda [r0],y\n"
+            "\ttax\n"
+            "\tinx\n"
+            "\tinc !_spr_depth_count,x\n"
+            "\tlda r0\n"
+            "\tadc #16\n"
+            "\tsta r0 \n"
+            "\tbcc .depthtally_nocarry\n"
+            "\tclc \n"
+            "\tinc r0+1\n"
+            ".depthtally_nocarry:\n"
+            "\tdec r2 \n"
+            "\tbne .loop_depthtally\n"
+
+            "\ta16\n"
+            "\trep #$20\n"
+            "\tplb\n"
+
         ".end:\n"
-        "\tply\n");
+            "\tply\n"
+            "\tsty r2\n"
+            "\tply\n"
+            "\tsty r1\n"
+            "\tply\n"
+            "\tsty r0\n"
+
+            "\tply\n");
     #else
         for (int i = 0; i < spr_normal_count; i++)
         {
@@ -482,6 +512,10 @@ void SpriteEngine_ProcessSpriteLists()
         "\ta16\n"
         "\tx16\n"
         "\tphy\n"
+        "\tpei (r0)\n"
+        "\tpei (r1)\n"
+        "\tpei (r2)\n"
+
         "\tlda #<_spr_queue_normal\n"
         "\tsta r0\n"
         "\tlda #^_spr_queue_normal\n"
@@ -489,57 +523,66 @@ void SpriteEngine_ProcessSpriteLists()
         "\tlda _spr_normal_count\n"
         "\tbeq .end2\n"
         "\tsta r2\n"
+
         ".loop_spritewrite:\n"
-        // Decrement the depth count
-        "\tlda #$0000\n"
-        "\tldy #8 \n" 
-        "\tsep #$20\n"
-        "\ta8\n"
-        "\tlda [r0],y\n"
-        "\ttax\n"
-        "\tlda >_spr_depth_count,x\n"
-        "\tdec\n"
-        "\tsta >_spr_depth_count,x\n"
+            // Decrement the depth count
+            "\tlda #$0000\n"
+            "\tldy #8 \n" 
+            "\tsep #$20\n"
+            "\ta8\n"
+            "\tlda [r0],y\n"
+            "\ttax\n"
+            "\tlda >_spr_depth_count,x\n"
+            "\tdec\n"
+            "\tsta >_spr_depth_count,x\n"
 
-        // Prepare the indices
-        "\ttax\n" 
+            // Prepare the indices
+            "\ttax\n" 
 
-        "\trep #$20\n"
-        "\ta16\n"
-        "\tasl\n"
-        "\tasl\n"
-        "\tsta r3 \n" 
-        "\tsep #$20\n"
-        "\ta8\n"
+            "\trep #$20\n"
+            "\ta16\n"
+            "\tasl\n"
+            "\tasl\n"
+            "\tsta r3 \n" 
+            "\tsep #$20\n"
+            "\ta8\n"
 
-        // Transfer the sprite information
-        "\tldy #6\n"
-        "\tlda [r0],y\n"
-        "\tsta >_shadow_oam+512,x\n"
-        
-        "\tldx r3\n"
+            // Transfer the sprite information
+            "\tldy #6\n"
+            "\tlda [r0],y\n"
+            "\tsta >_shadow_oam+512,x\n"
+            
+            "\tldx r3\n"
 
-        "\tldy #2\n"
-        "\tlda [r0],y\n"
-        "\tsta >_shadow_oam+1,x\n"
+            "\tldy #2\n"
+            "\tlda [r0],y\n"
+            "\tsta >_shadow_oam+1,x\n"
 
-        "\tlda [r0]\n"
-        "\tsta >_shadow_oam,x\n"
-        
-        "\trep #$20\n"
-        "\ta16\n"
-        "\tldy #4\n" 
-        "\tlda [r0],y\n"
-        "\tsta >_shadow_oam+2,x\n"
-        
-        "\tlda r0\n"
-        "\tclc \n"
-        "\tadc #16\n"
-        "\tsta r0 \n"
-        "\tdec r2 \n"
-        "\tbne .loop_spritewrite\n"
+            "\tlda [r0]\n"
+            "\tsta >_shadow_oam,x\n"
+            
+            "\trep #$20\n"
+            "\ta16\n"
+            "\tldy #4\n" 
+            "\tlda [r0],y\n"
+            "\tsta >_shadow_oam+2,x\n"
+            
+            "\tlda r0\n"
+            "\tclc \n"
+            "\tadc #16\n"
+            "\tsta r0 \n"
+            "\tdec r2 \n"
+            "\tbne .loop_spritewrite\n"
+            
         ".end2:\n"
-        "\tply\n");    
+            "\tply\n"
+            "\tsty r2\n"
+            "\tply\n"
+            "\tsty r1\n"
+            "\tply\n"
+            "\tsty r0\n"
+
+            "\tply\n");    
     #else
         for (int i = 0; i < spr_normal_count; i++)
         {
@@ -560,9 +603,14 @@ void SpriteEngine_ProcessSpriteLists()
         __asm(
         "\ta16\n"
         "\tx16\n"
+
+        "\tphy\n"
+        "\tpei (r0)\n"
+        "\tpei (r1)\n"
+
         "\tlda _spr_back_count\n"
         "\tbeq .end_drawback\n"
-        "\tphy\n"
+
         "\ttay\n"
         "\tlda #<_spr_queue_back\n"
         "\tsta r0\n"
@@ -570,15 +618,22 @@ void SpriteEngine_ProcessSpriteLists()
         "\tsta r1\n"
         
         ".loop_drawbacksprites:\n"
-        "\tjsl >_SpriteEngine_DrawSprite\n"
-        "\tlda r0\n"
-        "\tclc\n"
-        "\tadc #16\n"
-        "\tsta r0\n"
-        "\tdey\n"
-        "\tbne .loop_drawbacksprites\n"
-        "\tply\n"
-        ".end_drawback:\n");
+            "\tjsl >_SpriteEngine_DrawSprite\n"
+            "\tlda r0\n"
+            "\tclc\n"
+            "\tadc #16\n"
+            "\tsta r0\n"
+            "\tdey\n"
+            "\tbne .loop_drawbacksprites\n"
+
+        ".end_drawback:\n"
+            "\tply\n"
+            "\tsty r1\n"
+            "\tply\n"
+            "\tsty r0\n"
+
+            "\tply\n"
+    );
     #else
         for (int i = 0; i < spr_back_count; i++)
         {
@@ -755,20 +810,30 @@ void SpriteEngine_ResetOam()
 {
     #if VBCC_ASM == 1
         __asm(
+        "\ta16\n"
+        "\tx16\n"
+
+        "\tphy\n"
+        "\tpei (r2)\n"
+        "\tpei (r3)\n"
+        "\tpei (r10)\n"
+
         "\tlda _spr_sprite_count_prev\n"
         "\tbit #3\n"
         "\tbeq .sprcount_is_already_multiple_of_four\n"
+
         ".loop_roundcount:\n"
-        "\tinc\n"
-        "\tbit #3\n"
-        "\tbne .loop_roundcount\n"
+            "\tinc\n"
+            "\tbit #3\n"
+            "\tbne .loop_roundcount\n"
+
         ".sprcount_is_already_multiple_of_four:\n"
         "\tsta r10\n"
 
         "\tlda _spr_sprite_count\n"
         "\tcmp r10\n"
         "\tbcs .end_sprreset\n"
-        "\tphy\n"
+
         "\ttay\n"
 
         "\tasl\n"
@@ -801,11 +866,20 @@ void SpriteEngine_ResetOam()
 
         "\ta16\n"
         "\trep #$20\n"
-
-        "\tply\n"
+            
         ".end_sprreset:\n"
         "\tlda _spr_sprite_count\n"
-        "\tsta _spr_sprite_count_prev\n");
+        "\tsta _spr_sprite_count_prev\n"
+        
+        "\tply\n"
+        "\tsty r10\n"
+        "\tply\n"
+        "\tsty r3\n"
+        "\tply\n"
+        "\tsty r2\n"
+
+        "\tply\n"
+    );
     #else
         uint16_t temp_len = spr_sprite_count_prev;
         while ((temp_len & 0x03) != 0x00)

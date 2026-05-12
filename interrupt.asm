@@ -37,7 +37,10 @@ ___irq_vblank:
 
 	rti
 ; stacksize=0+??
+	global	_system_use_alternate_nmi
+	zpage	_system_use_alternate_nmi
 	global	_interrupt_vblank_sub
+	global	_interrupt_vblank_alt
 	zpage	r0
 	zpage	r1
 	zpage	r2
