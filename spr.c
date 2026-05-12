@@ -41,122 +41,354 @@ void SpriteEngine_DrawUISprite(int16_t x, int16_t y, uint16_t tileattrib)
     return;
 }
 
+#if VBCC_ASM == 1
+NO_INLINE void SpriteEngine_AddToFrontLayer(__reg("a/x") struct game_object * o, uint16_t tileattrib)
+#else
 void SpriteEngine_AddToFrontLayer(struct game_object * o, uint16_t tileattrib)
+#endif
 {
-    if (spr_front_count >= SPR_COUNT_MAX_FRONT)
-    {
-        return;
-    }
+    #if VBCC_ASM == 1
+        __asm(
+            "\ta16\n"
+            "\tx16\n"
+            "\tphy\n"
+            "\ttax\n"
 
-    int16_t temp_x;
-    int16_t temp_y;
+            // Tile attribute data is 6th item in stack
+            // object X position is 6th byte
+            // object Y position is 10th byte
+            // object Z position is 14th byte
+            // (use only high 16 bits for them)
 
-    temp_x = o->pos.x.lh.h - bg_scroll_x.full.high.a;
+            // Test if queue full first
+            "\tlda <_spr_front_count\n"
+            "\tcmp #64\n"
+            "\tbcs .reject\n"
 
-    if ((temp_x > -16) && (temp_x < 256))
-    {
-        if (temp_x < 0)
+            "\tasl\n"
+            "\tasl\n"
+            "\tasl\n"
+            "\tasl\n"
+            "\ttay\n"
+
+            "\tlda $7e0008,x\n"
+            "\tsec\n"
+            "\tsbc <_bg_scroll_x+2\n"
+            "\tbpl .x_pos\n"
+
+            ".x_neg:\n"
+                "\tcmp #-16\n"
+                "\tbcc .reject\n"
+                // Object partially on the left edge
+                "\tsta _spr_queue_front,y\n"
+                "\tlda #$40\n"
+                "\tsta _spr_queue_front+6,y\n"
+                "\tbra .y_test\n"
+            ".x_pos:\n"
+                "\tcmp #256\n"
+                "\tbcs .reject\n"
+                "\tsta _spr_queue_front,y\n"
+                "\tlda #$00\n"
+                "\tsta _spr_queue_front+6,y\n"
+            ".y_test:\n"
+            "\tlda $7e000c,x\n"
+            "\tsec\n"
+            "\tsbc $7e0010,x\n"
+            "\tsec\n"
+            "\tsbc <_bg_scroll_y+2\n"
+            "\tbpl .y_pos\n"
+
+            ".y_neg:\n"
+                "\tcmp #-16\n"
+                "\tbcc .reject\n"
+                "\tclc\n"
+                "\tbra .finish\n"
+            ".y_pos:\n"
+                "\tcmp #224\n"
+                "\tbcs .reject\n"
+
+            ".finish:\n"
+            "\tsta _spr_queue_front+2,y\n"
+            "\tadc #15\n"
+            "\tsta _spr_queue_front+8,y\n"
+            "\tlda 6,s\n"
+            "\tsta _spr_queue_front+4,y\n"
+            "\tinc <_spr_front_count\n"
+
+            ".reject:\n"
+            "\tply\n"
+        );
+    #else
+        if (spr_front_count >= SPR_COUNT_MAX_FRONT)
         {
-            spr_queue_front[spr_front_count].signsize = 0x40;
-        }
-        else
-        {
-            spr_queue_front[spr_front_count].signsize = 0x00;
-        }
-        temp_y = o->pos.y.lh.h - o->pos.z.lh.h - bg_scroll_y.full.high.a;
-
-        if ((temp_y > -16) && (temp_y < 224))
-        {
-            spr_queue_front[spr_front_count].tileattrib = tileattrib;
-            spr_queue_front[spr_front_count].x = temp_x;
-            spr_queue_front[spr_front_count].y = temp_y;
-            spr_queue_front[spr_front_count].depth = (temp_y + 15);
-
-            spr_front_count++;
-
             return;
         }
-    }
+
+        int16_t temp_x;
+        int16_t temp_y;
+
+        temp_x = o->pos.x.lh.h - bg_scroll_x.full.high.a;
+
+        if ((temp_x > -16) && (temp_x < 256))
+        {
+            if (temp_x < 0)
+            {
+                spr_queue_front[spr_front_count].signsize = 0x40;
+            }
+            else
+            {
+                spr_queue_front[spr_front_count].signsize = 0x00;
+            }
+            temp_y = o->pos.y.lh.h - o->pos.z.lh.h - bg_scroll_y.full.high.a;
+
+            if ((temp_y > -16) && (temp_y < 224))
+            {
+                spr_queue_front[spr_front_count].tileattrib = tileattrib;
+                spr_queue_front[spr_front_count].x = temp_x;
+                spr_queue_front[spr_front_count].y = temp_y;
+                spr_queue_front[spr_front_count].depth = (temp_y + 15);
+
+                spr_front_count++;
+
+                return;
+            }
+        }
+    #endif
 
     return;
 }
 
+
+#if VBCC_ASM == 1
+NO_INLINE void SpriteEngine_AddToSortedLayer(__reg("a/x") struct game_object * o, uint16_t tileattrib)
+#else
 void SpriteEngine_AddToSortedLayer(struct game_object * o, uint16_t tileattrib)
+#endif
 {
-    if (spr_normal_count >= SPR_COUNT_MAX_SORTED)
-    {
-        return;
-    }
+    #if VBCC_ASM == 1
+        __asm(
+            "\ta16\n"
+            "\tx16\n"
+            "\tphy\n"
+            "\ttax\n"
 
-    int16_t temp_x;
-    int16_t temp_y;
+            // Tile attribute data is 6th item in stack
+            // object X position is 6th byte
+            // object Y position is 10th byte
+            // object Z position is 14th byte
+            // (use only high 16 bits for them)
 
-    temp_x = o->pos.x.lh.h - bg_scroll_x.full.high.a;
+            // Test if queue full first
+            "\tlda <_spr_normal_count\n"
+            "\tcmp #64\n"
+            "\tbcs .reject\n"
 
-    if ((temp_x > -16) && (temp_x < 256))
-    {
-        if (temp_x < 0)
+            "\tasl\n"
+            "\tasl\n"
+            "\tasl\n"
+            "\tasl\n"
+            "\ttay\n"
+
+            "\tlda $7e0008,x\n"
+            "\tsec\n"
+            "\tsbc <_bg_scroll_x+2\n"
+            "\tbpl .x_pos\n"
+
+            ".x_neg:\n"
+                "\tcmp #-16\n"
+                "\tbcc .reject\n"
+                // Object partially on the left edge
+                "\tsta _spr_queue_normal,y\n"
+                "\tlda #$40\n"
+                "\tsta _spr_queue_normal+6,y\n"
+                "\tbra .y_test\n"
+            ".x_pos:\n"
+                "\tcmp #256\n"
+                "\tbcs .reject\n"
+                "\tsta _spr_queue_normal,y\n"
+                "\tlda #$00\n"
+                "\tsta _spr_queue_normal+6,y\n"
+            ".y_test:\n"
+            "\tlda $7e000c,x\n"
+            "\tsec\n"
+            "\tsbc $7e0010,x\n"
+            "\tsec\n"
+            "\tsbc <_bg_scroll_y+2\n"
+            "\tbpl .y_pos\n"
+
+            ".y_neg:\n"
+                "\tcmp #-16\n"
+                "\tbcc .reject\n"
+                "\tclc\n"
+                "\tbra .finish\n"
+            ".y_pos:\n"
+                "\tcmp #224\n"
+                "\tbcs .reject\n"
+
+            ".finish:\n"
+            "\tsta _spr_queue_normal+2,y\n"
+            "\tadc #15\n"
+            "\tsta _spr_queue_normal+8,y\n"
+            "\tlda 6,s\n"
+            "\tsta _spr_queue_normal+4,y\n"
+            "\tinc <_spr_normal_count\n"
+
+            ".reject:\n"
+            "\tply\n"
+        );
+    #else
+        if (spr_normal_count >= SPR_COUNT_MAX_SORTED)
         {
-            spr_queue_normal[spr_normal_count].signsize = 0x40;
-        }
-        else
-        {
-            spr_queue_normal[spr_normal_count].signsize = 0x00;
-        }
-        temp_y = o->pos.y.lh.h - o->pos.z.lh.h - bg_scroll_y.full.high.a;
-
-        if ((temp_y > -16) && (temp_y < 224))
-        {
-            spr_queue_normal[spr_normal_count].x = temp_x;
-            spr_queue_normal[spr_normal_count].y = temp_y;
-            spr_queue_normal[spr_normal_count].tileattrib = tileattrib;
-            spr_queue_normal[spr_normal_count].depth = (temp_y + 15);
-
-            spr_normal_count++;
-
             return;
         }
-    }
+
+        int16_t temp_x;
+        int16_t temp_y;
+
+        temp_x = o->pos.x.lh.h - bg_scroll_x.full.high.a;
+
+        if ((temp_x > -16) && (temp_x < 256))
+        {
+            if (temp_x < 0)
+            {
+                spr_queue_normal[spr_normal_count].signsize = 0x40;
+            }
+            else
+            {
+                spr_queue_normal[spr_normal_count].signsize = 0x00;
+            }
+            temp_y = o->pos.y.lh.h - o->pos.z.lh.h - bg_scroll_y.full.high.a;
+
+            if ((temp_y > -16) && (temp_y < 224))
+            {
+                spr_queue_normal[spr_normal_count].x = temp_x;
+                spr_queue_normal[spr_normal_count].y = temp_y;
+                spr_queue_normal[spr_normal_count].tileattrib = tileattrib;
+                spr_queue_normal[spr_normal_count].depth = (temp_y + 15);
+
+                spr_normal_count++;
+
+                return;
+            }
+        }
+    #endif
 
     return;
 }
 
+#if VBCC_ASM == 1
+NO_INLINE void SpriteEngine_AddToBackLayer(__reg("a/x") struct game_object * o, uint16_t tileattrib)
+#else
 void SpriteEngine_AddToBackLayer(struct game_object * o, uint16_t tileattrib)
+#endif
 {
-    if (spr_back_count >= SPR_COUNT_MAX_BACK)
-    {
-        return;
-    }
+    #if VBCC_ASM == 1
+        __asm(
+            "\ta16\n"
+            "\tx16\n"
+            "\tphy\n"
+            "\ttax\n"
 
-    int16_t temp_x;
-    int16_t temp_y;
+            // Tile attribute data is 6th item in stack
+            // object X position is 6th byte
+            // object Y position is 10th byte
+            // object Z position is 14th byte
+            // (use only high 16 bits for them)
 
-    temp_x = o->pos.x.lh.h - bg_scroll_x.full.high.a;
+            // Test if queue full first
+            "\tlda <_spr_back_count\n"
+            "\tcmp #64\n"
+            "\tbcs .reject\n"
 
-    if ((temp_x > -16) && (temp_x < 256))
-    {
-        if (temp_x < 0)
+            "\tasl\n"
+            "\tasl\n"
+            "\tasl\n"
+            "\tasl\n"
+            "\ttay\n"
+
+            "\tlda $7e0008,x\n"
+            "\tsec\n"
+            "\tsbc <_bg_scroll_x+2\n"
+            "\tbpl .x_pos\n"
+
+            ".x_neg:\n"
+                "\tcmp #-16\n"
+                "\tbcc .reject\n"
+                // Object partially on the left edge
+                "\tsta _spr_queue_back,y\n"
+                "\tlda #$40\n"
+                "\tsta _spr_queue_back+6,y\n"
+                "\tbra .y_test\n"
+            ".x_pos:\n"
+                "\tcmp #256\n"
+                "\tbcs .reject\n"
+                "\tsta _spr_queue_back,y\n"
+                "\tlda #$00\n"
+                "\tsta _spr_queue_back+6,y\n"
+            ".y_test:\n"
+            "\tlda $7e000c,x\n"
+            "\tsec\n"
+            "\tsbc $7e0010,x\n"
+            "\tsec\n"
+            "\tsbc <_bg_scroll_y+2\n"
+            "\tbpl .y_pos\n"
+
+            ".y_neg:\n"
+                "\tcmp #-16\n"
+                "\tbcc .reject\n"
+                "\tclc\n"
+                "\tbra .finish\n"
+            ".y_pos:\n"
+                "\tcmp #224\n"
+                "\tbcs .reject\n"
+
+            ".finish:\n"
+            "\tsta _spr_queue_back+2,y\n"
+            "\tadc #15\n"
+            "\tsta _spr_queue_back+8,y\n"
+            "\tlda 6,s\n"
+            "\tsta _spr_queue_back+4,y\n"
+            "\tinc <_spr_back_count\n"
+
+            ".reject:\n"
+            "\tply\n"
+        );
+    #else
+        if (spr_back_count >= SPR_COUNT_MAX_BACK)
         {
-            spr_queue_back[spr_back_count].signsize = 0x40;
-        }
-        else
-        {
-            spr_queue_back[spr_back_count].signsize = 0x00;
-        }
-        temp_y = o->pos.y.lh.h - o->pos.z.lh.h - bg_scroll_y.full.high.a;
-
-        if ((temp_y > -16) && (temp_y < 224))
-        {
-            spr_queue_back[spr_back_count].tileattrib = tileattrib;
-            spr_queue_back[spr_back_count].x = temp_x;
-            spr_queue_back[spr_back_count].y = temp_y;
-            spr_queue_back[spr_back_count].depth = (temp_y + 15);
-
-            spr_back_count++;
-
             return;
         }
-    }
+
+        int16_t temp_x;
+        int16_t temp_y;
+
+        temp_x = o->pos.x.lh.h - bg_scroll_x.full.high.a;
+
+        if ((temp_x > -16) && (temp_x < 256))
+        {
+            if (temp_x < 0)
+            {
+                spr_queue_back[spr_back_count].signsize = 0x40;
+            }
+            else
+            {
+                spr_queue_back[spr_back_count].signsize = 0x00;
+            }
+            temp_y = o->pos.y.lh.h - o->pos.z.lh.h - bg_scroll_y.full.high.a;
+
+            if ((temp_y > -16) && (temp_y < 224))
+            {
+                spr_queue_back[spr_back_count].tileattrib = tileattrib;
+                spr_queue_back[spr_back_count].x = temp_x;
+                spr_queue_back[spr_back_count].y = temp_y;
+                spr_queue_back[spr_back_count].depth = (temp_y + 15);
+
+                spr_back_count++;
+
+                return;
+            }
+        }
+    #endif
 
     return;
 }
@@ -283,7 +515,7 @@ void SpriteEngine_ProcessSpriteLists()
         "\tpei (r0)\n"
         "\tpei (r1)\n"
 
-        "\tlda _spr_front_count\n"
+        "\tlda <_spr_front_count\n"
         "\tbeq .end_drawfront\n"
         
         "\ttay\n"
@@ -364,15 +596,12 @@ void SpriteEngine_ProcessSpriteLists()
 
         "\tphy\n"
         "\tpei (r0)\n"
-        "\tpei (r1)\n"
         "\tpei (r2)\n"
-
+        
         "\tlda #<_spr_queue_normal\n"
         "\tsta r0\n"
-        "\tlda #^_spr_queue_normal\n"
-        "\tsta r1\n"
         
-        "\tlda _spr_normal_count\n"
+        "\tlda <_spr_normal_count\n"
         "\tbeq .end\n"
         "\tsta r2\n"
 
@@ -388,7 +617,7 @@ void SpriteEngine_ProcessSpriteLists()
         "\tclc \n"
 
         ".loop_depthtally:\n"
-            "\tlda [r0],y\n"
+            "\tlda (r0),y\n"
             "\ttax\n"
             "\tinx\n"
             "\tinc !_spr_depth_count,x\n"
@@ -409,8 +638,6 @@ void SpriteEngine_ProcessSpriteLists()
         ".end:\n"
             "\tply\n"
             "\tsty r2\n"
-            "\tply\n"
-            "\tsty r1\n"
             "\tply\n"
             "\tsty r0\n"
 
@@ -438,9 +665,9 @@ void SpriteEngine_ProcessSpriteLists()
         "\tsep #$10\n"
         "\tlda #$0000\n"
         "\ttax\n"
-        "\tlda >_spr_sprite_count\n"
+        "\tlda !_spr_sprite_count\n"
         "\tclc\n"
-        "\tadc >_spr_normal_count\n"
+        "\tadc !_spr_normal_count\n"
         "\tsep #$21\n"
         "\ta8\n"
         "\ttay\n"
@@ -512,26 +739,22 @@ void SpriteEngine_ProcessSpriteLists()
         "\ta16\n"
         "\tx16\n"
         "\tphy\n"
-        "\tpei (r0)\n"
-        "\tpei (r1)\n"
         "\tpei (r2)\n"
 
-        "\tlda #<_spr_queue_normal\n"
-        "\tsta r0\n"
-        "\tlda #^_spr_queue_normal\n"
-        "\tsta r1\n"
-        "\tlda _spr_normal_count\n"
+        "\tlda <_spr_normal_count\n"
         "\tbeq .end2\n"
         "\tsta r2\n"
 
+        "\tldy #0\n"
         ".loop_spritewrite:\n"
             // Decrement the depth count
-            "\tlda #$0000\n"
-            "\tldy #8 \n" 
+            // Wipe the accumulator first
+            "\ttdc\n"
             "\tsep #$20\n"
             "\ta8\n"
-            "\tlda [r0],y\n"
+            "\tlda !_spr_queue_normal+8,y\n"
             "\ttax\n"
+
             "\tlda >_spr_depth_count,x\n"
             "\tdec\n"
             "\tsta >_spr_depth_count,x\n"
@@ -548,39 +771,32 @@ void SpriteEngine_ProcessSpriteLists()
             "\ta8\n"
 
             // Transfer the sprite information
-            "\tldy #6\n"
-            "\tlda [r0],y\n"
+            "\tlda !_spr_queue_normal+6,y\n"
             "\tsta >_shadow_oam+512,x\n"
             
             "\tldx r3\n"
 
-            "\tldy #2\n"
-            "\tlda [r0],y\n"
+            "\tlda !_spr_queue_normal+2,y\n"
             "\tsta >_shadow_oam+1,x\n"
 
-            "\tlda [r0]\n"
+            "\tlda !_spr_queue_normal,y\n"
             "\tsta >_shadow_oam,x\n"
             
-            "\trep #$20\n"
+            "\trep #$21\n" // Carry is cleared here
             "\ta16\n"
-            "\tldy #4\n" 
-            "\tlda [r0],y\n"
+            "\tlda !_spr_queue_normal+4,y\n"
             "\tsta >_shadow_oam+2,x\n"
             
-            "\tlda r0\n"
-            "\tclc \n"
+            "\ttya\n"
             "\tadc #16\n"
-            "\tsta r0 \n"
-            "\tdec r2 \n"
+            "\ttay\n"
+
+            "\tdec r2\n"
             "\tbne .loop_spritewrite\n"
             
         ".end2:\n"
             "\tply\n"
             "\tsty r2\n"
-            "\tply\n"
-            "\tsty r1\n"
-            "\tply\n"
-            "\tsty r0\n"
 
             "\tply\n");    
     #else
@@ -608,7 +824,7 @@ void SpriteEngine_ProcessSpriteLists()
         "\tpei (r0)\n"
         "\tpei (r1)\n"
 
-        "\tlda _spr_back_count\n"
+        "\tlda <_spr_back_count\n"
         "\tbeq .end_drawback\n"
 
         "\ttay\n"
@@ -665,26 +881,26 @@ void SpriteEngine_ProcessSpriteLists()
 	    "\tx16\n"
         "\tphy\n"
 
-        "\tlda _spr_sprite_count\n"
+        "\tlda <_spr_sprite_count\n"
         "\tasl\n"
         "\tasl\n"
         "\ttax\n"
-        "\tldy #4\n"
-        "\tlda [r0],y \n"
+
+        "\tldy r0\n"
+
+        "\tlda $0004,y \n"
         "\tsta >_shadow_oam+2,x \n"
         "\tsep #$20\n"
         "\ta8\n"
-        "\tlda [r0]\n"
+        "\tlda $0000,y \n"
         "\tsta >_shadow_oam,x \n"
-        "\tldy #2\n"
-        "\tlda [r0],y \n"
+        "\tlda $0002,y \n"
         "\tsta >_shadow_oam+1,x\n"
         "\tldx _spr_sprite_count\n"
-        "\tldy #6\n"
-        "\tlda [r0],y \n"
+        "\tlda $0006,y \n"
         "\tsta >_shadow_oam+512,x \n"
         "\tinx\n"
-        "\tstx _spr_sprite_count\n"
+        "\tstx <_spr_sprite_count\n"
         "\ta16\n"
         "\trep #$20\n"
         "\tply\n");
@@ -782,7 +998,7 @@ void SpriteEngine_PackOamHighTable()
         "\trep #$30\n"
         "\tply\n"
         "\tpld\n"
-        "\tstz _spr_sprite_count\n"
+        "\tstz <_spr_sprite_count\n"
         );
     #else
         int j = 0;
@@ -830,7 +1046,7 @@ void SpriteEngine_ResetOam()
         ".sprcount_is_already_multiple_of_four:\n"
         "\tsta r10\n"
 
-        "\tlda _spr_sprite_count\n"
+        "\tlda <_spr_sprite_count\n"
         "\tcmp r10\n"
         "\tbcs .end_sprreset\n"
 
@@ -868,7 +1084,7 @@ void SpriteEngine_ResetOam()
         "\trep #$20\n"
             
         ".end_sprreset:\n"
-        "\tlda _spr_sprite_count\n"
+        "\tlda <_spr_sprite_count\n"
         "\tsta _spr_sprite_count_prev\n"
         
         "\tply\n"

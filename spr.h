@@ -1,7 +1,14 @@
 void SpriteEngine_DrawUISprite(int16_t x, int16_t y, uint16_t tileattrib);
+
+#if VBCC_ASM == 1
+NO_INLINE void SpriteEngine_AddToFrontLayer(__reg("a/x") struct game_object * o, uint16_t tileattrib);
+NO_INLINE void SpriteEngine_AddToSortedLayer(__reg("a/x") struct game_object * o, uint16_t tileattrib);
+NO_INLINE void SpriteEngine_AddToBackLayer(__reg("a/x") struct game_object * o, uint16_t tileattrib);
+#else
 void SpriteEngine_AddToFrontLayer(struct game_object * o, uint16_t tileattrib);
 void SpriteEngine_AddToSortedLayer(struct game_object * o, uint16_t tileattrib);
 void SpriteEngine_AddToBackLayer(struct game_object * o, uint16_t tileattrib);
+#endif
 
 void SpriteEngine_ProcessSpriteLists(void);
 

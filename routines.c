@@ -189,10 +189,10 @@ void routines_interactable_blocker(struct game_object * o)
                 SpriteEngine_AddToBackLayer(o, 0x0e | PAL_INTERACTABLE_BLOCKER_FLOOR << 9 | 2 << 12);
                 break;
             case OBJID_INTERACTABLE_BLOCKER_DOOR_NS:
-                spr_metaspr_draw(o, &data_metaspr_door_ns[0]);
+                SpriteEngine_AddMetaSprite(o, &data_metaspr_door_ns[0]);
                 break;
             case OBJID_INTERACTABLE_BLOCKER_DOOR_EW:
-                spr_metaspr_draw(o, &data_metaspr_door_ew[0]);
+                SpriteEngine_AddMetaSprite(o, &data_metaspr_door_ew[0]);
                 break;
         }
 
