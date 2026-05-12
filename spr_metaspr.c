@@ -20,19 +20,32 @@ void SpriteEngine_AddMetaSprite(struct game_object * o, const struct spr_metaspr
 
             "\tphy\n"
 
-            "\tpei (r0)\n" // r1 is untouched
-            "\tpei (r2)\n"
-            "\tpei (r3)\n"
+            "\tpei (r0)\n" // game object's address; r1 is untouched
+            
+            "\tpei (r2)\n" // holds sprite queue Y index
+            "\tpei (r3)\n" // holds depth
+            "\tpei (r4)\n" // holds origin X pos
+            "\tpei (r5)\n" // holds origin Y pos
 
             "\ttax\n"
-
-            // Precalculate the depth first
+            
+            // Precalculate the origin and depth
             "\tlda $7e000c,x\n"
-            "\tclc\n"
-            "\tadc #15\n"
             "\tsec\n"
             "\tsbc <_bg_scroll_y+2\n"
+            "\ttay\n"
+            "\tsec\n"
+            "\tsbc $7e0010,x\n"
+            "\tsta r5\n"
+            "\ttya\n"
+            "\tclc\n"
+            "\tadc #15\n"
             "\tsta r3\n"
+
+            "\tlda $7e0008,x\n" // carry is guaranteed clear
+            "\tsec\n"
+            "\tsbc <_bg_scroll_x+2\n"
+            "\tsta r4\n"
 
             ".metasprite_loop:\n"
             /* Metasprite defs
@@ -60,15 +73,13 @@ void SpriteEngine_AddMetaSprite(struct game_object * o, const struct spr_metaspr
             "\tbne .large\n"
 
             ".small:\n"
-                "\tlda $7e0008,x\n" // carry is guaranteed clear
+                "\tlda r4\n"
                 "\tldy #2\n"
                 "\tadc [r0],y\n"
-                "\tsec\n"
-                "\tldy r2\n"
-                "\tsbc <_bg_scroll_x+2\n"
+                
                 "\tbpl .x_pos\n"
-
                 ".x_neg:\n"
+                    "\tldy r2\n"
                     "\tcmp #-16\n"
                     "\tbcc .next_item\n"
                     // Object partially on the left edge
@@ -78,21 +89,19 @@ void SpriteEngine_AddMetaSprite(struct game_object * o, const struct spr_metaspr
                     "\tclc\n"
                     "\tbra .y_test\n"
                 ".x_pos:\n"
+                    "\tldy r2\n"
                     "\tcmp #256\n"
                     "\tbcs .next_item\n"
                     "\tsta _spr_queue_normal,y\n"
                     "\tlda #$00\n"
                     "\tsta _spr_queue_normal+6,y\n"
                 ".y_test:\n"
-                "\tlda $7e000c,x\n"
+
+                "\tlda r5\n"
                 "\tldy #4\n"
                 "\tadc [r0],y\n"
-                "\tsec\n"
-                "\tsbc $7e0010,x\n"
-                "\tldy r2\n"
-                "\tsbc <_bg_scroll_y+2\n"
+                
                 "\tbpl .y_pos\n"
-
                 ".y_neg:\n"
                     "\tcmp #-16\n"
                     "\tbcc .next_item\n"
@@ -103,18 +112,16 @@ void SpriteEngine_AddMetaSprite(struct game_object * o, const struct spr_metaspr
                     "\tbra .draw\n"
 
             ".large:\n"
-                "\tlda $7e0008,x\n" // carry is guaranteed clear
+                "\tlda r4\n"
                 "\tldy #2\n"
                 "\tadc [r0],y\n"
-                "\tsec\n"
-                "\tldy r2\n"
-                "\tsbc <_bg_scroll_x+2\n"
+                
                 "\tbpl .x_pos_lg\n"
-
                 ".x_neg_lg:\n"
                     "\tcmp #-32\n"
                     "\tbcc .next_item\n"
                     // Object partially on the left edge
+                    "\tldy r2\n"
                     "\tsta _spr_queue_normal,y\n"
                     "\tlda #$c0\n"
                     "\tsta _spr_queue_normal+6,y\n"
@@ -123,17 +130,15 @@ void SpriteEngine_AddMetaSprite(struct game_object * o, const struct spr_metaspr
                 ".x_pos_lg:\n"
                     "\tcmp #256\n"
                     "\tbcs .next_item\n"
+                    "\tldy r2\n"
                     "\tsta _spr_queue_normal,y\n"
                     "\tlda #$80\n"
                     "\tsta _spr_queue_normal+6,y\n"
                 ".y_test_lg:\n"
-                "\tlda $7e000c,x\n"
+                "\tlda r5\n"
                 "\tldy #4\n"
                 "\tadc [r0],y\n"
-                "\tsec\n"
-                "\tsbc $7e0010,x\n"
-                "\tldy r2\n"
-                "\tsbc <_bg_scroll_y+2\n"
+
                 "\tbpl .y_pos_lg\n"
 
                 ".y_neg_lg:\n"
@@ -145,6 +150,7 @@ void SpriteEngine_AddMetaSprite(struct game_object * o, const struct spr_metaspr
                     "\tbcs .next_item\n"
 
                 ".draw:\n"
+                    "\tldy r2\n"
                     "\tsta _spr_queue_normal+2,y\n"
                     "\tlda r3\n"
                     "\tsta _spr_queue_normal+8,y\n"
@@ -162,9 +168,14 @@ void SpriteEngine_AddMetaSprite(struct game_object * o, const struct spr_metaspr
             ".finish:\n"
 
             "\tply\n"
+            "\tsty r5\n"
+            "\tply\n"
+            "\tsty r4\n"
+            "\tply\n"
             "\tsty r3\n"
             "\tply\n"
             "\tsty r2\n"
+
             "\tply\n"
             "\tsty r0\n"
 

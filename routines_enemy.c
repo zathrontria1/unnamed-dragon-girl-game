@@ -311,7 +311,7 @@ void routines_slime(struct game_object * o)
     }
 
     // Testing DMA on demand
-    uint8_t * temp_addr = ani_getframe_dynamic(o);
+    uint8_t * temp_addr = ani_getframe_dynamic_slime(o);
 
     if ((temp_addr != o->struct_data.npc_data.ani.last_address))
     {
@@ -394,7 +394,7 @@ void routines_bubble_e(struct game_object * o)
         }
     }
 
-    uint8_t * temp_addr = ani_getframe_dynamic_stateless(o);
+    uint8_t * temp_addr = ani_getframe_dynamic_bubble(o);
 
     if ((temp_addr != o->struct_data.npc_data.ani.last_address))
     {

@@ -6,6 +6,63 @@
 #include "ani.h"
 #include "spr.h"
 
+// Lookup tables for animations
+/*
+    For reference:
+
+    #define STATE_IDLE 0
+
+    #define STATE_MOVE_WALK 1 // Yes, there is overlap
+    #define STATE_MOVE_RUN 2
+
+    #define STATE_ATTACK_BASIC 3
+    #define STATE_ATTACK_BASIC_MOVE 4
+
+    #define STATE_ATTACK_SPECIAL 5
+    #define STATE_ATTACK_SPECIAL_MOVE 6
+
+    #define STATE_HURT_NORMAL 7
+    #define STATE_HURT_NORMAL_MOVE 8
+    #define STATE_HURT_NORMAL_MOVE_RUN 9
+
+    #define STATE_HURT_BURN 10
+    #define STATE_HURT_BURN_MOVE 11
+
+    #define STATE_SPAWNING 12
+    #define STATE_DIE 13
+
+    #define FACING_DOWN 0
+    #define FACING_UP 1
+    #define FACING_RIGHT 2
+    #define FACING_LEFT 3
+*/
+
+// With flipping
+const uint16_t const_ani_lut_basic[14][4] = 
+{
+   {0, 1, 2, 2},
+
+   {3, 5, 7, 7},
+   {3, 5, 7, 7},
+
+   {18, 20, 22, 22},
+   {18, 20, 22, 22},
+
+   {24, 26, 28, 28},
+   {24, 26, 28, 28},
+    
+   {0, 1, 2, 2},
+   {3, 5, 7, 7},
+   {3, 5, 7, 7},
+
+   {9, 10, 11, 11},
+   {12, 14, 16, 16},
+
+   {0, 0, 0, 0},
+   {32, 32, 32, 32},
+   
+};
+
 /*
     Animations item drop gravity, and draw a drop shadow if mid-air
 */
@@ -221,10 +278,31 @@ uint8_t * ani_getframe_dynamic_bubble(struct game_object * o)
 
 uint8_t * ani_getframe_dynamic_slime(struct game_object * o)
 {
+    // TODO: ASM optimize
     // use a virtual tilenum system before finalizing.
-    uint16_t temp_tilenum = 0;
+    uint16_t temp_tilenum = o->struct_data.npc_data.ani.frame; // add the frame offset.
 
-    switch (o->state)
+    if (o->state == STATE_SPAWNING)
+    {
+        return (uint8_t *)((uint32_t)&data_sprite_spawn_placeholder + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
+    }
+    else
+    {
+        temp_tilenum += const_ani_lut_basic[o->state][o->facing];
+
+        if ((o->facing == FACING_LEFT) && (o->state != STATE_DIE))
+        {
+            return (uint8_t *)(((uint32_t)&data_sprite_slime + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10)) | 0x80000000); // set the negative flag
+        }
+        else
+        {
+            // Calculate the address
+            return (uint8_t *)((uint32_t)&data_sprite_slime + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
+        }
+    }
+
+    // Old code follows
+    /*switch (o->state)
     {
         case STATE_IDLE:
             break;
@@ -257,13 +335,12 @@ uint8_t * ani_getframe_dynamic_slime(struct game_object * o)
             temp_tilenum += 32;
             break;
         case STATE_SPAWNING:
-            temp_tilenum += o->struct_data.npc_data.ani.frame;
-            return (uint8_t *)((uint32_t)&data_sprite_spawn_placeholder + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
+            
         default:
             break;
     }
 
-    uint16_t temp_flip_x = 0;
+    uint16_t temp_flip_x;
 
     if (o->state != STATE_DIE)
     {
@@ -272,16 +349,19 @@ uint8_t * ani_getframe_dynamic_slime(struct game_object * o)
             switch (o->facing)
             {
                 case FACING_DOWN:
+                    temp_flip_x = 0;
                     break;
                 case FACING_UP:
+                    temp_flip_x = 0;
                     temp_tilenum += 1;
                     break;
                 case FACING_RIGHT:
+                    temp_flip_x = 0;
                     temp_tilenum += 2;
                     break;
                 case FACING_LEFT:
-                    temp_tilenum += 2;
                     temp_flip_x = 1;
+                    temp_tilenum += 2;
                     break;
             }
         }
@@ -290,23 +370,23 @@ uint8_t * ani_getframe_dynamic_slime(struct game_object * o)
             switch (o->facing)
             {
                 case FACING_DOWN:
+                    temp_flip_x = 0;
                     break;
                 case FACING_UP:
+                    temp_flip_x = 0;
                     temp_tilenum += 2;
                     break;
                 case FACING_RIGHT:
+                    temp_flip_x = 0;
                     temp_tilenum += 4;
                     break;
                 case FACING_LEFT:
-                    temp_tilenum += 4;
                     temp_flip_x = 1;
+                    temp_tilenum += 4;
                     break;
             }
         }
     }
-
-    // Now add the frame offset.
-    temp_tilenum += o->struct_data.npc_data.ani.frame;
 
     // Calculate the tilenum
     if (temp_flip_x)
@@ -318,5 +398,5 @@ uint8_t * ani_getframe_dynamic_slime(struct game_object * o)
     {
         // Calculate the address
         return (uint8_t *)((uint32_t)&data_sprite_slime + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
-    }
+    }*/
 }
