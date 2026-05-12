@@ -27,9 +27,3 @@ inline void obj_destroy_hitbox_player(uint16_t i);
 
 void obj_cleanup(void);
 void obj_cleanup_hitbox_player(void);
-
-uint32_t ai_distance_squared(int16_t abs_x, int16_t abs_y);
-uint16_t ai_run(struct game_object * o, uint32_t dist, int16_t x, int16_t y);
-inline void ai_idle(struct game_object * o);
-inline uint16_t ai_get_facing(struct game_object * o);
-

@@ -620,7 +620,7 @@ void system_poll_input()
     if (input_pad0_new != 0 && !rand_seeded)
     {
         // Seed it now if it's still not seeded
-        rand_seed(system_frames_elapsed);
+        Math_SeedRandom(system_frames_elapsed);
     }
     
     return;

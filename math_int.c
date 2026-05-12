@@ -10,7 +10,7 @@
     returns angle from 0-255
 */
 
-inline uint8_t atan2_uint8(int16_t y, int16_t x)
+inline uint8_t Math_GetAtan2_u8(int16_t y, int16_t x)
 {
     if (x == 0 && y == 0) {
         return 0;
@@ -26,7 +26,7 @@ inline uint8_t atan2_uint8(int16_t y, int16_t x)
     return (y < 0) ? (256 - angle) : angle;
 }
 
-inline uint16_t rand_get16()
+inline uint16_t Math_GetRandom_u16()
 {
     uint8_t temp_carry = 0;
 
@@ -63,7 +63,7 @@ inline uint16_t rand_get16()
 /*
     Seeds the random value generator LSFR with a 24-bit value (highest 8 bits dropped)
 */
-void rand_seed(uint32_t s)
+void Math_SeedRandom(uint32_t s)
 {
     if (s == 0)
     {
@@ -82,4 +82,28 @@ void rand_seed(uint32_t s)
     rand_array[2] = (uint8_t)(s >> 16);
 
     return;
+}
+
+/*
+    Returns the squared distance (avoid a square root)
+
+    Limited to max 320 on either axis to prevent the LUT from going too large.
+*/
+inline uint32_t Math_GetDistanceSquared(int16_t x, int16_t y)
+{
+    // c^2 = a^2 + b^2
+    uint16_t abs_y = (y < 0) ? -y : y;
+    uint16_t abs_x = (x < 0) ? -x : x;
+
+    if (abs_x > 320)
+    {
+        abs_x = 320;
+    }
+
+    if (abs_y > 320)
+    {
+        abs_y = 320;
+    }
+
+    return (data_pow_2[abs_x] + data_pow_2[abs_y]);
 }

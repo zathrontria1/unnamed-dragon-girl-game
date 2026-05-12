@@ -100,8 +100,8 @@
 
 #define DMA_QUEUE_MAX_ENTRIES 32 // entries per queue
 #define DMA_QUEUE_MAX_LENGTH 4634 // 
-//#define DMA_QUEUE_OVERHEAD 64 // time, in bytes lost to overhead, to loop a DMA queue entry in NMI
-#define DMA_QUEUE_OVERHEAD 62 // time, in bytes lost to overhead, to loop a DMA queue entry in NMI
+#define DMA_QUEUE_OVERHEAD 64 // time, in bytes lost to overhead, to loop a DMA queue entry in NMI
+//#define DMA_QUEUE_OVERHEAD 62 // This causes significantly increased time taken to add a queue entry due to non-power of 2 mul
 
 // Distance defines (squared)
 // Note that they are in pixel distance squared.

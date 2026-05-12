@@ -178,7 +178,7 @@ void map_camera_adjust(uint16_t suppress_map_gen)
             temp_y = unadjusted_bg_scroll_y - bg_scroll_y.full.high.a;
         }
 
-        uint8_t angle = (uint8_t)((uint8_t)(atan2_uint8(temp_x, temp_y)) + (uint8_t)(128));
+        uint8_t angle = (uint8_t)((uint8_t)(Math_GetAtan2_u8(temp_x, temp_y)) + (uint8_t)(128));
 
         // Apply the angle change again
         int32_t temp_delta_x = data_sine_1[angle] * (2 * V_MUL);

@@ -4,6 +4,8 @@
 #include "vars.h"
 
 #include "routines.h"
+#include "routines_player.h"
+#include "routines_enemy.h"
 #include "obj.h"
 #include "hittest.h"
 
@@ -55,37 +57,43 @@ void obj_run()
         __asm(
         "\ta16\n"
 	    "\tx16\n"
+
         "\tphy\n"
+
         "\tldx #<_objects\n"
         "\tldy #0\n"
         "\tcpy _obj_active_count\n"
         "\tbcs .object_break_loop\n"
+
         ".object_process_loop:\n"
-        "\tlda $7e0000,x\n" // assumes object memory is in bank 7e
-        "\tbeq .object_process_increment\n"
-        "\tiny\n"
-        "\tlda $7e0037,x\n"
-        "\tsta _system_JMLCodeInWRAM+2\n"
-        "\tlda $7e0036,x\n"
-        "\tsta _system_JMLCodeInWRAM+1\n"
-        "\tphy\n"
-        "\tphx\n"
-        "\ttxa\n"
-        "\tldx #^_objects\n"
-        "\tjsl >_system_JMLCodeInWRAM\n"
-        "\tplx\n"
-        "\tply\n"
+            "\tlda $7e0000,x\n" // assumes object memory is in bank 7e
+            "\tbeq .object_process_increment\n"
+            "\tiny\n"
+            "\tlda $7e0037,x\n"
+            "\tsta _system_JMLCodeInWRAM+2\n"
+            "\tlda $7e0036,x\n"
+            "\tsta _system_JMLCodeInWRAM+1\n"
+            "\tphy\n"
+            "\tphx\n"
+            "\ttxa\n"
+            "\tldx #^_objects\n"
+            "\tjsl >_system_JMLCodeInWRAM\n"
+            "\tplx\n"
+            "\tply\n"
+
         ".object_process_increment:\n"
-        "\ttxa\n"
-        "\tclc\n"
-        "\tadc #128\n"
-        "\tcmp #<_objects+6144\n"
-        "\tbcs .object_break_loop\n"
-        "\ttax\n"
-        "\tcpy _obj_active_count\n"
-        "\tbcc .object_process_loop\n"
+            "\ttxa\n"
+            "\tclc\n"
+            "\tadc #128\n"
+            "\tcmp #<_objects+6144\n"
+            "\tbcs .object_break_loop\n"
+            "\ttax\n"
+            "\tcpy _obj_active_count\n"
+            "\tbcc .object_process_loop\n"
+
         ".object_break_loop:\n"
-        "\tply\n");
+            "\tply\n"
+    );
     #else
         struct game_object * ptr = (struct game_object *)&objects[0];
 
@@ -117,37 +125,43 @@ void obj_run()
         __asm(
         "\ta16\n"
 	    "\tx16\n"
+
         "\tphy\n"
+        
         "\tldx #<_hitbox_player\n"
         "\tldy #0\n"
         "\tcpy _hitbox_count_player\n"
         "\tbcs .hitbox_player_break_loop\n"
+
         ".hitbox_player_process_loop:\n"
-        "\tlda $7e0000,x\n" // assumes object memory is in bank 7e
-        "\tbeq .hitbox_player_process_increment\n"
-        "\tiny\n"
-        "\tlda $7e0037,x\n"
-        "\tsta _system_JMLCodeInWRAM+2\n"
-        "\tlda $7e0036,x\n"
-        "\tsta _system_JMLCodeInWRAM+1\n"
-        "\tphy\n"
-        "\tphx\n"
-        "\ttxa\n"
-        "\tldx #^_hitbox_player\n"
-        "\tjsl >_system_JMLCodeInWRAM\n"
-        "\tplx\n"
-        "\tply\n"
+            "\tlda $7e0000,x\n" // assumes object memory is in bank 7e
+            "\tbeq .hitbox_player_process_increment\n"
+            "\tiny\n"
+            "\tlda $7e0037,x\n"
+            "\tsta _system_JMLCodeInWRAM+2\n"
+            "\tlda $7e0036,x\n"
+            "\tsta _system_JMLCodeInWRAM+1\n"
+            "\tphy\n"
+            "\tphx\n"
+            "\ttxa\n"
+            "\tldx #^_hitbox_player\n"
+            "\tjsl >_system_JMLCodeInWRAM\n"
+            "\tplx\n"
+            "\tply\n"
+
         ".hitbox_player_process_increment:\n"
-        "\ttxa\n"
-        "\tclc\n"
-        "\tadc #128\n"
-        "\tcmp #<_hitbox_player+2048\n"
-        "\tbcs .hitbox_player_break_loop\n"
-        "\ttax\n"
-        "\tcpy _hitbox_count_player\n"
-        "\tbcc .hitbox_player_process_loop\n"
+            "\ttxa\n"
+            "\tclc\n"
+            "\tadc #128\n"
+            "\tcmp #<_hitbox_player+2048\n"
+            "\tbcs .hitbox_player_break_loop\n"
+            "\ttax\n"
+            "\tcpy _hitbox_count_player\n"
+            "\tbcc .hitbox_player_process_loop\n"
+
         ".hitbox_player_break_loop:\n"
-        "\tply\n");
+            "\tply\n"
+    );
     #else
         ptr = (struct game_object *)&hitbox_player[0];
 
@@ -487,7 +501,7 @@ int16_t obj_instantiate(
         p->state = STATE_SPAWNING;
         p->struct_data.npc_data.status_time = 64 / V_MUL;
 
-        uint8_t temp_weight = (uint8_t)rand_get16();
+        uint8_t temp_weight = (uint8_t)Math_GetRandom_u16();
         p->struct_data.npc_data.money = (ENEMY_DROP_MONEY_MIN + (((ENEMY_DROP_MONEY_MAX - ENEMY_DROP_MONEY_MIN) * temp_weight) / 255));
 
         p->w = 16;
@@ -602,7 +616,7 @@ uint16_t obj_instantiate_npcs(const struct obj_list_entry_spawns* list, int16_t 
 
         if (list->random_spread != 0)
         {
-            int16_t temp_rand = (((int16_t)rand_get16()) % list->random_spread) - (list->random_spread >> 1);
+            int16_t temp_rand = (((int16_t)Math_GetRandom_u16()) % list->random_spread) - (list->random_spread >> 1);
 
             temp_x = list->x + temp_rand + offset_x;
             temp_y = list->y + temp_rand + offset_y;
@@ -871,221 +885,4 @@ void obj_set_function_pointer(struct game_object * o)
     }
 
     return;
-}
-
-/*
-    Returns the squared distance (avoid a square root)
-
-    Limited to max 320 on either axis to prevent the LUT from going too large.
-*/
-uint32_t ai_distance_squared(int16_t x, int16_t y)
-{
-    // c^2 = a^2 + b^2
-    uint16_t abs_y = (y < 0) ? -y : y;
-    uint16_t abs_x = (x < 0) ? -x : x;
-
-    if (abs_x > 320)
-    {
-        abs_x = 320;
-    }
-
-    if (abs_y > 320)
-    {
-        abs_y = 320;
-    }
-
-    return (data_pow_2[abs_x] + data_pow_2[abs_y]);
-}
-
-/*
-    Gameplay AI for non-player entities
-*/
-uint16_t ai_run(struct game_object * o, uint32_t dist, int16_t x, int16_t y)
-{
-    uint16_t temp_invalidate_animation_frame = 0;
-    uint16_t temp_interrupted = 0;
-
-    // Do some AI interruption given some conditions
-    if (
-        (((dist <= DIST_MELEE) && o->struct_data.npc_data.ai_state != AI_STATE_IDLE) ||
-        (o->struct_data.npc_data.status == STATUS_BURNING)) && (o->struct_data.npc_data.ai_state != AI_STATE_ATTACK)
-        )
-    {
-        // If AI gets too close to the player AND the AI isn't idling (i.e. moving)
-        // OR if the AI is on fire, HOWEVER
-        // Do not let the AI get interrupted if mid-attack
-        o->struct_data.npc_data.ai_timer = 0;
-        temp_interrupted = 1;
-    }
-
-    if (o->struct_data.npc_data.ai_timer == 0) // Only process AI state changes when this timer hits 0
-    {
-        uint8_t temp_rand = (uint8_t)rand_get16();
-        
-        // If the AI is idling, attacked the player, or gets interrupted by the player while not attacking...
-        if (o->struct_data.npc_data.ai_state == AI_STATE_IDLE || (temp_interrupted && (o->struct_data.npc_data.ai_state != AI_STATE_ATTACK)))
-        {
-            // Object has finished idling, time to move once more.
-            // Check if a minimum distance is met or not
-            if ((dist > DIST_MELEE) && (o->struct_data.npc_data.status != STATUS_BURNING))
-            {
-                // Enemy is far away from player
-                uint8_t temp_angle = atan2_uint8(y, x) + (temp_rand & 0x0f) - 8;
-
-                o->angle = temp_angle;
-
-                o->delta.x.a = data_cosine_1[temp_angle] * V_MUL;
-                o->delta.y.a = data_sine_1[temp_angle] * V_MUL;
-
-                o->struct_data.npc_data.ai_state = AI_STATE_MOVE_TOWARDS;
-                if ((o->state == STATE_HURT_BURN || o->state == STATE_HURT_BURN_MOVE))
-                {
-                    o->state = STATE_HURT_BURN_MOVE;
-                }
-                else
-                {
-                    o->state = STATE_MOVE_WALK;
-                }
-
-                o->facing = ai_get_facing(o);
-
-                temp_invalidate_animation_frame = 1;
-            }
-            else if (o->struct_data.npc_data.ai_state != AI_STATE_MOVE_AWAY) // don't recalc for anything already moving away.
-            {
-                // Enemy is close to player
-                uint8_t temp_angle = (atan2_uint8(y, x)) + (temp_rand & 0x0f) - 136;
-
-                o->angle = temp_angle;
-
-                o->delta.x.a = data_cosine_1[temp_angle] * V_MUL;
-                o->delta.y.a = data_sine_1[temp_angle] * V_MUL;
-
-                o->struct_data.npc_data.ai_state = AI_STATE_MOVE_AWAY;
-
-                if ((o->state == STATE_HURT_BURN || o->state == STATE_HURT_BURN_MOVE))
-                {
-                    o->state = STATE_HURT_BURN_MOVE;
-                }
-                else
-                {
-                    o->state = STATE_MOVE_WALK;
-                }
-
-                o->facing = ai_get_facing(o);
-
-                temp_invalidate_animation_frame = 1;
-            }
-
-            o->struct_data.npc_data.ai_timer = (30 + (temp_rand & 0x1f)) / V_MUL;
-        }
-        else if ((o->struct_data.npc_data.ai_state == AI_STATE_MOVE_TOWARDS) || (o->struct_data.npc_data.ai_state == AI_STATE_MOVE_AWAY))
-        {
-            // Object has finished its movement time and should decide on a possible action.
-            o->delta.x.a = 0;
-            o->delta.y.a = 0;
-
-            if (o->struct_data.npc_data.ai_state == AI_STATE_MOVE_AWAY)
-            {
-                o->angle = (o->angle) + 128;
-                o->facing = ai_get_facing(o);
-            }
-
-            // Now to decide if the AI is going to attack or not.
-            if (temp_rand >= 128)
-            {
-                // around half chance of performing an attack.
-                // During this situation, check the previous state
-                // to pick the correct attack for the range.
-
-                if (o->struct_data.npc_data.ai_state == AI_STATE_MOVE_TOWARDS)
-                {
-                    o->state = STATE_ATTACK_BASIC;
-                }
-                else
-                {
-                    o->state = STATE_ATTACK_SPECIAL; 
-                }
-
-                // For now, duplicate of the other case.
-                o->struct_data.npc_data.ai_state = AI_STATE_ATTACK;
-                
-                o->struct_data.npc_data.ai_timer = (15) / V_MUL;
-
-                o->struct_data.npc_data.ai_makeattack = 1;
-            }
-            else
-            {
-                // Not attacking. Fix the state so the animation makes sense.
-                o->struct_data.npc_data.ai_state = AI_STATE_IDLE;
-
-                if ((o->state == STATE_HURT_BURN || o->state == STATE_HURT_BURN_MOVE))
-                {
-                    o->state = STATE_HURT_BURN;
-                }
-                else
-                {
-                    o->state = STATE_IDLE;
-                }
-
-                o->struct_data.npc_data.ai_timer = (30 + (temp_rand & 0x1f)) / V_MUL;
-            } 
-
-            temp_invalidate_animation_frame = 1;
-        }
-        else if (o->struct_data.npc_data.ai_state == AI_STATE_ATTACK)
-        {
-            // Reset the AI to idle
-            o->struct_data.npc_data.ai_state = AI_STATE_IDLE;
-
-            if ((o->state == STATE_HURT_BURN || o->state == STATE_HURT_BURN_MOVE))
-            {
-                o->state = STATE_HURT_BURN;
-            }
-            else
-            {
-                o->state = STATE_IDLE;
-            }
-
-            o->struct_data.npc_data.ai_timer = (30 + (temp_rand & 0x1f)) / V_MUL;
-
-            temp_invalidate_animation_frame = 1;
-        }
-    }
-
-    ai_idle(o); // tick down the timer
-
-    return temp_invalidate_animation_frame;
-}
-
-inline void ai_idle(struct game_object * o)
-{
-    o->struct_data.npc_data.ai_timer--;
-
-    return;
-}
-
-inline uint16_t ai_get_facing(struct game_object * o)
-{
-    // Adjust the facing based on angle.
-    if (o->angle < 32)
-    {
-        return FACING_RIGHT;
-    }
-    else if (o->angle < 96)
-    {
-        return FACING_DOWN;
-    }
-    else if (o->angle < 160)
-    {
-        return FACING_LEFT;
-    }
-    else if (o->angle < 224)
-    {
-        return FACING_UP;
-    }
-    else
-    {
-        return FACING_RIGHT;
-    }
 }
