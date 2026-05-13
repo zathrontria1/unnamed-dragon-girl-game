@@ -99,6 +99,9 @@ sound/*.cfg
 # asset build batch file
 build_assets.bat
 
+# unpatched header ROM
+main_temp.sfc
+
 # some emulators dump files in the same folder as the output ROM
 /*.sym
 /*.srm

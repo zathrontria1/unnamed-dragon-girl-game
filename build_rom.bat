@@ -13,15 +13,18 @@ REM uncomment if the source code is changed, then comment it back after editing 
 REM vc +vlink-config -O4 -size -msfp4 -lms4 --DFASTROM=1 -S %cmd_asm1% 
 
 REM the below uses the custom startup code, which should let the game start faster
-vc +vlink-config -O4 -size -msfp4 -lms4 -no-inline-peephole --DFASTROM=1 %cmd_code% %cmd_data% -o %sfc_name%.sfc
+vc +vlink-config -O4 -size -msfp4 -lms4 -no-inline-peephole --DFASTROM=1 %cmd_code% %cmd_data% -o %sfc_name%_temp.sfc
 
 REM the below uses the stock startup code provided by VBCC
-REM vc +vlink-config-stockstartup -O4 -size -msfp4 -lms4 -no-inline-peephole %cmd_code% %cmd_data% -o %sfc_name%.sfc
+REM vc +vlink-config-stockstartup -O4 -size -msfp4 -lms4 -no-inline-peephole %cmd_code% %cmd_data% -o %sfc_name%_temp.sfc
 
 REM Also compile using calypsi for testing purposes
 REM this will invoke make.
 REM The makefile needs to be edited so that it doesn't error out if the ROM image was already made
 REM TODO: there are still show-stopping bugs with the created ROM image. Although it runs, it has bugs that make the game unplayable.
 REM make
+
+REM compute and patch the checksum
+python .\checksum.py HIROM %sfc_name%_temp.sfc %sfc_name%.sfc
 
 pause
