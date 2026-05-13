@@ -62,7 +62,7 @@ const uint16_t const_ani_lut_basic[56] =
    32, 32, 32, 32,
 };
 
-const uint16_t const_ani_lut_basic_byteoffsets[64] =
+const uint16_t const_ani_lut_frame_byteoffsets_16[64] =
 {
     0x0000, 0x0040, 0x0080, 0x00c0, 0x0100, 0x0140, 0x0180, 0x01c0, 
     0x0400, 0x0440, 0x0480, 0x04c0, 0x0500, 0x0540, 0x0580, 0x05c0, 
@@ -289,33 +289,23 @@ uint8_t * ani_getframe_dynamic_bubble(struct game_object * o)
 
             "\tphy\n"
 
-            "\tpei (r2)\n"
-
             "\ttax\n"
             // 30 + Frame Number
             // Current frame is byte 64
             "\tlda #30\n"
             "\tclc\n"
             "\tadc $7e0040,x\n" // current frame. now we have the tile num in virtual space
-            "\ttay\n"
-            "\tand #$0007\n"
-            "\txba\n"
-            "\tlsr\n"
-            "\tlsr\n"
-            "\tsta r2\n"
 
-            "\ttya\n"
-            "\txba\n"
-            "\tlsr\n"
-            "\tand #$7c00\n"
-            
-            "\tadc r2\n"
+            "\ttxy\n"
+            "\tasl\n" // This clears the carry
+            "\ttax\n"
+            "\tlda >_const_ani_lut_frame_byteoffsets_16,x\n"
+            "\ttyx\n"
+
             "\tadc #<_data_sprite_slime\n"
             "\tldx #^_data_sprite_slime\n"
 
             ".finish:\n"
-            "\tply\n"
-            "\tsty r2\n"
 
             "\tply\n"
 
@@ -362,7 +352,7 @@ uint8_t * ani_getframe_dynamic_slime(struct game_object * o)
                 "\ttxy\n"
                 "\tasl\n" // This clears the carry
                 "\ttax\n"
-                "\tlda >_const_ani_lut_basic_byteoffsets,x\n"
+                "\tlda >_const_ani_lut_frame_byteoffsets_16,x\n"
                 "\ttyx\n"
 
                 "\tadc #<_data_sprite_spawn_placeholder\n"
@@ -391,9 +381,9 @@ uint8_t * ani_getframe_dynamic_slime(struct game_object * o)
                 "\ttxy\n"
                 "\tasl\n" // This clears the carry
                 "\ttax\n"
-                "\tlda >_const_ani_lut_basic_byteoffsets,x\n"
+                "\tlda >_const_ani_lut_frame_byteoffsets_16,x\n"
                 "\ttyx\n"
-
+                
                 "\tadc #<_data_sprite_slime\n" 
 
                 "\ttay\n"

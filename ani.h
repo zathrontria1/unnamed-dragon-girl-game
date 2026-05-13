@@ -1,7 +1,7 @@
 // Lookup tables for animations
 // With flipping
 extern const uint16_t const_ani_lut_basic[56];
-extern const uint16_t const_ani_lut_basic_byteoffsets[64];
+extern const uint16_t const_ani_lut_frame_byteoffsets_16[64];
 
 uint16_t ani_animate_drop_gravity(struct game_object * o);
 
