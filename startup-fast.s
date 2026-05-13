@@ -8,17 +8,27 @@
 ___start:
     clc
     xce
+    jml :+ ; Jump to fastROM bank
+    :
     rep #$ff
     sep #$24
     a8
     x16
 
     ; Reset three registers that must be reset ASAP
+zero_byte: ; Refer to this + 1 to fetch a known source of zero
     stz $004200 ; Disable interrupts
     stz $00420c ; Disable HDMA
 
     lda #$8f
     sta $8f2100 ; Disable screen
+
+    lda #$01
+    sta $80420d ; Enable FastROM
+
+    lda #$80
+    pha
+    plb ; Change to FastROM data bank
     
     rep #$30
     a16
@@ -28,14 +38,9 @@ ___start:
     lda #r0
     and #$ff00
     tcd
-    pea #^__NDS
-    plb
 
     sep #$20
     a8
-
-    pla
-
     ; Write the MVN and RTL opcode
     lda #$54
     sta r6

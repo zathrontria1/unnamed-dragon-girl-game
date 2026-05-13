@@ -1,9 +1,12 @@
-STACKLEN   =?    0x200;
+STACKLEN   =?    0x400;
 WRAMSTART  =? 0x7E0000;
 WRAMSIZE   =?  0x20000;
 LORAMSTART =?   0x0000;
 LORAMSIZE  =?   0x2000;
 ROMSIZE    =?  0x80000;
+FASTROM    =?        0;
+
+OS = FASTROM * 0x800000;
 
 MEMORY
 {
@@ -16,18 +19,19 @@ MEMORY
  header : org = 0xFFC0, len = 0x20
  vectors : org = 0xFFE0, len = 0x20
 
- xrom : org = 0xc00000, len = 0x8000
- lrom : org = 0x008000, len = 0x8000 - 0x40
- hrom : org = 0xc10000, len = ROMSIZE - 0x10000
+ xrom : org = 0x400000+OS, len = 0x8000
+ lrom : org = 0x8000+FASTROM*0xC00000, len = 0x8000 - 0x40
+ hrom : org = 0x410000+OS, len = ROMSIZE - 0x10000
 
 }
 
 SECTIONS
 {
+
   xrom  : {*(.ctors) *(.dtors) *(*_text.far.*) *(*_rodata.far.*) *(*_text.huge.*) *(*_rodata.huge.*) } >xrom AT>out
-  fillx : {.=0xc08000;} >xrom AT>out
+  fillx : {.=0x408000+OS;} >xrom AT>out
   nrom  : {*(*_text.startup) *(*_text.near.*) *(*_rodata.near.*) *(.ctors) *(.dtors) *(text) *(*_text*) *(*_rodata.*) } >lrom AT>out
-  fill0 : {.=0xFFC0;} >lrom AT>out
+  fill0 : {.=0xFFC0+FASTROM*0xc00000;} >lrom AT>out
   header : {EXTERN(___header_hirom_ntsc) *(*header)} >header AT>out
   vectors : {EXTERN(___vecs) *(*vectors)} >vectors AT>out
 

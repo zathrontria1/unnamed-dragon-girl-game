@@ -3,6 +3,8 @@
 	x16
 	global	___irq_vblank
 ___irq_vblank:
+	jml :+
+	: ; Jump to fastROM
 	rep	#$30
 	pha
 	phx

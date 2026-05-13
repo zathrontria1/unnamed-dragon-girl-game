@@ -1,4 +1,4 @@
-const uint16_t const_lut_dma_split_lookup[6];
+extern const uint16_t const_lut_dma_split_lookup[6];
 
 void dma_copy_to_wram(
     uint32_t src, 
