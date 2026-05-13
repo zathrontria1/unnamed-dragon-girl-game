@@ -16,4 +16,9 @@ uint8_t * ani_getframe_dynamic_slime(struct game_object * o);
 #endif
 
 uint8_t * ani_getframe_dynamic_stateless(struct game_object * o);
+
+#if VBCC_ASM == 1
+NO_INLINE uint8_t * ani_getframe_dynamic_bubble(struct game_object * o);
+#else
 uint8_t * ani_getframe_dynamic_bubble(struct game_object * o);
+#endif

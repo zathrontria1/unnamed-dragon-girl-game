@@ -263,16 +263,63 @@ uint16_t ani_getframe_fixed_fast(struct game_object * o)
     }
 }
 
+#if VBCC_ASM == 1
+NO_INLINE uint8_t * ani_getframe_dynamic_bubble(struct game_object * o)
+#else
 uint8_t * ani_getframe_dynamic_bubble(struct game_object * o)
+#endif
 {
-    // use a virtual tilenum system before finalizing.
-    uint16_t temp_tilenum = 30;
+    #if VBCC_ASM == 1
+        __asm(
+            "\ta16\n"
+            "\tx16\n"
 
-    // Now add the frame offset.
-    temp_tilenum += o->struct_data.npc_data.ani.frame;
+            "\tphy\n"
 
-    // Calculate the address
-    return (uint8_t *)((uint32_t)&data_sprite_slime + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
+            "\tpei (r2)\n"
+
+            "\ttax\n"
+            // 30 + Frame Number
+            // Current frame is byte 64
+            "\tlda #30\n"
+            "\tclc\n"
+            "\tadc $7e0040,x\n" // current frame. now we have the tile num in virtual space
+            "\ttay\n"
+            "\tand #$0007\n"
+            "\txba\n"
+            "\tlsr\n"
+            "\tlsr\n"
+            "\tsta r2\n"
+
+            "\ttya\n"
+            "\txba\n"
+            "\tlsr\n"
+            "\tand #$7c00\n"
+            
+            "\tadc r2\n"
+            "\tadc #<_data_sprite_slime\n"
+            "\tldx #^_data_sprite_slime\n"
+
+            ".finish:\n"
+            "\tply\n"
+            "\tsty r2\n"
+
+            "\tply\n"
+
+            "\trtl\n"
+        );
+    #else
+        // use a virtual tilenum system before finalizing.
+        uint16_t temp_tilenum = 30;
+
+        // Now add the frame offset.
+        temp_tilenum += o->struct_data.npc_data.ani.frame;
+
+        // Calculate the address
+        return (uint8_t *)((uint32_t)&data_sprite_slime + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
+    #endif
+
+    return 0;
 }
 
 #if VBCC_ASM == 1
@@ -297,73 +344,74 @@ uint8_t * ani_getframe_dynamic_slime(struct game_object * o)
             "\tbne .not_spawning\n"
 
             ".spawning:\n"
-            // Frame Number
-            // Current frame is byte 64
-            "\tlda $7e0040,x\n" // current frame. now we have the tile num in virtual space
-            "\ttay\n"
-            "\tand #$0007\n"
-            "\txba\n"
-            "\tlsr\n"
-            "\tlsr\n"
-            "\tsta r2\n"
+                // Frame Number
+                // Current frame is byte 64
+                "\tlda $7e0040,x\n" // current frame. now we have the tile num in virtual space
+                "\ttay\n"
+                "\tand #$0007\n"
+                "\txba\n"
+                "\tlsr\n"
+                "\tlsr\n"
+                "\tsta r2\n"
 
-            "\ttya\n"
-            "\txba\n"
-            "\tlsr\n"
-            "\tand #$7c00\n"
-            
-            "\tadc r2\n"
-            "\tadc #<_data_sprite_spawn_placeholder\n"
-            "\tldx #^_data_sprite_spawn_placeholder\n"
+                "\ttya\n"
+                "\txba\n"
+                "\tlsr\n"
+                "\tand #$7c00\n"
+                
+                "\tadc r2\n"
+                "\tadc #<_data_sprite_spawn_placeholder\n"
+                "\tldx #^_data_sprite_spawn_placeholder\n"
 
-            "\tbra .finish\n"
+                "\tbra .finish\n"
 
             ".not_spawning:\n"
-            // (State * 4 + Facing + Frame Number)
-            // state is byte 30, facing is byte 32, current frame is byte 64
-            "\tlda $7e001e,x\n" // state
-            "\tasl\n"
-            "\tasl\n" // Carry is cleared here
-            "\tadc $7e0020,x\n" // facing
-            
-            "\tasl\n" // Now we have the index to look into the lookup
-            "\ttxy\n"
-            "\ttax\n"
-            "\tlda >_const_ani_lut_basic, x\n"
-
-            // Transform this number
-            // (temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10)
-            "\ttyx\n"
-            "\tadc $7e0040,x\n" // current frame. now we have the tile num in virtual space
-            "\ttay\n"
-            "\tand #$0007\n"
-            "\txba\n"
-            "\tlsr\n"
-            "\tlsr\n"
-            "\tsta r2\n"
-
-            "\ttya\n"
-            "\txba\n"
-            "\tlsr\n"
-            "\tand #$7c00\n"
-            "\tadc r2\n"
-            "\tadc #<_data_sprite_slime\n" 
-            "\ttay\n"
-
-            // Test for sign flip
-            "\tlda $7e001e,x\n" // state
-            "\tcmp #13\n"
-            "\tbeq .no_flip\n"
-            "\tlda $7e0020,x\n" // facing
-            "\tcmp #3\n"
-            "\tbne .no_flip\n"
-            ".flip_x:\n"
-                "\tlda #$8000\n"
-                "\tora #^_data_sprite_slime\n"
+                // (State * 4 + Facing + Frame Number)
+                // state is byte 30, facing is byte 32, current frame is byte 64
+                "\tlda $7e001e,x\n" // state
+                "\tasl\n"
+                "\tasl\n" // Carry is cleared here
+                "\tadc $7e0020,x\n" // facing
+                
+                "\tasl\n" // Now we have the index to look into the lookup
+                "\ttxy\n"
                 "\ttax\n"
-                "\tbra .finalize\n"
-            ".no_flip:\n"
-                "\tldx #^_data_sprite_slime\n"
+                "\tlda >_const_ani_lut_basic, x\n"
+
+                // Transform this number
+                // (temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10)
+                "\ttyx\n"
+                "\tadc $7e0040,x\n" // current frame. now we have the tile num in virtual space
+                "\ttay\n"
+                "\tand #$0007\n"
+                "\txba\n"
+                "\tlsr\n"
+                "\tlsr\n"
+                "\tsta r2\n"
+
+                "\ttya\n"
+                "\txba\n"
+                "\tlsr\n"
+                "\tand #$7c00\n"
+                "\tadc r2\n"
+                "\tadc #<_data_sprite_slime\n" 
+                "\ttay\n"
+
+                // Test for sign flip
+                "\tlda $7e001e,x\n" // state
+                "\tcmp #13\n"
+                "\tbeq .no_flip\n"
+                "\tlda $7e0020,x\n" // facing
+                "\tcmp #3\n"
+                "\tbne .no_flip\n"
+                ".flip_x:\n"
+                    "\tlda #$8000\n"
+                    "\tora #^_data_sprite_slime\n"
+                    "\ttax\n"
+                    "\tbra .finalize\n"
+                ".no_flip:\n"
+                    "\tldx #^_data_sprite_slime\n"
+
             ".finalize:\n"
             "\ttya\n"
 
