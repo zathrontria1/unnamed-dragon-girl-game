@@ -27,7 +27,6 @@ void obj_run()
     hitbox_count_enemy = 0;
 
     obj_process_count = 0;
-    hitbox_process_count_player = 0;
 
     blocker_build_count = 0;
     
@@ -165,6 +164,8 @@ void obj_run()
     #else
         ptr = (struct game_object *)&hitbox_player[0];
 
+        int hitbox_process_count_player = 0;
+    
         for (int i = 0; i < HIT_MAX_COUNT; i++)
         {
             if (ptr->id == OBJID_NULL)

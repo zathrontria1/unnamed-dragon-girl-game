@@ -98,7 +98,7 @@ uint16_t hitbox_player_delete_queue[HIT_MAX_COUNT];
 uint16_t hitbox_player_delete_queue_count;
 
 uint16_t hitbox_count_player;
-uint16_t hitbox_process_count_player;
+
 uint16_t hitbox_count_enemy;
 uint16_t hitbox_count_enemy_shadow;
 

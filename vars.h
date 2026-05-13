@@ -77,7 +77,7 @@ extern uint16_t hitbox_player_delete_queue[HIT_MAX_COUNT];
 extern uint16_t hitbox_player_delete_queue_count;
 
 extern uint16_t hitbox_count_player;
-extern uint16_t hitbox_process_count_player;
+
 extern uint16_t hitbox_count_enemy;
 
 extern uint16_t hitbox_count_enemy_shadow;
