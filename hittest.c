@@ -24,9 +24,9 @@
         "\tpei (r2)\n"
         "\tpei (r3)\n"
 
-        "\tlda #<_hitbox_player\n"
+        "\tlda #<_obj_hitbox_player\n"
         "\tsta r2\n"
-        "\tlda #^_hitbox_player\n"
+        "\tlda #^_obj_hitbox_player\n"
         "\tsta r3\n"
         
         ".hittest_enemy2player_process_loop:\n"
@@ -55,7 +55,7 @@
         "\tclc\n"
         "\tadc #128\n"
         "\tsta r2\n"
-        "\tcmp #<_hitbox_player+2048\n"
+        "\tcmp #<_obj_hitbox_player+2048\n"
         "\tbcc .hittest_enemy2player_process_loop\n"
 
         ".hittest_enemy2player_break_loop:\n"
@@ -71,9 +71,9 @@
         "\tply\n"
     );
     #else
-    struct game_object * p = &hitbox_player[0];
+    struct game_object * p = &obj_hitbox_player[0];
     
-    for (int i = 0; i < HIT_MAX_COUNT; i++)
+    for (int i = 0; i < OBJ_PLAYERHITBOX_MAX_COUNT; i++)
     {
         if (p->id != OBJID_NULL)
         {
@@ -113,13 +113,11 @@ inline struct game_object * hit_test_player(struct game_object * o)
     temp.h = 2;
 
     struct game_object * hit = NULL;
-    struct game_object * p = &objects[0];
-
-    int temp_objects_encountered = 0;
+    struct game_object * p = &obj_hitbox_enemy[0];
 
     // There's a bug with the cached list.
     // For now reverted to testing all objects.
-    for (int i = 0; temp_objects_encountered < hitbox_count_enemy_shadow; i++)
+    for (int i = 0; i < OBJ_ENEMYHITBOX_MAX_COUNT; i++)
     {
         // Test only objects that participate
         if (p->id != OBJID_NULL)
@@ -135,8 +133,6 @@ inline struct game_object * hit_test_player(struct game_object * o)
 
                     p->struct_data.npc_data.ttl = 1;
                 }
-
-                temp_objects_encountered++;
             }
         }
 

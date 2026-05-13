@@ -41,7 +41,7 @@ void routines_slime(struct game_object * o)
         // Note that all distance values obtained are squared for perf reasons (avoiding a square root)
         // This must be calculated regardless of AI state as the player uses this for
         // determining the closest target.
-        struct game_object * p = &objects[obj_player_index];
+        struct game_object * p = &obj_general[obj_player_index];
 
         if ((o->state != STATE_DIE) && (o->state != STATE_SPAWNING))
         {
@@ -72,13 +72,13 @@ void routines_slime(struct game_object * o)
                 if (o->struct_data.npc_data.ai_makeattack)
                 {
                     // Spawn a hit object
-                    int16_t j = obj_instantiate(OBJID_BUBBLE_E, o->pos.x.lh.h, o->pos.y.lh.h, 0);
+                    int16_t j = obj_instantiate_hitbox_enemy(OBJID_BUBBLE_E, o->pos.x.lh.h, o->pos.y.lh.h);
 
                     if (j >= 0)
                     {
                         SoundInterface_PlaySfx(SFX_ATK_SPLASH,0);
 
-                        struct game_object * p = &objects[j];
+                        struct game_object * p = &obj_hitbox_enemy[j];
                         p->struct_data.npc_data.attack = ENEMY_ATTACK_VALUE * ENEMY_ATTACK_MULT_RANGED;
 
                         // Angle needs to be recalculated
@@ -114,7 +114,7 @@ void routines_slime(struct game_object * o)
                             
                             if (k >= 0)
                             {
-                                struct game_object * q = &objects[k];
+                                struct game_object * q = &obj_general[k];
 
                                 q->struct_data.npc_data.ttl = 2;
                             }
@@ -181,7 +181,7 @@ void routines_slime(struct game_object * o)
                         
                         if (k >= 0)
                         {
-                            struct game_object * q = &objects[k];
+                            struct game_object * q = &obj_general[k];
 
                             int32_t temp = ((int32_t)Math_GetRandom_u16() - 16384);
 
@@ -243,7 +243,7 @@ void routines_slime(struct game_object * o)
 
                     if (k >= 0)
                     {
-                        struct game_object * q = &objects[k];
+                        struct game_object * q = &obj_general[k];
 
                         q->struct_data.npc_data.money = o->struct_data.npc_data.money;
 
@@ -257,7 +257,7 @@ void routines_slime(struct game_object * o)
 
                     if (k >= 0)
                     {
-                        struct game_object * q = &objects[k];
+                        struct game_object * q = &obj_general[k];
 
                         q->struct_data.npc_data.hp = ENEMY_DROP_REC_AMOUNT;
 
@@ -387,17 +387,15 @@ void routines_bubble_e(struct game_object * o)
             o->struct_data.npc_data.ani.frame ^= 0x0001;
         }
 
-        // Decrement time to live
-        o->struct_data.npc_data.ttl--;
-
         // Check if the object is to be destroyed
         if (o->struct_data.npc_data.ttl == 0)
         {
-            obj_destroy(o->array_index);
+            obj_destroy_hitbox_enemy(o->array_index);
         }
-         else
+        else
         {
-            hitbox_count_enemy++;
+            // Decrement time to live
+            o->struct_data.npc_data.ttl--;
         }
     }
 
@@ -445,18 +443,16 @@ void routines_hitbox_invis_e(struct game_object * o)
     {
         return;
     }
-
-    // Decrement time to live
-    o->struct_data.npc_data.ttl--;
-
+    
     // Check if the object is to be destroyed
     if (o->struct_data.npc_data.ttl == 0)
     {
-        obj_destroy(o->array_index);
+        obj_destroy_hitbox_enemy(o->array_index);
     }
     else
     {
-        hitbox_count_enemy++;
+        // Decrement time to live
+        o->struct_data.npc_data.ttl--;
     }
 
     return;

@@ -61,7 +61,7 @@ uint8_t system_JMLCodeInWRAM[4];
     ani_bg_tallbg_dma_ready = 0;
 
     obj_first_available = 0;
-    hitbox_player_first_available = 0;
+    obj_hitbox_player_first_available = 0;
 
     system_game_paused = 0;
     system_use_alternate_nmi = 0;
@@ -464,7 +464,9 @@ void system_init()
 
     // Reset object system
     obj_reset(0); // The first time this is done, reset all objects
-    obj_reset_hit_list(); // also reset hitbox list
+    obj_reset_hitbox_player(); // also reset hitbox list
+    obj_reset_hitbox_enemy();
+    
     obj_player_index = 0xffff;
 
     // Initialize BG scroll systems. Must be done before the map is loaded.

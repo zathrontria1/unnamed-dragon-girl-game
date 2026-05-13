@@ -117,7 +117,7 @@ void routines_interactable_switch(struct game_object * o)
                     
                     if (k >= 0)
                     {
-                        struct game_object * q = &objects[k];
+                        struct game_object * q = &obj_general[k];
                         q->struct_data.npc_data.ttl = 2;
                     }
                 }
@@ -230,8 +230,8 @@ void routines_spawner(struct game_object * o)
 {
     if (!system_game_paused)
     {
-        int16_t x1 = objects[obj_player_index].pos.x.lh.h;
-        int16_t y1 = objects[obj_player_index].pos.y.lh.h;
+        int16_t x1 = obj_general[obj_player_index].pos.x.lh.h;
+        int16_t y1 = obj_general[obj_player_index].pos.y.lh.h;
 
         // Check if the player is within the designated box
         if (hit_test_extended(x1, o->struct_data.interactable_data.spawn_area_x, y1, o->struct_data.interactable_data.spawn_area_y, 16, o->struct_data.interactable_data.spawn_area_w, 16, o->struct_data.interactable_data.spawn_area_h) == 0)
@@ -275,7 +275,7 @@ void routines_drop_money(struct game_object * o)
 
         if (o->pos.z.a == 0) // If item is on floor
         {
-            struct game_object * p = (struct game_object *)&objects[obj_player_index];
+            struct game_object * p = (struct game_object *)&obj_general[obj_player_index];
 
             // Check if the player is within the designated box
             if (hit_test(p, o) == 0)
@@ -308,7 +308,7 @@ void routines_drop_rec_meat(struct game_object * o)
 
         if (o->pos.z.a == 0) // If item is on floor
         {
-            struct game_object * p = (struct game_object *)&objects[obj_player_index];
+            struct game_object * p = (struct game_object *)&obj_general[obj_player_index];
             
             // Check if the player is within the designated box
             if (hit_test(p, o) == 0)

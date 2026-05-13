@@ -211,7 +211,7 @@ void routines_player(struct game_object * o)
                     int16_t j = obj_instantiate_hitbox_player(OBJID_HITBOX_INVISIBLE, o->pos.x.lh.h, o->pos.y.lh.h);
                     if (j >= 0)
                     {
-                        struct game_object * p = &hitbox_player[j];
+                        struct game_object * p = &obj_hitbox_player[j];
                         p->struct_data.npc_data.attack = PLAYER_ATTACK_VALUE * PLAYER_ATTACK_MULT_MELEE;
 
                         p->struct_data.npc_data.ttl = 2; // Lasts exactly 2 frames
@@ -296,7 +296,7 @@ void routines_player(struct game_object * o)
                     int16_t j = obj_instantiate_hitbox_player(OBJID_FIREBALL, o->pos.x.lh.h, o->pos.y.lh.h);
                     if (j >= 0)
                     {
-                        struct game_object * p = &hitbox_player[j];
+                        struct game_object * p = &obj_hitbox_player[j];
                         p->struct_data.npc_data.attack = PLAYER_ATTACK_VALUE * PLAYER_ATTACK_MULT_RANGED;
 
                         int32_t temp_jitter = ((int32_t)((int16_t)Math_GetRandom_u16())) * (V_MUL * 2);
@@ -422,11 +422,12 @@ void routines_player(struct game_object * o)
                     int16_t k = -1;
                     int16_t temp_x = o->pos.x.lh.h;
                     int16_t temp_y = o->pos.y.lh.h;
+
                     k = obj_instantiate(OBJID_SYS_IMPACT, temp_x, temp_y, 0);
                     
                     if (k >= 0)
                     {
-                        struct game_object * q = &objects[k];
+                        struct game_object * q = &obj_general[k];
 
                         q->struct_data.npc_data.ttl = 2;
                     }

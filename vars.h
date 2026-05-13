@@ -47,15 +47,14 @@ ZP extern void * system_loop_func_ptr;
 
 // Object system
 ZP extern uint16_t obj_first_available;
-extern struct game_object objects[OBJ_MAX_COUNT];
+extern struct game_object obj_general[OBJ_GENERAL_MAX_COUNT];
 
-extern uint16_t obj_delete_queue[OBJ_MAX_COUNT];
+extern uint16_t obj_delete_queue[OBJ_GENERAL_MAX_COUNT];
 extern uint16_t obj_delete_queue_count;
 
 extern uint16_t obj_player_index;
 extern uint16_t obj_active_count;
 
-extern uint16_t obj_process_count;
 extern uint16_t obj_next_uid;
 
 // Enemy data that shouldn't be in the object area
@@ -70,17 +69,17 @@ extern uint8_t * obj_player_prev_sprframe;
 extern uint16_t obj_player_active_fireballs;
 
 // Hitbox data
-ZP extern uint16_t hitbox_player_first_available;
-extern struct game_object hitbox_player[HIT_MAX_COUNT];
+ZP extern uint16_t obj_hitbox_player_first_available;
+extern struct game_object obj_hitbox_player[OBJ_PLAYERHITBOX_MAX_COUNT];
+extern uint16_t obj_hitbox_player_delete_queue[OBJ_PLAYERHITBOX_MAX_COUNT];
+extern uint16_t obj_hitbox_player_delete_queue_count;
+extern uint16_t obj_hitbox_count_player;
 
-extern uint16_t hitbox_player_delete_queue[HIT_MAX_COUNT];
-extern uint16_t hitbox_player_delete_queue_count;
-
-extern uint16_t hitbox_count_player;
-
-extern uint16_t hitbox_count_enemy;
-
-extern uint16_t hitbox_count_enemy_shadow;
+ZP extern uint16_t obj_hitbox_enemy_first_available;
+extern struct game_object obj_hitbox_enemy[OBJ_ENEMYHITBOX_MAX_COUNT];
+extern uint16_t obj_hitbox_enemy_delete_queue[OBJ_ENEMYHITBOX_MAX_COUNT];
+extern uint16_t obj_hitbox_enemy_delete_queue_count;
+extern uint16_t obj_hitbox_count_enemy;
 
 // Event flags
 extern uint8_t event_flags_global[EVENT_FLAG_GLOBAL_MAX];
@@ -95,7 +94,7 @@ extern uint16_t event_in_combat_shadow;
 extern uint16_t event_tutorial_shown;
 
 // Blocking colliders data
-extern struct tile_xy blocker_list[OBJ_MAX_COUNT];
+extern struct tile_xy blocker_list[OBJ_GENERAL_MAX_COUNT];
 extern uint16_t blocker_active_count;
 extern uint16_t blocker_build_count;
 extern uint16_t blocker_build_count_shadow; 

@@ -182,9 +182,10 @@ void loop_game()
 
     obj_cleanup();
     obj_cleanup_hitbox_player();
+    obj_cleanup_hitbox_enemy();
 
     // Don't bother checking for input if the player is dying
-    if (objects[obj_player_index].state != STATE_DIE)
+    if (obj_general[obj_player_index].state != STATE_DIE)
     {
         if (system_check_for_key(KEY_SELECT))
         {
@@ -256,8 +257,8 @@ void loop_mapdisplay_init()
     SpriteEngine_ResetOam();
     SpriteEngine_PackOamHighTable();
 
-    struct game_object * o = &objects[obj_player_index];
-    struct game_object temp_icon_object = objects[obj_player_index];
+    struct game_object * o = &obj_general[obj_player_index];
+    struct game_object temp_icon_object = obj_general[obj_player_index];
     temp_icon_object.state = STATE_ICON_NORMAL;
     temp_icon_object.facing = FACING_DOWN;
 
@@ -422,7 +423,7 @@ void loop_mapdisplay()
     // The minimap is always 192x192 pixels.
     // minimap position = (real position / map extent) * 192
 
-    struct game_object * p = &objects[obj_player_index];
+    struct game_object * p = &obj_general[obj_player_index];
 
     int16_t temp_x = p->pos.x.lh.h;
     int16_t temp_y = p->pos.y.lh.h;

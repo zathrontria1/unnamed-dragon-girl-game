@@ -431,17 +431,6 @@ uint16_t SpriteEngine_GetVramSlot16(uint16_t i)
         {
             spr_vram_slots[j] = i;
 
-            //if relevant bits are taken to as they shift all the way to bit 0 first for the lowest bit:
-            uint16_t temp_tilenum = 0; 
-            temp_tilenum |= (j & 0xf0) << 2;
-            temp_tilenum |= (j & 0x0c);
-            temp_tilenum |= (j & 0x02) << 4;
-            temp_tilenum |= (j & 0x01) << 1;
-            // (RRRR * 64) + (CC * 4) + (r * 32) + (c * 2);
-
-            objects[i].struct_data.npc_data.tilenum = temp_tilenum;
-            objects[i].struct_data.npc_data.vram_addr = temp_tilenum << 4; // mul by 16, size of a 8x8 tile - this is in words
-
             return j;
         }
     }
@@ -463,17 +452,6 @@ uint16_t SpriteEngine_GetVramSlot32(uint16_t i)
             spr_vram_slots[j+1] = i;
             spr_vram_slots[j+2] = i;
             spr_vram_slots[j+3] = i;
-
-            //if relevant bits are taken to as they shift all the way to bit 0 first for the lowest bit:
-            uint16_t temp_tilenum = 0; 
-            temp_tilenum |= (j & 0xf0) << 2;
-            temp_tilenum |= (j & 0x0c);
-            temp_tilenum |= (j & 0x02) << 4;
-            temp_tilenum |= (j & 0x01) << 1;
-            // (RRRR * 64) + (CC * 4) + (r * 32) + (c * 2);
-            
-            objects[i].struct_data.npc_data.tilenum = temp_tilenum;
-            objects[i].struct_data.npc_data.vram_addr = temp_tilenum << 4; // mul by 16, size of a 8x8 tile - this is in words
 
             return j;
         }

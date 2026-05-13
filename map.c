@@ -85,7 +85,7 @@ void map_regenerate()
 */
 void map_camera_adjust(uint16_t suppress_map_gen)
 {
-    struct game_object * ptr = &objects[obj_player_index];
+    struct game_object * ptr = &obj_general[obj_player_index];
 
     if (bg_scroll_use_interpolation == 0)
     {

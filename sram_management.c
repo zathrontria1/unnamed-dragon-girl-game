@@ -148,7 +148,7 @@ void sram_save(uint16_t slot)
 
     // Then the object data
     uint8_t * temp_playerdata = p; // BEWARE: not a pointer of pointer! Data must be copied
-    uint8_t * temp_livedata = (uint8_t *)&objects[obj_player_index];
+    uint8_t * temp_livedata = (uint8_t *)&obj_general[obj_player_index];
 
     for (int i = 0; i < sizeof(struct game_object); i++)
     {

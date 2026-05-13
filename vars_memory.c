@@ -68,15 +68,14 @@ ZP void * system_loop_func_ptr;
 
 // Object system
 ZP uint16_t obj_first_available;
-struct game_object objects[OBJ_MAX_COUNT];
+struct game_object obj_general[OBJ_GENERAL_MAX_COUNT];
 
-uint16_t obj_delete_queue[OBJ_MAX_COUNT];
+uint16_t obj_delete_queue[OBJ_GENERAL_MAX_COUNT];
 uint16_t obj_delete_queue_count;
 
 uint16_t obj_player_index;
 uint16_t obj_active_count;
 
-uint16_t obj_process_count;
 uint16_t obj_next_uid;
 
 // Enemy data that shouldn't be in the object area
@@ -91,16 +90,17 @@ uint8_t * obj_player_prev_sprframe;
 uint16_t obj_player_active_fireballs;
 
 // Hitbox data
-ZP uint16_t hitbox_player_first_available;
-struct game_object hitbox_player[HIT_MAX_COUNT];
+ZP uint16_t obj_hitbox_player_first_available;
+struct game_object obj_hitbox_player[OBJ_PLAYERHITBOX_MAX_COUNT];
+uint16_t obj_hitbox_player_delete_queue[OBJ_PLAYERHITBOX_MAX_COUNT];
+uint16_t obj_hitbox_player_delete_queue_count;
+uint16_t obj_hitbox_count_player;
 
-uint16_t hitbox_player_delete_queue[HIT_MAX_COUNT];
-uint16_t hitbox_player_delete_queue_count;
-
-uint16_t hitbox_count_player;
-
-uint16_t hitbox_count_enemy;
-uint16_t hitbox_count_enemy_shadow;
+ZP uint16_t obj_hitbox_enemy_first_available;
+struct game_object obj_hitbox_enemy[OBJ_ENEMYHITBOX_MAX_COUNT];
+uint16_t obj_hitbox_enemy_delete_queue[OBJ_ENEMYHITBOX_MAX_COUNT];
+uint16_t obj_hitbox_enemy_delete_queue_count;
+uint16_t obj_hitbox_count_enemy;
 
 // Event flags
 uint8_t event_flags_global[EVENT_FLAG_GLOBAL_MAX];
@@ -115,7 +115,7 @@ uint16_t event_in_combat_shadow;
 uint16_t event_tutorial_shown;
 
 // Blocking colliders data
-struct tile_xy blocker_list[OBJ_MAX_COUNT];
+struct tile_xy blocker_list[OBJ_GENERAL_MAX_COUNT];
 uint16_t blocker_active_count;
 uint16_t blocker_build_count;
 uint16_t blocker_build_count_shadow; 
