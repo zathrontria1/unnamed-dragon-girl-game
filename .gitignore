@@ -72,7 +72,7 @@ mapfile
 *.clip
 
 # non-finalized map data
-*.py
+maps/*.py
 *.tmj
 *.tmx
 *.tsx
