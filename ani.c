@@ -38,29 +38,28 @@
 */
 
 // With flipping
-const uint16_t const_ani_lut_basic[14][4] = 
+const uint16_t const_ani_lut_basic[56] = 
 {
-   {0, 1, 2, 2},
+   0, 1, 2, 2,
 
-   {3, 5, 7, 7},
-   {3, 5, 7, 7},
+   3, 5, 7, 7,
+   3, 5, 7, 7,
 
-   {18, 20, 22, 22},
-   {18, 20, 22, 22},
+   18, 20, 22, 22,
+   18, 20, 22, 22,
 
-   {24, 26, 28, 28},
-   {24, 26, 28, 28},
+   24, 26, 28, 28,
+   24, 26, 28, 28,
     
-   {0, 1, 2, 2},
-   {3, 5, 7, 7},
-   {3, 5, 7, 7},
+   0, 1, 2, 2,
+   3, 5, 7, 7,
+   3, 5, 7, 7,
 
-   {9, 10, 11, 11},
-   {12, 14, 16, 16},
+   9, 10, 11, 11,
+   12, 14, 16, 16,
 
-   {0, 0, 0, 0},
-   {32, 32, 32, 32},
-   
+   0, 0, 0, 0,
+   32, 32, 32, 32,
 };
 
 /*
@@ -276,127 +275,135 @@ uint8_t * ani_getframe_dynamic_bubble(struct game_object * o)
     return (uint8_t *)((uint32_t)&data_sprite_slime + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
 }
 
+#if VBCC_ASM == 1
+NO_INLINE uint8_t * ani_getframe_dynamic_slime(__reg("a/x") struct game_object * o)
+#else
 uint8_t * ani_getframe_dynamic_slime(struct game_object * o)
+#endif
 {
-    // TODO: ASM optimize
-    // use a virtual tilenum system before finalizing.
-    uint16_t temp_tilenum = o->struct_data.npc_data.ani.frame; // add the frame offset.
+    #if VBCC_ASM == 1
+        __asm(
+            "\ta16\n"
+            "\tx16\n"
 
-    if (o->state == STATE_SPAWNING)
-    {
-        return (uint8_t *)((uint32_t)&data_sprite_spawn_placeholder + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
-    }
-    else
-    {
-        temp_tilenum += const_ani_lut_basic[o->state][o->facing];
+            "\tphy\n"
 
-        if ((o->facing == FACING_LEFT) && (o->state != STATE_DIE))
-        {
-            return (uint8_t *)(((uint32_t)&data_sprite_slime + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10)) | 0x80000000); // set the negative flag
-        }
-        else
-        {
-            // Calculate the address
-            return (uint8_t *)((uint32_t)&data_sprite_slime + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
-        }
-    }
+            "\tpei (r2)\n"
 
-    // Old code follows
-    /*switch (o->state)
-    {
-        case STATE_IDLE:
-            break;
-        case STATE_MOVE_WALK:
-            temp_tilenum += 3;
-            break;
-        case STATE_MOVE_RUN:
-            temp_tilenum += 3;
-            break;
-        case STATE_ATTACK_BASIC:
-        case STATE_ATTACK_BASIC_MOVE:
-            temp_tilenum += 18;
-            break;
-        case STATE_ATTACK_SPECIAL:
-        case STATE_ATTACK_SPECIAL_MOVE:
-            temp_tilenum += 24;
-            break;
-        case STATE_HURT_NORMAL:
-            break;
-        case STATE_HURT_NORMAL_MOVE:
-            temp_tilenum += 3;
-            break;
-        case STATE_HURT_BURN:
-            temp_tilenum += 9;
-            break;
-        case STATE_HURT_BURN_MOVE:
-            temp_tilenum += 12;
-            break;
-        case STATE_DIE:
-            temp_tilenum += 32;
-            break;
-        case STATE_SPAWNING:
+            "\ttax\n"
+
+            "\tlda $7e001e,x\n"
+            "\tcmp #12\n"
+            "\tbne .not_spawning\n"
+
+            ".spawning:\n"
+            // Frame Number
+            // Current frame is byte 64
+            "\tlda $7e0040,x\n" // current frame. now we have the tile num in virtual space
+            "\ttay\n"
+            "\tand #$0007\n"
+            "\txba\n"
+            "\tlsr\n"
+            "\tlsr\n"
+            "\tsta r2\n"
+
+            "\ttya\n"
+            "\tlsr\n"
+            "\tlsr\n"
+            "\tlsr\n"
+            "\txba\n"
+            "\tasl\n"
+            "\tasl\n"
             
-        default:
-            break;
-    }
+            "\tadc r2\n"
+            "\tadc #<_data_sprite_spawn_placeholder\n"
+            "\tldx #^_data_sprite_spawn_placeholder\n"
 
-    uint16_t temp_flip_x;
+            "\tbra .finish\n"
 
-    if (o->state != STATE_DIE)
-    {
-        if (o->state == STATE_IDLE)
+            ".not_spawning:\n"
+            // (State * 4 + Facing + Frame Number)
+            // state is byte 30, facing is byte 32, current frame is byte 64
+            "\tlda $7e001e,x\n" // state
+            "\tasl\n"
+            "\tasl\n" // Carry is cleared here
+            "\tadc $7e0020,x\n" // facing
+            
+            "\tasl\n" // Now we have the index to look into the lookup
+            "\ttxy\n"
+            "\ttax\n"
+            "\tlda >_const_ani_lut_basic, x\n"
+
+            // Transform this number
+            // (temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10)
+            "\ttyx\n"
+            "\tadc $7e0040,x\n" // current frame. now we have the tile num in virtual space
+            "\ttay\n"
+            "\tand #$0007\n"
+            "\txba\n"
+            "\tlsr\n"
+            "\tlsr\n"
+            "\tsta r2\n"
+
+            "\ttya\n"
+            "\tlsr\n"
+            "\tlsr\n"
+            "\tlsr\n"
+            "\txba\n"
+            "\tasl\n"
+            "\tasl\n"
+            "\tadc r2\n"
+            "\tadc #<_data_sprite_slime\n" 
+            "\ttay\n"
+
+            // Test for sign flip
+            "\tlda $7e001e,x\n" // state
+            "\tcmp #13\n"
+            "\tbeq .no_flip\n"
+            "\tlda $7e0020,x\n" // facing
+            "\tcmp #3\n"
+            "\tbne .no_flip\n"
+            ".flip_x:\n"
+                "\tlda #$8000\n"
+                "\tora #^_data_sprite_slime\n"
+                "\ttax\n"
+                "\tbra .finalize\n"
+            ".no_flip:\n"
+                "\tldx #^_data_sprite_slime\n"
+            ".finalize:\n"
+            "\ttya\n"
+
+            ".finish:\n"
+            "\tply\n"
+            "\tsty r2\n"
+
+            "\tply\n"
+
+            "\trtl\n"
+        );
+    #else
+        // use a virtual tilenum system before finalizing.
+        uint16_t temp_tilenum = o->struct_data.npc_data.ani.frame; // add the frame offset.
+
+        if (o->state == STATE_SPAWNING)
         {
-            switch (o->facing)
-            {
-                case FACING_DOWN:
-                    temp_flip_x = 0;
-                    break;
-                case FACING_UP:
-                    temp_flip_x = 0;
-                    temp_tilenum += 1;
-                    break;
-                case FACING_RIGHT:
-                    temp_flip_x = 0;
-                    temp_tilenum += 2;
-                    break;
-                case FACING_LEFT:
-                    temp_flip_x = 1;
-                    temp_tilenum += 2;
-                    break;
-            }
+            return (uint8_t *)((uint32_t)&data_sprite_spawn_placeholder + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
         }
         else
         {
-            switch (o->facing)
+            temp_tilenum += const_ani_lut_basic[(o->state << 2) + o->facing];
+
+            if ((o->facing == FACING_LEFT) && (o->state != STATE_DIE))
             {
-                case FACING_DOWN:
-                    temp_flip_x = 0;
-                    break;
-                case FACING_UP:
-                    temp_flip_x = 0;
-                    temp_tilenum += 2;
-                    break;
-                case FACING_RIGHT:
-                    temp_flip_x = 0;
-                    temp_tilenum += 4;
-                    break;
-                case FACING_LEFT:
-                    temp_flip_x = 1;
-                    temp_tilenum += 4;
-                    break;
+                return (uint8_t *)(((uint32_t)&data_sprite_slime + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10)) | 0x80000000); // set the negative flag
+            }
+            else
+            {
+                // Calculate the address
+                return (uint8_t *)((uint32_t)&data_sprite_slime + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
             }
         }
-    }
+    #endif
 
-    // Calculate the tilenum
-    if (temp_flip_x)
-    {
-        // Also set the flip x flag
-        return (uint8_t *)(((uint32_t)&data_sprite_slime + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10)) | 0x80000000); // set the negative flag
-    }
-    else
-    {
-        // Calculate the address
-        return (uint8_t *)((uint32_t)&data_sprite_slime + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
-    }*/
+    return 0;
 }

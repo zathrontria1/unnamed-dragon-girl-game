@@ -349,6 +349,16 @@ void dma_copy_bg_64height_anim()
     return;
 }
 
+// (1 << split count) * DMA_QUEUE_OVERHEAD
+const uint16_t const_lut_dma_split_lookup[6] = {
+    (1 << 0) * DMA_QUEUE_OVERHEAD, 
+    (1 << 1) * DMA_QUEUE_OVERHEAD, 
+    (1 << 2) * DMA_QUEUE_OVERHEAD, 
+    (1 << 3) * DMA_QUEUE_OVERHEAD, 
+    (1 << 4) * DMA_QUEUE_OVERHEAD, 
+    (1 << 5) * DMA_QUEUE_OVERHEAD, 
+};
+
 uint16_t dma_queue_add(
     uint8_t * src, 
     uint16_t dest, 
@@ -357,7 +367,7 @@ uint16_t dma_queue_add(
     uint16_t split)
 {
     // Check for capacity (count, length) issues
-    uint16_t temp_length = (length + ((split + 1) * DMA_QUEUE_OVERHEAD)) + dma_queue_length;
+    uint16_t temp_length = length + const_lut_dma_split_lookup[split] + dma_queue_length;
     uint16_t temp_queue_count = dma_queue_count + 1 + split;
     
     if (temp_queue_count > DMA_QUEUE_MAX_ENTRIES)
