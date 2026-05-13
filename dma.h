@@ -10,7 +10,6 @@ void dma_copy_to_vram(
     uint16_t dest, 
     uint16_t length);
 
-void dma_clear_vram(void);
 #if VBCC_ASM == 1
     NO_INLINE void dma_copy_oam(void);
 #else

@@ -38,100 +38,95 @@ zero_byte: ; Refer to this + 1 to fetch a known source of zero
     lda #r0
     and #$ff00
     tcd
-
-    sep #$20
-    a8
-    ; Write the MVN and RTL opcode
-    lda #$54
-    sta r6
-
-    lda #$6b
-    sta r7+1
     
     ; Near bank WRAM clear
     ; Write addresses and length of the clear area
+    sep #$20
+    a8
+    ldx #<zero_byte+1
+    stx r0
+    lda #^zero_byte
+    sta r1
+
+    lda #$08
+    sta r5
+    
+    ldx #<__NBS
+    stx r2
     lda #^__NBS
-    sta r6+1
-    sta r7 ; Here, source and dest banks are the same.
+    sta r3
 
     rep #$30 ; axy16
     a16
     x16
-    
-    lda #0
-    sta >__NBS ; Write 0 to start bytes
-    
+
     lda #<__NBE
     sec
-    sbc #<__NBS+2
-    bcc .clearfar
-
-    ldx #<__NBS ; Copy source
-    ldy #<__NBS+1 ; Copy dest
-
-    jsl copy_blockmove
+    sbc #<__NBS
+    beq .clearfar
+    sta r4
+    
+    jsl copy_dma
 .clearfar:
     ; Repeat for the other banks.
     ; Far bank WRAM clear
     ; Write addresses and length of the clear area
     sep #$20
     a8
+    ldx #<__FBS
+    stx r2
     lda #^__FBS
-    sta r6+1
-    sta r7 ; Here, source and dest banks are the same.
+    sta r3
 
     rep #$30 ; axy16
     a16
     x16
-    
-    lda #0
-    sta >__FBS ; Write 0 to start bytes
-    
+
     lda #<__FBE
     sec
-    sbc #<__FBS+2
-    bcc .clearhuge
-
-    ldx #<__FBS ; Copy source
-    ldy #<__FBS+1 ; Copy dest
-
-    jsl copy_blockmove
+    sbc #<__FBS
+    beq .clearhuge
+    sta r4
+    
+    jsl copy_dma
 
     ; Huge bank WRAM clear
 .clearhuge:
     sep #$20
     a8
+    ldx #<__HBS
+    stx r2
     lda #^__HBS
-    sta r6+1
-    sta r7 ; Here, source and dest banks are the same.
+    sta r3
 
     rep #$30 ; axy16
     a16
     x16
-    
-    lda #0
-    sta >__HBS ; Write 0 to start bytes
-    
+
     lda #<__HBE
     sec
-    sbc #<__HBS+2
-
-    bcc .clear_done
-
-    ldx #<__HBS ; Copy source
-    ldy #<__HBS+1 ; Copy dest
-
-    jsl copy_blockmove
+    sbc #<__HBS
+    beq .clear_done
+    sta r4
+    
+    jsl copy_dma
 .clear_done:
-
     ; Begin copying.
     ; C is the location of the source. S is destination.
     sep #$20
     a8
+    ldx #<__NDC
+    stx r0
     lda #^__NDC
-    sta r7
+    sta r1
+
+    lda #$00
+    sta r5
+    
+    ldx #<__NDS
+    stx r2
     lda #^__NDS
-    sta r6+1 ; Source and destination are different. Note that in code the banks are "destination, source"
+    sta r3
 
     rep #$30 ; axy16
     a16
@@ -139,22 +134,23 @@ zero_byte: ; Refer to this + 1 to fetch a known source of zero
 
     lda #<__NDE
     sec
-    sbc #<__NDS+1
-
-    bcc .copyfar
-
-    ldx #<__NDC ; Copy source
-    ldy #<__NDS ; Copy dest
-
-    jsl copy_blockmove
-
+    sbc #<__NDS
+    beq .copyfar
+    sta r4
+    
+    jsl copy_dma
 .copyfar:
     sep #$20
     a8
+    ldx #<__FDC
+    stx r0
     lda #^__FDC
-    sta r7
+    sta r1
+    
+    ldx #<__FDS
+    stx r2
     lda #^__FDS
-    sta r6+1 ; Source and destination are different. Note that in code the banks are "destination, source"
+    sta r3
 
     rep #$30 ; axy16
     a16
@@ -162,22 +158,24 @@ zero_byte: ; Refer to this + 1 to fetch a known source of zero
 
     lda #<__FDE
     sec
-    sbc #<__FDS+1
-
-    bcc .copyhuge
-
-    ldx #<__FDC ; Copy source
-    ldy #<__FDS ; Copy dest
-
-    jsl copy_blockmove
+    sbc #<__FDS
+    beq .copyhuge
+    sta r4
+    
+    jsl copy_dma
 
 .copyhuge:
     sep #$20
     a8
+    ldx #<__HDC
+    stx r0
     lda #^__HDC
-    sta r7
+    sta r1
+    
+    ldx #<__HDS
+    stx r2
     lda #^__HDS
-    sta r6+1 ; Source and destination are different. Note that in code the banks are "destination, source"
+    sta r3
 
     rep #$30 ; axy16
     a16
@@ -185,67 +183,102 @@ zero_byte: ; Refer to this + 1 to fetch a known source of zero
 
     lda #<__HDE
     sec
-    sbc #<__HDS+1
-
-    bcc .copy_done
-
-    ldx #<__HDC ; Copy source
-    ldy #<__HDS ; Copy dest
-
-    jsl copy_blockmove
+    sbc #<__HDS
+    beq .copy_done
+    sta r4
+    
+    jsl copy_dma
 
 .copy_done:
-
     ; Clear the stack. Must be manually done without subroutine calls.
-    rep #$30
-    a16
-    x16
-    stz ___stack ; clear the first two bytes
-    lda #___stacklen-2
-    ldx #___stack
-    ldy #___stack+1
-    mvn #$00, #$00
-
-    ; DB should be at bank $00. Change it to $80 here.
-    ; Change data bank to $80
-    sep #$20
+    sep #$20  ; 8-bit accumulator
+    rep #$10  ; 16-bit index
     a8
-    lda #__DBR_init
-    pha
-    plb
+    x16
+
+    lda #^___stack
+    sta $2183 
+    ldx #<___stack
+    stx $2181 ; WRAM address, bottom 16 bits
+
+    ldx #___stacklen
+    stx $4305
+
+    ; Configure DMA to write to WMDATA
+    lda #$08
+    sta $4300
+
+    lda #$80
+    sta $4301
+
+    ldx #<zero_byte+1
+    stx $4302
+    ; Set the bank byte of the source address too
+    lda #^zero_byte
+    sta $4304
+
+    ; Start the DMA
+    lda #$1
+    sta $420b
 
     ; Clear the zero page
-    rep #$20
-    sep #$10
-    a16
-    x8
+    stz $2183
+    ldx #$0000
+    stx $2181
+
+    sta $4306
     
-    ldx #$0
-    
-.zp_clear:
-    stz $00,x
-    inx
-    inx
-    bne .zp_clear
+    sta $420b
 
-    rep #$30
+    ; Get ready to call __main();
+    rep #$30  ; 16-bit accumulator
     a16
-    x16 
 
-    txa ; At this point, X should be $0000
-    txy
-
-    pha
-    pla ; also clear the stack value with 0 for good measure
+    lda #$0000
+    tax
+    tay
 
     jsl ___main
 ___exit:
     jmp ___exit
 
-copy_blockmove:
-    phb
-    jsl >r6
-    plb
+copy_dma:
+    ; r0/r1 source
+    ; r2/r3 destination
+    ; r4 length
+    ; r5 fill/copy?
+    php
+    sep #$20  ; 8-bit accumulator
+    rep #$10  ; 16-bit index
+    a8
+    x16
+
+    lda r3
+    sta $2183 
+    ldx r2
+    stx $2181 ; WRAM address, bottom 16 bits
+
+    ldx r4
+    stx $4305
+
+    ; Configure DMA to write to WMDATA
+    lda r5
+    sta $4300
+
+    lda #$80
+    sta $4301
+
+    ldx r0
+    stx $4302
+    ; Set the bank byte of the source address too
+    lda r1
+    sta $4304
+
+    ; Start the DMA
+    lda #$1
+    sta $420b
+
+    plp
     rtl
 
  section zpage

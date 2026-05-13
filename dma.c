@@ -57,26 +57,6 @@ void dma_copy_to_vram(
     return;
 }
 
-void dma_clear_vram()
-{
-    // Write zeroes to entire VRAM
-    REG_VMAIN = VRAM_INCHIGH;
-    REG_VMADDLH = 0x0000;
-
-    REG_DMAP0 = 0x09; //word reg write, fixed address
-
-    REG_A1T0LH = (uint16_t)(((uint32_t)&const_zero));
-    REG_A1B0 = (uint8_t)(((uint32_t)&const_zero >> 16));
-
-    REG_BBAD0 = 0x18; // VMDATAL
-
-    REG_DAS0LH = 0x00;
-
-    REG_MDMAEN = 0x01;
-
-    return;
-}
-
 void dma_copy_oam()
 {
     // Update OAM from shadow
