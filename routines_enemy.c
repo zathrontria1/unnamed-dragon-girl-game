@@ -80,9 +80,16 @@ void routines_slime(struct game_object * o)
 
                         struct game_object * p = &objects[j];
                         p->struct_data.npc_data.attack = ENEMY_ATTACK_VALUE * ENEMY_ATTACK_MULT_RANGED;
+
+                        // Angle needs to be recalculated
+                        uint8_t temp_rand = (uint8_t)Math_GetRandom_u16();
+                        uint8_t temp_angle = Math_GetAtan2_u8(temp_y, temp_x) + (temp_rand & 0x0f) - 8;
+
+                        o->angle = temp_angle;
+                        o->facing = ai_get_facing(o);
                         
-                        p->delta.x.a = data_cosine_1[o->angle] * V_MUL;
-                        p->delta.y.a = data_sine_1[o->angle] * V_MUL;
+                        p->delta.x.a = data_cosine_1[temp_angle] * V_MUL;
+                        p->delta.y.a = data_sine_1[temp_angle] * V_MUL;
 
                         p->struct_data.npc_data.ttl = ENEMY_ATTACK_TTL;
                     }

@@ -18,17 +18,76 @@ ___irq_vblank:
 	plb
 	plb
 
-	; pseudoregisters are not used in NMI
-
-	lda <_system_use_alternate_nmi
-	bne .quick_nmi
+	pei	(r28)
+	pei	(r29)
+	pei	(r30)
+	pei	(r31)
+	pei	(r0)
+	pei	(r1)
+	pei	(r2)
+	pei	(r3)
+	pei	(r4)
+	pei	(r5)
+	pei	(r6)
+	pei	(r7)
+	pei	(r8)
+	pei	(r9)
+	pei	(r10)
+	pei	(r11)
+	pei	(r12)
+	pei	(r13)
+	pei	(r14)
+	pei	(r15)
+	lda	_system_use_alternate_nmi
+	bne	l4
 	jsl	>_interrupt_vblank_sub
-	bra .end_nmi
-	.quick_nmi:
+	bra	l5
+l4:
 	jsl	>_interrupt_vblank_alt
-	.end_nmi:
-
+l5:
 	rep	#$30
+
+
+	plx
+	stx	r15
+	plx
+	stx	r14
+	plx
+	stx	r13
+	plx
+	stx	r12
+	plx
+	stx	r11
+	plx
+	stx	r10
+	plx
+	stx	r9
+	plx
+	stx	r8
+	plx
+	stx	r7
+	plx
+	stx	r6
+	plx
+	stx	r5
+	plx
+	stx	r4
+	plx
+	stx	r3
+	plx
+	stx	r2
+	plx
+	stx	r1
+	plx
+	stx	r0
+	pla
+	sta	r31
+	pla
+	sta	r30
+	pla
+	sta	r29
+	pla
+	sta	r28
 
 	pld
 	plb
