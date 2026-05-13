@@ -62,6 +62,19 @@ const uint16_t const_ani_lut_basic[56] =
    32, 32, 32, 32,
 };
 
+const uint16_t const_ani_lut_basic_byteoffsets[64] =
+{
+    0x0000, 0x0040, 0x0080, 0x00c0, 0x0100, 0x0140, 0x0180, 0x01c0, 
+    0x0400, 0x0440, 0x0480, 0x04c0, 0x0500, 0x0540, 0x0580, 0x05c0, 
+    0x0800, 0x0840, 0x0880, 0x08c0, 0x0900, 0x0940, 0x0980, 0x09c0, 
+    0x0c00, 0x0c40, 0x0c80, 0x0cc0, 0x0d00, 0x0d40, 0x0d80, 0x0dc0, 
+
+    0x1000, 0x1040, 0x1080, 0x10c0, 0x1100, 0x1140, 0x1180, 0x11c0, 
+    0x1400, 0x1440, 0x1480, 0x14c0, 0x1500, 0x1540, 0x1580, 0x15c0, 
+    0x1800, 0x1840, 0x1880, 0x18c0, 0x1900, 0x1940, 0x1980, 0x19c0, 
+    0x1c00, 0x1c40, 0x1c80, 0x1cc0, 0x1d00, 0x1d40, 0x1d80, 0x1dc0, 
+};
+
 /*
     Animations item drop gravity, and draw a drop shadow if mid-air
 */
@@ -335,8 +348,6 @@ uint8_t * ani_getframe_dynamic_slime(struct game_object * o)
 
             "\tphy\n"
 
-            "\tpei (r2)\n"
-
             "\ttax\n"
 
             "\tlda $7e001e,x\n"
@@ -347,19 +358,13 @@ uint8_t * ani_getframe_dynamic_slime(struct game_object * o)
                 // Frame Number
                 // Current frame is byte 64
                 "\tlda $7e0040,x\n" // current frame. now we have the tile num in virtual space
-                "\ttay\n"
-                "\tand #$0007\n"
-                "\txba\n"
-                "\tlsr\n"
-                "\tlsr\n"
-                "\tsta r2\n"
 
-                "\ttya\n"
-                "\txba\n"
-                "\tlsr\n"
-                "\tand #$7c00\n"
-                
-                "\tadc r2\n"
+                "\ttxy\n"
+                "\tasl\n" // This clears the carry
+                "\ttax\n"
+                "\tlda >_const_ani_lut_basic_byteoffsets,x\n"
+                "\ttyx\n"
+
                 "\tadc #<_data_sprite_spawn_placeholder\n"
                 "\tldx #^_data_sprite_spawn_placeholder\n"
 
@@ -382,19 +387,15 @@ uint8_t * ani_getframe_dynamic_slime(struct game_object * o)
                 // (temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10)
                 "\ttyx\n"
                 "\tadc $7e0040,x\n" // current frame. now we have the tile num in virtual space
-                "\ttay\n"
-                "\tand #$0007\n"
-                "\txba\n"
-                "\tlsr\n"
-                "\tlsr\n"
-                "\tsta r2\n"
 
-                "\ttya\n"
-                "\txba\n"
-                "\tlsr\n"
-                "\tand #$7c00\n"
-                "\tadc r2\n"
+                "\ttxy\n"
+                "\tasl\n" // This clears the carry
+                "\ttax\n"
+                "\tlda >_const_ani_lut_basic_byteoffsets,x\n"
+                "\ttyx\n"
+
                 "\tadc #<_data_sprite_slime\n" 
+
                 "\ttay\n"
 
                 // Test for sign flip
@@ -416,8 +417,6 @@ uint8_t * ani_getframe_dynamic_slime(struct game_object * o)
             "\ttya\n"
 
             ".finish:\n"
-            "\tply\n"
-            "\tsty r2\n"
 
             "\tply\n"
 
