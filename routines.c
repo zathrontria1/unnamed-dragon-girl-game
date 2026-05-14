@@ -47,13 +47,15 @@ void routines_fx_smoke(struct game_object * o)
             o->struct_data.npc_data.ani.display = ani_getframe_fixed_fast(o);
         }
 
-        // Decrement time to live
-        o->struct_data.npc_data.ttl--;
-
         // Check if the object is to be destroyed
         if (o->struct_data.npc_data.ttl == 0)
         {
             obj_destroy(o->array_index);
+        }
+        else
+        {
+            // Decrement time to live
+            o->struct_data.npc_data.ttl--;
         }
     }
 
@@ -77,13 +79,15 @@ void routines_fx_impact(struct game_object * o)
         return;
     }
 
-    // Decrement time to live
-    o->struct_data.npc_data.ttl--;
-
     // Check if the object is to be destroyed
     if (o->struct_data.npc_data.ttl == 0)
     {
         obj_destroy(o->array_index);
+    }
+    else
+    {
+        // Decrement time to live
+        o->struct_data.npc_data.ttl--;
     }
 
     return;

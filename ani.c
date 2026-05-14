@@ -330,7 +330,7 @@ uint8_t * ani_getframe_dynamic_stateless(struct game_object * o)
 // Return offset to a fixed sprite tilenum based on given information
 // object ID and frame only
 // shorter version for light objects
-uint16_t ani_getframe_fixed_fast(struct game_object * o)
+inline uint16_t ani_getframe_fixed_fast(struct game_object * o)
 {
     switch (o->id)
     {
@@ -341,7 +341,7 @@ uint16_t ani_getframe_fixed_fast(struct game_object * o)
         case OBJID_SYS_IMPACT:
             return 10;
         case OBJID_SYS_TARGET:
-            return 14;
+            return 14; 
         default:
             return 0;
     }
