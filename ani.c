@@ -485,7 +485,8 @@ uint8_t * ani_getframe_dynamic_slime(struct game_object * o)
 
         if (o->state == STATE_SPAWNING)
         {
-            return (uint8_t *)((uint32_t)&data_sprite_spawn_placeholder + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
+            return (uint8_t *)((uint32_t)&data_sprite_spawn_placeholder + const_ani_lut_frame_byteoffsets_16[temp_tilenum]);
+            //return (uint8_t *)((uint32_t)&data_sprite_spawn_placeholder + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
         }
         else
         {
@@ -493,12 +494,14 @@ uint8_t * ani_getframe_dynamic_slime(struct game_object * o)
 
             if ((o->facing == FACING_LEFT) && (o->state != STATE_DIE))
             {
-                return (uint8_t *)(((uint32_t)&data_sprite_slime + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10)) | 0x80000000); // set the negative flag
+                return (uint8_t *)(((uint32_t)&data_sprite_slime + const_ani_lut_frame_byteoffsets_16[temp_tilenum]) | 0x80000000); // set the negative flag
+                //return (uint8_t *)(((uint32_t)&data_sprite_slime + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10)) | 0x80000000); // set the negative flag
             }
             else
             {
                 // Calculate the address
-                return (uint8_t *)((uint32_t)&data_sprite_slime + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
+                return (uint8_t *)((uint32_t)&data_sprite_slime + const_ani_lut_frame_byteoffsets_16[temp_tilenum]);
+                //return (uint8_t *)((uint32_t)&data_sprite_slime + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
             }
         }
     #endif
