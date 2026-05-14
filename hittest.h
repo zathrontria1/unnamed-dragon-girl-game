@@ -8,12 +8,6 @@ inline struct game_object * hit_test_player(struct game_object * o);
 inline uint16_t hit_test_interaction(struct game_object * o);
 
 #if VBCC_ASM == 1
-    NO_INLINE uint16_t hit_test_blocker(struct tile_xy t);
-#else
-    inline uint16_t hit_test_blocker(struct tile_xy t);
-#endif
-
-#if VBCC_ASM == 1
     NO_INLINE uint16_t hit_test(__reg("r0/r1") struct game_object * a, __reg("r2/r3") struct game_object * b);
 #else
     inline uint16_t hit_test(struct game_object * a, struct game_object * b);
