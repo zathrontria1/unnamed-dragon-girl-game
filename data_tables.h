@@ -107,6 +107,11 @@ const struct obj_list_entry_interactable data_interactables_debug0[] =
     {OBJID_NULL, 0, 0, 0}, 
 };
 
+const struct obj_list_entry_interactable data_interactables_debug1[] = 
+{
+    {OBJID_NULL, 0, 0, 0}, 
+};
+
 
 // Spawn lists should look like this:
 // ID, high X, high Y (offsets from spawn list)
@@ -133,6 +138,10 @@ const struct obj_list_entry_spawners data_spawners_debug0[] = {
     {OBJID_NULL, 0, 0, 1, 1, 0, 0, 0, 0, 0},
 };
 
+const struct obj_list_entry_spawners data_spawners_debug1[] = {
+    {OBJID_NULL, 0, 0, 1, 1, 0, 0, 0, 0, 0},
+};
+
 // Level data structs
 const struct level_data data_level_test_0 = {
     504,
@@ -155,8 +164,8 @@ const struct level_data data_level_test_0 = {
 };
 
 const struct level_data data_level_test_1 = {
-    504,
-    504,
+    64,
+    960,
 
     (void *)&data_bg_dungeon_lz4,
     (void *)&data_palette,
@@ -165,8 +174,8 @@ const struct level_data data_level_test_1 = {
     (void *)&data_map_lut_dungeon,
     (void *)&data_map_lut_dungeon_col,
     
-    (void *)&data_spawners_debug0,
-    (void *)&data_interactables_debug0,
+    (void *)&data_spawners_debug1,
+    (void *)&data_interactables_debug1,
 
     (void *)&data_bg_map_dungeon_1_8bpp_lz4,
     (void *)&data_palette_map_1_8bpp,

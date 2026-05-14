@@ -8,6 +8,7 @@ void system_init_regs(void);
 void system_init_wram_functions(void);
 void system_display_splash();
 void system_init(void);
+void system_init_partial(void);
 void system_init_graphics(void);
 void system_reset_bg_scroll_regs(void);
 void system_init_display(uint16_t routine);

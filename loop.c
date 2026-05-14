@@ -205,6 +205,20 @@ void loop_game()
 
             shadow_inidisp = 0x08;
         }
+        else if (system_check_for_key(KEY_L))
+        {
+            // Debug: Switch to new level
+            // Let's try using the new alternate NMI part
+            shadow_inidisp = 0x0f;
+            system_use_alternate_nmi = 1;
+            shadow_inidisp_change = -1;
+
+            level_data_ptr = &data_level_test_1;
+            system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_NEWLEVEL);
+            system_target_routine = ROUTINE_NEWLEVEL;
+
+            return;
+        }
     }
 
     gfx_process_mosaic();
@@ -565,6 +579,57 @@ void loop_game_partial(void)
     SpriteEngine_ResetOam();
     SpriteEngine_PackOamHighTable();
     system_game_paused = temp_game_paused_copy;
+
+    return;
+}
+
+/*
+    Used when going from a level to another
+*/
+
+void loop_game_newlevel()
+{
+    system_init_partial();
+    level_load(level_data_ptr);
+
+    system_ui_in_bg2 = 0;
+    ui_force_update = 1;
+
+    while (shadow_inidisp != 0x00)
+    {
+        ; // Prevent execution from continuing to VRAM writing parts while the display is turned on
+    }
+
+    // Try to move as many things as possible before here.
+    system_interrupt_disable();
+    REG_INIDISP = 0x8f;
+
+    system_reset_bg_scroll_regs();
+
+    // DMA just the background and BG3 tiles
+    dma_copy_to_vram(((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_MAP << 1)), TILEDATA_ADDR_GAME_MAP, 24576);
+    dma_copy_to_vram(((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_UI_2BPP << 1)), TILEDATA_ADDR_GAME_UI_2BPP, 8192);
+
+    map_camera_adjust(true);
+    map_regenerate();
+    system_reset_ui_tilemap();
+
+    system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_FADEIN);
+    system_target_routine = ROUTINE_GAMELOOP;
+
+    system_setup_tilemap_display(system_target_routine);
+    system_init_display(system_target_routine);
+
+    loop_game_partial();
+
+    ani_pal_hdma_enable(); 
+
+    shadow_inidisp = 0x00;
+
+    system_use_alternate_nmi = 0;
+    shadow_inidisp_change = 0;
+
+    system_interrupt_enable();
 
     return;
 }

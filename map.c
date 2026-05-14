@@ -26,6 +26,7 @@ void map_load(const uint8_t * map, const uint16_t * lut, const uint8_t * col)
     map_lut = lut;
     map_lut_col = col;
 
+    map_extent_tiles_x_shiftcount = 0;
     uint8_t temp = map_extent_tiles_x >> 1;
     while (temp != 0)
     {

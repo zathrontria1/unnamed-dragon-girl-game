@@ -24,15 +24,28 @@
 */
 void level_load(const struct level_data * level)
 {
-    // Instantiate player
-    obj_player_index = obj_instantiate(
-        OBJID_PLAYER, 
-        level->player_start_x, 
-        level->player_start_y, 
-        0); 
-    obj_player_prev_facing = FACING_DOWN;
+    // Instantiate player if the player isn't already instantiated
 
-    obj_player_pointer = &obj_general[obj_player_index];
+    if (obj_player_index == 0xffff)
+    {
+        obj_player_index = obj_instantiate(
+            OBJID_PLAYER, 
+            level->player_start_x, 
+            level->player_start_y, 
+            0); 
+
+        obj_player_prev_facing = FACING_DOWN;
+
+        obj_player_pointer = &obj_general[obj_player_index];
+    }
+    else
+    {
+        obj_general[obj_player_index].pos.x.lh.h = level->player_start_x;
+        obj_general[obj_player_index].pos.y.lh.h = level->player_start_y;
+
+        obj_general[obj_player_index].pos.x.lh.l = 0;
+        obj_general[obj_player_index].pos.y.lh.l = 0;
+    }
 
     // Instantiate enemies
     obj_instantiate_spawners(level->spawner_ptr);

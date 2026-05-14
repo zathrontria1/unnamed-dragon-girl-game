@@ -271,6 +271,7 @@ void obj_reset(int start_index)
 
             "\txba\n" 
             "\tlsr\n" // mul 128
+            "\ttax\n"
             "\tsta r0\n" // offset of start, also subtract length with this
             "\tlda #5120\n"
             "\tsec\n"
@@ -280,7 +281,7 @@ void obj_reset(int start_index)
             "\ta8\n"
             "\tsep #$20\n"
             "\tlda #$00\n"
-            "\tsta >_obj_general\n" // write first zero byte
+            "\tsta >_obj_general,x\n" // write first zero byte
             "\tlda #^_obj_general\n"
             "\tsta >_system_MVNCodeInWRAM+1\n" // write bank byte of source 
             "\tsta >_system_MVNCodeInWRAM+2\n" // ditto for destination

@@ -7,3 +7,4 @@ void loop_mapdisplay_init(void);
 void loop_messagebox(void);
 void loop_game_reload(void);
 void loop_game_partial(void); // Used to quickly restore UI and sprites without running most game logic
+void loop_game_newlevel(void); // Called when the level is to be swapped

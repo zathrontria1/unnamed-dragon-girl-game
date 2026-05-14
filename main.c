@@ -69,6 +69,9 @@ void * main_GetFunctionPointer(uint16_t routine)
         case ROUTINE_PAUSE:
             return (void *)&loop_pause;
             break;
+        case ROUTINE_NEWLEVEL:
+            return (void *)&loop_game_newlevel;
+            break;
         case ROUTINE_MAPDISPLAY:
             return (void *)&loop_mapdisplay;
             break;

@@ -488,6 +488,49 @@ void system_init()
     return;
 }
 
+/*
+    Call during a live game
+*/
+void system_init_partial()
+{
+    // Initialize VRAM slot allocator
+    SpriteEngine_InitVramSlot();
+    
+    // Reset sprites
+    spr_sprite_count_prev = 128;
+    spr_sprite_count = 0;
+    SpriteEngine_ResetOam();
+    SpriteEngine_PackOamHighTable();
+
+    // Reset object system
+    obj_reset(1); // Reset all except player
+    obj_reset_hitbox_player(); // also reset hitbox list
+    obj_reset_hitbox_enemy();
+
+    // Initialize BG scroll systems. Must be done before the map is loaded.
+    bg_scroll_x_bounds_min.full.high.a = -32768;
+    bg_scroll_y_bounds_min.full.high.a = -32768;
+    bg_scroll_use_interpolation = 0;
+
+    bg_scroll_x.a = 0;
+    bg_scroll_y.a = 0;
+    bg_scroll_x_prev.a = 0;
+    bg_scroll_y_prev.a = 0;
+
+    // invalidate UI caches
+    ui_cached_hp = -1;
+    ui_cached_hp_max = -1;
+    ui_cached_money = 4294967295;
+    ui_cached_enemy_counter = 65535;
+
+    // Reset enemy counter
+    obj_enemies_defeated = 0;
+    obj_enemies_target_count = 0;
+    obj_enemies_max_count = 0;
+
+    return;
+}
+
 void system_reset_bg_scroll_regs(void)
 {
     REG_BG1HOFS = 0;
