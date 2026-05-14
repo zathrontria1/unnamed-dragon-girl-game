@@ -188,8 +188,8 @@ const struct level_data data_level_test_2 = {
     (void *)&data_spawners_debug0,
     (void *)&data_interactables_debug0,
 
-    (void *)&data_bg_map_dungeon_8bpp_lz4,
-    (void *)&data_palette_map_8bpp,
+    (void *)&data_bg_map_dungeon_0_8bpp_lz4,
+    (void *)&data_palette_map_0_8bpp,
 
     (void *)&STR_LEVELNAME_DEBUG_B3F
 };
