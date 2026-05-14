@@ -183,9 +183,71 @@ void routines_interactable_sign(struct game_object * o)
 
 void routines_interactable_blocker(struct game_object * o)
 {
-    o->state = event_flags_local[o->struct_data.interactable_data.event_flag];
+    if (!system_game_paused) // If game is not paused
+    {
+        bool temp_switch_flip = false;
 
-    if (o->state == STATE_SWITCH_OFF)
+        if (o->state != event_flags_local[o->struct_data.interactable_data.event_flag])
+        {
+            temp_switch_flip = true;
+        }
+        
+        if (o->struct_data.interactable_data.delay_time != 0) // If the blocker is run for the first time
+        {
+            o->struct_data.interactable_data.delay_time = 0;
+            temp_switch_flip = true;
+        }
+        
+        o->state = event_flags_local[o->struct_data.interactable_data.event_flag];
+
+        if (temp_switch_flip == true)
+        {
+            if (o->state == STATE_SWITCH_OFF)
+            {
+                // edit the map_collision_buf
+                // o->tile contains the x and y tile coords
+                // y needs to be shifted an amount of times
+                uint16_t q = ((uint8_t)o->tile.y << map_extent_tiles_x_shiftcount) + o->tile.x;
+                uint16_t q2;
+                map_collision_buf[q] = 0x00;
+
+                switch (o->id)
+                {
+                    case OBJID_INTERACTABLE_BLOCKER_DOOR_NS:
+                        q2 = ((uint8_t)o->tile.y << map_extent_tiles_x_shiftcount) + o->tile.x + 1;
+                        map_collision_buf[q2] = 0x00;
+                        break;
+                    case OBJID_INTERACTABLE_BLOCKER_DOOR_EW:
+                        q2 = ((uint8_t)(o->tile.y - 1) << map_extent_tiles_x_shiftcount) + o->tile.x;
+                        map_collision_buf[q2] = 0x00;
+                        break;
+                }
+            }
+            else
+            {
+                // edit the map_collision_buf
+                // o->tile contains the x and y tile coords
+                // y needs to be shifted an amount of times
+                uint16_t q = ((uint8_t)o->tile.y << map_extent_tiles_x_shiftcount) + o->tile.x;
+                uint16_t q2;
+                map_collision_buf[q] = 0xff;
+
+                switch (o->id)
+                {
+                    case OBJID_INTERACTABLE_BLOCKER_DOOR_NS:
+                        q2 = ((uint8_t)o->tile.y << map_extent_tiles_x_shiftcount) + o->tile.x + 1;
+                        map_collision_buf[q2] = 0xff;
+                        break;
+                    case OBJID_INTERACTABLE_BLOCKER_DOOR_EW:
+                        q2 = ((uint8_t)(o->tile.y - 1) << map_extent_tiles_x_shiftcount) + o->tile.x;
+                        map_collision_buf[q2] = 0xff;
+                        break;
+                }
+            }
+        }
+    }
+
+    if (o->state == STATE_SWITCH_OFF) // Only draw if the switch is off.
     {
         switch (o->id)
         {
@@ -198,32 +260,6 @@ void routines_interactable_blocker(struct game_object * o)
             case OBJID_INTERACTABLE_BLOCKER_DOOR_EW:
                 SpriteEngine_AddMetaSprite(o, &data_metaspr_door_ew[0]);
                 break;
-        }
-
-        if (!system_game_paused)
-        {
-            switch (o->id)
-            {
-                case OBJID_INTERACTABLE_BLOCKER_FLOOR:
-                    blocker_list[blocker_build_count] = o->tile;
-                    blocker_build_count++;
-                    break;
-                case OBJID_INTERACTABLE_BLOCKER_DOOR_NS:
-                    blocker_list[blocker_build_count] = o->tile;
-                    blocker_build_count++;
-                    blocker_list[blocker_build_count].x = blocker_list[blocker_build_count-1].x + 1;
-                    blocker_list[blocker_build_count].y = blocker_list[blocker_build_count-1].y;
-                    blocker_build_count++;
-                    break;
-                case OBJID_INTERACTABLE_BLOCKER_DOOR_EW:
-                    blocker_list[blocker_build_count] = o->tile;
-                    blocker_build_count++;
-                    blocker_list[blocker_build_count].x = blocker_list[blocker_build_count-1].x ;
-                    blocker_list[blocker_build_count].y = blocker_list[blocker_build_count-1].y - 1;
-                    blocker_build_count++;
-                    break;
-            }
-            
         }
     }
 

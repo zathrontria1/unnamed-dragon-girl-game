@@ -117,12 +117,6 @@ uint16_t event_in_combat_shadow;
 
 uint16_t event_tutorial_shown;
 
-// Blocking colliders data
-struct tile_xy blocker_list[OBJ_GENERAL_MAX_COUNT];
-uint16_t blocker_active_count;
-uint16_t blocker_build_count;
-uint16_t blocker_build_count_shadow; 
-
 // Random numbers
 int8_t rand_array[3];
 uint16_t rand_seeded;

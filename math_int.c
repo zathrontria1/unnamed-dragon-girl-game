@@ -91,6 +91,7 @@ void Math_SeedRandom(uint32_t s)
 */
 inline uint32_t Math_GetDistanceSquared(int16_t x, int16_t y)
 {
+    // It's pretty fast already. Don't inline this.
     // c^2 = a^2 + b^2
     uint16_t abs_y = (y < 0) ? -y : y;
     uint16_t abs_x = (x < 0) ? -x : x;

@@ -24,8 +24,6 @@
 
 void obj_run() 
 {
-    blocker_build_count = 0;
-    
     event_in_combat = 0;
 
     snd_flame_active = 0;
@@ -223,7 +221,6 @@ void obj_run()
         }
     #endif
 
-    blocker_build_count_shadow = blocker_build_count;
     event_in_combat_shadow = event_in_combat;
 
     if ((event_in_combat == 0) && 
@@ -644,9 +641,12 @@ int16_t obj_instantiate(
         p->hit_type = 0x0000;
     }
 
-    if (id == OBJID_INTERACTABLE_BLOCKER_FLOOR)
+    if ((id == OBJID_INTERACTABLE_BLOCKER_FLOOR) || 
+        (id == OBJID_INTERACTABLE_BLOCKER_DOOR_EW) || 
+        (id == OBJID_INTERACTABLE_BLOCKER_DOOR_NS))
     {
-        blocker_active_count++;
+        // Set a non-zero value
+        p->struct_data.interactable_data.delay_time = 0xffff;
     }
 
     obj_set_function_pointer(p);
@@ -958,15 +958,8 @@ inline void obj_destroy_hitbox_enemy(uint16_t i)
 */
 void obj_cleanup()
 {
-    uint16_t temp_blocker_count = 0;
-
     for (int i = 0; i < obj_delete_queue_count; i++)
     {
-        if (obj_general[obj_delete_queue[i]].id == OBJID_INTERACTABLE_BLOCKER_FLOOR)
-        {
-            temp_blocker_count++;
-        }
-
         if (obj_general[obj_delete_queue[i]].id == OBJID_SLIME)
         {
             SpriteEngine_ReleaseVramSlot(obj_delete_queue[i], 1);
@@ -983,7 +976,6 @@ void obj_cleanup()
     }
     
     obj_active_count -= obj_delete_queue_count;
-    blocker_active_count -= temp_blocker_count;
 
     obj_delete_queue_count = 0;
     return;
