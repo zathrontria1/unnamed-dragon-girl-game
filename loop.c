@@ -163,8 +163,7 @@ void loop_game()
     {
         ui_show_message_ttl--;
     }
-
-    if (ui_show_message_ttl == 0 && !ui_show_message_cleared)
+    else if (!ui_show_message_cleared)
     {
         ui_clear(30, UI_MSGBOX_SL_START, 1);
     }
@@ -257,7 +256,7 @@ void loop_mapdisplay_init()
     SpriteEngine_ResetOam();
     SpriteEngine_PackOamHighTable();
 
-    struct game_object * o = &obj_general[obj_player_index];
+    struct game_object * o = obj_player_pointer;
     struct game_object temp_icon_object = obj_general[obj_player_index];
     temp_icon_object.state = STATE_ICON_NORMAL;
     temp_icon_object.facing = FACING_DOWN;
@@ -423,7 +422,7 @@ void loop_mapdisplay()
     // The minimap is always 192x192 pixels.
     // minimap position = (real position / map extent) * 192
 
-    struct game_object * p = &obj_general[obj_player_index];
+    struct game_object * p = obj_player_pointer;
 
     int16_t temp_x = p->pos.x.lh.h;
     int16_t temp_y = p->pos.y.lh.h;

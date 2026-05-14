@@ -279,7 +279,7 @@ void routines_drop_money(struct game_object * o)
 
         if (o->pos.z.a == 0) // If item is on floor
         {
-            struct game_object * p = (struct game_object *)&obj_general[obj_player_index];
+            struct game_object * p = obj_player_pointer;
 
             // Check if the player is within the designated box
             if (hit_test(p, o) == 0)
@@ -312,7 +312,7 @@ void routines_drop_rec_meat(struct game_object * o)
 
         if (o->pos.z.a == 0) // If item is on floor
         {
-            struct game_object * p = (struct game_object *)&obj_general[obj_player_index];
+            struct game_object * p = obj_player_pointer;
             
             // Check if the player is within the designated box
             if (hit_test(p, o) == 0)

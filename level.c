@@ -32,6 +32,8 @@ void level_load(const struct level_data * level)
         0); 
     obj_player_prev_facing = FACING_DOWN;
 
+    obj_player_pointer = &obj_general[obj_player_index];
+
     // Instantiate enemies
     obj_instantiate_spawners(level->spawner_ptr);
     obj_instantiate_interactables(level->interactable_ptr);

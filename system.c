@@ -555,7 +555,7 @@ void system_setup_tilemap_display(uint16_t routine)
     return;
 }
 
-void system_wait_vblank()
+inline void system_wait_vblank()
 {
     // A workaround has been done on the ASM code side
     system_in_vblank = 1; // This must be the last value written.
@@ -648,7 +648,7 @@ inline uint16_t system_check_for_key_hold(enum KEYPAD_BITS k)
     return 0;
 }
 
-void system_interrupt_enable()
+inline void system_interrupt_enable()
 {
     // Set up interrupts
     register volatile uint8_t temp1 = REG_RDNMI;
@@ -662,7 +662,7 @@ void system_interrupt_enable()
     return;
 }
 
-void system_interrupt_disable()
+inline void system_interrupt_disable()
 {
     // Set up interrupts
     register volatile uint8_t temp1 = REG_RDNMI;

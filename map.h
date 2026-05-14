@@ -1,4 +1,5 @@
 void map_load(const uint8_t * map, const uint16_t * lut, const uint8_t * col);
+void map_build_collision_table();
 void map_regenerate(void);
 void map_camera_adjust(uint16_t suppress_map_gen);
 void map_check_tilemap_crossing();

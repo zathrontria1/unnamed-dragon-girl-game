@@ -25,8 +25,31 @@ void map_load(const uint8_t * map, const uint16_t * lut, const uint8_t * col)
     map_lut = lut;
     map_lut_col = col;
 
+    // Generate the collision map
+    map_build_collision_table();
+
     // Ensure that the camera is at a valid position
     map_camera_adjust(1);
+
+    return;
+}
+
+/*
+    Call to build the collision table
+    The table will be completely linear, so only ends when it's out of tiles.
+*/
+void map_build_collision_table()
+{
+    const uint8_t * ptr = map_current;
+    ptr += 2; 
+
+    uint16_t temp_len = map_extent_tiles_x * map_extent_tiles_y;
+
+    for (uint16_t i = 0; i < temp_len; i++)
+    {
+        map_collision_buf[i] = map_lut_col[*ptr];
+        ptr++;
+    }
 
     return;
 }
@@ -85,7 +108,7 @@ void map_regenerate()
 */
 void map_camera_adjust(uint16_t suppress_map_gen)
 {
-    struct game_object * ptr = &obj_general[obj_player_index];
+    struct game_object * ptr = obj_player_pointer;
 
     if (bg_scroll_use_interpolation == 0)
     {

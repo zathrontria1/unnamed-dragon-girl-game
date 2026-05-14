@@ -24,12 +24,13 @@
 
 uint16_t move(struct game_object * o)
 {
+    __asm("\tbit $4200\n");
     // one axis needs to be tested at a time
     // if a collision check fails on an axis,
     // that axis' delta will be zeroed out
 
     // first test X axis movement
-    int32_t temp_xl = o->pos.x.a + o->delta.x.a;
+    int32_t temp_xl = o->pos.x.a + o->delta.x.a; // Must be done in 32-bit space
     
     int16_t temp_x = (int16_t)(temp_xl >> 16) + 1;
     int16_t temp_y = o->pos.y.lh.h + 1;
@@ -60,24 +61,26 @@ uint16_t move(struct game_object * o)
     temp_start_x = (temp_x & 0xf);
     temp_screen_x = temp_x >> 4;
 
-    uint16_t temp_start_y;
-
-    temp_start_y = (temp_y & 0xf);
+    uint16_t temp_start_y = (temp_y & 0xf) << 4;
     temp_screen_y = temp_y >> 4;
 
     uint16_t temp_screen_offset;
-    const uint8_t * q;
 
     temp_screen_offset = (temp_screen_x << 8) + (temp_screen_y << (6 + (map_extent_x >> 8)));
 
-    q = map_current + 2 + temp_screen_offset + temp_start_x + ((temp_start_y) << 4);
+    uint16_t q;
+    q = temp_screen_offset + temp_start_x + temp_start_y;
+
+    //const uint8_t * q;
+    //q = map_current + 2 + temp_screen_offset + temp_start_x + temp_start_y;
 
     struct tile_xy t;
     t.x = temp_x;
     t.y = temp_y;
-    
 
-    if ((map_lut_col[*q] < 128) || hit_test_blocker(t))
+    if (map_collision_buf[q] < 128)
+    //if ((map_lut_col[*q] < 128))
+    //if ((map_lut_col[*q] < 128) || hit_test_blocker(t))
     {
         o->delta.x.a = 0;
         temp_test_failed = 1;
@@ -86,16 +89,19 @@ uint16_t move(struct game_object * o)
     // Bottom edge
     if (temp_test_failed != 1)
     {
-        temp_start_y = (temp_y_2 & 0xf);
+        temp_start_y = (temp_y_2 & 0xf) << 4;
         temp_screen_y = temp_y_2 >> 4;
 
         temp_screen_offset = (temp_screen_x << 8) + (temp_screen_y << (6 + (map_extent_x >> 8)));
 
-        q = map_current + 2 + temp_screen_offset + temp_start_x + ((temp_start_y) << 4);
+        q = temp_screen_offset + temp_start_x + temp_start_y;
+        //q = map_current + 2 + temp_screen_offset + temp_start_x + temp_start_y;
 
         t.y = temp_y_2;
 
-        if ((map_lut_col[*q] < 128) || (hit_test_blocker(t)))
+        if (map_collision_buf[q] < 128)
+        //if ((map_lut_col[*q] < 128))
+        //if ((map_lut_col[*q] < 128) || hit_test_blocker(t))
         {
             o->delta.x.a = 0;
         }
@@ -142,17 +148,20 @@ uint16_t move(struct game_object * o)
     temp_start_x = (temp_x & 0xf);
     temp_screen_x = temp_x >> 4;
 
-    temp_start_y = (temp_y & 0xf);
+    temp_start_y = (temp_y & 0xf) << 4;
     temp_screen_y = temp_y >> 4;
 
     temp_screen_offset = (temp_screen_x << 8) + (temp_screen_y << (6 + (map_extent_x >> 8)));
 
-    q = map_current + 2 + temp_screen_offset + temp_start_x + ((temp_start_y) << 4);
+    q = temp_screen_offset + temp_start_x + temp_start_y;
+    //q = map_current + 2 + temp_screen_offset + temp_start_x + temp_start_y;
 
     t.x = temp_x;
     t.y = temp_y;
 
-    if ((map_lut_col[*q] < 128) || (hit_test_blocker(t)))
+    if (map_collision_buf[q] < 128)
+    //if ((map_lut_col[*q] < 128))
+    //if ((map_lut_col[*q] < 128) || hit_test_blocker(t))
     {
         o->delta.y.a = 0;
         if ((o->delta.x.a | o->delta.y.a) == 0)
@@ -170,11 +179,14 @@ uint16_t move(struct game_object * o)
 
         temp_screen_offset = (temp_screen_x << 8) + (temp_screen_y << (6 + (map_extent_x >> 8)));
 
-        q = map_current + 2 + temp_screen_offset + temp_start_x + ((temp_start_y) << 4);
+        q = temp_screen_offset + temp_start_x + temp_start_y;
+        //q = map_current + 2 + temp_screen_offset + temp_start_x + temp_start_y;
 
         t.x = temp_x_2;
         
-        if ((map_lut_col[*q] >= 128) || (hit_test_blocker(t)))
+        if (map_collision_buf[q] >= 128)
+        //if ((map_lut_col[*q] >= 128))
+        //if ((map_lut_col[*q] >= 128) || hit_test_blocker(t))
         {
             // One final check if a bounding box exists
             if (bg_scroll_y_bounds_min.full.high.a != -32768)

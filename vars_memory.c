@@ -66,6 +66,8 @@ ZP uint16_t system_game_paused;
 
 ZP void * system_loop_func_ptr;
 
+ZP struct game_object * obj_player_pointer;
+
 // Object system
 ZP uint16_t obj_first_available;
 struct game_object obj_general[OBJ_GENERAL_MAX_COUNT];
@@ -150,6 +152,9 @@ uint16_t map_extent_tiles_y;
 
 const uint16_t * map_lut;
 const uint8_t * map_lut_col;
+
+// Collision buffer decompresses here for speed and editability
+uint8_t map_collision_buf[64*64]; // 4KB // There is no speed benefit from making this 16-bit wide
 
 // Camera/background scroll
 ZP union pos_bgscroll bg_scroll_x;

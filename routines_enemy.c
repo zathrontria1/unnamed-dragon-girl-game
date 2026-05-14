@@ -41,7 +41,7 @@ void routines_slime(struct game_object * o)
         // Note that all distance values obtained are squared for perf reasons (avoiding a square root)
         // This must be calculated regardless of AI state as the player uses this for
         // determining the closest target.
-        struct game_object * p = &obj_general[obj_player_index];
+        struct game_object * p = obj_player_pointer;
 
         if ((o->state != STATE_DIE) && (o->state != STATE_SPAWNING))
         {
