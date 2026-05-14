@@ -37,6 +37,13 @@ void level_load(const struct level_data * level)
         obj_player_prev_facing = FACING_DOWN;
 
         obj_player_pointer = &obj_general[obj_player_index];
+
+        obj_player_health_regen_delay = PLAYER_HEALTH_REGEN_DELAY;
+        obj_player_health_regen_interval = PLAYER_HEALTH_REGEN_INTERVAL;
+        obj_player_health_regen_value = PLAYER_HEALTH_REGEN_VALUE;
+        obj_player_health_regen_limit = obj_general[obj_player_index].struct_data.npc_data.hp_max >> PLAYER_HEALTH_REGEN_LIMITSHIFT;
+
+        obj_player_recovery_drop_pity = ENEMY_DROP_REC_PITY;
     }
     else
     {

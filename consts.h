@@ -176,6 +176,11 @@
 
 #define PLAYER_HEALTH_STARTING 50
 
+#define PLAYER_HEALTH_REGEN_DELAY (180 / V_MUL)
+#define PLAYER_HEALTH_REGEN_INTERVAL (60 / V_MUL)
+#define PLAYER_HEALTH_REGEN_VALUE 1
+#define PLAYER_HEALTH_REGEN_LIMITSHIFT 1 // right shift 1 = div 2. 2 = div 4, etc.
+
 #define PLAYER_ATTACK_INTERVAL_NORMAL ((4) / V_MUL)
 #define PLAYER_ATTACK_INTERVAL_SPECIAL ((4) / V_MUL)
 #define PLAYER_ATTACK_TTL ((60) / V_MUL)
@@ -197,6 +202,7 @@
 #define ENEMY_DROP_MONEY_MIN 100
 #define ENEMY_DROP_MONEY_MAX 200
 #define ENEMY_DROP_REC_AMOUNT 5
+#define ENEMY_DROP_REC_PITY 7 // after this amount of drops, next drop is guaranteed to be a recovery item if none of the previous drops is
 
 #define FX_SMOKE_INTERVAL ANI_INTERVAL_16 // Must be a power of 2
 #define FX_SMOKE_TTL ((60) / V_MUL)

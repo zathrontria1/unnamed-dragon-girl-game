@@ -454,13 +454,15 @@ void routines_player(struct game_object * o)
                             o->struct_data.npc_data.invuln_time = 60 / V_MUL;
                         }
 
+                        obj_player_health_regen_delay = PLAYER_HEALTH_REGEN_DELAY;
+
                         // Also trigger the mosaic
                         gfx_mosaic_change = -1;
                         gfx_mosaic_intensity = 4;
                         gfx_mosaic_layers = 0x02;
                     }
 
-                    o->struct_data.npc_data.ttl = 1; // despawn the object that triggered the hit
+                    p->struct_data.npc_data.ttl = 1; // despawn the object that triggered the hit
 
                     temp_invalidate_animation_frame = 1;
                 }
@@ -469,6 +471,34 @@ void routines_player(struct game_object * o)
             if (o->struct_data.npc_data.invuln_time > 0)
             {
                 o->struct_data.npc_data.invuln_time--;
+            }
+
+            // Process health regen if needed
+
+            if (obj_player_health_regen_delay == 0)
+            {
+                if (obj_player_health_regen_interval == 0)
+                {
+                    if (o->struct_data.npc_data.hp < obj_player_health_regen_limit)
+                    {
+                        obj_player_health_regen_interval = PLAYER_HEALTH_REGEN_INTERVAL;
+
+                        o->struct_data.npc_data.hp += obj_player_health_regen_value;
+
+                        if (o->struct_data.npc_data.hp > obj_player_health_regen_limit)
+                        {
+                            o->struct_data.npc_data.hp = obj_player_health_regen_limit;
+                        }
+                    }
+                }
+                else
+                {
+                    obj_player_health_regen_interval--;
+                }
+            }
+            else
+            {
+                obj_player_health_regen_delay--;
             }
 
             // Check if the player is dead

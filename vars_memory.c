@@ -92,6 +92,13 @@ uint16_t obj_player_prev_facing;
 uint8_t * obj_player_prev_sprframe;
 uint16_t obj_player_active_fireballs;
 
+uint16_t obj_player_health_regen_delay;
+uint16_t obj_player_health_regen_interval;
+uint16_t obj_player_health_regen_value;
+uint16_t obj_player_health_regen_limit;
+
+uint16_t obj_player_recovery_drop_pity;
+
 // Hitbox data
 ZP uint16_t obj_hitbox_player_first_available;
 struct game_object obj_hitbox_player[OBJ_PLAYERHITBOX_MAX_COUNT];
