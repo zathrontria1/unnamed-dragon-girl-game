@@ -129,6 +129,8 @@ extern uint16_t map_extent_y;
 extern uint16_t map_extent_tiles_x;
 extern uint16_t map_extent_tiles_y;
 
+extern uint16_t map_extent_tiles_x_shiftcount; // converted into amount of shifts. 16 being 4, 32 being 5, 64 being 6, 128 being 7
+
 extern const uint16_t * map_lut;
 extern const uint8_t * map_lut_col;
 

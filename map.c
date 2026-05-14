@@ -19,11 +19,19 @@ void map_load(const uint8_t * map, const uint16_t * lut, const uint8_t * col)
     map_current = map;
     map_extent_tiles_x = (*map) << 4;
     map_extent_x = (*map++) << 8;
+    
     map_extent_tiles_y = (*map) << 4;
     map_extent_y = (*map) << 8;
 
     map_lut = lut;
     map_lut_col = col;
+
+    uint8_t temp = map_extent_tiles_x >> 1;
+    while (temp != 0)
+    {
+        temp >>= 1;
+        map_extent_tiles_x_shiftcount++;
+    }
 
     // Generate the collision map
     map_build_collision_table();
@@ -44,11 +52,35 @@ void map_build_collision_table()
     ptr += 2; 
 
     uint16_t temp_len = map_extent_tiles_x * map_extent_tiles_y;
+    uint16_t x = 0;
+    uint16_t y = 0;
 
+    // Need to convert the map from screen-based to linear for further performance improvements
     for (uint16_t i = 0; i < temp_len; i++)
     {
-        map_collision_buf[i] = map_lut_col[*ptr];
-        ptr++;
+        uint16_t temp_start_x = (x & 0xf);
+        uint16_t temp_screen_x = x >> 4;
+
+        uint16_t temp_start_y = (y & 0xf) << 4;
+        uint16_t temp_screen_y = y >> 4;
+
+        uint16_t temp_screen_offset = (temp_screen_x << 8) + (temp_screen_y << (6 + (map_extent_x >> 8)));
+
+        //uint16_t q;
+        const uint8_t * q;
+        q = ptr + temp_screen_offset + temp_start_x + temp_start_y;
+
+        map_collision_buf[i] = map_lut_col[*q];
+
+        x++;
+        if (x >= map_extent_tiles_x)
+        {
+            x = 0;
+            y++;
+        }
+
+        //map_collision_buf[i] = map_lut_col[*ptr];
+        //ptr++;
     }
 
     return;
