@@ -44,6 +44,9 @@
         system_in_vblank = 0; // Clear the vblank flag now to prevent problems later.
         system_nmis_counted = 0;
 
+        // Repoint the HDMA table
+        REG_A1T3LH = hdma_scroll_ptr;
+        
         dma_copy_oam();
         dma_copy_palette();
 

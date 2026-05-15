@@ -262,8 +262,14 @@ union cgram_full shadow_cgram; // 256 palette entries, 2 bytes wide each
 
 // HDMA table for palettes and other purposes
 // 6 channels usable for HDMA, so 6 arrays each
-struct hdma_indirect_table_entry hdma_indirect_tables[3][8];
-uint16_t hdma_indirect_data[3][224][2];
+struct hdma_indirect_table_entry hdma_indirect_tables[2][8];
+uint16_t hdma_indirect_data[2][448];
+
+struct hdma_indirect_table_entry hdma_scroll_tables[2][8];
+uint16_t hdma_scroll_data[2][32];
+uint16_t hdma_scroll_select;
+ZP uint16_t hdma_scroll_ptr;
+uint16_t hdma_scroll_sine_index;
 
 // Sound system
 uint16_t snd_footstep_timeout;

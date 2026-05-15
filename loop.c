@@ -223,6 +223,8 @@ void loop_game()
 
     gfx_process_mosaic();
     gfx_process_screen_cmath();
+
+    HdmaEngine_UpdateBgScrollValues();
     
     return;
 }

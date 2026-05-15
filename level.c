@@ -65,9 +65,10 @@ void level_load(const struct level_data * level)
     
     level_load_graphics(level); // Now no longer hits VRAM
     level_load_palette(level); // Must do before making palette calcs
-    ani_pal_precalc_entries();
-    HdmaEngine_SetupPaletteHdma();
     
+    ani_pal_precalc_entries();
+    HdmaEngine_SetupHdma();
+
     return;
 }
 
