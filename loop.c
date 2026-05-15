@@ -11,7 +11,7 @@
 #include "ani_bg.h"
 #include "ani_fixedspr.h"
 #include "ani_pal.h"
-#include "ani_pal_hdma.h"
+#include "hdma.h"
 
 #include "dma.h"
 #include "system.h"
@@ -551,7 +551,7 @@ void loop_game_reload()
 
     loop_game_partial();
 
-    ani_pal_hdma_enable(); 
+    HdmaEngine_EnableHdma(); 
 
     shadow_inidisp = 0x00;
 
@@ -622,7 +622,7 @@ void loop_game_newlevel()
 
     loop_game_partial();
 
-    ani_pal_hdma_enable(); 
+    HdmaEngine_EnableHdma(); 
 
     shadow_inidisp = 0x00;
 

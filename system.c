@@ -21,7 +21,7 @@
 #include "gfx.h"
 
 #include "ani_pal.h"
-#include "ani_pal_hdma.h"
+#include "hdma.h"
 
 #include "snd.h"
 #include "ui.h"

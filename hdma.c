@@ -3,14 +3,14 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "ani_pal_hdma.h"
+#include "hdma.h"
 
 #include "vars.h"
 
 /*
     Sets up a gradient to half brightness effect on the water subpalette via HDMA tables
 */
-void ani_pal_hdma_setup()
+void HdmaEngine_SetupPaletteHdma()
 {
     // Is a bit of a misnomer now. Maybe needs a rename.
     REG_DMAP1 = 0x43;  // CGADD+CGDATA - Indirect, pattern 3
@@ -54,9 +54,9 @@ void ani_pal_hdma_setup()
     
     hdma_indirect_tables[1][3].count = 0;
 
-    ani_pal_hdma_make_table((uint16_t *)&hdma_indirect_data[0], 0x42, 13, 1, 224, 0, BLENDMODE_ALPHA_TOWARDS_BLACK); // Water
-    ani_pal_hdma_make_table((uint16_t *)&hdma_indirect_data[1], 0x04, 4, 2, 48, 0, BLENDMODE_ALPHA_TOWARDS_BLACK); // UI message box using alpha towards black
-    //ani_pal_hdma_make_table((uint16_t *)&hdma_indirect_data[1], 0x22, 4, -1, 16, 1, BLENDMODE_ADDSUB); // UI message box using subtraction
+    HdmaEngine_GeneratePaletteTable((uint16_t *)&hdma_indirect_data[0], 0x42, 13, 1, 224, 0, BLENDMODE_ALPHA_TOWARDS_BLACK); // Water
+    HdmaEngine_GeneratePaletteTable((uint16_t *)&hdma_indirect_data[1], 0x04, 4, 2, 48, 0, BLENDMODE_ALPHA_TOWARDS_BLACK); // UI message box using alpha towards black
+    //HdmaEngine_GeneratePaletteTable((uint16_t *)&hdma_indirect_data[1], 0x22, 4, -1, 16, 1, BLENDMODE_ADDSUB); // UI message box using subtraction
 
     return;
 }
@@ -66,7 +66,7 @@ void ani_pal_hdma_setup()
 
     It's safe to directly disable HDMA anytime, so no equivalent function is provided for the reverse.
 */
-void ani_pal_hdma_enable()
+void HdmaEngine_EnableHdma()
 {
     // Check that we're out of vblank first...
     while((REG_HVBJOY & VBL_READY) == VBL_READY)
@@ -82,7 +82,7 @@ void ani_pal_hdma_enable()
     return;
 }
 
-void ani_pal_hdma_make_table(uint16_t * table_ptr, uint16_t pal_start, uint16_t entries, int16_t intensity_change, int16_t height, uint16_t rate_delay, uint16_t blend_mode)
+void HdmaEngine_GeneratePaletteTable(uint16_t * table_ptr, uint16_t pal_start, uint16_t entries, int16_t intensity_change, int16_t height, uint16_t rate_delay, uint16_t blend_mode)
 {
     int16_t temp_intensity = 0;
 

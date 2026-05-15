@@ -10,7 +10,7 @@
 #include "obj.h"
 #include "ani_bg.h"
 #include "ani_pal.h"
-#include "ani_pal_hdma.h"
+#include "hdma.h"
 
 #include "dma.h"
 #include "lz4.h"
@@ -66,8 +66,8 @@ void level_load(const struct level_data * level)
     level_load_graphics(level); // Now no longer hits VRAM
     level_load_palette(level); // Must do before making palette calcs
     ani_pal_precalc_entries();
-    ani_pal_hdma_setup();
-
+    HdmaEngine_SetupPaletteHdma();
+    
     return;
 }
 

@@ -11,7 +11,7 @@
 #include "level.h"
 #include "loop.h"
 
-#include "ani_pal_hdma.h"
+#include "hdma.h"
 
 #include "snd.h"
 
@@ -37,7 +37,7 @@ int main()
     system_setup_tilemap_display(system_target_routine);
     system_init_display(system_target_routine);
 
-    ani_pal_hdma_enable();
+    HdmaEngine_EnableHdma();
 
     SoundInterface_PlayMusic(); 
     
