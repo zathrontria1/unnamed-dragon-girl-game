@@ -89,6 +89,7 @@ void loop_fadeout()
 void loop_messagebox()
 {
     system_game_paused = 1;
+    system_dont_count_lag = 1;
 
     obj_run();
 
@@ -133,10 +134,14 @@ void loop_messagebox()
 
 void loop_game()
 {
+    system_dont_count_lag = 0;
+
     ui_process();
 
     if (!event_tutorial_shown)
     {
+        system_dont_count_lag = 1;
+
         SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
 
         ui_print_ml((uint8_t *)&STR_MSG_TUTORIAL_MP, UI_MSGBOX_ML_START, UI_MARGIN_LEFT);
@@ -150,6 +155,8 @@ void loop_game()
 
     if (system_check_for_key(KEY_X))
     {
+        system_dont_count_lag = 1;
+
         SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
         
         ui_print_ml_special((uint8_t *)&STR_UI_PLAYERINFO_ML);
@@ -254,6 +261,8 @@ void loop_pause()
 
 void loop_mapdisplay_init()
 {
+    system_dont_count_lag = 1;
+    
     // Silence the looping fire sound
     if (snd_flame_playing == 1)
     {

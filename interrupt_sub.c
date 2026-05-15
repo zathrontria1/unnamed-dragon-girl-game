@@ -101,6 +101,11 @@
 
             ani_bg_tallbg_dma_ready = 0;
         }
+
+        if ((system_nmis_counted >= NMI_WAIT_COUNT) && !system_dont_count_lag)
+        {
+            system_frames_lag++; // Increment on lag frame (more than 2 physical frames)
+        }
     }
 
     return;

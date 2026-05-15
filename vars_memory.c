@@ -46,6 +46,8 @@ ZP uint16_t system_current_routine;
 ZP uint16_t system_target_routine;
 
 ZP uint32_t system_frames_elapsed;
+ZP uint32_t system_frames_lag;
+uint16_t system_dont_count_lag; // set to 1 to not increment the lag counter during e.g. creating a text box
 
 ZP uint8_t shadow_stat77;
 

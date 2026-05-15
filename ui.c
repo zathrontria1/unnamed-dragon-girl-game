@@ -458,14 +458,14 @@ void ui_print_ml_special(uint8_t * string_ptr)
     uint16_t temp_hp_max = obj_general[obj_player_index].struct_data.npc_data.hp_max;
     uint16_t temp_attack = obj_general[obj_player_index].struct_data.npc_data.attack;
     uint16_t temp_defense = obj_general[obj_player_index].struct_data.npc_data.defense;
-    uint16_t temp_money = obj_general[obj_player_index].struct_data.npc_data.money;
+    uint16_t temp_lagframes = system_frames_lag;
     uint16_t temp_h = (uint16_t)((system_frames_elapsed / FPS) / (3600l));
     uint16_t temp_m = (uint16_t)(((system_frames_elapsed / FPS) % (3600l)) / 60);
     uint16_t temp_s = (uint16_t)((system_frames_elapsed / FPS) % 60);
 
     snprintf(
         (char *)&temp_str, 128, (char *)string_ptr, 
-        temp_hp, temp_hp_max, temp_attack, temp_defense, temp_money, temp_h, temp_m, temp_s);
+        temp_hp, temp_hp_max, temp_attack, temp_defense, temp_lagframes, temp_h, temp_m, temp_s);
     
     ui_print_ml((uint8_t *)&temp_str, UI_MSGBOX_ML_START, UI_MARGIN_LEFT);
 

@@ -54,7 +54,7 @@ const uint8_t STR_UI_HELP_MAP[] = "SELECT Button: Return to game";
 const uint8_t STR_UI_PLAYERINFO_ML[] = "\
 HP: %u/%u\n\
 ATK: %u DEF: %u\n\
-Money: %u \n\
+Lag frames:         %10u\n\
 Play time:        %6u:%02u:%02u";
 
 const uint8_t STR_LEVELNAME_DEBUG_B1F[] = "DEBUG Dungeon B1F";
