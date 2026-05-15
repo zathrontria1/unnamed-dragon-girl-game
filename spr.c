@@ -482,6 +482,11 @@ void SpriteEngine_ReleaseVramSlot(uint16_t i, uint16_t slot_count)
     return;
 }
 
+/*
+    Processes sprite lists and writes to OAM shadow buffer.
+
+    TODO: C code compiler doesn't match ASM and is actually broken. Investigate.
+*/
 void SpriteEngine_ProcessSpriteLists()
 {
     #if VBCC_ASM == 1
@@ -778,13 +783,17 @@ void SpriteEngine_ProcessSpriteLists()
 
             "\tply\n");    
     #else
+        // TODO: Investigate a bug with the compiled C code here. This causes sprite corruption.
+        // Toggling other inline assembly and leaving only this in assembly will NOT cause issues
+        // Pointer error? Hard to test without another compiler...
         for (int i = 0; i < spr_normal_count; i++)
         {
             spr_depth_count[spr_queue_normal[i].depth]--;
 
-            shadow_oam.entries.shadow_oam_low[spr_depth_count[spr_queue_normal[i].depth]].tileattrib = spr_queue_normal[i].tileattrib;
             shadow_oam.entries.shadow_oam_low[spr_depth_count[spr_queue_normal[i].depth]].x = (uint8_t)spr_queue_normal[i].x;
             shadow_oam.entries.shadow_oam_low[spr_depth_count[spr_queue_normal[i].depth]].y = (uint8_t)spr_queue_normal[i].y;
+
+            shadow_oam.entries.shadow_oam_low[spr_depth_count[spr_queue_normal[i].depth]].tileattrib = spr_queue_normal[i].tileattrib;
 
             shadow_oam.entries.shadow_oam_high[spr_depth_count[spr_queue_normal[i].depth]].signsize = spr_queue_normal[i].signsize;
         }
