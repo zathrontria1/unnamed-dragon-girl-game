@@ -984,10 +984,10 @@ void SpriteEngine_PackOamHighTable()
         for (int i = 0; i < 32; i++)
         {
             shadow_oam.bytes[512+i] = 
-                shadow_oam.entries.shadow_oam_high[j].signsize >> 6 |
-                shadow_oam.entries.shadow_oam_high[j+1].signsize >> 4 |
-                shadow_oam.entries.shadow_oam_high[j+2].signsize >> 2 |
-                shadow_oam.entries.shadow_oam_high[j+3].signsize;
+                (shadow_oam.entries.shadow_oam_high[j].signsize >> 6) |
+                (shadow_oam.entries.shadow_oam_high[j+1].signsize >> 4) |
+                (shadow_oam.entries.shadow_oam_high[j+2].signsize >> 2) |
+                (shadow_oam.entries.shadow_oam_high[j+3].signsize);
             j += 4;
         }
 
@@ -1054,7 +1054,7 @@ void SpriteEngine_ResetOam()
         "\tinx\n"
         
         "\tiny\n"
-        "\tcpy _spr_sprite_count_prev\n"
+        "\tcpy r10\n"
 
         "\tbcc .loop_sprreset\n"
 
