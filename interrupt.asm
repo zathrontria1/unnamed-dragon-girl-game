@@ -1,3 +1,4 @@
+;vcprmin=10000
 	section	"DONTMERGE_text.near.__irq_vblank.0","acrx"
 	a16
 	x16
@@ -46,8 +47,7 @@ l4:
 	jsl	>_interrupt_vblank_alt
 l5:
 	rep	#$30
-
-
+	
 	plx
 	stx	r15
 	plx

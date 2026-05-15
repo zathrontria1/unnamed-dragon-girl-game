@@ -12,7 +12,7 @@ Game features are otherwise not yet set in stone.
 - Built targetting NTSC systems, which should cover the majority of owned hardware as well as all modern emulation purposes.
 - Frame rate target of 30 FPS maximum (to minimize intrusive slowdown in heavier processing, especially with current compilers)
 - Targeting SNES HiROM memory map. 
-- SRAM is configured to be 128KB but currently not actually used. There is a functional SRAM check, though.
+- SRAM is configured to be 32KB but currently not actually read from. There is a functional SRAM check and possibly saving on level change, though.
 - Load-once assets (e.g. static background tiles, static UI tiles, and fixed sprites) are compressed in LZ4
 - Load-frequent assets (anything that can be DMA'd live) are uncompressed
 - Most object sprites are dynamically allocated
@@ -21,7 +21,6 @@ Game features are otherwise not yet set in stone.
 
 ### To-do
 - More levels, and a way to swap them
-- Pre-title/startup screens
 - Title screen
 - Game over screen
 - A proper game end condition
@@ -52,12 +51,14 @@ Primarily tested with [VBCC](http://www.compilers.de/vbcc.html) and [Mesen2](htt
 
 Out of the box, VBCC will compile and link the ROM as if it were on SlowROM. You can modify the linker configuration to take advantage of FastROM speeds.
 
-It shouldn't happen with the modified included PVSnesLib header files now, but if you get errors with regard to undefined registers, refer to the following pages to add any missing registers:
+It shouldn't happen with the modified included PVSnesLib header files now (you may need to manually copy them), but if you get errors with regard to undefined registers, refer to the following pages to add any missing registers:
 [MMIO](https://snes.nesdev.org/wiki/MMIO_registers)
 [PPU](https://snes.nesdev.org/wiki/PPU_registers)
 [DMA](https://snes.nesdev.org/wiki/DMA_registers)
 
 This project uses the definition of bool as defined in the C standard. PVSnesLib uses a non-standard definition (true is 0xff instead of 0x01). The header files included with this project use the C definition for bool and will not compile with PVSnesLib headers as is, if your compiler provides them. [See here for what definitions are expected](https://cppreference.com/c/header/stdbool).
+
+If you get compilation errors with the tolower function, change the compiler flag to favour size.
 
 A work-in-progress Makefile and SCM is also provided for [Calypsi](https://www.calypsi.cc/) but is currently still not fully functional.
 

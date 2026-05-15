@@ -7,8 +7,8 @@
 -asv=vasm6502_oldstyle -816 -vobj3 -nowarn=62 -Fvobj -opt-branch -ldots %s -o %s -ldots
 -rm=del %s
 -rmv=del %s
--ld=vlink -m -b rawbin1 -nowarn=22 -Cvbcc -T./vlink-hi -L%%VBCC%%/targets/65816-snes/lib %%VBCC%%/targets/65816-snes/lib/startup.o %s %s -o %s -lvc
--ldv=vlink -m -Mmapfile -b rawbin1 -nowarn=22 -Cvbcc -T./vlink-hi -L%%VBCC%%/targets/65816-snes/lib %%VBCC%%/targets/65816-snes/lib/startup.o %s %s  -o %s -lvc -Mmapfile
+-ld=vlink -m -b rawbin1 -nowarn=22 -Cvbcc -T./vlink-hi -L%%VBCC%%/targets/65816-snes/lib %%VBCC%%/targets/65816-snes/lib/startup.o ./tolower.o %s %s -o %s -lvc
+-ldv=vlink -m -Mmapfile -b rawbin1 -nowarn=22 -Cvbcc -T./vlink-hi -L%%VBCC%%/targets/65816-snes/lib %%VBCC%%/targets/65816-snes/lib/startup.o ./tolower.o %s %s  -o %s -lvc -Mmapfile
 -l2=vlink -m -b rawbin1 -Cvbcc -nowarn=22 -T%./vlink-hi -L%%VBCC%%/targets/65816-snes/lib %s %s -o %s
 -l2v=vlink -m -Mmapfile -b rawbin1 -Cvbcc -nowarn=22 -T./vlink-hi -L%%VBCC%%/targets/65816-snes/lib %s %s -o %s -Mmapfile
 

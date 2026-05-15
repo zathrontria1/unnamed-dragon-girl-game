@@ -107,3 +107,5 @@ void main_Reset()
 
     return;
 }
+
+void __write(){} // Disable the screen printing functions

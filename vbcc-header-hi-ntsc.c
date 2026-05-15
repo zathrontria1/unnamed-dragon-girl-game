@@ -9,5 +9,5 @@ __section("header") const struct cart_header {
  char version;
  int checksum_compl;
  int checksum;
-} __header_hirom_ntsc = {"ZATHRONTRIA TESTGAME", 0x21, 0x02, 8, 5, 0, 0, 0, 0xffff, 0x0000};
+} __header_hirom_ntsc = {"ZATHRONTRIA TESTGAME", 0x21, 0x02, 9, 5, 0, 0, 0, 0xffff, 0x0000};
 

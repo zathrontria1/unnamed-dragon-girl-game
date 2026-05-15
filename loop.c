@@ -32,6 +32,8 @@
 #include "snd.h"
 #include "consts_snd.h"
 
+#include "sram_management.h"
+
 #include "main.h"
 
 void loop_fadein()
@@ -630,6 +632,8 @@ void loop_game_newlevel()
 
     system_use_alternate_nmi = 0;
     shadow_inidisp_change = 0;
+
+    sram_save(0);
 
     system_interrupt_enable();
 
