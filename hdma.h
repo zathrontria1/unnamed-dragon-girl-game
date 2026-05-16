@@ -1,4 +1,5 @@
 extern const int16_t const_hdma_scroll_sine[16][64];
+extern struct hdma_indirect_table_entry hdma_scroll_tables[2][8];
 
 void HdmaEngine_SetupHdma(void);
 
