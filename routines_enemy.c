@@ -236,8 +236,10 @@ void routines_slime(struct game_object * o)
                 int16_t temp_x = o->pos.x.lh.h;
                 int16_t temp_y = o->pos.y.lh.h;
 
-                if ((int16_t)(Math_GetRandom_u16()) > (-24576))
+                if (((int16_t)(Math_GetRandom_u16()) > -24576) && (obj_player_recovery_drop_pity != 0))
                 {
+                    obj_player_recovery_drop_pity--;
+
                     k = obj_instantiate(OBJID_DROP_MONEY, temp_x, temp_y, 0);
 
                     if (k >= 0)
@@ -251,7 +253,8 @@ void routines_slime(struct game_object * o)
                     }
                 }
                 else
-                {
+                {   
+                    obj_player_recovery_drop_pity = ENEMY_DROP_REC_PITY;
                     k = obj_instantiate(OBJID_DROP_REC_MEAT, temp_x, temp_y, 0);
 
                     if (k >= 0)
