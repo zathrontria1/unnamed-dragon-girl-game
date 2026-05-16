@@ -184,14 +184,14 @@ uint16_t ai_run(struct game_object * o, uint32_t dist, int16_t x, int16_t y)
     return temp_invalidate_animation_frame;
 }
 
-inline void ai_idle(struct game_object * o)
+FORCE_INLINE void ai_idle(struct game_object * o)
 {
     o->struct_data.npc_data.ai_timer--;
 
     return;
 }
 
-inline uint16_t ai_get_facing(struct game_object * o)
+FORCE_INLINE uint16_t ai_get_facing(struct game_object * o)
 {
     // Adjust the facing based on angle.
     if (o->angle < 32)

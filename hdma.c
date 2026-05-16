@@ -3,9 +3,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "hdma.h"
-
 #include "vars.h"
+
+#include "hdma.h"
 
 // Scroll tables for v-scroll
 struct hdma_indirect_table_entry hdma_scroll_tables[2][8];

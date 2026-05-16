@@ -28,11 +28,11 @@ void obj_set_function_pointer(struct game_object * o);
 uint16_t obj_instantiate_npcs(const struct obj_list_entry_spawns* list, int16_t offset_x, int16_t offset_y);
 uint16_t obj_instantiate_spawners(const struct obj_list_entry_spawners* list);
 uint16_t obj_instantiate_interactables(const struct obj_list_entry_interactable* list);
-inline uint16_t obj_get_uid(void);
+FORCE_INLINE uint16_t obj_get_uid(void);
 
-inline void obj_destroy(uint16_t i);
-inline void obj_destroy_hitbox_player(uint16_t i);
-inline void obj_destroy_hitbox_enemy(uint16_t i);
+FORCE_INLINE void obj_destroy(uint16_t i);
+FORCE_INLINE void obj_destroy_hitbox_player(uint16_t i);
+FORCE_INLINE void obj_destroy_hitbox_enemy(uint16_t i);
 
 void obj_cleanup(void);
 void obj_cleanup_hitbox_player(void);

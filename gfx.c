@@ -101,7 +101,7 @@ void gfx_process_screen_cmath()
     return;
 }
 
-inline void gfx_cmath_set(int16_t r, int16_t g, int16_t b)
+FORCE_INLINE void gfx_cmath_set(int16_t r, int16_t g, int16_t b)
 {
     gfx_cmath_r = r << 8;
     gfx_cmath_g = g << 8;

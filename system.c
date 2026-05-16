@@ -190,8 +190,8 @@ void system_display_splash()
     REG_BG1SC = 0x3800 >> 8; // The image is 28KB. Have the tilemap go to the 28Kth byte.
 
     // Decompress the splash and tilemap
-    LZ4_UnpackToWRAM(&data_bg_splash_lz4, 0x007f0000);
-    LZ4_UnpackToWRAM(&data_tilemap_splash_lz4, 0x007f7000);
+    LZ4_UnpackToWRAM((void *)&data_bg_splash_lz4, 0x007f0000);
+    LZ4_UnpackToWRAM((void *)&data_tilemap_splash_lz4, 0x007f7000);
     
     // Copy the palette
     dma_copy_to_wram((uint32_t)data_palette_splash, (uint32_t)&shadow_cgram, 32);
@@ -598,7 +598,7 @@ void system_setup_tilemap_display(uint16_t routine)
     return;
 }
 
-inline void system_wait_vblank()
+FORCE_INLINE void system_wait_vblank()
 {
     // A workaround has been done on the ASM code side
     system_in_vblank = 1; // This must be the last value written.
@@ -671,7 +671,7 @@ void system_poll_input()
     return;
 }
 
-inline uint16_t system_check_for_key(enum KEYPAD_BITS k)
+FORCE_INLINE uint16_t system_check_for_key(enum KEYPAD_BITS k)
 {
     if ((input_pad0_new & k) == k)
     {
@@ -681,7 +681,7 @@ inline uint16_t system_check_for_key(enum KEYPAD_BITS k)
     return 0;
 }
 
-inline uint16_t system_check_for_key_hold(enum KEYPAD_BITS k)
+FORCE_INLINE uint16_t system_check_for_key_hold(enum KEYPAD_BITS k)
 {
     if ((input_pad0 & k) == k)
     {
@@ -691,7 +691,7 @@ inline uint16_t system_check_for_key_hold(enum KEYPAD_BITS k)
     return 0;
 }
 
-inline void system_interrupt_enable()
+FORCE_INLINE void system_interrupt_enable()
 {
     // Set up interrupts
     register volatile uint8_t temp1 = REG_RDNMI;
@@ -705,7 +705,7 @@ inline void system_interrupt_enable()
     return;
 }
 
-inline void system_interrupt_disable()
+FORCE_INLINE void system_interrupt_disable()
 {
     // Set up interrupts
     register volatile uint8_t temp1 = REG_RDNMI;
@@ -736,7 +736,7 @@ void system_reset()
     return;
 }
 
-inline void system_check_for_soft_reset()
+FORCE_INLINE void system_check_for_soft_reset()
 {
     if ((input_pad0 & (KEY_L | KEY_R | KEY_SELECT | KEY_START)) == (KEY_L | KEY_R | KEY_SELECT | KEY_START)) // check soft reset combo
     {

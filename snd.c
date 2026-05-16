@@ -146,7 +146,7 @@ void SoundInterface_StartSoundEngine()
     return;
 }
 
-inline void SoundInterface_AcknowledgeBusy()
+FORCE_INLINE void SoundInterface_AcknowledgeBusy()
 {
     while (REG_APU00 != SND_SIG_CLEAR)
     {
@@ -156,7 +156,7 @@ inline void SoundInterface_AcknowledgeBusy()
     return;
 }
 
-inline void SoundInterface_AcknowledgeNop()
+FORCE_INLINE void SoundInterface_AcknowledgeNop()
 {
     REG_APU01 = SND_CMD_NOP;
 
@@ -168,7 +168,7 @@ inline void SoundInterface_AcknowledgeNop()
     return;
 }
 
-inline void SoundInterface_PlaySfx(uint8_t sfx_id, int8_t pan)
+FORCE_INLINE void SoundInterface_PlaySfx(uint8_t sfx_id, int8_t pan)
 {
     SoundInterface_AcknowledgeBusy();
 
@@ -187,7 +187,7 @@ inline void SoundInterface_PlaySfx(uint8_t sfx_id, int8_t pan)
     return;
 }
 
-inline void SoundInterface_PlaySfx_Ex(uint8_t sfx_id, int8_t vol_l, int8_t vol_r, int8_t pitch)
+FORCE_INLINE void SoundInterface_PlaySfx_Ex(uint8_t sfx_id, int8_t vol_l, int8_t vol_r, int8_t pitch)
 {
     SoundInterface_AcknowledgeBusy();
     
@@ -219,7 +219,7 @@ inline void SoundInterface_PlaySfx_Ex(uint8_t sfx_id, int8_t vol_l, int8_t vol_r
 }
 
 // stop an SFX
-inline void SoundInterface_StopSfx(uint8_t sfx_id)
+FORCE_INLINE void SoundInterface_StopSfx(uint8_t sfx_id)
 {
     SoundInterface_AcknowledgeBusy();
 

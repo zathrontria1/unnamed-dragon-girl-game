@@ -10,7 +10,7 @@
     returns angle from 0-255
 */
 
-inline uint8_t Math_GetAtan2_u8(int16_t y, int16_t x)
+FORCE_INLINE uint8_t Math_GetAtan2_u8(int16_t y, int16_t x)
 {
     if (x == 0 && y == 0) {
         return 0;
@@ -121,7 +121,7 @@ void Math_SeedRandom(uint32_t s)
 
     Limited to max 320 on either axis to prevent the LUT from going too large.
 */
-inline uint32_t Math_GetDistanceSquared(int16_t x, int16_t y)
+FORCE_INLINE uint32_t Math_GetDistanceSquared(int16_t x, int16_t y)
 {
     // It's pretty fast already. Don't inline this.
     // c^2 = a^2 + b^2

@@ -924,7 +924,7 @@ uint16_t obj_instantiate_interactables(const struct obj_list_entry_interactable*
 
     \brief Adds the object whose slot i into the deletion queue.
 */
-inline void obj_destroy(uint16_t i)
+FORCE_INLINE void obj_destroy(uint16_t i)
 {
     obj_delete_queue[obj_delete_queue_count] = i;
 
@@ -934,7 +934,7 @@ inline void obj_destroy(uint16_t i)
 }
 
 // Ditto for player hitboxes
-inline void obj_destroy_hitbox_player(uint16_t i)
+FORCE_INLINE void obj_destroy_hitbox_player(uint16_t i)
 {
     obj_hitbox_player_delete_queue[obj_hitbox_player_delete_queue_count] = i;
 
@@ -944,7 +944,7 @@ inline void obj_destroy_hitbox_player(uint16_t i)
 }
 
 // Lastly for enemy hitboxes
-inline void obj_destroy_hitbox_enemy(uint16_t i)
+FORCE_INLINE void obj_destroy_hitbox_enemy(uint16_t i)
 {
     obj_hitbox_enemy_delete_queue[obj_hitbox_enemy_delete_queue_count] = i;
 
@@ -1027,7 +1027,7 @@ void obj_cleanup_hitbox_enemy()
     return;
 }
 
-inline uint16_t obj_get_uid()
+FORCE_INLINE uint16_t obj_get_uid()
 {
     uint16_t temp_uid = obj_next_uid;
     obj_next_uid++;

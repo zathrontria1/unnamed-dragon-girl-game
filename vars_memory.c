@@ -11,6 +11,7 @@
 #include "data_tables_lut.h"
 #include "data_metaspr_list.h"
 
+#include "consts.h"
 #include "consts_snd.h"
 #include "sound/seq/seq_test.h"
 

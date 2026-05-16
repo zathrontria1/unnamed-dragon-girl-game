@@ -330,7 +330,7 @@ uint8_t * ani_getframe_dynamic_stateless(struct game_object * o)
 // Return offset to a fixed sprite tilenum based on given information
 // object ID and frame only
 // shorter version for light objects
-inline uint16_t ani_getframe_fixed_fast(struct game_object * o)
+FORCE_INLINE uint16_t ani_getframe_fixed_fast(struct game_object * o)
 {
     switch (o->id)
     {

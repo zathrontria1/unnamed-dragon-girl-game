@@ -19,12 +19,14 @@ _data_palette:
     incbin "palette/palette_spr_common1.bin"
     incbin "palette/palette_spr_common1.bin"
     incbin "palette/palette_bg_dungeon_2.bin"
+    
     global _data_palette_map_0_8bpp
 _data_palette_map_0_8bpp:
     incbin "palette/palette_bg_map_dungeon_0_8bpp.bin"
     global _data_palette_map_1_8bpp
 _data_palette_map_1_8bpp:
     incbin "palette/palette_bg_map_dungeon_1_8bpp.bin"
+
     global _data_palette_splash
 _data_palette_splash:
     incbin "splash/palette_splash.bin"

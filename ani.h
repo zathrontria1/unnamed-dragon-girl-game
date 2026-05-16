@@ -7,7 +7,7 @@ uint16_t ani_animate_drop_gravity(struct game_object * o);
 
 uint8_t * ani_getframe_player(struct game_object * o);
 
-inline uint16_t ani_getframe_fixed_fast(struct game_object * o);
+FORCE_INLINE uint16_t ani_getframe_fixed_fast(struct game_object * o);
 
 uint8_t * ani_getframe_dynamic(struct game_object * o);
 

@@ -11,7 +11,7 @@
 #if VBCC_ASM == 1
     NO_INLINE struct game_object * hit_test_enemy(__reg("r0/r1") struct game_object * o)
 #else
-    inline struct game_object * hit_test_enemy(struct game_object * o)
+    FORCE_INLINE struct game_object * hit_test_enemy(struct game_object * o)
 #endif
 {
     #if VBCC_ASM == 1 // place addresses at r0 and r2
@@ -90,7 +90,7 @@
     return NULL;
 }
 
-inline uint16_t hit_test_interaction(struct game_object * o)
+FORCE_INLINE uint16_t hit_test_interaction(struct game_object * o)
 {
     int16_t x1 = o->pos.x.lh.h;
     int16_t y1 = o->pos.y.lh.h;
@@ -104,7 +104,7 @@ inline uint16_t hit_test_interaction(struct game_object * o)
 }
 
 // Call from player to hit test
-inline struct game_object * hit_test_player(struct game_object * o)
+FORCE_INLINE struct game_object * hit_test_player(struct game_object * o)
 {
     // shrink the player's hitbox
     // for this we'll make a copy
@@ -150,7 +150,7 @@ inline struct game_object * hit_test_player(struct game_object * o)
 #if VBCC_ASM == 1
     NO_INLINE uint16_t hit_test(__reg("r0/r1") struct game_object * a, __reg("r2/r3") struct game_object * b)
 #else
-    inline uint16_t hit_test(struct game_object * a, struct game_object * b)
+    FORCE_INLINE uint16_t hit_test(struct game_object * a, struct game_object * b)
 #endif
 {
     // a.x < b.x + b.w && b.x < a.x + a.w
@@ -178,7 +178,7 @@ inline struct game_object * hit_test_player(struct game_object * o)
 /*
     Directly specified with square size
 */
-inline uint16_t hit_test_direct(int16_t x1, int16_t x2, int16_t y1, int16_t y2, int16_t s1, int16_t s2)
+FORCE_INLINE uint16_t hit_test_direct(int16_t x1, int16_t x2, int16_t y1, int16_t y2, int16_t s1, int16_t s2)
 {
     // a.x < b.x + b.w && b.x < a.x + a.w
     if ((x2 + s2) < x1)
@@ -205,7 +205,7 @@ inline uint16_t hit_test_direct(int16_t x1, int16_t x2, int16_t y1, int16_t y2, 
 /*
     Directly specified with non-square size
 */
-inline uint16_t hit_test_extended(int16_t x1, int16_t x2, int16_t y1, int16_t y2, int16_t w1, int16_t w2, int16_t h1, int16_t h2)
+FORCE_INLINE uint16_t hit_test_extended(int16_t x1, int16_t x2, int16_t y1, int16_t y2, int16_t w1, int16_t w2, int16_t h1, int16_t h2)
 {
     // a.x < b.x + b.w && b.x < a.x + a.w
     if ((x2 + w2) < x1)
