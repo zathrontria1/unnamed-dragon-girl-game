@@ -40,10 +40,14 @@ void SpriteEngine_AddMetaSprite(struct game_object * o, const struct spr_metaspr
             "\ttya\n"
             "\tclc\n"
             "\tadc #16\n"
+            "\tbpl .depth_is_positive\n"
+                "\tlda #$0000\n"
+                "\tbra .no_saturate_depth\n"
+            ".depth_is_positive:\n"
             "\tcmp #$00ff\n"
             "\tbcc .no_saturate_depth\n"
                 "\tlda #$00ff\n"
-            "\t.no_saturate_depth:\n"
+            ".no_saturate_depth:\n"
             "\tand #$00ff\n"
             "\tsta r3\n"
 
@@ -194,6 +198,10 @@ void SpriteEngine_AddMetaSprite(struct game_object * o, const struct spr_metaspr
         if (temp_depth_signed > 255)
         {
             temp_depth_signed = 255;
+        }
+        else if (temp_depth_signed < 0)
+        {   
+            temp_depth_signed = 0;
         }
 
         uint16_t temp_depth = temp_depth_signed & 0x00ff;
