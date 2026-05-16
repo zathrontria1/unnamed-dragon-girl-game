@@ -26,38 +26,70 @@ inline uint8_t Math_GetAtan2_u8(int16_t y, int16_t x)
     return (y < 0) ? (256 - angle) : angle;
 }
 
-inline uint16_t Math_GetRandom_u16()
+#if VBCC_ASM == 1
+NO_INLINE uint16_t Math_GetRandom_u16()
+#else
+uint16_t Math_GetRandom_u16()
+#endif
 {
-    uint8_t temp_carry = 0;
+    #if VBCC_ASM == 1
+        __asm(
+            "\ta8\n"
+            "\tsep #$20\n"
+            "\tlda _rand_array\n"           // Operation 7 (with carry clear).
+            "\tasl\n"
+            "\teor _rand_array+1\n"
+            "\tsta _rand_array+1\n"
+            "\trol\n"             // Operation 9.
+            "\teor _rand_array+2\n"
+            "\tsta _rand_array+2\n"
+            "\teor _rand_array\n"           // Operation 5.
+            "\tsta _rand_array\n"
+            "\tlda _rand_array+1\n"           // Operation 15.
+            "\tror\n"
+            "\teor _rand_array+2\n"
+            "\tsta _rand_array+2\n"
+            "\teor _rand_array+1\n"           // Operation 6.
+            "\tsta _rand_array+1\n"
+            "\ta16\n"
+            "\trep #$30\n"
+            "\tlda _rand_array\n"
+            "\trtl\n"
+        );
+    #else
+        uint8_t temp_carry = 0;
 
-    rand_array[1] = (rand_array[0] << 1) ^ rand_array[1];
+        rand_array[1] = (rand_array[0] << 1) ^ rand_array[1];
 
-    if (rand_array[1] < 0)
-    {
-        rand_array[2] = ((rand_array[1] << 1) ^ rand_array[2]) | 0x01;
-        temp_carry = 1;
-    }
-    else
-    {
-        rand_array[2] = (rand_array[1] << 1) ^ rand_array[2];
-    }
+        if (rand_array[1] < 0)
+        {
+            rand_array[2] = ((rand_array[1] << 1) ^ rand_array[2]) | 0x01;
+            temp_carry = 1;
+        }
+        else
+        {
+            rand_array[2] = (rand_array[1] << 1) ^ rand_array[2];
+        }
 
-    rand_array[0] = (rand_array[2] << 1) ^ rand_array[0];
+        rand_array[0] = (rand_array[2] << 1) ^ rand_array[0];
 
-    if (temp_carry)
-    {
-        rand_array[2] = ((rand_array[1] >> 1) | 0x80) ^ rand_array[2];
-    }
-    else
-    {
-        rand_array[2] = (rand_array[1] >> 1) ^ rand_array[2];
-    }
+        if (temp_carry)
+        {
+            rand_array[2] = ((rand_array[1] >> 1) | 0x80) ^ rand_array[2];
+        }
+        else
+        {
+            rand_array[2] = (rand_array[1] >> 1) ^ rand_array[2];
+        }
 
-    rand_array[1] = rand_array[2] ^ rand_array[1];
+        rand_array[1] = rand_array[2] ^ rand_array[1];
 
-    uint16_t * val = (uint16_t *) (&rand_array[0]);
+        uint16_t * val = (uint16_t *) (&rand_array[0]);
 
-    return *val;
+        return *val;
+    #endif
+    
+    return 0;
 }
 
 /*

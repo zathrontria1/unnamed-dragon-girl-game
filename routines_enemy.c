@@ -171,13 +171,12 @@ void routines_slime(struct game_object * o)
 
                     // Only spawn objects every 8 frames...
                     if (
-                        (((uint16_t)system_frames_elapsed & FX_SMOKE_INTERVAL) == FX_SMOKE_INTERVAL)
+                        (((uint16_t)(system_frames_elapsed) & FX_SMOKE_INTERVAL) == FX_SMOKE_INTERVAL)
                     )
                     {
-                        int16_t k = -1;
                         int16_t temp_x = o->pos.x.lh.h;
                         int16_t temp_y = o->pos.y.lh.h;
-                        k = obj_instantiate(OBJID_FX_SMOKE, temp_x, temp_y, 0);
+                        int16_t k = obj_instantiate(OBJID_FX_SMOKE, temp_x, temp_y, 0);
                         
                         if (k >= 0)
                         {

@@ -127,7 +127,7 @@ uint16_t event_in_combat_shadow;
 uint16_t event_tutorial_shown;
 
 // Random numbers
-int8_t rand_array[3];
+ZP int8_t rand_array[3];
 uint16_t rand_seeded;
 
 // DMA system
