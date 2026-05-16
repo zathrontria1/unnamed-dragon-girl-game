@@ -79,7 +79,7 @@ struct game_object obj_general[OBJ_GENERAL_MAX_COUNT];
 uint16_t obj_delete_queue[OBJ_GENERAL_MAX_COUNT];
 uint16_t obj_delete_queue_count;
 
-uint16_t obj_player_index;
+int16_t obj_player_index;
 uint16_t obj_active_count;
 
 uint16_t obj_next_uid;

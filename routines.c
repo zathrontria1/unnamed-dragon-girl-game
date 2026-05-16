@@ -207,18 +207,18 @@ void routines_interactable_blocker(struct game_object * o)
                 // edit the map_collision_buf
                 // o->tile contains the x and y tile coords
                 // y needs to be shifted an amount of times
-                uint16_t q = ((uint8_t)o->tile.y << map_extent_tiles_x_shiftcount) + o->tile.x;
+                uint16_t q = (o->tile.y << map_extent_tiles_x_shiftcount) + o->tile.x;
                 uint16_t q2;
                 map_collision_buf[q] = 0x00;
 
                 switch (o->id)
                 {
                     case OBJID_INTERACTABLE_BLOCKER_DOOR_NS:
-                        q2 = ((uint8_t)o->tile.y << map_extent_tiles_x_shiftcount) + o->tile.x + 1;
+                        q2 = (o->tile.y << map_extent_tiles_x_shiftcount) + o->tile.x + 1;
                         map_collision_buf[q2] = 0x00;
                         break;
                     case OBJID_INTERACTABLE_BLOCKER_DOOR_EW:
-                        q2 = ((uint8_t)(o->tile.y - 1) << map_extent_tiles_x_shiftcount) + o->tile.x;
+                        q2 = ((o->tile.y - 1) << map_extent_tiles_x_shiftcount) + o->tile.x;
                         map_collision_buf[q2] = 0x00;
                         break;
                 }
@@ -228,18 +228,18 @@ void routines_interactable_blocker(struct game_object * o)
                 // edit the map_collision_buf
                 // o->tile contains the x and y tile coords
                 // y needs to be shifted an amount of times
-                uint16_t q = ((uint8_t)o->tile.y << map_extent_tiles_x_shiftcount) + o->tile.x;
+                uint16_t q = (o->tile.y << map_extent_tiles_x_shiftcount) + o->tile.x;
                 uint16_t q2;
                 map_collision_buf[q] = 0xff;
 
                 switch (o->id)
                 {
                     case OBJID_INTERACTABLE_BLOCKER_DOOR_NS:
-                        q2 = ((uint8_t)o->tile.y << map_extent_tiles_x_shiftcount) + o->tile.x + 1;
+                        q2 = (o->tile.y << map_extent_tiles_x_shiftcount) + o->tile.x + 1;
                         map_collision_buf[q2] = 0xff;
                         break;
                     case OBJID_INTERACTABLE_BLOCKER_DOOR_EW:
-                        q2 = ((uint8_t)(o->tile.y - 1) << map_extent_tiles_x_shiftcount) + o->tile.x;
+                        q2 = ((o->tile.y - 1) << map_extent_tiles_x_shiftcount) + o->tile.x;
                         map_collision_buf[q2] = 0xff;
                         break;
                 }

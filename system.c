@@ -467,7 +467,7 @@ void system_init()
     obj_reset_hitbox_player(); // also reset hitbox list
     obj_reset_hitbox_enemy();
     
-    obj_player_index = 0xffff;
+    obj_player_index = -1;
 
     // Initialize BG scroll systems. Must be done before the map is loaded.
     bg_scroll_x_bounds_min.full.high.a = -32768;

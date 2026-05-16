@@ -17,17 +17,18 @@
 void map_load(const uint8_t * map, const uint16_t * lut, const uint8_t * col)
 {
     map_current = map;
-    map_extent_tiles_x = (*map) << 4;
-    map_extent_x = (*map++) << 8;
+    map_extent_tiles_x = ((uint16_t)(*map)) << 4;
+    map_extent_x = ((uint16_t)(*map++)) << 8;
     
-    map_extent_tiles_y = (*map) << 4;
-    map_extent_y = (*map) << 8;
+    map_extent_tiles_y = ((uint16_t)(*map)) << 4;
+    map_extent_y = ((uint16_t)(*map)) << 8;
 
     map_lut = lut;
     map_lut_col = col;
 
     map_extent_tiles_x_shiftcount = 0;
-    uint8_t temp = map_extent_tiles_x >> 1;
+
+    uint16_t temp = map_extent_tiles_x >> 1;
     while (temp != 0)
     {
         temp >>= 1;
@@ -91,8 +92,8 @@ void map_regenerate()
 {
     const uint8_t * p = (map_current+2);
 
-    int16_t temp_x_tile_offset = (bg_scroll_x.full.high.a >> 4); 
-    int16_t temp_y_tile_offset = (bg_scroll_y.full.high.a >> 4) - 1; 
+    int16_t temp_x_tile_offset = ((uint16_t)bg_scroll_x.full.high.a >> 4); 
+    int16_t temp_y_tile_offset = ((uint16_t)bg_scroll_y.full.high.a >> 4) - 1; 
     int16_t temp_x_tile_offset_adj = temp_x_tile_offset - 7;
     int16_t temp_x_tile_offset_adj_target = temp_x_tile_offset_adj + 32;
 
@@ -417,11 +418,11 @@ void map_check_tilemap_crossing()
     const uint8_t * p = map_current;
     p += 2;
 
-    uint16_t temp_x_odd = (bg_scroll_x.full.high.a >> 3) & 0x0001;
-    int16_t temp_x_tile_offset_8 = bg_scroll_x.full.high.a >> 3;
-    int16_t temp_x_tile_offset = bg_scroll_x.full.high.a >> 4;
-    int16_t temp_x_tile_offset_prev_8 = bg_scroll_x_prev.full.high.a >> 3;
-    int16_t temp_y_tile_offset = bg_scroll_y.full.high.a >> 4;
+    uint16_t temp_x_odd = ((uint16_t)bg_scroll_x.full.high.a >> 3) & 0x0001;
+    int16_t temp_x_tile_offset_8 = (uint16_t)bg_scroll_x.full.high.a >> 3;
+    int16_t temp_x_tile_offset = (uint16_t)bg_scroll_x.full.high.a >> 4;
+    int16_t temp_x_tile_offset_prev_8 = (uint16_t)bg_scroll_x_prev.full.high.a >> 3;
+    int16_t temp_y_tile_offset = (uint16_t)bg_scroll_y.full.high.a >> 4;
 
     if (temp_x_tile_offset_8 > temp_x_tile_offset_prev_8)
     {
@@ -463,12 +464,12 @@ void map_check_tilemap_crossing()
     bg_scroll_x_prev.full.high.a = bg_scroll_x.full.high.a;
 
     // Now to test the Y axis
-    uint16_t temp_y_odd = (bg_scroll_y.full.high.a >> 3) & 0x0001;
+    uint16_t temp_y_odd = ((uint16_t)bg_scroll_y.full.high.a >> 3) & 0x0001;
 
-    int16_t temp_y_tile_offset_8 = bg_scroll_y.full.high.a >> 3;
-    temp_y_tile_offset = bg_scroll_y.full.high.a >> 4;
-    int16_t temp_y_tile_offset_prev_8 = bg_scroll_y_prev.full.high.a >> 3;
-    temp_x_tile_offset = bg_scroll_x.full.high.a >> 4;
+    int16_t temp_y_tile_offset_8 = (uint16_t)bg_scroll_y.full.high.a >> 3;
+    temp_y_tile_offset = (uint16_t)bg_scroll_y.full.high.a >> 4;
+    int16_t temp_y_tile_offset_prev_8 = (uint16_t)bg_scroll_y_prev.full.high.a >> 3;
+    temp_x_tile_offset = (uint16_t)bg_scroll_x.full.high.a >> 4;
 
     if (temp_y_tile_offset_8 > temp_y_tile_offset_prev_8)
     {
@@ -519,7 +520,6 @@ void map_check_tilemap_crossing()
 */
 uint16_t map_tilemap_build_col(const uint8_t * p, const uint16_t * lut, int16_t tile_x, int16_t tile_y, uint16_t odd)
 {
-    
     // tile_x to determine if it's on the odd or even section of the tilemap.
     // if x = 0:  0 + 16 = 16, 16 >> 4 = 1, 1-1 = 0, 0 & 0x01 = 0
     // if x = 17: 17+ 16 = 33, 33 >> 4 = 2, 2-1 = 1, 1 & 0x01 = 1

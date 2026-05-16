@@ -566,8 +566,8 @@ int16_t obj_instantiate(
     if ((id >= OBJID_START_OF_INTERACTABLES) && (id <= OBJID_END_OF_INTERACTABLES))
     {
         p->state = STATE_SWITCH_OFF;
-        p->tile.x = p->pos.x.lh.h >> 4;
-        p->tile.y = p->pos.y.lh.h >> 4;
+        p->tile.x = (uint16_t)p->pos.x.lh.h >> 4;
+        p->tile.y = (uint16_t)p->pos.y.lh.h >> 4;
 
         p->struct_data.interactable_data.event_flag = local_event_flag;
     }

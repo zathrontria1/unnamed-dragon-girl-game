@@ -26,7 +26,9 @@ void level_load(const struct level_data * level)
 {
     // Instantiate player if the player isn't already instantiated
 
-    if (obj_player_index == 0xffff)
+    // TODO: behaviorial differences with Calypsi here that causes the game to be unable to
+    // switch levels here. If the player is outright re-initialized, it does work.
+    if (obj_player_index == -1)
     {
         obj_player_index = obj_instantiate(
             OBJID_PLAYER, 
@@ -36,7 +38,7 @@ void level_load(const struct level_data * level)
 
         obj_player_prev_facing = FACING_DOWN;
 
-        obj_player_pointer = &obj_general[obj_player_index];
+        obj_player_pointer = (struct game_object *)&obj_general[obj_player_index];
 
         obj_player_health_regen_delay = PLAYER_HEALTH_REGEN_DELAY;
         obj_player_health_regen_interval = PLAYER_HEALTH_REGEN_INTERVAL;
@@ -53,7 +55,7 @@ void level_load(const struct level_data * level)
         obj_general[obj_player_index].pos.x.lh.l = 0;
         obj_general[obj_player_index].pos.y.lh.l = 0;
     }
-
+    
     // Instantiate enemies
     obj_instantiate_spawners(level->spawner_ptr);
     obj_instantiate_interactables(level->interactable_ptr);

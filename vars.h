@@ -56,7 +56,7 @@ extern struct game_object obj_general[OBJ_GENERAL_MAX_COUNT];
 extern uint16_t obj_delete_queue[OBJ_GENERAL_MAX_COUNT];
 extern uint16_t obj_delete_queue_count;
 
-extern uint16_t obj_player_index;
+extern int16_t obj_player_index;
 extern uint16_t obj_active_count;
 
 extern uint16_t obj_next_uid;
