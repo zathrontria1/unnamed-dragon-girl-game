@@ -323,10 +323,12 @@ void HdmaEngine_UpdateBgScrollValues()
     {
         temp_sine_select = 15;
     }
+
+    int16_t temp_y = bg_scroll_y.full.high.a - 1;
     
     for (int i = 0; i < 32; i++)
     {
-        hdma_scroll_data[temp_table_to_write][i] = bg_scroll_y.full.high.a + const_hdma_scroll_sine[temp_sine_select][(hdma_scroll_sine_index+i) & 0x1f] - 1;
+        hdma_scroll_data[temp_table_to_write][i] = temp_y + const_hdma_scroll_sine[temp_sine_select][hdma_scroll_sine_index+i];
     }
 
     hdma_scroll_select = temp_table_to_write;
