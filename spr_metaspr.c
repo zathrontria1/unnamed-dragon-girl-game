@@ -39,7 +39,8 @@ void SpriteEngine_AddMetaSprite(struct game_object * o, const struct spr_metaspr
             "\tsta r5\n"
             "\ttya\n"
             "\tclc\n"
-            "\tadc #15\n"
+            "\tadc #16\n"
+            "\tand #$00ff\n"
             "\tsta r3\n"
 
             "\tlda $7e0008,x\n" // carry is guaranteed clear
@@ -186,7 +187,7 @@ void SpriteEngine_AddMetaSprite(struct game_object * o, const struct spr_metaspr
         int16_t temp_y;
         uint16_t temp_depth;
 
-        temp_depth = (o->pos.y.lh.h + 15) - bg_scroll_y.full.high.a;
+        temp_depth = ((o->pos.y.lh.h + 15) - bg_scroll_y.full.high.a) & 0x00ff;
 
         while (m->size != 0xffff)
         {

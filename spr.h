@@ -10,7 +10,11 @@ void SpriteEngine_AddToSortedLayer(struct game_object * o, uint16_t tileattrib);
 void SpriteEngine_AddToBackLayer(struct game_object * o, uint16_t tileattrib);
 #endif
 
+#ifdef __VBCC__
+NO_INLINE void SpriteEngine_ProcessSpriteLists(void);
+#else
 void SpriteEngine_ProcessSpriteLists(void);
+#endif
 
 #if VBCC_ASM == 1
     NO_INLINE void SpriteEngine_DrawSprite(__reg("r0/r1") struct spr_queue_entry * s);

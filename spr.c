@@ -109,7 +109,8 @@ void SpriteEngine_AddToFrontLayer(struct game_object * o, uint16_t tileattrib)
 
             ".finish:\n"
             "\tsta _spr_queue_front+2,y\n"
-            "\tadc #15\n"
+            "\tadc #16\n"
+            "\tand #$00ff\n"
             "\tsta _spr_queue_front+8,y\n"
             "\tlda 6,s\n"
             "\tsta _spr_queue_front+4,y\n"
@@ -146,7 +147,7 @@ void SpriteEngine_AddToFrontLayer(struct game_object * o, uint16_t tileattrib)
                 spr_queue_front[spr_front_count].tileattrib = tileattrib;
                 spr_queue_front[spr_front_count].x = temp_x;
                 spr_queue_front[spr_front_count].y = temp_y;
-                spr_queue_front[spr_front_count].depth = (temp_y + 15);
+                spr_queue_front[spr_front_count].depth = (temp_y + 16) & 0x00ff;
 
                 spr_front_count++;
 
@@ -227,7 +228,8 @@ void SpriteEngine_AddToSortedLayer(struct game_object * o, uint16_t tileattrib)
 
             ".finish:\n"
             "\tsta _spr_queue_normal+2,y\n"
-            "\tadc #15\n"
+            "\tadc #16\n"
+            "\tand #$00ff\n"
             "\tsta _spr_queue_normal+8,y\n"
             "\tlda 6,s\n"
             "\tsta _spr_queue_normal+4,y\n"
@@ -264,7 +266,7 @@ void SpriteEngine_AddToSortedLayer(struct game_object * o, uint16_t tileattrib)
                 spr_queue_normal[spr_normal_count].x = temp_x;
                 spr_queue_normal[spr_normal_count].y = temp_y;
                 spr_queue_normal[spr_normal_count].tileattrib = tileattrib;
-                spr_queue_normal[spr_normal_count].depth = (temp_y + 15);
+                spr_queue_normal[spr_normal_count].depth = (temp_y + 16) & 0x00ff;
 
                 spr_normal_count++;
 
@@ -344,7 +346,8 @@ void SpriteEngine_AddToBackLayer(struct game_object * o, uint16_t tileattrib)
 
             ".finish:\n"
             "\tsta _spr_queue_back+2,y\n"
-            "\tadc #15\n"
+            "\tadc #16\n"
+            "\tand #$00ff\n"
             "\tsta _spr_queue_back+8,y\n"
             "\tlda 6,s\n"
             "\tsta _spr_queue_back+4,y\n"
@@ -381,7 +384,7 @@ void SpriteEngine_AddToBackLayer(struct game_object * o, uint16_t tileattrib)
                 spr_queue_back[spr_back_count].tileattrib = tileattrib;
                 spr_queue_back[spr_back_count].x = temp_x;
                 spr_queue_back[spr_back_count].y = temp_y;
-                spr_queue_back[spr_back_count].depth = (temp_y + 15);
+                spr_queue_back[spr_back_count].depth = (temp_y + 16) & 0x00ff;
 
                 spr_back_count++;
 
@@ -783,9 +786,6 @@ void SpriteEngine_ProcessSpriteLists()
 
             "\tply\n");    
     #else
-        // TODO: Investigate a bug with the compiled C code here. This causes sprite corruption.
-        // Toggling other inline assembly and leaving only this in assembly will NOT cause issues
-        // Pointer error? Hard to test without another compiler...
         for (int i = 0; i < spr_normal_count; i++)
         {
             spr_depth_count[spr_queue_normal[i].depth]--;
