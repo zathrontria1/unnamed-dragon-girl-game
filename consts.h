@@ -102,7 +102,12 @@
 #define DMA_QUEUE_MAX_ENTRIES 32 // entries per queue
 #define DMA_QUEUE_MAX_LENGTH 4634 // 
 //#define DMA_QUEUE_OVERHEAD 64 // time, in bytes lost to overhead, to loop a DMA queue entry in NMI
+
+#if VBCC_ASM == 1
 #define DMA_QUEUE_OVERHEAD 62 // Using a lookup table to multiply this; otherwise this causes significantly increased time taken to add a queue entry due to non-power of 2 mul
+#else
+#define DMA_QUEUE_OVERHEAD 132
+#endif
 
 // Distance defines (squared)
 // Note that they are in pixel distance squared.
