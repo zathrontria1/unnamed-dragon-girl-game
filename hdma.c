@@ -154,11 +154,11 @@ void HdmaEngine_UpdateBgScrollValues()
     hdma_scroll_select = temp_table_to_write;
     hdma_scroll_ptr = (uint16_t)((uint32_t)&hdma_scroll_tables[hdma_scroll_select]);
 
-    hdma_scroll_sine_index++;
+    hdma_scroll_sine_index += (1 * V_MUL) >> 1;
 
-    if (hdma_scroll_sine_index >= 32)
+    while (hdma_scroll_sine_index >= 32)
     {
-        hdma_scroll_sine_index = 0;
+        hdma_scroll_sine_index -= 32;
     }
 
     return;
@@ -265,7 +265,8 @@ void HdmaEngine_GeneratePaletteTable(uint16_t * table_ptr, uint16_t pal_start, u
         }
 
         temp_intensity_counter += entries;
-        if (temp_intensity_counter >= (entries << rate_delay))
+        
+        while (temp_intensity_counter >= (entries << rate_delay))
         {
             temp_intensity_counter -= (entries << rate_delay);
             temp_intensity += intensity_change;
