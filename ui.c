@@ -15,14 +15,14 @@
 
 void ui_process()
 {
-    if ((ui_cached_hp != obj_general[obj_player_index].struct_data.npc_data.hp) ||
-        (ui_cached_hp_max != obj_general[obj_player_index].struct_data.npc_data.hp_max) || (ui_force_update != 0))
+    if ((ui_cached_hp != obj_player_pointer->struct_data.npc_data.hp) ||
+        (ui_cached_hp_max != obj_player_pointer->struct_data.npc_data.hp_max) || (ui_force_update != 0))
     {
         // HP changed
         ui_update_health();
     }
 
-    if ((ui_cached_money != obj_general[obj_player_index].struct_data.npc_data.money) || (ui_force_update != 0))
+    if ((ui_cached_money != obj_player_pointer->struct_data.npc_data.money) || (ui_force_update != 0))
     {
         // Amount of money held changed
         ui_update_money();
@@ -42,8 +42,8 @@ void ui_process()
 void ui_update_health()
 {
     // Copy these values
-    int32_t temp_hp = obj_general[obj_player_index].struct_data.npc_data.hp;
-    int32_t temp_hp_max = obj_general[obj_player_index].struct_data.npc_data.hp_max;
+    int32_t temp_hp = obj_player_pointer->struct_data.npc_data.hp;
+    int32_t temp_hp_max = obj_player_pointer->struct_data.npc_data.hp_max;
 
     // Calculate the amount of pixels the health bar would have
     uint16_t temp_bar_length_fill;
@@ -310,7 +310,7 @@ void ui_show_enemy_health_bar(struct game_object * o)
 void ui_update_money()
 {
     // Copy these values
-    uint32_t temp_money = obj_general[obj_player_index].struct_data.npc_data.money;
+    uint32_t temp_money = obj_player_pointer->struct_data.npc_data.money;
 
     uint8_t temp_string[6] = "     " ; // 5 spaces
 
@@ -455,10 +455,10 @@ void ui_print_ml_special(uint8_t * string_ptr)
         Play time:        %6u:%02u:%02u";
     */
 
-    uint16_t temp_hp = obj_general[obj_player_index].struct_data.npc_data.hp;
-    uint16_t temp_hp_max = obj_general[obj_player_index].struct_data.npc_data.hp_max;
-    uint16_t temp_attack = obj_general[obj_player_index].struct_data.npc_data.attack;
-    uint16_t temp_defense = obj_general[obj_player_index].struct_data.npc_data.defense;
+    uint16_t temp_hp = obj_player_pointer->struct_data.npc_data.hp;
+    uint16_t temp_hp_max = obj_player_pointer->struct_data.npc_data.hp_max;
+    uint16_t temp_attack = obj_player_pointer->struct_data.npc_data.attack;
+    uint16_t temp_defense = obj_player_pointer->struct_data.npc_data.defense;
     uint16_t temp_lagframes = system_frames_lag;
     uint16_t temp_h = (uint16_t)((system_frames_elapsed / FPS) / (3600l));
     uint16_t temp_m = (uint16_t)(((system_frames_elapsed / FPS) % (3600l)) / 60);

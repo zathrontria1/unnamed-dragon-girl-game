@@ -193,7 +193,7 @@ void loop_game()
     obj_cleanup_hitbox_enemy();
 
     // Don't bother checking for input if the player is dying
-    if (obj_general[obj_player_index].state != STATE_DIE)
+    if (obj_player_pointer->state != STATE_DIE)
     {
         if (system_check_for_key(KEY_SELECT))
         {
@@ -222,7 +222,7 @@ void loop_game()
             system_use_alternate_nmi = 1;
             shadow_inidisp_change = -1;
 
-            level_data_ptr = &data_level_test_1;
+            level_data_ptr = (const struct level_data *)&data_level_test_1;
             system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_NEWLEVEL);
             system_target_routine = ROUTINE_NEWLEVEL;
 
@@ -284,7 +284,7 @@ void loop_mapdisplay_init()
     SpriteEngine_PackOamHighTable();
 
     struct game_object * o = obj_player_pointer;
-    struct game_object temp_icon_object = obj_general[obj_player_index];
+    struct game_object temp_icon_object = *obj_player_pointer;
     temp_icon_object.state = STATE_ICON_NORMAL;
     temp_icon_object.facing = FACING_DOWN;
 

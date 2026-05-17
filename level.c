@@ -49,11 +49,11 @@ void level_load(const struct level_data * level)
     }
     else
     {
-        obj_general[obj_player_index].pos.x.lh.h = level->player_start_x;
-        obj_general[obj_player_index].pos.y.lh.h = level->player_start_y;
+        obj_player_pointer->pos.x.lh.h = level->player_start_x;
+        obj_player_pointer->pos.y.lh.h = level->player_start_y;
 
-        obj_general[obj_player_index].pos.x.lh.l = 0;
-        obj_general[obj_player_index].pos.y.lh.l = 0;
+        obj_player_pointer->pos.x.lh.l = 0;
+        obj_player_pointer->pos.y.lh.l = 0;
     }
 
     // Reset local event flags

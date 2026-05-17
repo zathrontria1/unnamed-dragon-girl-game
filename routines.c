@@ -270,8 +270,8 @@ void routines_spawner(struct game_object * o)
 {
     if (!system_game_paused)
     {
-        int16_t x1 = obj_general[obj_player_index].pos.x.lh.h;
-        int16_t y1 = obj_general[obj_player_index].pos.y.lh.h;
+        int16_t x1 = obj_player_pointer->pos.x.lh.h;
+        int16_t y1 = obj_player_pointer->pos.y.lh.h;
 
         // Check if the player is within the designated box
         if (hit_test_extended(x1, o->struct_data.interactable_data.spawn_area_x, y1, o->struct_data.interactable_data.spawn_area_y, 16, o->struct_data.interactable_data.spawn_area_w, 16, o->struct_data.interactable_data.spawn_area_h) == 0)
