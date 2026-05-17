@@ -121,6 +121,7 @@ extern uint16_t input_pad0_new;
 
 // Map system
 extern const struct level_data * level_data_ptr;
+extern const struct level_data * level_data_ptr_prev;
 
 // Map decompression buffers.
 extern uint16_t map_column[32]; // one contiguous column

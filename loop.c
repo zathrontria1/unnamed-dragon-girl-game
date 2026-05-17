@@ -604,7 +604,7 @@ void loop_game_newlevel()
 {
     system_init_partial();
     
-    level_load(level_data_ptr);
+    bool temp_level_reuses_vram_contents = level_load(level_data_ptr);
 
     system_ui_in_bg2 = 0;
     ui_force_update = 1;
@@ -620,14 +620,14 @@ void loop_game_newlevel()
 
     REG_HDMAEN = 0x00;
 
-    system_reset_bg_scroll_regs();
-
-    // DMA just the background and BG3 tiles
-    dma_copy_to_vram(((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_MAP << 1)), TILEDATA_ADDR_GAME_MAP, 24576);
-    dma_copy_to_vram(((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_UI_2BPP << 1)), TILEDATA_ADDR_GAME_UI_2BPP, 8192);
+    // DMA just the background and BG3 tiles, IF there was a need to
+    if (!temp_level_reuses_vram_contents)
+    {
+        dma_copy_to_vram(((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_MAP << 1)), TILEDATA_ADDR_GAME_MAP, 24576);
+        dma_copy_to_vram(((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_UI_2BPP << 1)), TILEDATA_ADDR_GAME_UI_2BPP, 8192);
+    }
     
     map_regenerate();
-    system_reset_ui_tilemap();
 
     system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_FADEIN);
     system_target_routine = ROUTINE_GAMELOOP;

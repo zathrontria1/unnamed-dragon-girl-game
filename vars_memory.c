@@ -144,6 +144,7 @@ uint16_t input_pad0_new;
 
 // Map system
 const struct level_data * level_data_ptr;
+const struct level_data * level_data_ptr_prev;
 
 // Map decompression buffers.
 uint16_t map_column[32]; // one contiguous column

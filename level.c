@@ -22,12 +22,14 @@
 
     Split into two parts so part of it can be done while the screen is turned on
 */
-void level_load(const struct level_data * level)
+bool level_load(const struct level_data * level)
 {
     // Instantiate player if the player isn't already instantiated
 
     // TODO: behaviorial differences with Calypsi here that causes the game to be unable to
     // switch levels here. If the player is outright re-initialized, it does work.
+
+    bool temp_level_reuses_vram_contents = false;
 
     // Suspect: pointer errors
     if (obj_player_index == -1)
@@ -74,14 +76,50 @@ void level_load(const struct level_data * level)
     // TODO: currently hardcoded. In the future, pointers may be part of map data.
     ani_bg_addr_water = (uint8_t *)&data_bg_dungeon_anim_water;
     ani_bg_addr_coin = (uint8_t *)&data_sprite_drop_coin;
-    
-    level_load_graphics(level); // Now no longer hits VRAM
-    level_load_palette(level); // Must do before making palette calcs
-    
-    ani_pal_precalc_entries();
-    HdmaEngine_SetupHdma();
 
-    return;
+    // If the pointers point to the same thing, assume that a full reload is needed
+    if (level_data_ptr_prev == level_data_ptr)
+    {
+        level_load_graphics(level); // Now no longer hits VRAM
+        level_load_palette(level); // Must do before making palette calcs
+    
+        ani_pal_precalc_entries();
+        HdmaEngine_SetupHdma();
+    }
+    else
+    {
+        // Note that these don't need to be reloaded if the graphics and palettes are the same as the last time.
+        if (level->tileset_tiles_lz4 != level_data_ptr_prev->tileset_tiles_lz4)
+        {
+            level_load_graphics(level); // Now no longer hits VRAM
+        }
+        else
+        {
+            // Just load the new map cells
+            map_load(
+            level->map_cells, 
+            level->map_lut, 
+            level->map_lut_col);
+
+            temp_level_reuses_vram_contents = true; // Flag to avoid VRAM DMA if not needed
+        }
+
+        if (level->tileset_palette != level_data_ptr_prev->tileset_palette)
+        {
+            level_load_palette(level); // Must do before making palette calcs
+        
+            ani_pal_precalc_entries();
+            HdmaEngine_SetupHdma();
+        }
+        else
+        {
+            // Just update the scroll tables
+            HdmaEngine_UpdateBgScrollValues();
+            HdmaEngine_UpdateBgScrollValues(); // Yes, run this twice, so both tables are populated
+        }
+    }
+
+    return temp_level_reuses_vram_contents;
 }
 
 /*
