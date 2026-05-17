@@ -14,7 +14,12 @@ obj-calypsi/%.o: %.c
 	cc65816 --target=snes --speed -I include -O2 --list-file=$(@:%.o=%.lst) --data-model=large --code-model=large -o $@ $<
 
 main_calypsi.elf: $(OBJS)
+	del /q .\main_calypsi.elf
+	del /q .\main_calypsi.raw
+	del /q .\main_calypsi.sfc
 	ln65816 HiROM.scm --output-format=raw --target=snes --debug -o $@ $^ --list-file=main_calypsi-debug.lst --semi-hosted --verbose --stack-size=512
 	ren main_calypsi.raw main_calypsi.sfc
 clean:
-	-rm $(OBJS)
+	del /q .\main_calypsi.elf
+	del /q .\main_calypsi.raw
+	del /q .\obj-calypsi\*.*
