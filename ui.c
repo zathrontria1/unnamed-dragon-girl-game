@@ -448,10 +448,11 @@ void ui_print_ml_special(uint8_t * string_ptr)
     char temp_str[128];
 
     /*
+        const uint8_t STR_UI_PLAYERINFO_ML[] = "\
         HP: %u/%u\n\
         ATK: %u DEF: %u\n\
-        Money: %u \n\
-        Play time:        %6u:%02u:%02u
+        Lag frames:         %10u\n\
+        Play time:        %6u:%02u:%02u";
     */
 
     uint16_t temp_hp = obj_general[obj_player_index].struct_data.npc_data.hp;

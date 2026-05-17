@@ -55,6 +55,12 @@ void level_load(const struct level_data * level)
         obj_general[obj_player_index].pos.x.lh.l = 0;
         obj_general[obj_player_index].pos.y.lh.l = 0;
     }
+
+    // Reset local event flags
+    for (int i = 0; i < 256; i++)
+    {
+        event_flags_local[i] = 0;
+    }
     
     // Instantiate enemies
     obj_instantiate_spawners(level->spawner_ptr);
