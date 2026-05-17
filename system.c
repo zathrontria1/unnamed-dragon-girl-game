@@ -506,7 +506,7 @@ void system_init_partial()
     obj_reset(1); // Reset all except player
     obj_reset_hitbox_player(); // also reset hitbox list
     obj_reset_hitbox_enemy();
-
+    
     // Initialize BG scroll systems. Must be done before the map is loaded.
     bg_scroll_x_bounds_min.full.high.a = -32768;
     bg_scroll_y_bounds_min.full.high.a = -32768;

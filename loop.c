@@ -603,6 +603,7 @@ void loop_game_partial(void)
 void loop_game_newlevel()
 {
     system_init_partial();
+    
     level_load(level_data_ptr);
 
     system_ui_in_bg2 = 0;
@@ -616,6 +617,8 @@ void loop_game_newlevel()
     // Try to move as many things as possible before here.
     system_interrupt_disable();
     REG_INIDISP = 0x8f;
+
+    REG_HDMAEN = 0x00;
 
     system_reset_bg_scroll_regs();
 

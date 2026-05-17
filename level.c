@@ -28,6 +28,8 @@ void level_load(const struct level_data * level)
 
     // TODO: behaviorial differences with Calypsi here that causes the game to be unable to
     // switch levels here. If the player is outright re-initialized, it does work.
+
+    // Suspect: pointer errors
     if (obj_player_index == -1)
     {
         obj_player_index = obj_instantiate(
@@ -56,15 +58,17 @@ void level_load(const struct level_data * level)
         obj_player_pointer->pos.y.lh.l = 0;
     }
 
+    
     // Reset local event flags
     for (int i = 0; i < 256; i++)
     {
         event_flags_local[i] = 0;
     }
-    
+
     // Instantiate enemies
-    obj_instantiate_spawners(level->spawner_ptr);
-    obj_instantiate_interactables(level->interactable_ptr);
+    obj_instantiate_spawners((const struct obj_list_entry_spawners*)level->spawner_ptr);
+
+    obj_instantiate_interactables((const struct obj_list_entry_interactable*)level->interactable_ptr);
     
     // initialize global DMA tile animation
     // TODO: currently hardcoded. In the future, pointers may be part of map data.

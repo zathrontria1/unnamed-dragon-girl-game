@@ -828,7 +828,7 @@ uint16_t obj_instantiate_npcs(const struct obj_list_entry_spawns* list, int16_t 
 uint16_t obj_instantiate_spawners(const struct obj_list_entry_spawners* list)
 {
     uint16_t temp_total_spawns = 0;
-
+    
     while (list->id != OBJID_NULL)
     {
         if (obj_active_count >= OBJ_GENERAL_MAX_COUNT)
