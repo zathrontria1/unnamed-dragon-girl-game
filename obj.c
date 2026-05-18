@@ -590,65 +590,56 @@ int16_t obj_instantiate(
         p->h = 16;
     }
 
-    if (id == OBJID_SLIME)
+    // Send the ID to a helper function to set the correct data.
+    // If the function returns false, this is not an 
+    // enemy and set things
+    if (obj_get_enemy_data(p))
     {
         p->struct_data.npc_data.ani.last_address = 0;
         p->struct_data.npc_data.ani.last_dmafailed = 0;
         p->struct_data.npc_data.hp_tile_offset = 0;
         p->struct_data.npc_data.hp_display_time = 0;
 
-        p->struct_data.npc_data.hp = ENEMY_HEALTH_STARTING;
-        p->struct_data.npc_data.hp_max = ENEMY_HEALTH_STARTING;
-
-        p->struct_data.npc_data.attack = ENEMY_ATTACK_VALUE;
-        p->struct_data.npc_data.defense = ENEMY_DEFENSE_VALUE;
-
-        p->struct_data.npc_data.hp_cache = ENEMY_HEALTH_STARTING;
-
         p->state = STATE_SPAWNING;
         p->struct_data.npc_data.status_time = 64 / V_MUL;
-
-        uint8_t temp_weight = (uint8_t)Math_GetRandom_u16();
-        p->struct_data.npc_data.money = (ENEMY_DROP_MONEY_MIN + (((ENEMY_DROP_MONEY_MAX - ENEMY_DROP_MONEY_MIN) * temp_weight) / 255));
-
-        p->w = 16;
-        p->h = 16;
-    }
-
-    if ((id == OBJID_DROP_MONEY) || (id == OBJID_DROP_REC_MEAT))
-    {
-        p->w = 16;
-        p->h = 16;
-    }
-
-    obj_active_count++;
-
-    if ((id == OBJID_FIREBALL) || (id == OBJID_HITBOX_INVISIBLE))
-    {
-        p->hit_type = 0x0001;
-
-        p->w = 16;
-        p->h = 16;
-    }
-    else if ((id == OBJID_HITBOX_INVISIBLE_E) || (id == OBJID_BUBBLE_E))
-    {
-        p->hit_type = 0x8001;
-
-        p->w = 16;
-        p->h = 16;
     }
     else
     {
-        p->hit_type = 0x0000;
+        if ((id == OBJID_DROP_MONEY) || (id == OBJID_DROP_REC_MEAT))
+        {
+            p->w = 16;
+            p->h = 16;
+        }
+
+        if ((id == OBJID_FIREBALL) || (id == OBJID_HITBOX_INVISIBLE))
+        {
+            p->hit_type = 0x0001;
+
+            p->w = 16;
+            p->h = 16;
+        }
+        else if ((id == OBJID_HITBOX_INVISIBLE_E) || (id == OBJID_BUBBLE_E))
+        {
+            p->hit_type = 0x8001;
+
+            p->w = 16;
+            p->h = 16;
+        }
+        else
+        {
+            p->hit_type = 0x0000;
+        }
+
+        if ((id == OBJID_INTERACTABLE_BLOCKER_FLOOR) || 
+            (id == OBJID_INTERACTABLE_BLOCKER_DOOR_EW) || 
+            (id == OBJID_INTERACTABLE_BLOCKER_DOOR_NS))
+        {
+            // Set a non-zero value
+            p->struct_data.interactable_data.delay_time = 0xffff;
+        }
     }
 
-    if ((id == OBJID_INTERACTABLE_BLOCKER_FLOOR) || 
-        (id == OBJID_INTERACTABLE_BLOCKER_DOOR_EW) || 
-        (id == OBJID_INTERACTABLE_BLOCKER_DOOR_NS))
-    {
-        // Set a non-zero value
-        p->struct_data.interactable_data.delay_time = 0xffff;
-    }
+    obj_active_count++;
 
     obj_set_function_pointer(p);
 
@@ -1099,4 +1090,43 @@ void obj_set_function_pointer(struct game_object * o)
     }
 
     return;
+}
+
+bool obj_get_enemy_data(struct game_object * o)
+{
+    struct enemy_data * data_ptr;
+
+    switch (o->id)
+    {
+        case OBJID_SLIME:
+            data_ptr = (struct enemy_data *)&data_enemy_stats_slime;
+            break;
+        case OBJID_LIZARDMAN:
+            data_ptr = (struct enemy_data *)&data_enemy_stats_lizardman;
+            break;
+        case OBJID_LIZARDMAN_ARCHER:
+            data_ptr = (struct enemy_data *)&data_enemy_stats_lizardman_archer;
+            break;
+        case OBJID_LIZARDMAN_LILSIS:
+            data_ptr = (struct enemy_data *)&data_enemy_stats_lizardman_lilsis;
+            break;
+        default:
+            return false;
+    }
+
+    o->struct_data.npc_data.hp = data_ptr->hp;
+    o->struct_data.npc_data.hp_max = data_ptr->hp;
+
+    o->struct_data.npc_data.attack = data_ptr->attack;
+    o->struct_data.npc_data.defense = data_ptr->defense;
+
+    o->struct_data.npc_data.hp_cache = data_ptr->hp;
+
+    uint8_t temp_weight = (uint8_t)Math_GetRandom_u16();
+    o->struct_data.npc_data.money = (data_ptr->money_min + (((data_ptr->money_max - data_ptr->money_min) * temp_weight) / 255));
+
+    o->w = data_ptr->width;
+    o->h = data_ptr->height;
+
+    return true;
 }

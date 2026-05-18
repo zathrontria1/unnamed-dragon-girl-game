@@ -2,6 +2,26 @@
 
 #include "data_strings.h"
 
+// Enemy data 
+const struct enemy_data data_enemy_stats_slime = 
+{
+    15, 1, 1, 100, 200, 16, 16
+};
+
+const struct enemy_data data_enemy_stats_lizardman = 
+{
+    30, 2, 2, 200, 300, 16, 16
+};
+const struct enemy_data data_enemy_stats_lizardman_archer = 
+{
+    20, 2, 2, 200, 300, 16, 16
+};
+const struct enemy_data data_enemy_stats_lizardman_lilsis = 
+{
+    // Placeholder; this is supposed to be the alternate player
+    50, 1, 1, 0, 0, 16, 16
+};
+
 // wav2brr produces files with 2 byte headers. Take into account this and subtract 2 from file length on disk.
 // pitch value = (actual rate * 4096) / 32000
 // tick values will be automatically generated at runtime if set to 0

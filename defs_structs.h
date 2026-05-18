@@ -1,3 +1,17 @@
+struct enemy_data
+{
+    int32_t hp;
+    
+    uint16_t attack;
+    uint16_t defense;
+
+    uint16_t money_min;
+    uint16_t money_max;
+
+    uint16_t width;
+    uint16_t height;
+};
+
 struct level_data
 {
     uint16_t player_start_x;

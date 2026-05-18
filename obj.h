@@ -37,3 +37,5 @@ FORCE_INLINE void obj_destroy_hitbox_enemy(uint16_t i);
 void obj_cleanup(void);
 void obj_cleanup_hitbox_player(void);
 void obj_cleanup_hitbox_enemy(void);
+
+bool obj_get_enemy_data(struct game_object * o);

@@ -1,6 +1,11 @@
 // Sound engine and data
 #include "vars_snd.h"
 
+extern const struct enemy_data data_enemy_stats_slime;
+extern const struct enemy_data data_enemy_stats_lizardman;
+extern const struct enemy_data data_enemy_stats_lizardman_archer;
+extern const struct enemy_data data_enemy_stats_lizardman_lilsis;
+
 // Game data (non-audio)
 extern const uint8_t data_palette[];
 extern const uint8_t data_palette_map_0_8bpp[];
