@@ -574,9 +574,11 @@ void SoundInterface_UploadMusicSequence(struct seq_command * s, uint8_t track)
     // Begin transfer.
     uint8_t * ptr = (uint8_t *)s;
     
-    SoundInterface_UploadData(ptr, temp_len);
+    //SoundInterface_UploadData(ptr, temp_len);
+    SoundInterface_UploadData_2byte(ptr, temp_len);
 
-    uint8_t temp_lobyte = (uint8_t)(REG_APU00 + 2);
+    //uint8_t temp_lobyte = (uint8_t)(REG_APU00 + 2);
+    uint8_t temp_lobyte = (uint8_t)(REG_APU00 + 4);
     REG_APU00 = temp_lobyte; 
 
     SoundInterface_AcknowledgeNop();

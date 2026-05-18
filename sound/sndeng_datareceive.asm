@@ -61,7 +61,8 @@ _mus_seq_upload:
     mov <seq_ptr_start+X, A
     mov <seq_ptr_start+1+X, Y
 
-    call !_data_upload_loop
+    ;call !_data_upload_loop
+    call !_data_upload_loop_2byte
 
     ret
     
@@ -80,12 +81,8 @@ _sfx_upload:
     mov A,#SND_CMD_DATA_UPLOAD_SLOT
     :
         cbne <REG_APUIO1, :-
-        ;cmp A,<REG_APUIO1
-        ;bne :-
     :
         cbne <REG_APUIO1, :-
-        ;cmp A,<REG_APUIO1
-        ;bne :-
 
     ; then the tick count and slot
     mov <r6,<REG_APUIO3
@@ -98,12 +95,8 @@ _sfx_upload:
     mov A,#SND_CMD_DATA_SAMPLE_UPLOAD_SAMPLERATE
     :
         cbne <REG_APUIO1, :-
-        ;cmp A,<REG_APUIO1
-        ;bne :-
     :
         cbne <REG_APUIO1, :-
-        ;cmp A,<REG_APUIO1
-        ;bne :-
 
     ; the sample rate
     mov A, <REG_APUIO2
@@ -116,12 +109,8 @@ _sfx_upload:
     mov A,#SND_CMD_DATA_SAMPLE_UPLOAD_LOOPSTART
     :
         cbne <REG_APUIO1, :-
-        ;cmp A,<REG_APUIO1
-        ;bne :-
     :
         cbne <REG_APUIO1, :-
-        ;cmp A,<REG_APUIO1
-        ;bne :-
 
     ; loop point
     mov A, <REG_APUIO2
@@ -134,12 +123,8 @@ _sfx_upload:
     mov A,#SND_CMD_DATA_SAMPLE_UPLOAD_ADSR
     :
         cbne <REG_APUIO1, :-
-        ;cmp A,<REG_APUIO1
-        ;bne :-
     :
         cbne <REG_APUIO1, :-
-        ;cmp A,<REG_APUIO1
-        ;bne :-
 
     ; copy the ADSR settings
     mov A, <REG_APUIO2
@@ -263,42 +248,40 @@ _sfx_upload:
 
     ret
 
-_data_upload_loop:
-    ; Begin copy
-    ; r2 contains the pointer to the write dest
+;_data_upload_loop:
+;    ; Begin copy
+;    ; r2 contains the pointer to the write dest
+;
+;    ; Copy r2 to @abs_ptr
+;    mov A, <r2
+;    mov !@abs_ptr+1, A
+;    mov A, <r2+1
+;    mov !@abs_ptr+2, A
+;
+;    mov Y,#0
+;
+;    @startup:
+;        cmp Y,<REG_APUIO0
+;        bne @startup
+;        bra @write
+;    @loop:
+;        cmp Y,<REG_APUIO0
+;        bne @check_end
+;
+;        @write:
+;        mov A,<REG_APUIO1
+;        mov <REG_APUIO0,Y
+;        @abs_ptr: 
+;        mov !$0000+Y,A
+;        inc y
+;        bne @loop
+;            inc !@abs_ptr+2
+;        @check_end:
+;        bpl @loop
+;        cmp Y,<REG_APUIO0
+;        bpl @loop
 
-    ; Copy r2 to @abs_ptr
-    mov A, <r2
-    mov !@abs_ptr+1, A
-    mov A, <r2+1
-    mov !@abs_ptr+2, A
-
-    mov Y,#0
-
-    @startup:
-        cmp Y,<REG_APUIO0
-        bne @startup
-        bra @write
-    @loop:
-        cmp Y,<REG_APUIO0
-        bne @check_end
-
-        @write:
-        mov A,<REG_APUIO1
-        mov <REG_APUIO0,Y
-        ;mov [<r2]+Y,A ; Replace with abs below
-        @abs_ptr: 
-        mov !$0000+Y,A
-        inc y
-        bne @loop
-            ;inc <r2+1 ; ditto
-            inc !@abs_ptr+2
-        @check_end:
-        bpl @loop
-        cmp Y,<REG_APUIO0
-        bpl @loop
-
-    ret
+;    ret
 
 _data_upload_loop_2byte:
     ; Begin copy
