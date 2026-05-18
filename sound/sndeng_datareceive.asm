@@ -258,7 +258,8 @@ _sfx_upload:
     mov A,X
     mov [<r11]+y,a
 
-    call !_data_upload_loop
+    ;call !_data_upload_loop
+    call !_data_upload_loop_2byte
 
     ret
 
@@ -292,6 +293,54 @@ _data_upload_loop:
         bne @loop
             ;inc <r2+1 ; ditto
             inc !@abs_ptr+2
+        @check_end:
+        bpl @loop
+        cmp Y,<REG_APUIO0
+        bpl @loop
+
+    ret
+
+_data_upload_loop_2byte:
+    ; Begin copy
+    ; r2 contains the pointer to the write dest
+
+    ; Copy r2 to @abs_ptr_0 and @abs_ptr_1 (byte 0 and 1)
+    mov A, <r2
+    mov !@abs_ptr_0+1, A
+    mov !@abs_ptr_1+1, A
+    mov A, <r2+1
+    mov !@abs_ptr_0+2, A
+    mov !@abs_ptr_1+2, A
+
+    ; increment abs_ptr_1
+    inc !@abs_ptr_1+1
+    bne :+
+        inc !@abs_ptr_1+2
+    :
+
+    mov Y,#0
+
+    @startup:
+        cmp Y,<REG_APUIO0
+        bne @startup
+        bra @write
+    @loop:
+        cmp Y,<REG_APUIO0
+        bne @check_end
+
+        @write:
+        mov A,<REG_APUIO1
+        @abs_ptr_0: 
+        mov !$0000+Y,A
+        mov A,<REG_APUIO2
+        mov <REG_APUIO0,Y
+        @abs_ptr_1: 
+        mov !$0000+Y,A
+        inc y
+        inc y
+        bne @loop
+            inc !@abs_ptr_0+2
+            inc !@abs_ptr_1+2
         @check_end:
         bpl @loop
         cmp Y,<REG_APUIO0

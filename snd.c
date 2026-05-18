@@ -146,6 +146,91 @@ void SoundInterface_StartSoundEngine()
     return;
 }
 
+#if VBCC_ASM == 1
+    NO_INLINE void SoundInterface_UploadData_2byte(uint8_t * data_ptr, uint16_t len)
+#else
+    void SoundInterface_UploadData_2byte(uint8_t * data_ptr, uint16_t len)
+#endif
+{
+    // i compare with size of the binary blob
+    // May need to change i to exactly 0 and no offset on compared size
+    // when implementing actual driver.
+
+    #if VBCC_ASM == 1
+         __asm(
+            "\tphy\n"
+
+            "\tpei (r0)\n"
+            "\tpei (r1)\n"
+            "\tpei (r2)\n"
+            "\tpei (r3)\n"
+            "\tpei (r4)\n"
+
+            "\tsta r0\n" // Data pointer
+            "\tstx r0+2\n"
+            "\tinc\n"
+            "\tsta r3\n" // Data pointer
+            "\tstx r3+2\n"
+
+            "\tlda 16,s\n" // Length of transfer
+            "\tbeq .end_sound\n"
+            "\tsta r2\n" 
+            
+            "\tldy #0\n"
+
+            "\tsep #$20\n"
+            "\ta8\n"
+        ".write_apu_byte:\n"
+            "\tlda [r0],y\n"
+            "\tsta 8513\n"
+            "\tlda [r3],y\n"
+            "\tsta 8514\n"
+            "\ttya\n"
+            "\tsta 8512\n"
+        ".check_ack:\n"
+            "\tcmp 8512\n"
+            "\tbne .check_ack\n"
+
+            "\tiny\n"
+            "\tiny\n"
+            "\tcpy r2\n"
+            "\tbcc .write_apu_byte\n"
+
+            "\ta16\n"
+            "\trep #$20\n"
+        ".end_sound:\n"
+            "\tply\n"
+            "\tsty r4\n"
+            "\tply\n"
+            "\tsty r3\n"
+            "\tply\n"
+            "\tsty r2\n"
+            "\tply\n"
+            "\tsty r1\n"
+            "\tply\n"
+            "\tsty r0\n"
+
+            "\tply\n"
+        );
+    #else
+        
+        for (uint16_t i = 0; i < len; i += 2)
+        {
+            REG_APU01 = *data_ptr++;
+            REG_APU02 = *data_ptr++;
+
+            uint8_t temp_index_lobyte = (uint8_t)(i);
+            REG_APU00 = temp_index_lobyte;
+
+            while (REG_APU00 != temp_index_lobyte)
+            {
+                ; // Wait for acknowledgement
+            }
+        }
+    #endif
+    return;
+}
+
 FORCE_INLINE void SoundInterface_AcknowledgeBusy()
 {
     while (REG_APU00 != SND_SIG_CLEAR)
@@ -346,10 +431,11 @@ void SoundInterface_UploadSample(struct sample_list_entry * s)
 
     ptr += 2;
     
-    SoundInterface_UploadData(ptr, s->len);
-    //snd_upload_data_3byte(data_ptr, len);
+    //SoundInterface_UploadData(ptr, s->len);
+    SoundInterface_UploadData_2byte(ptr, s->len);
 
-    uint8_t temp_lobyte = (uint8_t)(REG_APU00 + 2);
+    //uint8_t temp_lobyte = (uint8_t)(REG_APU00 + 2);
+    uint8_t temp_lobyte = (uint8_t)(REG_APU00 + 4);
     REG_APU00 = temp_lobyte; 
 
     SoundInterface_AcknowledgeNop();
