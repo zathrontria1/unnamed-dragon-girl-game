@@ -30,6 +30,7 @@ extern const uint8_t data_ui_dynamic_selectcursor[]; // selection cursor in text
 extern const uint8_t data_sprite_player[]; // player  
 extern const uint8_t data_sprite_fixed_lz4[]; // permanently loaded effects/system
 extern const uint8_t data_sprite_slime[]; // slime
+extern const uint8_t data_sprite_lizardman[]; // lizardman
 extern const uint8_t data_sprite_spawn_placeholder[]; // spawning placeholder
 extern const uint8_t data_sprite_drop_coin[]; // dropped coins
 

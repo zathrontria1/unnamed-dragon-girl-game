@@ -7,9 +7,14 @@ _data_sprite_player:
     global _data_sprite_fixed_lz4
 _data_sprite_fixed_lz4:
     incbin "sprites/spr_fixed.bin.lz4"
+
     global _data_sprite_slime
 _data_sprite_slime:
     incbin "sprites/spr_slime.bin"
+    global _data_sprite_lizardman
+_data_sprite_lizardman:
+    incbin "sprites/spr_lizardman.bin"
+
     global _data_sprite_spawn_placeholder
 _data_sprite_spawn_placeholder:
     incbin "sprites/spr_spawn_placeholder.bin"
