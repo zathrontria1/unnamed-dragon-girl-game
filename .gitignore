@@ -90,12 +90,6 @@ sound/abigassbundleofsamples/*
 
 sound/*.zip
 
-# sound engine assembly and linker files
-sound/*.bat
-sound/*.asm
-sound/*.inc
-sound/*.cfg
-
 # asset build batch file
 build_assets.bat
 
