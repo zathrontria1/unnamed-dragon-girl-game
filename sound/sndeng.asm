@@ -674,6 +674,54 @@ _mul_16_by_16:
 
     ret
 
+_div_16_by_abs3:
+    ; divide 16 bit number by 3 by multiplying by 1/3
+    ; enter with
+    ; A containing the hi byte of the number to be divided by 3
+    ; Y containing the lo byte of the number to be divided by 3
+    ; the hi byte of the partial product is kept in A or saved
+    ; on the stack when neccessary
+    ; the product (N/3 quotient) is returned hi byte in A,
+    ; lo byte in Y
+    ; save the number in lo_temp, hi_temp
+    mov Y, <divabs3_dividend
+    mov A, <divabs3_dividend+1
+
+    mov <divabs3_lo_temp, Y
+    mov <divabs3_lo_product, Y
+    mov <divabs3_hi_temp, A
+
+    mov Y, #$09
+    clrc
+    bcc ENTER
+
+    ; each pass through loop adds the number in
+    ; lo_temp, hi_temp to the partial product and
+    ; then divides the partial product by 4
+    LOOP:
+    push A
+    mov A, <divabs3_lo_product
+    adc A, <divabs3_lo_temp
+    mov <divabs3_lo_product, A
+    pop A
+    adc A, <divabs3_hi_temp
+    ENTER:
+    ror A
+    ror <divabs3_lo_product
+    lsr A
+    ror <divabs3_lo_product
+    dec Y
+    bne LOOP
+    mov Y, <divabs3_lo_product
+
+    mov <divabs3_quotient, Y
+    mov <divabs3_quotient+1, A
+    movw ya, <divabs3_quotient
+
+    ; Results in above variable, also in YA
+
+    ret
+
 _set_tune:
     ; (uint8_t ins_id, uint8_t tune);
     mov <r0, <REG_APUIO2

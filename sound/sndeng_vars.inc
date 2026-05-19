@@ -48,6 +48,8 @@ global_sfx_tick_counter: .res 8
 global_nextfree: .res 2
 global_sample_end: .res 2
 
+global_current_command_counter: .res 1
+
 seq_playing: .res 1
 
 seq_current_track: .res 1
@@ -73,6 +75,12 @@ mul16_b: .res 2
 mul16_product_32: .res 4
 mul16_scratch: .res 2
 mul16_fix: .res 2
+
+divabs3_dividend: .res 2
+divabs3_lo_temp: .res 1
+divabs3_lo_product: .res 1
+divabs3_hi_temp: .res 1
+divabs3_quotient: .res 2
 
 .segment "SPCBSS"
 

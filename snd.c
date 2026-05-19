@@ -50,7 +50,7 @@ void SoundInterface_StartSoundEngine()
     }
 
     // Address is now set
-    SoundInterface_UploadData((uint8_t *)&data_soundengine_binary, 2048);
+    SoundInterface_UploadData((uint8_t *)&data_soundengine_binary, 2304);
 
     // Start the engine
     // Write start address
@@ -158,6 +158,9 @@ void SoundInterface_StartSoundEngine()
 
     #if VBCC_ASM == 1
          __asm(
+            "\ta16\n"
+            "\tx16\n"
+
             "\tphy\n"
 
             "\tpei (r0)\n"
@@ -166,15 +169,16 @@ void SoundInterface_StartSoundEngine()
             "\tpei (r3)\n"
             "\tpei (r4)\n"
 
-            "\tsta r0\n" // Data pointer
+            "\tsta r0\n" // Data pointer 0
             "\tstx r0+2\n"
-            "\tinc\n"
-            "\tsta r3\n" // Data pointer
             "\tstx r3+2\n"
 
             "\tlda 16,s\n" // Length of transfer
             "\tbeq .end_sound\n"
+            "\tlsr\n" // Clears carry; assumes the length is already even
             "\tsta r2\n" 
+            "\tadc r0\n"
+            "\tsta r3\n" // Data pointer 1. Note that it won't cross pointers.
             
             "\tldy #0\n"
 
@@ -191,7 +195,6 @@ void SoundInterface_StartSoundEngine()
             "\tcmp 8512\n"
             "\tbne .check_ack\n"
 
-            "\tiny\n"
             "\tiny\n"
             "\tcpy r2\n"
             "\tbcc .write_apu_byte\n"
@@ -213,19 +216,22 @@ void SoundInterface_StartSoundEngine()
             "\tply\n"
         );
     #else
-        
+        uint8_t * data_ptr_2 = (uint8_t *)(data_ptr + (len >> 1));
+        uint8_t temp_internal_counter = 0x00;
+
         for (uint16_t i = 0; i < len; i += 2)
         {
             REG_APU01 = *data_ptr++;
-            REG_APU02 = *data_ptr++;
+            REG_APU02 = *data_ptr_2++;
 
-            uint8_t temp_index_lobyte = (uint8_t)(i);
-            REG_APU00 = temp_index_lobyte;
+            REG_APU00 = temp_internal_counter;
 
-            while (REG_APU00 != temp_index_lobyte)
+            while (REG_APU00 != temp_internal_counter)
             {
                 ; // Wait for acknowledgement
             }
+
+            temp_internal_counter++;
         }
     #endif
     return;
@@ -367,8 +373,16 @@ void SoundInterface_ResetAPU()
 void SoundInterface_UploadSample(struct sample_list_entry * s)
 {
     SoundInterface_AcknowledgeBusy();
+
+    uint16_t temp_len = s->len;
     
-    REG_APU0203 = s->len;
+    // Sanity check the length first. If the length is not even, pad it
+    if (s->len & 0x0001 != 0x0000)
+    {
+        temp_len++;
+    }
+    REG_APU0203 = temp_len;
+
     REG_APU01 = SND_CMD_DATA_SAMPLE_UPLOAD; // Initial
 
     uint32_t temp;
@@ -432,10 +446,10 @@ void SoundInterface_UploadSample(struct sample_list_entry * s)
     ptr += 2;
     
     //SoundInterface_UploadData(ptr, s->len);
-    SoundInterface_UploadData_2byte(ptr, s->len);
-
+    SoundInterface_UploadData_2byte(ptr, temp_len); // Provide the adjusted length
+    
     //uint8_t temp_lobyte = (uint8_t)(REG_APU00 + 2);
-    uint8_t temp_lobyte = (uint8_t)(REG_APU00 + 4);
+    uint8_t temp_lobyte = (uint8_t)(REG_APU00 + 2);
     REG_APU00 = temp_lobyte; 
 
     SoundInterface_AcknowledgeNop();
@@ -554,7 +568,7 @@ void SoundInterface_UploadMusicSequence(struct seq_command * s, uint8_t track)
 
     SoundInterface_AcknowledgeBusy();
     
-    REG_APU0203 = temp_len;
+    REG_APU0203 = temp_len; // length is always even
     REG_APU01 = SND_CMD_SEQ_UPLOAD; // Initial
 
     while (REG_APU01 != SND_CMD_SEQ_UPLOAD)
@@ -578,7 +592,7 @@ void SoundInterface_UploadMusicSequence(struct seq_command * s, uint8_t track)
     SoundInterface_UploadData_2byte(ptr, temp_len);
 
     //uint8_t temp_lobyte = (uint8_t)(REG_APU00 + 2);
-    uint8_t temp_lobyte = (uint8_t)(REG_APU00 + 4);
+    uint8_t temp_lobyte = (uint8_t)(REG_APU00 + 2);
     REG_APU00 = temp_lobyte; 
 
     SoundInterface_AcknowledgeNop();
