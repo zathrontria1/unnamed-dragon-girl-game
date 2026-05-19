@@ -38,5 +38,5 @@ void SoundInterface_PlayMusic();
 void SoundInterface_PauseMusic();
 void SoundInterface_StopMusic();
 
-FORCE_INLINE void SoundInterface_AcknowledgeBusy();
+FORCE_INLINE void SoundInterface_AcknowledgeBusy(bool ignore_busy);
 FORCE_INLINE void SoundInterface_AcknowledgeNop();

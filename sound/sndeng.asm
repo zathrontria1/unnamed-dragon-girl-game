@@ -219,6 +219,8 @@ _main:
     @end:
     inc <global_current_command_counter
     @end_skipinc:
+    mov <REG_CONTROL, #$33 ; Reset the read ports
+    mov <global_received_cmd, #SND_CMD_NOP
     mov <global_last_cmd,<global_received_cmd
     
     mov <REG_APUIO0, <global_current_command_counter

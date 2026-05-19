@@ -345,11 +345,28 @@ void SoundInterface_StartSoundEngine()
 }
     */
 
-FORCE_INLINE void SoundInterface_AcknowledgeBusy()
+FORCE_INLINE void SoundInterface_AcknowledgeBusy(bool ignore_busy)
 {
-    while (REG_APU00 != snd_current_command_counter)
+    if (!ignore_busy)
     {
-        ; // Wait for ready
+        while (REG_APU00 != snd_current_command_counter)
+        {
+            ; // Wait for ready. use for things that can't be dropped, but risk of a lock-up
+        }
+    }
+    else
+    {
+        int wait_counter = 0;
+
+        while (REG_APU00 != snd_current_command_counter)
+        {
+            wait_counter++; // Wait for ready, within a limit.
+            if (wait_counter > 256)
+            {
+                snd_current_command_counter = REG_APU00;
+                break;
+            }
+        }
     }
     
     return;
@@ -362,7 +379,7 @@ FORCE_INLINE void SoundInterface_AcknowledgeNop()
 
 FORCE_INLINE void SoundInterface_PlaySfx(uint8_t sfx_id, int8_t pan)
 {
-    SoundInterface_AcknowledgeBusy();
+    SoundInterface_AcknowledgeBusy(true);
 
     REG_APU02 = sfx_id;
     REG_APU03 = pan;
@@ -376,7 +393,7 @@ FORCE_INLINE void SoundInterface_PlaySfx(uint8_t sfx_id, int8_t pan)
 
 FORCE_INLINE void SoundInterface_PlaySfx_Ex(uint8_t sfx_id, int8_t vol_l, int8_t vol_r, int8_t pitch)
 {
-    SoundInterface_AcknowledgeBusy();
+    SoundInterface_AcknowledgeBusy(true);
     
     REG_APU02 = sfx_id;
     REG_APU03 = pitch;
@@ -401,7 +418,7 @@ FORCE_INLINE void SoundInterface_PlaySfx_Ex(uint8_t sfx_id, int8_t vol_l, int8_t
 // stop an SFX
 FORCE_INLINE void SoundInterface_StopSfx(uint8_t sfx_id)
 {
-    SoundInterface_AcknowledgeBusy();
+    SoundInterface_AcknowledgeBusy(true);
 
     REG_APU02 = sfx_id;
 
@@ -418,7 +435,7 @@ FORCE_INLINE void SoundInterface_StopSfx(uint8_t sfx_id)
 
 void SoundInterface_SetDspRegister(uint8_t dsp_reg, uint8_t dsp_data)
 {
-    SoundInterface_AcknowledgeBusy();
+    SoundInterface_AcknowledgeBusy(false);
 
     REG_APU02 = dsp_reg;
     REG_APU03 = dsp_data;
@@ -444,7 +461,7 @@ void SoundInterface_SetDspRegister(uint8_t dsp_reg, uint8_t dsp_data)
 */
 void SoundInterface_ResetAPU()
 {
-    SoundInterface_AcknowledgeBusy();
+    SoundInterface_AcknowledgeBusy(false);
 
     REG_APU01 = SND_CMD_SOFTRESET;
 
@@ -460,7 +477,7 @@ void SoundInterface_ResetAPU()
 
 void SoundInterface_UploadSample(struct sample_list_entry * s)
 {
-    SoundInterface_AcknowledgeBusy();
+    SoundInterface_AcknowledgeBusy(false);
 
     uint16_t temp_len = s->len;
     
@@ -582,7 +599,7 @@ void SoundInterface_UploadInstrumentList(struct sample_list_entry_ins * s)
 
 void SoundInterface_SetSampleTune(uint8_t ins_id, uint8_t tune)
 {
-    SoundInterface_AcknowledgeBusy();
+    SoundInterface_AcknowledgeBusy(false);
 
     REG_APU03 = tune;
     REG_APU02 = ins_id;
@@ -606,7 +623,7 @@ void SoundInterface_SetSampleTune(uint8_t ins_id, uint8_t tune)
 */
 void SoundInterface_SetMusicTempo(uint16_t tempo)
 {
-    SoundInterface_AcknowledgeBusy();
+    SoundInterface_AcknowledgeBusy(false);
 
     uint8_t temp_t2timer;
     uint16_t temp_interval = 1;
@@ -668,7 +685,7 @@ void SoundInterface_UploadMusicSequence(struct seq_command * s, uint8_t track)
         temp_ptr++;
     }
 
-    SoundInterface_AcknowledgeBusy();
+    SoundInterface_AcknowledgeBusy(false);
     
     REG_APU0203 = temp_len; // length is always even
     REG_APU01 = SND_CMD_SEQ_UPLOAD; // Initial
@@ -707,7 +724,7 @@ void SoundInterface_UploadMusicSequence(struct seq_command * s, uint8_t track)
 
 void SoundInterface_PlayMusic()
 {
-    SoundInterface_AcknowledgeBusy();
+    SoundInterface_AcknowledgeBusy(false);
 
     REG_APU01 = SND_CMD_MUS_START;
 
@@ -725,7 +742,7 @@ void SoundInterface_PlayMusic()
 
 void SoundInterface_PauseMusic()
 {
-    SoundInterface_AcknowledgeBusy();
+    SoundInterface_AcknowledgeBusy(false);
 
     REG_APU01 = SND_CMD_MUS_PAUSE;
 
@@ -743,7 +760,7 @@ void SoundInterface_PauseMusic()
 
 void SoundInterface_StopMusic()
 {
-    SoundInterface_AcknowledgeBusy();
+    SoundInterface_AcknowledgeBusy(false);
 
     REG_APU01 = SND_CMD_MUS_STOP;
 
