@@ -24,6 +24,7 @@ _mus_seq_upload:
     mov <REG_APUIO1,<REG_APUIO1
 
     ; Sequence can be copied to RAM, let the other side write out now since it'll be a while
+    mov <REG_APUIO0, #$ff ; make sure the other side doesn't get Y == 0
     mov <REG_APUIO1,<REG_APUIO1
 
     ; Calculate where the pointers should be
@@ -132,6 +133,7 @@ _sfx_upload:
     movw <r10,ya
 
     ; Sample can be copied to RAM, let the other side write out now since it'll be a while
+    mov <REG_APUIO0, #$ff ; make sure the other side doesn't get Y == 0
     mov <REG_APUIO1,<REG_APUIO1
 
     ; Calculate where the pointers should be

@@ -112,7 +112,6 @@ _start:
     mov <seq_tick_timer_target, A ; slowest possible additional tick wait. music is effectively stopped
 
     mov <global_last_cmd, A ; Make it so that the "last command" is the soft reset command which is impossible for a fresh boot
-
 _main:
     ; Check if a signal is ready.
     mov A,<global_last_cmd
@@ -146,11 +145,8 @@ _main:
     cmp A,#SND_CMD_NOP
     bne :+
         mov <REG_APUIO1,#SND_CMD_NOP
-        bra @end
+        bra @end_skipinc
     :
-
-    ; a processing message, so the SPC is now considered busy
-    mov <REG_APUIO0,#SND_SIG_BUSY
 
     ; as a rule
     ; opcode echo within the routine
@@ -218,14 +214,14 @@ _main:
         bra @end
     :
     cmp A,#SND_CMD_SOFTRESET
-    bne :+
+    bne @end_skipinc
         jmp !_reset_spc
-    :
     @end:
-
+    inc <global_current_command_counter
+    @end_skipinc:
     mov <global_last_cmd,<global_received_cmd
-
-    mov <REG_APUIO0,#SND_SIG_CLEAR
+    
+    mov <REG_APUIO0, <global_current_command_counter
 
     jmp !_main
 

@@ -275,6 +275,8 @@ ZP uint16_t hdma_scroll_ptr;
 uint16_t hdma_scroll_sine_index;
 
 // Sound system
+uint8_t snd_current_command_counter;
+
 uint16_t snd_footstep_timeout;
 uint16_t snd_punch_timeout;
 uint16_t snd_flame_active;

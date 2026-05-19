@@ -231,6 +231,8 @@ void system_display_splash()
 
     // In case the above initialization take too short this should prevent issues
     system_interrupt_disable(); // uploading the SPC while interrupts are on can cause lock-ups
+
+    snd_current_command_counter = 0;
     SoundInterface_StartSoundEngine(); // start the SPC
 
     // Upload instrument and music sequence data

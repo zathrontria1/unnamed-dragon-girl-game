@@ -347,24 +347,17 @@ void SoundInterface_StartSoundEngine()
 
 FORCE_INLINE void SoundInterface_AcknowledgeBusy()
 {
-    while (REG_APU00 != SND_SIG_CLEAR)
+    while (REG_APU00 != snd_current_command_counter)
     {
         ; // Wait for ready
     }
-
+    
     return;
 }
 
 FORCE_INLINE void SoundInterface_AcknowledgeNop()
 {
     REG_APU01 = SND_CMD_NOP;
-
-    while (REG_APU01 != SND_CMD_NOP)
-    {
-        ; // Wait for acknowledgement
-    }
-
-    return;
 }
 
 FORCE_INLINE void SoundInterface_PlaySfx(uint8_t sfx_id, int8_t pan)
@@ -376,12 +369,7 @@ FORCE_INLINE void SoundInterface_PlaySfx(uint8_t sfx_id, int8_t pan)
 
     REG_APU01 = SND_CMD_SFX_PLAY;
 
-    while (REG_APU01 != SND_CMD_SFX_PLAY)
-    {
-        ; // Wait for opcode echo.
-    }
-
-    SoundInterface_AcknowledgeNop();
+    snd_current_command_counter++;
 
     return;
 }
@@ -405,14 +393,7 @@ FORCE_INLINE void SoundInterface_PlaySfx_Ex(uint8_t sfx_id, int8_t vol_l, int8_t
 
     REG_APU01 = SND_CMD_SFX_PLAY_EXTEND_VOLDATA;
 
-    while (REG_APU01 != SND_CMD_SFX_PLAY_EXTEND_VOLDATA)
-    {
-        ; // Wait for opcode echo.
-    }
-
-    REG_APU01 = SND_CMD_NOP;
-
-    SoundInterface_AcknowledgeNop();
+    snd_current_command_counter++;
 
     return;
 }
@@ -426,12 +407,7 @@ FORCE_INLINE void SoundInterface_StopSfx(uint8_t sfx_id)
 
     REG_APU01 = SND_CMD_SFX_STOP;
 
-    while (REG_APU01 != SND_CMD_SFX_STOP)
-    {
-        ; // Wait for opcode echo.
-    }
-
-    SoundInterface_AcknowledgeNop();
+    snd_current_command_counter++;
 
     return;
 }
@@ -454,6 +430,8 @@ void SoundInterface_SetDspRegister(uint8_t dsp_reg, uint8_t dsp_data)
         ; // Wait for opcode echo.
     }
 
+    snd_current_command_counter++;
+
     SoundInterface_AcknowledgeNop();
 
     return;
@@ -469,6 +447,8 @@ void SoundInterface_ResetAPU()
     SoundInterface_AcknowledgeBusy();
 
     REG_APU01 = SND_CMD_SOFTRESET;
+
+    snd_current_command_counter = 0;
 
     while (REG_APU01 != SND_CMD_SOFTRESET)
     {
@@ -568,6 +548,8 @@ void SoundInterface_UploadSample(struct sample_list_entry * s)
     uint8_t temp_lobyte = (uint8_t)(REG_APU00 + 2);
     REG_APU00 = temp_lobyte; 
 
+    snd_current_command_counter++;
+
     SoundInterface_AcknowledgeNop();
 
     return;
@@ -610,6 +592,8 @@ void SoundInterface_SetSampleTune(uint8_t ins_id, uint8_t tune)
     {
         ; // Wait for opcode echo.
     }
+
+    snd_current_command_counter++;
 
     SoundInterface_AcknowledgeNop();
 
@@ -664,6 +648,8 @@ void SoundInterface_SetMusicTempo(uint16_t tempo)
         ; // Wait for opcode echo.
     }
 
+    snd_current_command_counter++;
+
     SoundInterface_AcknowledgeNop();
 
     return;
@@ -712,6 +698,8 @@ void SoundInterface_UploadMusicSequence(struct seq_command * s, uint8_t track)
     uint8_t temp_lobyte = (uint8_t)(REG_APU00 + 2);
     REG_APU00 = temp_lobyte; 
 
+    snd_current_command_counter++;
+
     SoundInterface_AcknowledgeNop();
 
     return;
@@ -728,6 +716,10 @@ void SoundInterface_PlayMusic()
         ; // Wait for opcode echo.
     }
 
+    snd_current_command_counter++;
+
+    SoundInterface_AcknowledgeNop();
+
     return;
 }
 
@@ -742,6 +734,10 @@ void SoundInterface_PauseMusic()
         ; // Wait for opcode echo.
     }
 
+    snd_current_command_counter++;
+
+    SoundInterface_AcknowledgeNop();
+
     return;
 }
 
@@ -755,6 +751,10 @@ void SoundInterface_StopMusic()
     {
         ; // Wait for opcode echo.
     }
+
+    snd_current_command_counter++;
+
+    SoundInterface_AcknowledgeNop();
 
     return;
 }
