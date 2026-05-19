@@ -6,10 +6,18 @@ void SoundInterface_StartSoundEngine();
 #endif
 
 #if VBCC_ASM == 1
-    NO_INLINE void SoundInterface_UploadData_2byte(uint8_t * data_ptr, uint16_t len);
+    NO_INLINE void SoundInterface_UploadData_2byte(uint8_t * data_ptr, uint16_t chunk_len);
 #else
-    void SoundInterface_UploadData_2byte(uint8_t * data_ptr, uint16_t len);
+    void SoundInterface_UploadData_2byte(uint8_t * data_ptr, uint16_t chunk_len);
 #endif
+
+/*
+#if VBCC_ASM == 1
+    NO_INLINE void SoundInterface_UploadData_3byte(uint8_t * data_ptr, uint16_t chunk_len);
+#else
+    void SoundInterface_UploadData_3byte(uint8_t * data_ptr, uint16_t chunk_len);
+#endif
+*/
 
 FORCE_INLINE void SoundInterface_PlaySfx(uint8_t sfx_id, int8_t pan);
 FORCE_INLINE void SoundInterface_PlaySfx_Ex(uint8_t sfx_id, int8_t vol_l, int8_t vol_r, int8_t pitch);

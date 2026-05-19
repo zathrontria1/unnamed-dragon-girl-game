@@ -245,6 +245,7 @@ _sfx_upload:
 
     ;call !_data_upload_loop
     call !_data_upload_loop_2byte
+    ;call !_data_upload_loop_3byte
 
     ret
 
@@ -335,68 +336,68 @@ _data_upload_loop_2byte:
 
     ret
 
-_data_upload_loop_3byte:
-    ; Begin copy
-    ; r0 contains the length of data transfer
-    ; r2 contains the pointer to the write dest
-
-    ; first calculate the length divided
-    mov <divabs3_dividend, <r0
-    mov <divabs3_dividend+1, <r0+1
-
-    ; Call div by 3
-    call !_div_16_by_abs3
-
-    ; Save chunk length to r0
-    mov <r0, <divabs3_quotient
-    mov <r0+1, <divabs3_quotient+1
-
-    ; Copy r2 to @abs_ptr_0-2 (byte 0-2)
-    mov A, <r2
-    mov !@abs_ptr_0+1, A
-
-    mov A, <r2+1
-    mov !@abs_ptr_0+2, A
-
-    ; Calculate offsetted second and third pointer
-    movw ya, <r2
-    clrc
-    addw ya, <r0
-    mov !@abs_ptr_1+1, A
-    mov !@abs_ptr_1+2, Y
-    addw ya, <r0
-    mov !@abs_ptr_2+1, A
-    mov !@abs_ptr_2+2, Y
-
-    mov Y,#0
-
-    @startup:
-        cmp Y,<REG_APUIO0
-        bne @startup
-        bra @write
-    @loop:
-        cmp Y,<REG_APUIO0
-        bne @check_end
-
-        @write:
-        mov A,<REG_APUIO1
-        @abs_ptr_0: 
-        mov !$0000+Y,A
-        mov A,<REG_APUIO2
-        @abs_ptr_1: 
-        mov !$0000+Y,A
-        mov A,<REG_APUIO3
-        mov <REG_APUIO0,Y
-        @abs_ptr_2: 
-        mov !$0000+Y,A
-        inc y
-        bne @loop
-            inc !@abs_ptr_0+2
-            inc !@abs_ptr_1+2
-            inc !@abs_ptr_2+2
-        @check_end:
-        bpl @loop
-        cmp Y,<REG_APUIO0
-        bpl @loop
-
-    ret
+;_data_upload_loop_3byte:
+;    ; Begin copy
+;    ; r0 contains the length of data transfer
+;    ; r2 contains the pointer to the write dest
+;
+;    ; first calculate the length divided
+;    mov <divabs3_dividend, <r0
+;    mov <divabs3_dividend+1, <r0+1
+;
+;    ; Call div by 3
+;    call !_div_16_by_abs3
+;
+;    ; Save chunk length to r0
+;    mov <r0, <divabs3_quotient
+;    mov <r0+1, <divabs3_quotient+1
+;
+;    ; Copy r2 to @abs_ptr_0-2 (byte 0-2)
+;    mov A, <r2
+;    mov !@abs_ptr_0+1, A
+;
+;    mov A, <r2+1
+;    mov !@abs_ptr_0+2, A
+;
+;    ; Calculate offsetted second and third pointer
+;    movw ya, <r2
+;    clrc
+;    addw ya, <r0
+;    mov !@abs_ptr_1+1, A
+;    mov !@abs_ptr_1+2, Y
+;    addw ya, <r0
+;    mov !@abs_ptr_2+1, A
+;    mov !@abs_ptr_2+2, Y
+;
+;    mov Y,#0
+;
+;    @startup:
+;        cmp Y,<REG_APUIO0
+;        bne @startup
+;        bra @write
+;    @loop:
+;        cmp Y,<REG_APUIO0
+;        bne @check_end
+;
+;        @write:
+;        mov A,<REG_APUIO1
+;        @abs_ptr_0: 
+;        mov !$0000+Y,A
+;        mov A,<REG_APUIO2
+;        @abs_ptr_1: 
+;        mov !$0000+Y,A
+;        mov A,<REG_APUIO3
+;        mov <REG_APUIO0,Y
+;        @abs_ptr_2: 
+;        mov !$0000+Y,A
+;        inc y
+;        bne @loop
+;            inc !@abs_ptr_0+2
+;            inc !@abs_ptr_1+2
+;            inc !@abs_ptr_2+2
+;        @check_end:
+;        bpl @loop
+;        cmp Y,<REG_APUIO0
+;        bpl @loop
+;
+;    ret
