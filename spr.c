@@ -215,6 +215,8 @@ void SpriteEngine_AddToSortedLayer(struct game_object * o, uint16_t tileattrib)
             "\tsbc $7e0010,x\n"
             "\tsec\n"
             "\tsbc <_bg_scroll_y+2\n"
+            "\tsec\n"
+            "\tsbc #2\n"
             "\tbpl .y_pos\n"
 
             ".y_neg:\n"

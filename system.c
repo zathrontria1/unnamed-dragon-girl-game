@@ -197,7 +197,7 @@ void system_display_splash()
     dma_copy_to_wram((uint32_t)data_palette_splash, (uint32_t)&shadow_cgram, 32);
 
     // Upload the splash
-    dma_copy_to_vram(0x007f0000, 0x0000, 0x7800);
+    dma_copy_to_vram(0x007f0000, 0x0000, 0x7800); // Copy the entire section including the tilemap.
     dma_copy_palette();
 
     // Set up a fade-in. Doing this so that we can actually run the other steps
