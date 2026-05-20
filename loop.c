@@ -163,14 +163,14 @@ void loop_game()
 
         // TODO: implement subscreen function
         // below are test functions
-        //UserInterface_ClearWindowBuffer();
-        //UserInterface_ClearTextBuffer();
+        /*UserInterface_ClearWindowBuffer();
+        UserInterface_ClearTextBuffer();
 
-        //UserInterface_DrawWindowBackground(0,0,10,22);
-        //UserInterface_DrawWindowBackground(0,22,32,4);
-        //UserInterface_DrawWindowBackground(2,8,16,8);
+        UserInterface_DrawWindowBackground(0,0,10,22);
+        UserInterface_DrawWindowBackground(0,22,32,4);
+        UserInterface_DrawWindowBackground(2,8,16,8);
 
-        //UserInterface_CopyUiBuffers();
+        UserInterface_CopyUiBuffers();*/
 
         system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_MSGBOX);
         system_target_routine = ROUTINE_MSGBOX;

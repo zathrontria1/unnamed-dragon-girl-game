@@ -40,18 +40,18 @@ void HdmaEngine_SetupPaletteHdma()
     REG_BBAD6 = (uint8_t)((uint32_t)&REG_TM);
 
     REG_A1T1LH = (uint16_t)((uint32_t)&hdma_indirect_tables[0]);
-    REG_A1T2LH = (uint16_t)((uint32_t)&hdma_indirect_tables[1]);
+    REG_A1T2LH = (uint16_t)((uint32_t)&hdma_windowbackground_tables[0]);
     REG_A1T6LH = (uint16_t)((uint32_t)&const_hdma_tm_msgbox[0]);
 
     REG_A1B1 = (uint8_t)((uint32_t)&hdma_indirect_tables[0] >> 16);
-    REG_A1B2 = (uint8_t)((uint32_t)&hdma_indirect_tables[1] >> 16);
+    REG_A1B2 = (uint8_t)((uint32_t)&hdma_windowbackground_tables[0] >> 16);
     REG_A1B6 = (uint8_t)((uint32_t)&const_hdma_tm_msgbox[0] >> 16);
 
     REG_DAS1LH = (uint16_t)((uint32_t)&hdma_indirect_data[0]);
-    REG_DAS2LH = (uint16_t)((uint32_t)&hdma_indirect_data[1]);
+    REG_DAS2LH = (uint16_t)((uint32_t)&hdma_windowbackground_data[0]);
 
     REG_DASB1 = (uint8_t)((uint32_t)&hdma_indirect_data[0] >> 16);
-    REG_DASB2 = (uint8_t)((uint32_t)&hdma_indirect_data[1] >> 16);
+    REG_DASB2 = (uint8_t)((uint32_t)&hdma_windowbackground_data[0] >> 16);
 
     hdma_indirect_tables[0][0].count = 0x80 | 112;
     hdma_indirect_tables[0][0].addr = (uint16_t)((uint32_t)&hdma_indirect_data[0]);
@@ -61,19 +61,30 @@ void HdmaEngine_SetupPaletteHdma()
 
     hdma_indirect_tables[0][2].count = 0;
 
-    hdma_indirect_tables[1][0].count = (UI_MSGBOX_ML_START * 4);
-    hdma_indirect_tables[1][0].addr = (uint16_t)((uint32_t)&hdma_indirect_data[1]);
+    // background UI window, textbox ver
+    hdma_windowbackground_tables[0][0].count = (UI_MSGBOX_ML_START * 4);
+    hdma_windowbackground_tables[0][0].addr = (uint16_t)((uint32_t)&hdma_windowbackground_data[0]);
 
-    hdma_indirect_tables[1][1].count = (UI_MSGBOX_ML_START * 4);
-    hdma_indirect_tables[1][1].addr = (uint16_t)((uint32_t)&hdma_indirect_data[1]);
+    hdma_windowbackground_tables[0][1].count = (UI_MSGBOX_ML_START * 4);
+    hdma_windowbackground_tables[0][1].addr = (uint16_t)((uint32_t)&hdma_windowbackground_data[0]);
 
-    hdma_indirect_tables[1][2].count = 0x80 | ((UI_MSGBOX_HEIGHT * 8) + 4); // Text box height plus reset entries
-    hdma_indirect_tables[1][2].addr = (uint16_t)((uint32_t)&hdma_indirect_data[1]);
+    hdma_windowbackground_tables[0][2].count = 0x80 | ((UI_MSGBOX_HEIGHT * 8) + 4); // Text box height plus reset entries
+    hdma_windowbackground_tables[0][2].addr = (uint16_t)((uint32_t)&hdma_windowbackground_data[0]);
     
-    hdma_indirect_tables[1][3].count = 0;
+    hdma_windowbackground_tables[0][3].count = 0;
+
+    // Fullscreen ver
+    hdma_windowbackground_tables[1][0].count = 0x80 | 112;
+    hdma_windowbackground_tables[1][0].addr = (uint16_t)((uint32_t)&hdma_windowbackground_data[1][0]);
+
+    hdma_windowbackground_tables[1][1].count = 0x80 | 112;
+    hdma_windowbackground_tables[1][1].addr = (uint16_t)((uint32_t)&hdma_windowbackground_data[1][0] + 448);
+
+    hdma_windowbackground_tables[1][2].count = 0;
 
     HdmaEngine_GeneratePaletteTable((uint16_t *)&hdma_indirect_data[0], 0x42, 13, 1, 224, 0, BLENDMODE_ALPHA_TOWARDS_BLACK); // Water
-    HdmaEngine_GeneratePaletteTable((uint16_t *)&hdma_indirect_data[1], 0x04, 4, 2, 48, 0, BLENDMODE_ALPHA_TOWARDS_BLACK); // UI message box using alpha towards black
+    HdmaEngine_GeneratePaletteTable((uint16_t *)&hdma_windowbackground_data[0], 0x04, 4, 2, 48, 0, BLENDMODE_ALPHA_TOWARDS_BLACK); // UI message box using alpha towards black
+    HdmaEngine_GeneratePaletteTable((uint16_t *)&hdma_windowbackground_data[1], 0x04, 4, 1, 220, 2, BLENDMODE_ALPHA_TOWARDS_BLACK); // UI full height using alpha towards black
 
     return;
 }

@@ -251,6 +251,10 @@ extern union cgram_full shadow_cgram; // 256 palette entries, 2 bytes wide each
 extern struct hdma_indirect_table_entry hdma_indirect_tables[2][8];
 extern uint16_t hdma_indirect_data[2][448];
 
+extern struct hdma_indirect_table_entry hdma_windowbackground_tables[2][8];
+extern uint16_t hdma_windowbackground_data[2][448];
+extern uint16_t hdma_windowbackground_select;
+
 extern uint16_t hdma_scroll_data[2][32];
 extern uint16_t hdma_scroll_select;
 extern ZP uint16_t hdma_scroll_ptr;
