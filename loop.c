@@ -161,8 +161,18 @@ void loop_game()
         
         UserInterface_PrintSpecialText((uint8_t *)&STR_UI_PLAYERINFO_ML);
 
+        // TODO: implement subscreen function
+        // below are test functions
+        //UserInterface_ClearWindowBuffer();
+        //UserInterface_ClearTextBuffer();
+
+        //UserInterface_DrawWindowBackground(0,0,10,22);
+        //UserInterface_DrawWindowBackground(0,22,32,4);
+        //UserInterface_DrawWindowBackground(2,8,16,8);
+
+        //UserInterface_CopyUiBuffers();
+
         system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_MSGBOX);
-        //system_current_routine = ROUTINE_MSGBOX;
         system_target_routine = ROUTINE_MSGBOX;
 
         return;

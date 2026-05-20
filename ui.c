@@ -822,15 +822,15 @@ void UserInterface_DrawWindowBackground(uint16_t x, uint16_t y, uint16_t w, uint
             // Last row
             ui_window_background[i][x] = 0x01a0 | 0x2000 | (PAL_UI_4BPP << 10);
         }
-        else if ((i - y) & 0x0001 == 0)
-        {
-            // Even row
-            ui_window_background[i][x] = 0x0190 | 0x2000 | (PAL_UI_4BPP << 10);
-        }
-        else
+        else if ((i - y) & 0x0001 == 1)
         {
             // Odd row
             ui_window_background[i][x] = 0x0180 | 0x2000 | (PAL_UI_4BPP << 10);
+        }
+        else
+        {
+            // Even row
+            ui_window_background[i][x] = 0x0190 | 0x2000 | (PAL_UI_4BPP << 10);
         }
     }
 
@@ -844,37 +844,36 @@ void UserInterface_DrawWindowBackground(uint16_t x, uint16_t y, uint16_t w, uint
                 if (i - y == 0)
                 {
                     // First row
-                    ui_window_background[i][j] = (0x0171 + (j % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
+                    ui_window_background[i][j] = (0x0171 + ((j + 1) % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
                 }
                 else if ((i - y == 1) && (i != (y + h - 1)))
                 {
                     // Second row, and not the last row
-                    ui_window_background[i][j] = (0x0181 + (j % 2))  | 0x2000 | (PAL_UI_4BPP << 10);
+                    ui_window_background[i][j] = (0x0181 + ((j + 1) % 2))  | 0x2000 | (PAL_UI_4BPP << 10);
                 }
                 else if (i == (y + h - 2))
                 {
                     // Second to last row
-                    ui_window_background[i][j] = (0x0191 + (j % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
+                    ui_window_background[i][j] = (0x0191 + ((j + 1) % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
                 }
                 else if (i == (y + h - 1))
                 {
                     // Last row
-                    ui_window_background[i][j] = (0x01a1 + (j % 2))  | 0x2000 | (PAL_UI_4BPP << 10);
+                    ui_window_background[i][j] = (0x01a1 + ((j + 1) % 2))  | 0x2000 | (PAL_UI_4BPP << 10);
                 }
-                else if ((i - y) & 0x0001 == 0)
+                else if ((i - y) & 0x0001 == 1)
                 {
-                    // Even row
-                    ui_window_background[i][j] = (0x0191 + (j % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
+                    // Odd row
+                    ui_window_background[i][j] = (0x0181 + ((j + 1) % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
                 }
                 else
                 {
-                    // Odd row
-                    ui_window_background[i][j] = (0x0181 + (j % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
+                    // Even row
+                    ui_window_background[i][j] = (0x0191 + ((j + 1) % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
                 }
             }
         }
     }
-    
 
     // Rightmost column
     for (int i = y; i < y+h; i++)
@@ -899,15 +898,15 @@ void UserInterface_DrawWindowBackground(uint16_t x, uint16_t y, uint16_t w, uint
             // Last row
             ui_window_background[i][x+w-1] = 0x01a3 | 0x2000 | (PAL_UI_4BPP << 10);
         }
-        else if ((i - y) & 0x0001 == 0)
-        {
-            // Even row
-            ui_window_background[i][x+w-1] = 0x0193 | 0x2000 | (PAL_UI_4BPP << 10);
-        }
-        else
+        else if ((i - y) & 0x0001 == 1)
         {
             // Odd row
             ui_window_background[i][x+w-1] = 0x0183 | 0x2000 | (PAL_UI_4BPP << 10);
+        }
+        else
+        {
+            // Even row
+            ui_window_background[i][x+w-1] = 0x0193 | 0x2000 | (PAL_UI_4BPP << 10);
         }
     }
 
