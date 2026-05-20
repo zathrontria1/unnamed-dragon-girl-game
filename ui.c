@@ -512,7 +512,7 @@ void ui_print_ml(uint8_t * string_ptr, uint16_t row, uint16_t col)
             {
                 for (; i < 30; i++)
                 {
-                    ui_show_message_string_fixedwidth[j][i] = 0x0000 | 0x2000;
+                    ui_window_text[j][i] = 0x0000 | 0x2000;
                 }
 
                 i = 0;
@@ -531,7 +531,7 @@ void ui_print_ml(uint8_t * string_ptr, uint16_t row, uint16_t col)
             {
                 for (; i < 30; i++)
                 {
-                    ui_show_message_string_fixedwidth[j][i] = 0x0000 | 0x2000 | (PAL_UI_TEXT_WHITE << 10);
+                    ui_window_text[j][i] = 0x0000 | 0x2000 | (PAL_UI_TEXT_WHITE << 10);
                 }
 
                 i = 0;
@@ -545,7 +545,7 @@ void ui_print_ml(uint8_t * string_ptr, uint16_t row, uint16_t col)
             // advance the printer to the next line.
             for (int i = temp_col; temp_col < 30; temp_col++)
             {
-                ui_show_message_string_fixedwidth[temp_row][temp_col] = 0x0000 | 0x2000 | (PAL_UI_TEXT_WHITE << 10);
+                ui_window_text[temp_row][temp_col] = 0x0000 | 0x2000 | (PAL_UI_TEXT_WHITE << 10);
             }
             temp_col = 0;
             temp_row++;
@@ -570,7 +570,7 @@ void ui_print_ml(uint8_t * string_ptr, uint16_t row, uint16_t col)
         }
 
         // Normal printable.
-        ui_show_message_string_fixedwidth[temp_row][temp_col] = (-0x0020 + *string_ptr) | 0x2000 | (PAL_UI_TEXT_WHITE << 10);
+        ui_window_text[temp_row][temp_col] = (-0x0020 + *string_ptr) | 0x2000 | (PAL_UI_TEXT_WHITE << 10);
 
 
         temp_col++;
@@ -580,7 +580,7 @@ void ui_print_ml(uint8_t * string_ptr, uint16_t row, uint16_t col)
     ui_show_message_page_ptr = string_ptr;
 
     if (dma_queue_add(
-        (uint8_t *)(&ui_show_message_string_fixedwidth[0][0]), 
+        (uint8_t *)(&ui_window_text[0][0]), 
         0x3400 + ((row + 1) << 5) + (col), 
         252,
         VRAM_INCHIGH, 
@@ -626,7 +626,7 @@ void ui_print(uint8_t * string_ptr, uint16_t row, uint16_t col)
     uint16_t temp_len = 2;
     for (; i < 30; i++)
     {
-        ui_show_message_string_fixedwidth[0][i] = (-0x20 + *string_ptr++) | 0x2000  | (PAL_UI_TEXT_WHITE << 10);
+        ui_window_text[0][i] = (-0x20 + *string_ptr++) | 0x2000  | (PAL_UI_TEXT_WHITE << 10);
 
         if ((*string_ptr == 0x00) || (*string_ptr == '\n') || (*string_ptr == '\r'))
         {
@@ -642,11 +642,11 @@ void ui_print(uint8_t * string_ptr, uint16_t row, uint16_t col)
 
     for (; i < 30; i++)
     {
-        ui_show_message_string_fixedwidth[0][i] = 0x0000 | 0x2000;
+        ui_window_text[0][i] = 0x0000 | 0x2000;
     }
 
     if (dma_queue_add(
-        (uint8_t *)(&ui_show_message_string_fixedwidth[0][0]), 
+        (uint8_t *)(&ui_window_text[0][0]), 
         0x3400 + (row << 5) + (col), 
         temp_len,
         VRAM_INCHIGH, 
@@ -669,7 +669,7 @@ void ui_print_mode3(uint8_t * string_ptr, uint16_t row, uint16_t col)
     uint16_t temp_len = 2;
     for (; i < 30; i++)
     {
-        ui_show_message_string_fixedwidth[0][i] = (0x00e0 + *string_ptr++) | 0x2000 | (PAL_UI_4BPP << 10);
+        ui_window_text[0][i] = (0x00e0 + *string_ptr++) | 0x2000 | (PAL_UI_4BPP << 10);
 
         if ((*string_ptr == 0x00) || (*string_ptr == '\n') || (*string_ptr == '\r'))
         {
@@ -685,11 +685,11 @@ void ui_print_mode3(uint8_t * string_ptr, uint16_t row, uint16_t col)
 
     for (; i < 30; i++)
     {
-        ui_show_message_string_fixedwidth[0][i] = 0x0100 | 0x2000;
+        ui_window_text[0][i] = 0x0100 | 0x2000;
     }
 
     if (dma_queue_add(
-        (uint8_t *)(&ui_show_message_string_fixedwidth[0][0]), 
+        (uint8_t *)(&ui_window_text[0][0]), 
         0x4c00 + (row << 5) + (col), 
         temp_len,
         VRAM_INCHIGH, 
@@ -706,11 +706,11 @@ void ui_clear(uint16_t len, uint16_t row, uint16_t col)
 {
     for (int i = 0; i < len; i++)
     {
-        ui_show_message_string_fixedwidth[0][i] = 0x0000 | 0x2000 | (PAL_UI_TEXT_WHITE << 10);
+        ui_window_text[0][i] = 0x0000 | 0x2000 | (PAL_UI_TEXT_WHITE << 10);
     }
     
     if (dma_queue_add(
-        (uint8_t *)(&ui_show_message_string_fixedwidth[0][0]), 
+        (uint8_t *)(&ui_window_text[0][0]), 
         0x3400 + (row << 5) + (col), 
         len << 1,
         VRAM_INCHIGH, 
@@ -732,35 +732,35 @@ void ui_clear(uint16_t len, uint16_t row, uint16_t col)
 */
 void ui_draw_textbox(uint16_t row, uint16_t h)
 {
-    ui_show_message_border[0][0] = 0x0170 | 0x2000 | (PAL_UI_4BPP << 10);
-    ui_show_message_border[1][0] = 0x0180 | 0x2000 | (PAL_UI_4BPP << 10);
+    ui_window_background[0][0] = 0x0170 | 0x2000 | (PAL_UI_4BPP << 10);
+    ui_window_background[1][0] = 0x0180 | 0x2000 | (PAL_UI_4BPP << 10);
 
-    ui_show_message_border[2][0] = 0x0190 | 0x2000 | (PAL_UI_4BPP << 10);
-    ui_show_message_border[3][0] = 0x0180 | 0x2000 | (PAL_UI_4BPP << 10);
+    ui_window_background[2][0] = 0x0190 | 0x2000 | (PAL_UI_4BPP << 10);
+    ui_window_background[3][0] = 0x0180 | 0x2000 | (PAL_UI_4BPP << 10);
 
-    ui_show_message_border[4][0] = 0x0190 | 0x2000 | (PAL_UI_4BPP << 10);
-    ui_show_message_border[5][0] = 0x01a0 | 0x2000 | (PAL_UI_4BPP << 10);
+    ui_window_background[4][0] = 0x0190 | 0x2000 | (PAL_UI_4BPP << 10);
+    ui_window_background[5][0] = 0x01a0 | 0x2000 | (PAL_UI_4BPP << 10);
 
     for (int i = 0; i < 30; i++)
     {
-        ui_show_message_border[0][i+1] = (0x0171 + (i % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
-        ui_show_message_border[1][i+1] = (0x0181 + (i % 2))  | 0x2000 | (PAL_UI_4BPP << 10);
+        ui_window_background[0][i+1] = (0x0171 + (i % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
+        ui_window_background[1][i+1] = (0x0181 + (i % 2))  | 0x2000 | (PAL_UI_4BPP << 10);
 
-        ui_show_message_border[2][i+1] = (0x0191 + (i % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
-        ui_show_message_border[3][i+1] = (0x0181 + (i % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
+        ui_window_background[2][i+1] = (0x0191 + (i % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
+        ui_window_background[3][i+1] = (0x0181 + (i % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
 
-        ui_show_message_border[4][i+1] = (0x0191 + (i % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
-        ui_show_message_border[5][i+1] = (0x01a1 + (i % 2))  | 0x2000 | (PAL_UI_4BPP << 10);
+        ui_window_background[4][i+1] = (0x0191 + (i % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
+        ui_window_background[5][i+1] = (0x01a1 + (i % 2))  | 0x2000 | (PAL_UI_4BPP << 10);
     }
 
-    ui_show_message_border[0][31] = 0x0173 | 0x2000 | (PAL_UI_4BPP << 10);
-    ui_show_message_border[1][31] = 0x0183 | 0x2000 | (PAL_UI_4BPP << 10);
+    ui_window_background[0][31] = 0x0173 | 0x2000 | (PAL_UI_4BPP << 10);
+    ui_window_background[1][31] = 0x0183 | 0x2000 | (PAL_UI_4BPP << 10);
 
-    ui_show_message_border[2][31] = 0x0193 | 0x2000 | (PAL_UI_4BPP << 10);
-    ui_show_message_border[3][31] = 0x0183 | 0x2000 | (PAL_UI_4BPP << 10);
+    ui_window_background[2][31] = 0x0193 | 0x2000 | (PAL_UI_4BPP << 10);
+    ui_window_background[3][31] = 0x0183 | 0x2000 | (PAL_UI_4BPP << 10);
 
-    ui_show_message_border[4][31] = 0x0193 | 0x2000 | (PAL_UI_4BPP << 10);
-    ui_show_message_border[5][31] = 0x01a3 | 0x2000 | (PAL_UI_4BPP << 10);
+    ui_window_background[4][31] = 0x0193 | 0x2000 | (PAL_UI_4BPP << 10);
+    ui_window_background[5][31] = 0x01a3 | 0x2000 | (PAL_UI_4BPP << 10);
 
     ui_textbox_dma(row, h);
 
@@ -773,7 +773,7 @@ void ui_clear_textbox(uint16_t row, uint16_t h)
     {
         for (int j = 0; j < 32; j++)
         {
-            ui_show_message_border[i][j] = 0x0100 | 0x2000 | (PAL_UI_4BPP << 10);
+            ui_window_background[i][j] = 0x0100 | 0x2000 | (PAL_UI_4BPP << 10);
         }
     }
 
@@ -787,13 +787,13 @@ void ui_clear_textbox_text(uint16_t row, uint16_t h)
 {
     for (int i = 0; i < 32; i++)
     {
-        ui_show_message_string_fixedwidth[0][i] = 0x0000 | 0x2000;
+        ui_window_text[0][i] = 0x0000 | 0x2000;
     }
 
     for (int i = 1; i < (h + 1); i++)
     {
         if (dma_queue_add(
-            (uint8_t *)(&ui_show_message_string_fixedwidth[0][0]), 
+            (uint8_t *)(&ui_window_text[0][0]), 
             0x3400 + ((row + i) << 5), 
             64,
             VRAM_INCHIGH, 
@@ -810,7 +810,7 @@ void ui_clear_textbox_text(uint16_t row, uint16_t h)
 void ui_textbox_dma(uint16_t row, uint16_t h)
 {
     if (dma_queue_add(
-        (uint8_t *)(&ui_show_message_border[0][0]), 
+        (uint8_t *)(&ui_window_background[0][0]), 
         0x3000 + (row << 5), 
         128,
         VRAM_INCHIGH, 
@@ -823,7 +823,7 @@ void ui_textbox_dma(uint16_t row, uint16_t h)
     for (int i = 2; i < (h - 1); i++)
     {
         if (dma_queue_add(
-            (uint8_t *)(&ui_show_message_border[2+(i%2)][0]), 
+            (uint8_t *)(&ui_window_background[2+(i%2)][0]), 
             0x3000 + ((row + i) << 5), 
             64,
             VRAM_INCHIGH, 
@@ -835,7 +835,7 @@ void ui_textbox_dma(uint16_t row, uint16_t h)
     }
 
     if (dma_queue_add(
-        (uint8_t *)(&ui_show_message_border[4][0]), 
+        (uint8_t *)(&ui_window_background[4][0]), 
         0x3000 + ((row + h - 2) << 5), 
         128,
         VRAM_INCHIGH, 

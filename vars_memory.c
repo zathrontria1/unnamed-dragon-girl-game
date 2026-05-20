@@ -210,27 +210,32 @@ uint16_t pal_ani_sel;
 // UI
 uint16_t system_ui_in_bg2;
 
+// UI cache invalidation stuff
 uint16_t ui_force_update;
 int32_t ui_cached_hp;
 int32_t ui_cached_hp_max;
 uint32_t ui_cached_money;
 uint16_t ui_cached_enemy_counter;
 
+// TODO: Handle UI windows and texts generically
+uint16_t ui_window_background[32][32]; // BG1. Call functions to draw a window here.
+uint16_t ui_window_text[32][32]; // BG3. Call functions to draw text here.
+
+uint8_t ui_show_message_string[31]; // 30 characters + null terminator
+
+// Sub-strings
 uint16_t ui_hp_gauge[28];
 uint16_t ui_money_counter[11];
 uint16_t ui_enemy_counter[9];
 
 uint16_t ui_level_status[5];
 
-uint16_t ui_show_message_string_fixedwidth[4][32]; // 4x32 (30 + 2 padding)
-uint8_t ui_show_message_string[31]; // 30 characters + null terminator
+// UI status and timers
 uint16_t ui_show_message_ttl;
 uint16_t ui_show_message_cleared;
 uint16_t ui_show_message_page;
 uint8_t * ui_show_message_page_ptr_init;
 uint8_t * ui_show_message_page_ptr;
-
-uint16_t ui_show_message_border[6][32]; // textbox borders. Top 2 rows, middle 2 repeated rows, bottom 2 rows
 
 // Sprite system
 ZP uint16_t spr_sprite_count; // Rendered sprites this frame
