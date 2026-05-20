@@ -13,25 +13,25 @@
 #include "ui.h"
 #include "spr.h"
 
-void ui_process()
+void UserInterface_Process()
 {
     if ((ui_cached_hp != obj_player_pointer->struct_data.npc_data.hp) ||
         (ui_cached_hp_max != obj_player_pointer->struct_data.npc_data.hp_max) || (ui_force_update != 0))
     {
         // HP changed
-        ui_update_health();
+        UserInterface_UpdateHealthCounters();
     }
 
     if ((ui_cached_money != obj_player_pointer->struct_data.npc_data.money) || (ui_force_update != 0))
     {
         // Amount of money held changed
-        ui_update_money();
+        UserInterface_UpdateMoneyCounters();
     }
 
     if ((ui_cached_enemy_counter != obj_enemies_defeated) || (ui_force_update != 0))
     {
         // Enemies defeated changed
-        ui_update_enemy_counters();
+        UserInterface_UpdateEnemyCounters();
     }
 
     ui_force_update = 0;
@@ -39,7 +39,7 @@ void ui_process()
     return;
 }
 
-void ui_update_health()
+void UserInterface_UpdateHealthCounters()
 {
     // Copy these values
     int32_t temp_hp = obj_player_pointer->struct_data.npc_data.hp;
@@ -252,7 +252,7 @@ void ui_update_health()
 /*
     Set up the drawing for the HP gauge
 */
-void ui_show_enemy_health_bar(struct game_object * o)
+void UserInterface_DrawEnemyHealthBar(struct game_object * o)
 {
     // get fraction of health if it's not changed
     if (o->struct_data.npc_data.hp_cache != o->struct_data.npc_data.hp)
@@ -307,7 +307,7 @@ void ui_show_enemy_health_bar(struct game_object * o)
     return;
 }
 
-void ui_update_money()
+void UserInterface_UpdateMoneyCounters()
 {
     // Copy these values
     uint32_t temp_money = obj_player_pointer->struct_data.npc_data.money;
@@ -387,7 +387,7 @@ void ui_update_money()
 }
 
 
-void ui_update_enemy_counters()
+void UserInterface_UpdateEnemyCounters()
 {
     // Copy these values
     char temp_string[8] = "   /   "; // 3 spaces, a /, and another 3 spaces
@@ -443,7 +443,7 @@ void ui_update_enemy_counters()
     return;
 }
 
-void ui_print_ml_special(uint8_t * string_ptr)
+void UserInterface_PrintSpecialText(uint8_t * string_ptr)
 {
     char temp_str[128];
 
@@ -468,7 +468,7 @@ void ui_print_ml_special(uint8_t * string_ptr)
         (char *)&temp_str, 128, (char *)string_ptr, 
         temp_hp, temp_hp_max, temp_attack, temp_defense, temp_lagframes, temp_h, temp_m, temp_s);
     
-    ui_print_ml((uint8_t *)&temp_str, UI_MSGBOX_ML_START, UI_MARGIN_LEFT);
+    UserInterface_PrintText_MultiLine((uint8_t *)&temp_str, UI_MSGBOX_ML_START, UI_MARGIN_LEFT);
 
     return;
 }
@@ -476,7 +476,7 @@ void ui_print_ml_special(uint8_t * string_ptr)
 /* 
     Prints 4-line monospaced text to the screen and queues DMA for it
 */
-void ui_print_ml(uint8_t * string_ptr, uint16_t row, uint16_t col)
+void UserInterface_PrintText_MultiLine(uint8_t * string_ptr, uint16_t row, uint16_t col)
 {
     uint16_t temp_col = 0;
     uint16_t temp_row = 0;
@@ -485,7 +485,7 @@ void ui_print_ml(uint8_t * string_ptr, uint16_t row, uint16_t col)
     {
         // Start of a new message page.
         ui_show_message_page_ptr_init = string_ptr;
-        ui_draw_textbox(UI_MSGBOX_ML_START, UI_MSGBOX_HEIGHT);
+        UserInterface_DrawTextbox(UI_MSGBOX_ML_START, UI_MSGBOX_HEIGHT);
     }
     else if (string_ptr == ui_show_message_page_ptr_init)
     {
@@ -620,7 +620,7 @@ void ui_print_ml(uint8_t * string_ptr, uint16_t row, uint16_t col)
 /*
     Prints monospaced text to the screen and queues DMA for it
 */
-void ui_print(uint8_t * string_ptr, uint16_t row, uint16_t col)
+void UserInterface_PrintText(uint8_t * string_ptr, uint16_t row, uint16_t col)
 {
     int i = 0;
     uint16_t temp_len = 2;
@@ -663,7 +663,7 @@ void ui_print(uint8_t * string_ptr, uint16_t row, uint16_t col)
     Prints monospaced text to the screen and queues DMA for it, for mode 3 
     (where 4bpp and UI tilemap is located in a different location)
 */
-void ui_print_mode3(uint8_t * string_ptr, uint16_t row, uint16_t col)
+void UserInterface_PrintText_Mode3(uint8_t * string_ptr, uint16_t row, uint16_t col)
 {
     uint16_t i = 0;
     uint16_t temp_len = 2;
@@ -702,7 +702,7 @@ void ui_print_mode3(uint8_t * string_ptr, uint16_t row, uint16_t col)
     return;
 }
 
-void ui_clear(uint16_t len, uint16_t row, uint16_t col)
+void UserInterface_ClearText(uint16_t len, uint16_t row, uint16_t col)
 {
     for (int i = 0; i < len; i++)
     {
@@ -730,7 +730,7 @@ void ui_clear(uint16_t len, uint16_t row, uint16_t col)
 
     Height includes borders (e.g. 4 text rows = h is 6)
 */
-void ui_draw_textbox(uint16_t row, uint16_t h)
+void UserInterface_DrawTextbox(uint16_t row, uint16_t h)
 {
     ui_window_background[0][0] = 0x0170 | 0x2000 | (PAL_UI_4BPP << 10);
     ui_window_background[1][0] = 0x0180 | 0x2000 | (PAL_UI_4BPP << 10);
@@ -762,12 +762,190 @@ void ui_draw_textbox(uint16_t row, uint16_t h)
     ui_window_background[4][31] = 0x0193 | 0x2000 | (PAL_UI_4BPP << 10);
     ui_window_background[5][31] = 0x01a3 | 0x2000 | (PAL_UI_4BPP << 10);
 
-    ui_textbox_dma(row, h);
+    UserInterface_CopyTextboxToVram(row, h);
 
     return;
 }
 
-void ui_clear_textbox(uint16_t row, uint16_t h)
+/*
+    These functions clear the entirety of BG1 and BG3 UI buffers.
+    Always call these before drawing any genericized UI windows or text
+*/
+void UserInterface_ClearWindowBuffer()
+{
+    for (int x = 0; x < 32; x++)
+    {
+        for (int y = 0; y < 32; y++)
+        {
+            ui_window_background[y][x] = 0x0100 | 0x2000 | (PAL_UI_4BPP << 10);
+        }
+    }
+    return;
+}
+void UserInterface_ClearTextBuffer()
+{
+    for (int x = 0; x < 32; x++)
+    {
+        for (int y = 0; y < 32; y++)
+        {
+            ui_window_text[y][x] = 0x0000 | 0x2000 | (PAL_UI_TEXT_WHITE << 10);
+        }
+    }
+    return;
+}
+
+/*
+    This function can draw a window anywhere, but if starting from scratch, must flush the old background
+*/
+void UserInterface_DrawWindowBackground(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
+{
+    // First column
+    for (int i = y; i < y+h; i++)
+    {
+        if (i - y == 0)
+        {
+            // First row
+            ui_window_background[i][x] = 0x0170 | 0x2000 | (PAL_UI_4BPP << 10);
+        }
+        else if ((i - y == 1) && (i != (y + h - 1)))
+        {
+            // Second row, and not the last row
+            ui_window_background[i][x] = 0x0180 | 0x2000 | (PAL_UI_4BPP << 10);
+        }
+        else if (i == (y + h - 2))
+        {
+            // Second to last row
+            ui_window_background[i][x] = 0x0190 | 0x2000 | (PAL_UI_4BPP << 10);
+        }
+        else if (i == (y + h - 1))
+        {
+            // Last row
+            ui_window_background[i][x] = 0x01a0 | 0x2000 | (PAL_UI_4BPP << 10);
+        }
+        else if ((i - y) & 0x0001 == 0)
+        {
+            // Even row
+            ui_window_background[i][x] = 0x0190 | 0x2000 | (PAL_UI_4BPP << 10);
+        }
+        else
+        {
+            // Odd row
+            ui_window_background[i][x] = 0x0180 | 0x2000 | (PAL_UI_4BPP << 10);
+        }
+    }
+
+    // Middle columns
+    if (w-2 > 0)
+    {
+        for (int i = y; i < y+h; i++)
+        {
+            for (int j = x+1; j < x+w-1; j++)
+            {
+                if (i - y == 0)
+                {
+                    // First row
+                    ui_window_background[i][j] = (0x0171 + (j % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
+                }
+                else if ((i - y == 1) && (i != (y + h - 1)))
+                {
+                    // Second row, and not the last row
+                    ui_window_background[i][j] = (0x0181 + (j % 2))  | 0x2000 | (PAL_UI_4BPP << 10);
+                }
+                else if (i == (y + h - 2))
+                {
+                    // Second to last row
+                    ui_window_background[i][j] = (0x0191 + (j % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
+                }
+                else if (i == (y + h - 1))
+                {
+                    // Last row
+                    ui_window_background[i][j] = (0x01a1 + (j % 2))  | 0x2000 | (PAL_UI_4BPP << 10);
+                }
+                else if ((i - y) & 0x0001 == 0)
+                {
+                    // Even row
+                    ui_window_background[i][j] = (0x0191 + (j % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
+                }
+                else
+                {
+                    // Odd row
+                    ui_window_background[i][j] = (0x0181 + (j % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
+                }
+            }
+        }
+    }
+    
+
+    // Rightmost column
+    for (int i = y; i < y+h; i++)
+    {
+        if (i - y == 0)
+        {
+            // First row
+            ui_window_background[i][x+w-1] = 0x0173 | 0x2000 | (PAL_UI_4BPP << 10);
+        }
+        else if ((i - y == 1) && (i != (y + h - 1)))
+        {
+            // Second row, and not the last row
+            ui_window_background[i][x+w-1] = 0x0183 | 0x2000 | (PAL_UI_4BPP << 10);
+        }
+        else if (i == (y + h - 2))
+        {
+            // Second to last row
+            ui_window_background[i][x+w-1] = 0x0193 | 0x2000 | (PAL_UI_4BPP << 10);
+        }
+        else if (i == (y + h - 1))
+        {
+            // Last row
+            ui_window_background[i][x+w-1] = 0x01a3 | 0x2000 | (PAL_UI_4BPP << 10);
+        }
+        else if ((i - y) & 0x0001 == 0)
+        {
+            // Even row
+            ui_window_background[i][x+w-1] = 0x0193 | 0x2000 | (PAL_UI_4BPP << 10);
+        }
+        else
+        {
+            // Odd row
+            ui_window_background[i][x+w-1] = 0x0183 | 0x2000 | (PAL_UI_4BPP << 10);
+        }
+    }
+
+    // Last row
+    return;
+}
+
+/*
+    Call this to copy the entire UI buffer.
+*/
+void UserInterface_CopyUiBuffers()
+{
+    if (dma_queue_add(
+        (uint8_t *)(&ui_window_background[0][0]), 
+        0x3000, 
+        2048,
+        VRAM_INCHIGH, 
+        0
+        ) != 0)
+    {
+        return;
+    }
+
+    if (dma_queue_add(
+        (uint8_t *)(&ui_window_text[0][0]), 
+        0x3400, 
+        2048,
+        VRAM_INCHIGH, 
+        0
+        ) == 0)
+    {
+        return;
+    }
+
+    return;
+}
+
+void UserInterface_ClearTextbox(uint16_t row, uint16_t h)
 {
     for (int i = 0; i < 6; i++)
     {
@@ -777,13 +955,13 @@ void ui_clear_textbox(uint16_t row, uint16_t h)
         }
     }
 
-    ui_textbox_dma(row, h);
-    ui_clear_textbox_text(row, h);
+    UserInterface_CopyTextboxToVram(row, h);
+    UserInterface_ClearTextboxText(row, h);
 
     return;
 }
 
-void ui_clear_textbox_text(uint16_t row, uint16_t h)
+void UserInterface_ClearTextboxText(uint16_t row, uint16_t h)
 {
     for (int i = 0; i < 32; i++)
     {
@@ -807,7 +985,7 @@ void ui_clear_textbox_text(uint16_t row, uint16_t h)
     return;
 }
 
-void ui_textbox_dma(uint16_t row, uint16_t h)
+void UserInterface_CopyTextboxToVram(uint16_t row, uint16_t h)
 {
     if (dma_queue_add(
         (uint8_t *)(&ui_window_background[0][0]), 
@@ -848,7 +1026,7 @@ void ui_textbox_dma(uint16_t row, uint16_t h)
     return;
 }
 
-void ui_dma_ui_tiles()
+void UserInterface_CopyUiGraphicsToVram()
 {
     dma_queue_add((uint8_t *)((uint32_t)&data_ui_dynamic_textadvance + ((uint16_t)((system_frames_elapsed >> 2) % 4) * 32)), 0x4300, 32, VRAM_INCHIGH, 0);
     dma_queue_add((uint8_t *)((uint32_t)&data_ui_dynamic_textadvance + 256 + ((uint16_t)((system_frames_elapsed >> 2) % 4) * 32)), 0x4380, 32, VRAM_INCHIGH, 0);

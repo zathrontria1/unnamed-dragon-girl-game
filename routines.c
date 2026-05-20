@@ -127,7 +127,7 @@ void routines_interactable_switch(struct game_object * o)
                 }
                 else
                 {
-                    ui_print((uint8_t *)&STR_MSG_INCOMBAT, UI_MSGBOX_SL_START, UI_MARGIN_LEFT);
+                    UserInterface_PrintText((uint8_t *)&STR_MSG_INCOMBAT, UI_MSGBOX_SL_START, UI_MARGIN_LEFT);
                 }
             }
         }
@@ -156,7 +156,7 @@ void routines_interactable_sign(struct game_object * o)
                 {
                     SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
 
-                    ui_print_ml(o->data_ptr, UI_MSGBOX_ML_START, UI_MARGIN_LEFT);
+                    UserInterface_PrintText_MultiLine(o->data_ptr, UI_MSGBOX_ML_START, UI_MARGIN_LEFT);
 
                     system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_MSGBOX);
                     //system_current_routine = ROUTINE_MSGBOX;
@@ -166,7 +166,7 @@ void routines_interactable_sign(struct game_object * o)
                 }
                 else
                 {
-                    ui_print((uint8_t *)&STR_MSG_INCOMBAT, UI_MSGBOX_SL_START, UI_MARGIN_LEFT);
+                    UserInterface_PrintText((uint8_t *)&STR_MSG_INCOMBAT, UI_MSGBOX_SL_START, UI_MARGIN_LEFT);
                 }
             }
         }

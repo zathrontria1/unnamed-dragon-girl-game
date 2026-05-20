@@ -93,7 +93,7 @@ void loop_messagebox()
 
     obj_run();
 
-    ui_dma_ui_tiles();
+    UserInterface_CopyUiGraphicsToVram();
 
     SpriteEngine_ProcessSpriteLists();
 
@@ -110,7 +110,7 @@ void loop_messagebox()
         if (ui_show_message_page == 0)
         {
             // Clear the textbox
-            ui_clear_textbox(UI_MSGBOX_ML_START, UI_MSGBOX_HEIGHT);
+            UserInterface_ClearTextbox(UI_MSGBOX_ML_START, UI_MSGBOX_HEIGHT);
 
             if (ui_show_message_page_ptr_init == (uint8_t *)&STR_MSG_TUTORIAL_MP)
             {
@@ -125,7 +125,7 @@ void loop_messagebox()
         }
         else if (ui_show_message_page != 0)
         {
-            ui_print_ml(ui_show_message_page_ptr_init, UI_MSGBOX_ML_START, UI_MARGIN_LEFT);
+            UserInterface_PrintText_MultiLine(ui_show_message_page_ptr_init, UI_MSGBOX_ML_START, UI_MARGIN_LEFT);
         }
     }
 
@@ -136,7 +136,7 @@ void loop_game()
 {
     system_dont_count_lag = 0;
 
-    ui_process();
+    UserInterface_Process();
 
     if (!event_tutorial_shown)
     {
@@ -144,7 +144,7 @@ void loop_game()
 
         SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
 
-        ui_print_ml((uint8_t *)&STR_MSG_TUTORIAL_MP, UI_MSGBOX_ML_START, UI_MARGIN_LEFT);
+        UserInterface_PrintText_MultiLine((uint8_t *)&STR_MSG_TUTORIAL_MP, UI_MSGBOX_ML_START, UI_MARGIN_LEFT);
 
         system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_MSGBOX);
         //system_current_routine = ROUTINE_MSGBOX;
@@ -159,7 +159,7 @@ void loop_game()
 
         SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
         
-        ui_print_ml_special((uint8_t *)&STR_UI_PLAYERINFO_ML);
+        UserInterface_PrintSpecialText((uint8_t *)&STR_UI_PLAYERINFO_ML);
 
         system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_MSGBOX);
         //system_current_routine = ROUTINE_MSGBOX;
@@ -174,7 +174,7 @@ void loop_game()
     }
     else if (!ui_show_message_cleared)
     {
-        ui_clear(30, UI_MSGBOX_SL_START, 1);
+        UserInterface_ClearText(30, UI_MSGBOX_SL_START, 1);
     }
 
     ani_bg_update_water_anim();
@@ -423,7 +423,7 @@ void loop_mapdisplay_init()
         }
     #endif
 
-    ui_print_mode3((uint8_t *)&STR_UI_HELP_MAP, UI_MAPSCREEN_SL_START, UI_MARGIN_LEFT);
+    UserInterface_PrintText_Mode3((uint8_t *)&STR_UI_HELP_MAP, UI_MAPSCREEN_SL_START, UI_MARGIN_LEFT);
 
     system_target_routine = ROUTINE_MAPDISPLAY;
 
@@ -585,7 +585,7 @@ void loop_game_partial(void)
     uint16_t temp_game_paused_copy = system_game_paused;
 
     system_game_paused = 1;
-    ui_process();
+    UserInterface_Process();
     obj_run();
 
     SpriteEngine_ProcessSpriteLists();

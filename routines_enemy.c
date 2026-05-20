@@ -47,7 +47,7 @@ void routines_slime(struct game_object * o)
         {
             if (o->struct_data.npc_data.hp_display_time > 0)
             {
-                ui_show_enemy_health_bar(o);
+                UserInterface_DrawEnemyHealthBar(o);
             }
 
             int16_t temp_x = o->pos.x.lh.h - p->pos.x.lh.h;
@@ -314,7 +314,7 @@ void routines_slime(struct game_object * o)
         {
             if (o->struct_data.npc_data.hp_display_time > 0)
             {
-                ui_show_enemy_health_bar(o);
+                UserInterface_DrawEnemyHealthBar(o);
             }
         }
     }

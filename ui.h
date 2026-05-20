@@ -1,17 +1,29 @@
-void ui_process(void);
-void ui_update_health(void);
-void ui_update_money(void);
-void ui_update_enemy_counters(void);
-void ui_print_ml(uint8_t * string_ptr, uint16_t row, uint16_t col);
-void ui_print_ml_special(uint8_t * string_ptr);
-void ui_print(uint8_t * string_ptr, uint16_t row, uint16_t col);
-void ui_print_mode3(uint8_t * string_ptr, uint16_t row, uint16_t col);
-void ui_clear(uint16_t len, uint16_t row, uint16_t col);
-void ui_draw_textbox(uint16_t row, uint16_t h);
-void ui_clear_textbox(uint16_t row, uint16_t h);
-void ui_clear_textbox_text(uint16_t row, uint16_t h);
-void ui_textbox_dma(uint16_t row, uint16_t h);
+void UserInterface_Process(void);
+void UserInterface_UpdateHealthCounters(void);
+void UserInterface_UpdateMoneyCounters(void);
+void UserInterface_UpdateEnemyCounters(void);
 
-void ui_show_enemy_health_bar(struct game_object * o);
+void UserInterface_PrintText_MultiLine(uint8_t * string_ptr, uint16_t row, uint16_t col);
+void UserInterface_PrintSpecialText(uint8_t * string_ptr);
+void UserInterface_PrintText(uint8_t * string_ptr, uint16_t row, uint16_t col);
+void UserInterface_PrintText_Mode3(uint8_t * string_ptr, uint16_t row, uint16_t col);
 
-void ui_dma_ui_tiles(void);
+void UserInterface_ClearText(uint16_t len, uint16_t row, uint16_t col);
+
+void UserInterface_DrawTextbox(uint16_t row, uint16_t h);
+
+void UserInterface_ClearTextbox(uint16_t row, uint16_t h);
+void UserInterface_ClearTextboxText(uint16_t row, uint16_t h);
+
+// Genericized window drawing functions
+void UserInterface_ClearWindowBuffer();
+void UserInterface_ClearTextBuffer();
+void UserInterface_DrawWindowBackground(uint16_t x, uint16_t y, uint16_t w, uint16_t h);
+
+void UserInterface_CopyUiBuffers();
+
+void UserInterface_CopyTextboxToVram(uint16_t row, uint16_t h);
+
+void UserInterface_DrawEnemyHealthBar(struct game_object * o);
+
+void UserInterface_CopyUiGraphicsToVram(void);
