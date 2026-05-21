@@ -18,7 +18,7 @@ struct menu_item {
     void * ptr;
 };
 
-extern bool subscreen_toplevel_rendered;
+extern bool subscreen_rendered;
 extern uint16_t subscreen_selection;
 extern uint16_t subscreen_bottom_entry;
 
@@ -26,6 +26,10 @@ extern uint16_t subscreen_cursor_x;
 extern uint16_t subscreen_cursor_y;
 
 extern const struct menu_item subscreen_items_toplevel[7];
+extern const struct menu_item subscreen_items_help[7];
 
 void loop_subscreen_top();
 void loop_subscreen_top_drawtime();
+
+void loop_subscreen_help();
+void loop_subscreen_help_drawtext(bool copy_result);

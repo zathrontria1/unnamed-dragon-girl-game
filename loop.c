@@ -161,7 +161,7 @@ void loop_game()
         SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
         
         //UserInterface_PrintSpecialText((uint8_t *)&STR_UI_PLAYERINFO_ML);
-        subscreen_toplevel_rendered = 0; // Clear subscreen state so it re-renders
+        subscreen_rendered = 0; // Clear subscreen state so it re-renders
 
         system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_SUBSCREEN);
         system_target_routine = ROUTINE_SUBSCREEN;

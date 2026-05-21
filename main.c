@@ -91,6 +91,9 @@ void * main_GetFunctionPointer(uint16_t routine)
         case ROUTINE_SUBSCREEN:
             return (void *)&loop_subscreen_top;
             break;
+        case ROUTINE_SUBSCREEN_HELP:
+            return (void *)&loop_subscreen_help;
+            break;
         case ROUTINE_RESET: // Special cased to immediately reset
             return (void *)&main_Reset;
             break;

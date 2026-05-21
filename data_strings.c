@@ -23,25 +23,8 @@ text box.";
 const uint8_t STR_MSG_TUTORIAL_MP[] = "\
 Welcome to\n\
 Unnamed Dragon Girl Game!\n\
-Press the A Button to read\n\
-the instructions.\r\
-Use the D-Pad to move around.\n\
-You can move faster if you\n\
-hold down the B Button.\r\
-The A Button is used to\n\
-interact with the world.\n\
-This is also the button\n\
-to punch things.\r\
-Hold down the Y Button\n\
-to unleash flames.\n\
-Lower damage, and slows you,\n\
-but has good coverage.\r\
-Press the X Button\n\
-to check your stats.\r\
-Press the START Button\n\
-to pause the game.\n\
-Press the SELECT Button\n\
-to view the dungeon map.\r\
+A Button: Start Game\n\
+X Button: Open Menu\r\
 This is a prototype game,\n\
 and I hope you have fun\n\
 trying the game out.\n\
@@ -62,6 +45,88 @@ const uint8_t STR_UI_SUBSCREEN_MONEY[] =            "Money:       %10u";
 const uint8_t STR_UI_SUBSCREEN_PLAYTIME[] =         "Play time: %6u:%02u:%02u";
 const uint8_t STR_UI_SUBSCREEN_PLAYTIME_NOCOLON[] = "Play time: %6u %02u %02u";
 const uint8_t STR_UI_SUBSCREEN_LAGCOUNTER[] =       "Lag counter: %10u";
+
+const uint8_t STR_UI_SUBSCREEN_HELP_MOVEMENT_H[] = "1";
+const uint8_t STR_UI_SUBSCREEN_HELP_INTERACTION_H[] = "2";
+const uint8_t STR_UI_SUBSCREEN_HELP_ATTACK_H[] = "3";
+const uint8_t STR_UI_SUBSCREEN_HELP_PROGRESSION_H[] = "4";
+const uint8_t STR_UI_SUBSCREEN_HELP_MAP_H[] = "5";
+const uint8_t STR_UI_SUBSCREEN_HELP_RESET_H[] = "6";
+
+const uint8_t STR_UI_SUBSCREEN_HELP_MOVEMENT[] = "\
+Press the D-Pad to move in\n\
+that direction.\n\
+You can move diagonally.\n\
+\n\
+Your facing will be in the\n\
+same direction as what\n\
+you moved towards.\n\
+\n\
+While moving, hold the\n\
+B Button to run.\n\
+Note that you can't run\n\
+while breathing fire.";
+
+const uint8_t STR_UI_SUBSCREEN_HELP_INTERACTION[] = "\
+Press the A Button\n\
+to read signs, talk to\n\
+NPCs, operate switches,\n\
+levers, and do stuff.\n\
+\n\
+To pick up items,\n\
+walk over them.\n\
+\n\
+You can't interact with\n\
+items that require the\n\
+use of the A Button\n\
+while you're in combat.";
+
+const uint8_t STR_UI_SUBSCREEN_HELP_ATTACK[] = "\
+Hold down the Y Button to\n\
+breath fire in a cone.\n\
+This does a steady amount of\n\
+damage against a wide area.\n\
+\n\
+Press the A Button during\n\
+combat to punch.\n\
+The range is very limited,\n\
+but it deals much more\n\
+damage, and enemies have\n\
+less invulnerability time.";
+
+const uint8_t STR_UI_SUBSCREEN_HELP_PROGRESSION[] = "\
+Defeat most enemies in a\n\
+level, then find the entry\n\
+to the next level, to \n\
+progress in the game.\n\
+\n\
+If your HP drops to zero,\n\
+it's Game Over.\n\
+\n\
+You'll regen HP if\n\
+you have less than half\n\
+remaining, but you'll need\n\
+recovery items to recover\n\
+HP past that.";
+
+const uint8_t STR_UI_SUBSCREEN_HELP_MAP[] = "\
+Select \"Map\" in Pause Menu\n\
+to open the overview map\n\
+for the current level.\n\
+\n\
+Press the SELECT Button\n\
+to exit the screen.";
+
+const uint8_t STR_UI_SUBSCREEN_HELP_RESET[] = "\
+To restart the game,\n\
+Press the following\n\
+combination while\n\
+the game is not paused:\n\
+\n\
+L + R + SELECT + START\n\
+\n\
+Unsaved progress will\n\
+be lost.";
 
 const uint8_t STR_LEVELNAME_DEBUG_B1F[] = "DEBUG Dungeon B1F";
 const uint8_t STR_LEVELNAME_DEBUG_B2F[] = "DEBUG Dungeon B2F";

@@ -20,7 +20,7 @@
 
 #include "data_strings.h"
 
-bool subscreen_toplevel_rendered;
+bool subscreen_rendered;
 uint16_t subscreen_selection;
 uint16_t subscreen_bottom_entry;
 
@@ -32,7 +32,7 @@ void loop_subscreen_top()
     system_game_paused = 1;
     system_dont_count_lag = 1;
 
-    if (!subscreen_toplevel_rendered)
+    if (!subscreen_rendered)
     {
         subscreen_selection = 0;
         subscreen_bottom_entry = 0;
@@ -73,7 +73,7 @@ void loop_subscreen_top()
         
         UserInterface_CopyUiBuffers();
 
-        subscreen_toplevel_rendered = 1;
+        subscreen_rendered = 1;
     }
     else
     {
@@ -113,6 +113,16 @@ void loop_subscreen_top()
 
         loop_subscreen_top_drawtime();
 
+        if (system_check_for_key(KEY_A))
+        {
+            if (subscreen_items_toplevel[subscreen_selection].action == MENUACTION_OPENSUBSCREEN)
+            {
+                subscreen_rendered = 0;
+                system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_SUBSCREEN_HELP);
+                return;
+            }
+        }
+
         if (system_check_for_key(KEY_X) || system_check_for_key(KEY_B))
         {
             // Exiting the top level subscreen.
@@ -129,6 +139,114 @@ void loop_subscreen_top()
             system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_GAMELOOP);
             system_target_routine = ROUTINE_GAMELOOP;
         }
+    }
+
+    return;
+}
+
+void loop_subscreen_help()
+{
+    system_game_paused = 1;
+    system_dont_count_lag = 1;
+
+    if (!subscreen_rendered)
+    {
+        subscreen_selection = 0;
+        subscreen_bottom_entry = 0;
+
+        for (int i = 0; i < 256; i++)
+        {
+            if ((subscreen_items_help[i].x == 255) && (subscreen_items_help[i].y == 255))
+            {
+                subscreen_bottom_entry = i-1;
+                break;
+            }
+        }
+        
+        UserInterface_ClearWindowBuffer();
+
+        UserInterface_DrawWindowBackground(0,0,4,26);
+        UserInterface_DrawWindowBackground(4,0,28,26);
+
+        loop_subscreen_help_drawtext(false);
+        
+        UserInterface_CopyUiBuffers();
+        
+        subscreen_rendered = 1;
+    }
+    else
+    {
+        // Perform menu navigation
+        if (system_check_for_key(KEY_UP))
+        {
+            if (subscreen_selection == 0)
+            {
+                subscreen_selection = subscreen_bottom_entry;
+            }
+            else
+            {
+                subscreen_selection--;
+            }
+
+            loop_subscreen_help_drawtext(true);
+        }
+        else if (system_check_for_key(KEY_DOWN))
+        {
+            if (subscreen_selection >= subscreen_bottom_entry)
+            {
+                subscreen_selection = 0;
+            }
+            else
+            {
+                subscreen_selection++;
+            }
+
+            loop_subscreen_help_drawtext(true);
+        }
+
+        int16_t x = subscreen_items_help[subscreen_selection].x;
+        int16_t y = subscreen_items_help[subscreen_selection].y;
+
+        SpriteEngine_DrawUISprite(x, y, (0x2c | PAL_SYS_IMPACT << 9 | 3 << 12));
+
+        SpriteEngine_ProcessSpriteLists();
+
+        SpriteEngine_ResetOam();
+        SpriteEngine_PackOamHighTable();
+
+        if (system_check_for_key(KEY_X) || system_check_for_key(KEY_B))
+        {
+            subscreen_rendered = 0;
+            // Exiting the help subscreen.
+            SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
+
+            system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_SUBSCREEN);
+            system_target_routine = ROUTINE_SUBSCREEN;
+        }
+    }
+
+    return;
+}
+
+/*
+    Helper function to draw for Help
+*/
+void loop_subscreen_help_drawtext(bool copy_result)
+{
+    UserInterface_ClearTextBuffer();
+
+    UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_HELP_MOVEMENT_H, 2, 2);
+    UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_HELP_INTERACTION_H, 2, 4);
+    UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_HELP_ATTACK_H, 2, 6);
+    UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_HELP_PROGRESSION_H, 2, 8);
+    UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_HELP_MAP_H, 2, 10);
+    UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_HELP_RESET_H, 2, 12);
+
+    UserInterface_DrawWindowText((char *)subscreen_items_help[subscreen_selection].ptr, 4, 1);
+
+    if (copy_result)
+    {
+        UserInterface_CopyUiBuffers();
     }
 
     return;
@@ -165,10 +283,21 @@ const struct menu_item subscreen_items_toplevel[7] = {
 
     {8, 20, MENUACTION_OPENSUBSCREEN, 0}, 
     {8, 28, MENUACTION_OPENSUBSCREEN, 0}, 
-    {8, 36, MENUACTION_OPENSUBSCREEN, 0}, 
+    {8, 36, MENUACTION_OPENSUBSCREEN, (void *)&loop_subscreen_help}, 
     {8, 44, MENUACTION_OPENSUBSCREEN, 0}, 
     
     {8, 52, MENUACTION_CALLFUNCTION, (void *)&system_reset}, 
+
+    {255, 255, 0, 0}, 
+};
+
+const struct menu_item subscreen_items_help[7] = {
+    {0, 12, 0, (void *)&STR_UI_SUBSCREEN_HELP_MOVEMENT}, 
+    {0, 28, 0, (void *)&STR_UI_SUBSCREEN_HELP_INTERACTION}, 
+    {0, 44, 0, (void *)&STR_UI_SUBSCREEN_HELP_ATTACK}, 
+    {0, 60, 0, (void *)&STR_UI_SUBSCREEN_HELP_PROGRESSION}, 
+    {0, 76, 0, (void *)&STR_UI_SUBSCREEN_HELP_MAP}, 
+    {0, 92, 0, (void *)&STR_UI_SUBSCREEN_HELP_RESET}, 
 
     {255, 255, 0, 0}, 
 };

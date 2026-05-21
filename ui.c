@@ -1003,6 +1003,7 @@ void UserInterface_DrawWindowText(char * string_ptr, uint16_t x, uint16_t y)
             row++;
             col = x;
             string_ptr++;
+            continue;
         }
         else if (col >= 32)
         {
