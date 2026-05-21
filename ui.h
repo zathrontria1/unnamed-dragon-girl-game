@@ -16,7 +16,7 @@ void UserInterface_ClearTextbox(uint16_t row, uint16_t h);
 void UserInterface_ClearTextboxText(uint16_t row, uint16_t h);
 
 // Genericized window drawing functions
-void UserInterface_ClearWindowBuffer();
+void UserInterface_ClearWindowBuffer(bool use_clear_tile);
 void UserInterface_ClearTextBuffer();
 void UserInterface_ClearTextBuffer_Line(uint16_t y);
 void UserInterface_DrawWindowBackground(uint16_t x, uint16_t y, uint16_t w, uint16_t h);

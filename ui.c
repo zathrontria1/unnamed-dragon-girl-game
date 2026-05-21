@@ -771,13 +771,20 @@ void UserInterface_DrawTextbox(uint16_t row, uint16_t h)
     These functions clear the entirety of BG1 and BG3 UI buffers.
     Always call these before drawing any genericized UI windows or text
 */
-void UserInterface_ClearWindowBuffer()
+void UserInterface_ClearWindowBuffer(bool use_clear_tile)
 {
     for (int x = 0; x < 32; x++)
     {
         for (int y = 0; y < 32; y++)
         {
-            ui_window_background[y][x] = 0x0100 | 0x2000 | (PAL_UI_4BPP << 10);
+            if (use_clear_tile)
+            {
+                ui_window_background[y][x] = 0x0100 | 0x2000 | (PAL_UI_4BPP << 10);
+            }
+            else
+            {
+                ui_window_background[y][x] = 0x015f | 0x2000 | (PAL_UI_4BPP << 10);
+            }
         }
     }
     return;

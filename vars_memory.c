@@ -285,6 +285,9 @@ uint16_t hdma_scroll_select;
 ZP uint16_t hdma_scroll_ptr;
 uint16_t hdma_scroll_sine_index;
 
+ZP uint16_t hdma_use_gradient;
+ZP uint16_t hdma_gradient_ptr;
+
 // Sound system
 uint8_t snd_current_command_counter;
 

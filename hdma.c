@@ -84,7 +84,9 @@ void HdmaEngine_SetupPaletteHdma()
 
     HdmaEngine_GeneratePaletteTable((uint16_t *)&hdma_indirect_data[0], 0x42, 13, 1, 224, 0, BLENDMODE_ALPHA_TOWARDS_BLACK); // Water
     HdmaEngine_GeneratePaletteTable((uint16_t *)&hdma_windowbackground_data[0], 0x04, 4, 2, 48, 0, BLENDMODE_ALPHA_TOWARDS_BLACK); // UI message box using alpha towards black
-    HdmaEngine_GeneratePaletteTable((uint16_t *)&hdma_windowbackground_data[1], 0x04, 4, 1, 220, 2, BLENDMODE_ALPHA_TOWARDS_BLACK); // UI full height using alpha towards black
+    HdmaEngine_GeneratePaletteTable((uint16_t *)&hdma_windowbackground_data[1], 0x04, 4, 1, 224, 1, BLENDMODE_ALPHA_TOWARDS_BLACK); // UI full height using alpha towards black
+
+    hdma_gradient_ptr = (uint16_t)((uint32_t)&hdma_windowbackground_tables[0][0]);
 
     return;
 }
@@ -218,6 +220,11 @@ void HdmaEngine_GeneratePaletteTable(uint16_t * table_ptr, uint16_t pal_start, u
 
             if (blend_mode == BLENDMODE_ALPHA_TOWARDS_BLACK)
             {
+                if (temp_intensity > 31)
+                {
+                    temp_intensity = 31;
+                }
+
                 temp_r = ((shadow_cgram.entry[pal_start+j] & 0x001f) * (31 - temp_intensity)) / 31;
                 temp_g = (((shadow_cgram.entry[pal_start+j] & 0x03e0) >> 5) * (31 - temp_intensity)) / 31;
                 temp_b = (((shadow_cgram.entry[pal_start+j] & 0x7c00) >> 10) * (31 - temp_intensity)) / 31;
@@ -234,7 +241,7 @@ void HdmaEngine_GeneratePaletteTable(uint16_t * table_ptr, uint16_t pal_start, u
             {
                 temp_r = 0;
             }
-            else if (temp_r > 31)
+            if (temp_r > 31)
             {
                 temp_r = 31;
             }
@@ -243,7 +250,7 @@ void HdmaEngine_GeneratePaletteTable(uint16_t * table_ptr, uint16_t pal_start, u
             {
                 temp_g = 0;
             }
-            else if (temp_g > 31)
+            if (temp_g > 31)
             {
                 temp_g = 31;
             }
@@ -252,7 +259,7 @@ void HdmaEngine_GeneratePaletteTable(uint16_t * table_ptr, uint16_t pal_start, u
             {
                 temp_b = 0;
             }
-            else if (temp_b > 31)
+            if (temp_b > 31)
             {
                 temp_b = 31;
             }

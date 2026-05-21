@@ -262,6 +262,9 @@ extern uint16_t hdma_scroll_select;
 extern ZP uint16_t hdma_scroll_ptr;
 extern uint16_t hdma_scroll_sine_index;
 
+extern ZP uint16_t hdma_use_gradient;
+extern ZP uint16_t hdma_gradient_ptr;
+
 // Sound system
 extern uint8_t snd_current_command_counter;
 

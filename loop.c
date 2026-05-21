@@ -40,6 +40,8 @@
 
 void loop_fadein()
 {
+    hdma_use_gradient = 0x0000;
+
     // Always reset mosaic during fades
     shadow_mosaic = 0x00; 
 
@@ -67,6 +69,8 @@ void loop_fadein()
 */
 void loop_fadeout()
 {
+    hdma_use_gradient = 0x0000;
+
     // Always reset mosaic during fades
     shadow_mosaic = 0x00; 
 
@@ -92,6 +96,9 @@ void loop_messagebox()
 {
     system_game_paused = 1;
     system_dont_count_lag = 1;
+
+    hdma_use_gradient = 0xffff;
+    hdma_gradient_ptr = (uint16_t)((uint32_t)&hdma_windowbackground_tables[0][0]);
 
     obj_run();
 
@@ -136,6 +143,8 @@ void loop_messagebox()
 void loop_game()
 {
     system_dont_count_lag = 0;
+
+    hdma_use_gradient = 0x0001;
 
     UserInterface_Process();
 
@@ -241,6 +250,8 @@ void loop_game()
 
 void loop_pause()
 {
+    hdma_use_gradient = 0x0001;
+
     // Silence the looping fire sound
     if (snd_flame_playing == 1)
     {
@@ -263,6 +274,8 @@ void loop_pause()
 void loop_mapdisplay_init()
 {
     system_dont_count_lag = 1;
+
+    hdma_use_gradient = 0x0000;
     
     // Silence the looping fire sound
     if (snd_flame_playing == 1)
@@ -447,6 +460,8 @@ void loop_mapdisplay_init()
 
 void loop_mapdisplay()
 {
+    hdma_use_gradient = 0x0000;
+
     // The minimap is always 192x192 pixels.
     // minimap position = (real position / map extent) * 192
 
@@ -522,6 +537,8 @@ void loop_mapdisplay()
 
 void loop_game_reload()
 {
+    hdma_use_gradient = 0x0000;
+
     // Perform a partial load
     level_load_tileset(level_data_ptr);
     level_load_palette(level_data_ptr);
@@ -603,6 +620,8 @@ void loop_game_partial(void)
 
 void loop_game_newlevel()
 {
+    hdma_use_gradient = 0x0000;
+    
     system_init_partial();
     
     bool temp_level_reuses_vram_contents = level_load(level_data_ptr);

@@ -23,11 +23,14 @@
     shadow_stat77 = REG_STAT77;
 
     // Check the current routine and set up HDMA
-    if (system_current_routine == ROUTINE_MSGBOX)
+    if (hdma_use_gradient == 0xffff)
     {
         REG_HDMAEN = HDMA_USED_CHANNELS_MSGBOX;
+        // Repoint the HDMA table
+        REG_A1T2LH = hdma_gradient_ptr;
+        
     }
-    else if (system_current_routine == ROUTINE_MAPDISPLAY || system_current_routine == ROUTINE_FADEIN || system_current_routine == ROUTINE_FADEOUT)
+    else if (hdma_use_gradient == 0)
     {
         ; // Do not interfere with HDMA
     }
@@ -85,7 +88,7 @@
     else if (system_current_routine != ROUTINE_MAPDISPLAY)
     {
         // Just refresh the entries used by HDMA
-        //dma_copy_palette_subset(0x22, 4); // UI message box: not needed as part of the table resets it
+        dma_copy_palette_subset(0x04, 4); // UI message box
         dma_copy_palette_subset(0x42, 13); // Water tiles
 
         if (ani_bg_water_dma_ready)

@@ -12,10 +12,11 @@
 #define MENUACTION_CALLFUNCTION 255
 
 struct menu_item {
-    uint8_t x;
-    uint8_t y;
+    int16_t x;
+    int16_t y;
     uint16_t action;
     void * ptr;
+    uint8_t padding[6];
 };
 
 extern bool subscreen_rendered;
