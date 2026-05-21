@@ -18,10 +18,12 @@ void UserInterface_ClearTextboxText(uint16_t row, uint16_t h);
 // Genericized window drawing functions
 void UserInterface_ClearWindowBuffer();
 void UserInterface_ClearTextBuffer();
+void UserInterface_ClearTextBuffer_Line(uint16_t y);
 void UserInterface_DrawWindowBackground(uint16_t x, uint16_t y, uint16_t w, uint16_t h);
 void UserInterface_DrawWindowText(char * string_ptr, uint16_t x, uint16_t y);
 
 void UserInterface_CopyUiBuffers();
+void UserInterface_CopyTextBuffer_Line(uint16_t y);
 
 void UserInterface_CopyTextboxToVram(uint16_t row, uint16_t h);
 

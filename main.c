@@ -10,6 +10,7 @@
 #include "system.h"
 #include "level.h"
 #include "loop.h"
+#include "loop_subscreen.h"
 
 #include "hdma.h"
 
@@ -86,6 +87,9 @@ void * main_GetFunctionPointer(uint16_t routine)
             break;
         case ROUTINE_FADEOUT:
             return (void *)&loop_fadeout;
+            break;
+        case ROUTINE_SUBSCREEN:
+            return (void *)&loop_subscreen_top;
             break;
         case ROUTINE_RESET: // Special cased to immediately reset
             return (void *)&main_Reset;

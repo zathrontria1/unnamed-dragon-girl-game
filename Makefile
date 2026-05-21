@@ -1,5 +1,5 @@
 C_SRCS = system.c interrupt.c interrupt_sub.c sram_management.c dma.c hdma.c asm.c \
-math_int.c level.c loop.c map.c obj.c movement.c routines.c routines_player.c routines_enemy.c \
+math_int.c level.c loop.c loop_subscreen.c map.c obj.c movement.c routines.c routines_player.c routines_enemy.c \
 routines_enemy_ai.c hittest.c ani.c ani_bg.c ani_fixedspr.c ani_pal.c spr.c spr_metaspr.c ui.c \
 snd.c lz4.c gfx.c main.c vars_memory.c data_strings.c
 

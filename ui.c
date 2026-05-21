@@ -793,6 +793,14 @@ void UserInterface_ClearTextBuffer()
     }
     return;
 }
+void UserInterface_ClearTextBuffer_Line(uint16_t y)
+{
+    for (int x = 0; x < 32; x++)
+    {
+        ui_window_text[y][x] = 0x0000 | 0x2000 | (PAL_UI_TEXT_WHITE << 10);
+    }
+    return;
+}
 
 /*
     This function can draw a window anywhere, but if starting from scratch, must flush the old background
@@ -1035,6 +1043,22 @@ void UserInterface_CopyUiBuffers()
         (uint8_t *)(&ui_window_text[0][0]), 
         0x3400, 
         2048,
+        VRAM_INCHIGH, 
+        0
+        ) == 0)
+    {
+        return;
+    }
+
+    return;
+}
+
+void UserInterface_CopyTextBuffer_Line(uint16_t y)
+{
+    if (dma_queue_add(
+        (uint8_t *)(&ui_window_text[y][0]), 
+        0x3400 + (y << 5), 
+        64,
         VRAM_INCHIGH, 
         0
         ) == 0)

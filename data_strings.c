@@ -51,22 +51,17 @@ const uint8_t STR_MSG_INCOMBAT[] = "Can't use while in combat";
 
 const uint8_t STR_UI_HELP_MAP[] = "SELECT Button: Return to game";
 
-const uint8_t STR_UI_PLAYERINFO_ML[] = "\
-HP: %u/%u\n\
-ATK: %u DEF: %u\n\
-Lag frames:         %10u\n\
-Play time:        %6u:%02u:%02u";
-
-const uint8_t STR_UI_SUBSCREEN_RESUME[] = "Resume";
+const uint8_t STR_UI_SUBSCREEN_RESUME[] =  "Resume";
 const uint8_t STR_UI_SUBSCREEN_PROFILE[] = "Profile";
-const uint8_t STR_UI_SUBSCREEN_MAP[] = "Map";
-const uint8_t STR_UI_SUBSCREEN_HELP[] = "Help";
+const uint8_t STR_UI_SUBSCREEN_MAP[] =     "Map";
+const uint8_t STR_UI_SUBSCREEN_HELP[] =    "Help";
 const uint8_t STR_UI_SUBSCREEN_OPTIONS[] = "Options";
 const uint8_t STR_UI_SUBSCREEN_RESTART[] = "Restart";
 
-const uint8_t STR_UI_SUBSCREEN_MONEY[] =      "Money:       %10u";
-const uint8_t STR_UI_SUBSCREEN_PLAYTIME[] =   "Play time: %6u:%02u:%02u";
-const uint8_t STR_UI_SUBSCREEN_LAGCOUNTER[] = "Lag counter: %10u";
+const uint8_t STR_UI_SUBSCREEN_MONEY[] =            "Money:       %10u";
+const uint8_t STR_UI_SUBSCREEN_PLAYTIME[] =         "Play time: %6u:%02u:%02u";
+const uint8_t STR_UI_SUBSCREEN_PLAYTIME_NOCOLON[] = "Play time: %6u %02u %02u";
+const uint8_t STR_UI_SUBSCREEN_LAGCOUNTER[] =       "Lag counter: %10u";
 
 const uint8_t STR_LEVELNAME_DEBUG_B1F[] = "DEBUG Dungeon B1F";
 const uint8_t STR_LEVELNAME_DEBUG_B2F[] = "DEBUG Dungeon B2F";
