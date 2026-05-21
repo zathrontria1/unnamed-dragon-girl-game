@@ -796,12 +796,32 @@ void UserInterface_ClearTextBuffer()
 
 /*
     This function can draw a window anywhere, but if starting from scratch, must flush the old background
+
+    Right now it doesn't handle window sizes that aren't a multiple of 2 properly due to lack of suitable tiles
 */
 void UserInterface_DrawWindowBackground(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 {
+    // Sanity checks
+    if ((w == 0) || (h == 0))
+    {
+        // Size is 0
+        return;
+    }
+    if ((x >= 32) || (y >= 32))
+    {
+        // Start of window is outside the screen
+        return;
+    }
+
     // First column
     for (int i = y; i < y+h; i++)
     {
+        if (i >= 32)
+        {
+            // Over last row
+            break;
+        }
+
         if (i - y == 0)
         {
             // First row
@@ -839,37 +859,67 @@ void UserInterface_DrawWindowBackground(uint16_t x, uint16_t y, uint16_t w, uint
     {
         for (int i = y; i < y+h; i++)
         {
+            if (i >= 32)
+            {
+                // Over last row
+                break;
+            }
+
             for (int j = x+1; j < x+w-1; j++)
             {
+                if (j >= 32)
+                {
+                    // Over last column
+                    break;
+                }
+
                 if (i - y == 0)
                 {
                     // First row
-                    ui_window_background[i][j] = (0x0171 + ((j + 1) % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
-                }
-                else if ((i - y == 1) && (i != (y + h - 1)))
-                {
-                    // Second row, and not the last row
-                    ui_window_background[i][j] = (0x0181 + ((j + 1) % 2))  | 0x2000 | (PAL_UI_4BPP << 10);
-                }
-                else if (i == (y + h - 2))
-                {
-                    // Second to last row
-                    ui_window_background[i][j] = (0x0191 + ((j + 1) % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
+                    if (x % 2 == 0)
+                    {
+                        ui_window_background[i][j] = (0x0171 + ((j + 1) % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
+                    }
+                    else
+                    {
+                        ui_window_background[i][j] = (0x0171 + (j % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
+                    }
                 }
                 else if (i == (y + h - 1))
                 {
                     // Last row
-                    ui_window_background[i][j] = (0x01a1 + ((j + 1) % 2))  | 0x2000 | (PAL_UI_4BPP << 10);
+                    if (x % 2 == 0)
+                    {
+                        ui_window_background[i][j] = (0x01a1 + ((j + 1) % 2))  | 0x2000 | (PAL_UI_4BPP << 10);
+                    }
+                    else
+                    {
+                        ui_window_background[i][j] = (0x01a1 + (j % 2))  | 0x2000 | (PAL_UI_4BPP << 10);
+                    }
                 }
                 else if ((i - y) & 0x0001 == 1)
                 {
                     // Odd row
-                    ui_window_background[i][j] = (0x0181 + ((j + 1) % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
+                    if (x % 2 == 0)
+                    {
+                        ui_window_background[i][j] = (0x0181 + ((j + 1) % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
+                    }
+                    else
+                    {
+                        ui_window_background[i][j] = (0x0181 + (j % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
+                    }
                 }
                 else
                 {
                     // Even row
-                    ui_window_background[i][j] = (0x0191 + ((j + 1) % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
+                    if (x % 2 == 0)
+                    {
+                        ui_window_background[i][j] = (0x0191 + ((j + 1) % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
+                    }
+                    else
+                    {
+                        ui_window_background[i][j] = (0x0191 + (j % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
+                    }
                 }
             }
         }
@@ -878,6 +928,12 @@ void UserInterface_DrawWindowBackground(uint16_t x, uint16_t y, uint16_t w, uint
     // Rightmost column
     for (int i = y; i < y+h; i++)
     {
+        if (i >= 32)
+        {
+            // Over last row
+            break;
+        }
+
         if (i - y == 0)
         {
             // First row
@@ -911,6 +967,51 @@ void UserInterface_DrawWindowBackground(uint16_t x, uint16_t y, uint16_t w, uint
     }
 
     // Last row
+    return;
+}
+
+
+/*
+    Call this to draw a string to the text buffer.
+
+    Text will newline if it hits a screen edge, and terminate at the last block
+*/
+void UserInterface_DrawWindowText(char * string_ptr, uint16_t x, uint16_t y)
+{
+    // Sanity check
+    if ((x >= 32) || (y >= 32))
+    {
+        // Start of text is offscreen
+        return;
+    }
+
+    uint16_t col = x;
+    uint16_t row = y;
+
+    while (*string_ptr != 0x00)
+    {
+        if (*string_ptr == '\n')
+        {
+            row++;
+            col = x;
+            string_ptr++;
+        }
+        else if (col >= 32)
+        {
+            row++;
+            col = x;
+        }
+        
+        if (row >= 32)
+        {
+            break;
+        }
+
+        ui_window_text[row][col] = (-0x20 + *string_ptr++) | 0x2000  | (PAL_UI_TEXT_WHITE << 10);
+
+        col++;
+    }
+
     return;
 }
 

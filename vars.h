@@ -206,6 +206,8 @@ extern uint16_t ui_enemy_counter[9];
 
 extern uint16_t ui_level_status[5];
 
+extern uint32_t ui_display_money;
+
 // UI status and timers
 extern uint16_t ui_show_message_ttl;
 extern uint16_t ui_show_message_cleared;

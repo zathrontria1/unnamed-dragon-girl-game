@@ -230,6 +230,8 @@ uint16_t ui_enemy_counter[9];
 
 uint16_t ui_level_status[5];
 
+uint32_t ui_display_money;
+
 // UI status and timers
 uint16_t ui_show_message_ttl;
 uint16_t ui_show_message_cleared;

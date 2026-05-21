@@ -19,6 +19,7 @@ void UserInterface_ClearTextboxText(uint16_t row, uint16_t h);
 void UserInterface_ClearWindowBuffer();
 void UserInterface_ClearTextBuffer();
 void UserInterface_DrawWindowBackground(uint16_t x, uint16_t y, uint16_t w, uint16_t h);
+void UserInterface_DrawWindowText(char * string_ptr, uint16_t x, uint16_t y);
 
 void UserInterface_CopyUiBuffers();
 

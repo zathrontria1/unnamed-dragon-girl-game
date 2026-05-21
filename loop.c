@@ -1,5 +1,6 @@
 #include <snes/console.h>
 
+#include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -159,18 +160,41 @@ void loop_game()
 
         SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
         
-        UserInterface_PrintSpecialText((uint8_t *)&STR_UI_PLAYERINFO_ML);
+        //UserInterface_PrintSpecialText((uint8_t *)&STR_UI_PLAYERINFO_ML);
 
         // TODO: implement subscreen function
         // below are test functions
-        /*UserInterface_ClearWindowBuffer();
+        UserInterface_ClearWindowBuffer();
         UserInterface_ClearTextBuffer();
 
-        UserInterface_DrawWindowBackground(0,0,10,22);
-        UserInterface_DrawWindowBackground(0,22,32,4);
-        UserInterface_DrawWindowBackground(2,8,16,8);
+        UserInterface_DrawWindowBackground(0,0,12,10);
+        UserInterface_DrawWindowBackground(6,22,26,4);
 
-        UserInterface_CopyUiBuffers();*/
+        char temp_money_string[32] = "          ";
+        
+        snprintf((char *)&temp_money_string, 32, (char *)&STR_UI_SUBSCREEN_MONEY, obj_player_pointer->struct_data.npc_data.money);
+
+        char temp_time_string[32] = "          ";
+        uint16_t temp_h = (uint16_t)((system_frames_elapsed / FPS) / (3600l));
+        uint16_t temp_m = (uint16_t)(((system_frames_elapsed / FPS) % (3600l)) / 60);
+        uint16_t temp_s = (uint16_t)((system_frames_elapsed / FPS) % 60);
+        snprintf((char *)&temp_time_string, 32, (char *)&STR_UI_SUBSCREEN_PLAYTIME, temp_h, temp_m, temp_s);
+
+        char temp_lag_frames[32] = "          ";
+        snprintf((char *)&temp_lag_frames, 32, (char *)&STR_UI_SUBSCREEN_LAGCOUNTER, system_frames_lag);
+
+        UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_RESUME, 3, 2);
+        UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_PROFILE, 3, 3);
+        UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_MAP, 3, 4);
+        UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_HELP, 3, 5);
+        UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS, 3, 6);
+        UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_RESTART, 3, 7);
+
+        UserInterface_DrawWindowText((char *)&temp_money_string, 7, 23);
+        UserInterface_DrawWindowText((char *)&temp_time_string, 7, 24);
+        UserInterface_DrawWindowText((char *)&temp_lag_frames, 7, 25);
+        
+        UserInterface_CopyUiBuffers();
 
         system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_MSGBOX);
         system_target_routine = ROUTINE_MSGBOX;
