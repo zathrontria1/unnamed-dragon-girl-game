@@ -5,6 +5,7 @@
 
 #include "vars.h"
 
+#include "ui.h"
 #include "dma.h"
 #include "interrupt.h"
 #include "interrupt_sub.h"
@@ -58,7 +59,7 @@
         // Write background values
         bg_scroll_y_mod.full.high.a = bg_scroll_y.full.high.a - 1;
 
-        if (system_ui_in_bg2 == 0)
+        if (ui_in_bg2 == 0)
         {
             REG_BG2HOFS = bg_scroll_x.full.high.lh.l;
             REG_BG2HOFS = bg_scroll_x.full.high.lh.h;

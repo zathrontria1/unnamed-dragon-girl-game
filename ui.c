@@ -13,6 +13,37 @@
 #include "ui.h"
 #include "spr.h"
 
+uint16_t ui_in_bg2;
+
+// UI cache invalidation stuff
+uint16_t ui_force_update;
+int32_t ui_cached_hp;
+int32_t ui_cached_hp_max;
+uint32_t ui_cached_money;
+uint16_t ui_cached_enemy_counter;
+
+// TODO: Handle UI windows and texts generically
+uint16_t ui_window_background[32][32]; // BG1. Call functions to draw a window here.
+uint16_t ui_window_text[32][32]; // BG3. Call functions to draw text here.
+
+uint8_t ui_show_message_string[31]; // 30 characters + null terminator
+
+// Sub-strings
+uint16_t ui_hp_gauge[28];
+uint16_t ui_money_counter[11];
+uint16_t ui_enemy_counter[9];
+
+uint16_t ui_level_status[5];
+
+uint32_t ui_display_money;
+
+// UI status and timers
+uint16_t ui_show_message_ttl;
+uint16_t ui_show_message_cleared;
+uint16_t ui_show_message_page;
+uint8_t * ui_show_message_page_ptr_init;
+uint8_t * ui_show_message_page_ptr;
+
 void UserInterface_Process()
 {
     if ((ui_cached_hp != obj_player_pointer->struct_data.npc_data.hp) ||

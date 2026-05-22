@@ -307,7 +307,7 @@ void loop_mapdisplay_init()
 
     dma_queue_add(temp_addr, 0x6000, 128, VRAM_INCHIGH, 1);
 
-    system_ui_in_bg2 = 1;
+    ui_in_bg2 = 1;
 
     LZ4_UnpackToWRAM(level_data_ptr->map_overview_tiles_lz4, 0x007f0000);
 
@@ -539,7 +539,7 @@ void loop_game_reload()
     level_load_tileset(level_data_ptr);
     level_load_palette(level_data_ptr);
 
-    system_ui_in_bg2 = 0;
+    ui_in_bg2 = 0;
     ui_force_update = 1;
 
     bg_scroll_x = bg_scroll_x_saved;
@@ -618,7 +618,7 @@ void loop_game_newlevel()
     
     bool temp_level_reuses_vram_contents = level_load(level_data_ptr);
 
-    system_ui_in_bg2 = 0;
+    ui_in_bg2 = 0;
     ui_force_update = 1;
 
     while (shadow_inidisp != 0x00)
