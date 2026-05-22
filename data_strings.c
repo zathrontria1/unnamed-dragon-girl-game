@@ -32,7 +32,7 @@ trying the game out.\n\
 
 const uint8_t STR_MSG_INCOMBAT[] = "Can't use while in combat";
 
-const uint8_t STR_UI_HELP_MAP[] = "SELECT Button: Return to game";
+const uint8_t STR_UI_HELP_MAP[] = "Press any button to close.";
 
 const uint8_t STR_UI_SUBSCREEN_RESUME[] =  "Resume";
 const uint8_t STR_UI_SUBSCREEN_PROFILE[] = "Profile";

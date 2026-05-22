@@ -513,15 +513,14 @@ void loop_mapdisplay()
     SpriteEngine_ResetOam();
     SpriteEngine_PackOamHighTable();
 
-    if (system_check_for_key(KEY_SELECT))
+    // Check for *any* key
+    if (system_check_for_any_key())
     {
-        // Let's try using the new alternate NMI part
         shadow_inidisp = 0x0f;
         system_use_alternate_nmi = 1;
         shadow_inidisp_change = -1;
 
         system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_GAMELOOP_RELOAD);
-        //system_current_routine = ROUTINE_GAMELOOP_RELOAD;
         system_target_routine = ROUTINE_GAMELOOP_RELOAD;
     }
 

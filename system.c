@@ -685,6 +685,16 @@ FORCE_INLINE uint16_t system_check_for_key(enum KEYPAD_BITS k)
     return 0;
 }
 
+FORCE_INLINE uint16_t system_check_for_any_key()
+{
+    if (input_pad0_new != 0x0000)
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
 FORCE_INLINE uint16_t system_check_for_key_hold(enum KEYPAD_BITS k)
 {
     if ((input_pad0 & k) == k)
