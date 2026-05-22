@@ -1,3 +1,11 @@
+extern uint8_t snd_current_command_counter;
+
+extern uint16_t snd_footstep_timeout;
+extern uint16_t snd_punch_timeout;
+extern uint16_t snd_flame_active;
+extern uint16_t snd_flame_playing;
+extern uint16_t snd_firecrackle_timeout;
+
 void SoundInterface_StartSoundEngine();
 #if VBCC_ASM == 1
     NO_INLINE void SoundInterface_UploadData(uint8_t * data_ptr, uint16_t len);

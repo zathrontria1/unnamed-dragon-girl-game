@@ -202,12 +202,3 @@ NEAR extern struct spr_queue_entry spr_queue_normal[SPR_COUNT_MAX_SORTED]; // de
 NEAR extern union oam_buffer shadow_oam;
 
 extern union cgram_full shadow_cgram; // 256 palette entries, 2 bytes wide each
-
-// Sound system
-extern uint8_t snd_current_command_counter;
-
-extern uint16_t snd_footstep_timeout;
-extern uint16_t snd_punch_timeout;
-extern uint16_t snd_flame_active;
-extern uint16_t snd_flame_playing;
-extern uint16_t snd_firecrackle_timeout;

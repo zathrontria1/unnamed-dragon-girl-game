@@ -226,12 +226,3 @@ NEAR struct spr_queue_entry spr_queue_normal[SPR_COUNT_MAX_SORTED]; // depth sor
 NEAR union oam_buffer shadow_oam;
 
 union cgram_full shadow_cgram; // 256 palette entries, 2 bytes wide each
-
-// Sound system
-uint8_t snd_current_command_counter;
-
-uint16_t snd_footstep_timeout;
-uint16_t snd_punch_timeout;
-uint16_t snd_flame_active;
-uint16_t snd_flame_playing;
-uint16_t snd_firecrackle_timeout;

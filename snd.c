@@ -5,6 +5,14 @@
 #include "snd.h"
 #include "consts_snd.h"
 
+uint8_t snd_current_command_counter; // Used to check if the SPC is ready for a new command
+
+uint16_t snd_footstep_timeout;
+uint16_t snd_punch_timeout;
+uint16_t snd_flame_active;
+uint16_t snd_flame_playing;
+uint16_t snd_firecrackle_timeout;
+
 /*
     Convention outside the stock IPL:
 
