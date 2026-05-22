@@ -97,9 +97,9 @@ void HdmaEngine_SetupPaletteHdma()
 
     hdma_windowbackground_tables[1][2].count = 0;
 
-    HdmaEngine_GeneratePaletteTable((uint16_t *)&hdma_bgpalette_data[0], 0x42, 13, 1, 224, 0, BLENDMODE_ALPHA_TOWARDS_BLACK); // Water
-    HdmaEngine_GeneratePaletteTable((uint16_t *)&hdma_windowbackground_data[0], 0x04, 4, 2, 48, 0, BLENDMODE_ALPHA_TOWARDS_BLACK); // UI message box using alpha towards black
-    HdmaEngine_GeneratePaletteTable((uint16_t *)&hdma_windowbackground_data[1], 0x04, 4, 1, 224, 1, BLENDMODE_ALPHA_TOWARDS_BLACK); // UI full height using alpha towards black
+    HdmaEngine_GeneratePaletteTable((uint16_t *)&hdma_bgpalette_data[0], 0x42, 13, RGB5(0,0,0), 0.8f, 224); // Water
+    HdmaEngine_GeneratePaletteTable((uint16_t *)&hdma_windowbackground_data[0], 0x04, 4, RGB5(0,0,0), 0.8f, 48); // UI message box using alpha towards black
+    HdmaEngine_GeneratePaletteTable((uint16_t *)&hdma_windowbackground_data[1], 0x04, 4, RGB5(0,0,0), 0.8f, 224); // UI full height using alpha towards black
 
     hdma_gradient_ptr = (uint16_t)((uint32_t)&hdma_windowbackground_tables[0][0]);
 
@@ -213,45 +213,40 @@ void HdmaEngine_EnableHdma()
     return;
 }
 
-void HdmaEngine_GeneratePaletteTable(uint16_t * table_ptr, uint16_t pal_start, uint16_t entries, int16_t intensity_change, int16_t height, uint16_t rate_delay, uint16_t blend_mode)
+/*
+    Generate HDMA palette entries using floats. Slower, but can cleanly map to any height
+*/
+void HdmaEngine_GeneratePaletteTable(uint16_t * table_ptr, uint16_t pal_start, uint16_t entries, uint16_t target_color, float alpha, int16_t height)
 {
-    int16_t temp_intensity = 0;
+    bool temp_overflow = false;
 
-    int i = 0;
-
-    int temp_intensity_counter = 0;
-
-    for (; i < height; i += entries)
+    for (int i = 0; i < height; i += entries)
     {
-        uint8_t temp_overflow = 0;
-
         for (int j = 0; j < entries; j++)
         {
+            // Write the CGRAM address
             *table_ptr = (pal_start+j) << 8;
 
-            int16_t temp_r;
-            int16_t temp_g;
-            int16_t temp_b;
+            // Fetch the base colour
+            int16_t temp_r1 = (shadow_cgram.entry[pal_start+j] & 0x001f);
+            int16_t temp_g1 = (shadow_cgram.entry[pal_start+j] & 0x03e0) >> 5;
+            int16_t temp_b1 = (shadow_cgram.entry[pal_start+j] & 0x7c00) >> 10;
 
-            if (blend_mode == BLENDMODE_ALPHA_TOWARDS_BLACK)
-            {
-                if (temp_intensity > 31)
-                {
-                    temp_intensity = 31;
-                }
+            // Split the target colour
+            int16_t temp_r2 = (target_color & 0x001f);
+            int16_t temp_g2 = (target_color & 0x03e0) >> 5;
+            int16_t temp_b2 = (target_color & 0x7c00) >> 10;
 
-                temp_r = ((shadow_cgram.entry[pal_start+j] & 0x001f) * (31 - temp_intensity)) / 31;
-                temp_g = (((shadow_cgram.entry[pal_start+j] & 0x03e0) >> 5) * (31 - temp_intensity)) / 31;
-                temp_b = (((shadow_cgram.entry[pal_start+j] & 0x7c00) >> 10) * (31 - temp_intensity)) / 31;
-            }
-            else
-            {
-                temp_r = (shadow_cgram.entry[pal_start+j] & 0x001f) + temp_intensity;
-                temp_g = ((shadow_cgram.entry[pal_start+j] & 0x03e0) >> 5) + temp_intensity;
-                temp_b = ((shadow_cgram.entry[pal_start+j] & 0x7c00) >> 10) + temp_intensity;
-            }
-            
-            
+            // Calculate weights
+            float temp_weight_adjust = (height - (i+j)) / (float)height;
+            float temp_weight_2 = (1.0f - temp_weight_adjust) * alpha;
+            float temp_weight_1 = 1.0f - temp_weight_2;
+
+            // Weight them
+            int16_t temp_r = (temp_r1 * temp_weight_1) + (temp_r2 * temp_weight_2);
+            int16_t temp_g = (temp_g1 * temp_weight_1) + (temp_g2 * temp_weight_2);
+            int16_t temp_b = (temp_b1 * temp_weight_1) + (temp_b2 * temp_weight_2);
+
             if (temp_r < 0)
             {
                 temp_r = 0;
@@ -279,6 +274,7 @@ void HdmaEngine_GeneratePaletteTable(uint16_t * table_ptr, uint16_t pal_start, u
                 temp_b = 31;
             }
 
+            // Save the colour value
             table_ptr++;
 
             *table_ptr = RGB5(temp_r, temp_g, temp_b);
@@ -287,34 +283,14 @@ void HdmaEngine_GeneratePaletteTable(uint16_t * table_ptr, uint16_t pal_start, u
 
             if ((i+j+1) >= height)
             {
-                temp_overflow = 1;
+                temp_overflow = true;
                 break;
             }
         }
 
-        if (temp_overflow == 1)
+        if (temp_overflow)
         {
             break;
-        }
-
-        temp_intensity_counter += entries;
-        
-        while (temp_intensity_counter >= (entries << rate_delay))
-        {
-            temp_intensity_counter -= (entries << rate_delay);
-            temp_intensity += intensity_change;
-        }
-    }
-
-    if (i + entries < 224) // only do this if there are enough spare entries to do it
-    {
-        // Fill the last entries with the resets
-        for (int j = 0; j < entries; j++)
-        {
-            *table_ptr = (pal_start+j) << 8;
-            table_ptr++;
-            *table_ptr = shadow_cgram.entry[pal_start+j];
-            table_ptr++;
         }
     }
 
