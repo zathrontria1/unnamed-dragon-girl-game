@@ -183,21 +183,6 @@ extern uint8_t * ani_bg_addr_coin;
 extern uint16_t pal_ani_entries[8][2]; // Just enough for the magic circle
 extern uint16_t pal_ani_sel;
 
-// Sprite system
-ZP extern uint16_t spr_sprite_count; // Rendered sprites this frame
-extern uint16_t spr_sprite_count_prev; // previous
-
-extern uint16_t spr_vram_slots[128]; // VRAM slots in sprite page
-
-ZP extern uint16_t spr_front_count; // Rendered non-UI unsorted front-forced sprites this frame
-NEAR extern struct spr_queue_entry spr_queue_front[SPR_COUNT_MAX_FRONT];
-ZP extern uint16_t spr_back_count; // Rendered non-UI unsorted back-forced sprites this frame (e.g. shadows)
-NEAR extern struct spr_queue_entry spr_queue_back[SPR_COUNT_MAX_BACK];
-
-ZP extern uint16_t spr_normal_count;
-NEAR extern uint8_t spr_depth_count[257]; // Count of sprites on each depth line
-NEAR extern struct spr_queue_entry spr_queue_normal[SPR_COUNT_MAX_SORTED]; // depth sorted sprite entries
-
 // Shadow buffers
 NEAR extern union oam_buffer shadow_oam;
 

@@ -6,6 +6,20 @@
 #include "spr.h"
 #include "system.h"
 
+ZP uint16_t spr_sprite_count; // Rendered sprites this frame
+uint16_t spr_sprite_count_prev; // previous
+
+uint16_t spr_vram_slots[128];
+
+ZP uint16_t spr_front_count; // Rendered non-UI unsorted front-forced sprites this frame
+NEAR struct spr_queue_entry spr_queue_front[SPR_COUNT_MAX_FRONT];
+ZP uint16_t spr_back_count; // Rendered non-UI unsorted back-forced sprites this frame (e.g. background impostors and shadows)
+NEAR struct spr_queue_entry spr_queue_back[SPR_COUNT_MAX_BACK];
+
+ZP uint16_t spr_normal_count;
+NEAR uint8_t spr_depth_count[257]; // Count of sprites on each depth line
+NEAR struct spr_queue_entry spr_queue_normal[SPR_COUNT_MAX_SORTED]; // depth sorted sprite entries
+
 /*
     Adds a sprite to the draw queue
 
