@@ -7,6 +7,7 @@
 
 #include "ui.h"
 #include "dma.h"
+#include "hdma.h"
 #include "interrupt.h"
 #include "interrupt_sub.h"
 #include "gfx.h"

@@ -7,6 +7,21 @@
 
 #include "hdma.h"
 
+struct hdma_indirect_table_entry hdma_bgpalette_tables[3];
+uint16_t hdma_bgpalette_data[448];
+
+struct hdma_indirect_table_entry hdma_windowbackground_tables[2][4];
+uint16_t hdma_windowbackground_data[2][448];
+uint16_t hdma_windowbackground_select;
+
+uint16_t hdma_scroll_data[2][32];
+uint16_t hdma_scroll_select;
+ZP uint16_t hdma_scroll_ptr;
+uint16_t hdma_scroll_sine_index;
+
+ZP uint16_t hdma_use_gradient;
+ZP uint16_t hdma_gradient_ptr;
+
 // Scroll tables for v-scroll
 struct hdma_indirect_table_entry hdma_scroll_tables[2][8];
 
