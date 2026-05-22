@@ -7,6 +7,16 @@
 
 #include "gfx.h"
 
+uint16_t gfx_mosaic_layers;
+int16_t gfx_mosaic_intensity;
+int16_t gfx_mosaic_change;
+
+int16_t gfx_cmath_change;
+
+int16_t gfx_cmath_r;
+int16_t gfx_cmath_g;
+int16_t gfx_cmath_b;
+
 /*
     Manage mosaic function
 

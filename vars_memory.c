@@ -254,17 +254,6 @@ ZP uint16_t spr_normal_count;
 NEAR uint8_t spr_depth_count[257]; // Count of sprites on each depth line
 NEAR struct spr_queue_entry spr_queue_normal[SPR_COUNT_MAX_SORTED]; // depth sorted sprite entries
 
-// Graphics effects
-uint16_t gfx_mosaic_layers;
-int16_t gfx_mosaic_intensity;
-int16_t gfx_mosaic_change;
-
-int16_t gfx_cmath_change;
-
-int16_t gfx_cmath_r;
-int16_t gfx_cmath_g;
-int16_t gfx_cmath_b;
-
 // Shadow buffers
 NEAR union oam_buffer shadow_oam;
 
