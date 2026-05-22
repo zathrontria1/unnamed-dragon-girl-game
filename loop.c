@@ -290,9 +290,6 @@ void loop_mapdisplay_init()
     bg_scroll_x.full.high.a = -32;
     bg_scroll_y.full.high.a = -8;
 
-    // Copy the current OAM into the copy
-    shadow_oam_copy = shadow_oam;
-
     SpriteEngine_ProcessSpriteLists();
     SpriteEngine_ResetOam();
     SpriteEngine_PackOamHighTable();
@@ -561,10 +558,6 @@ void loop_game_reload()
     REG_INIDISP = 0x8f;
 
     system_reset_bg_scroll_regs();
-    
-
-    // Copy the old OAM into the current
-    shadow_oam = shadow_oam_copy;
 
     // DMA just the background and BG3 tiles
     dma_copy_to_vram(((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_MAP << 1)), TILEDATA_ADDR_GAME_MAP, 24576);

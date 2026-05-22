@@ -267,7 +267,6 @@ int16_t gfx_cmath_b;
 
 // Shadow buffers
 NEAR union oam_buffer shadow_oam;
-union oam_buffer shadow_oam_copy; // copied during UI open so there's always a full copy ready to use
 
 union cgram_full shadow_cgram; // 256 palette entries, 2 bytes wide each
 
