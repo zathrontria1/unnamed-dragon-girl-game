@@ -566,6 +566,9 @@ void system_init_display(uint16_t routine)
     switch (routine)
     {
         case ROUTINE_GAMELOOP:
+        case ROUTINE_SUBSCREEN:
+        case ROUTINE_SUBSCREEN_HELP:
+        case ROUTINE_MSGBOX:
             REG_BGMODE = 0x09; // Mode 1, high priority bg3
             REG_TM = TM_MODE1; // BG1, BG2, BG3, and OBJ
             break;
@@ -584,6 +587,9 @@ void system_setup_tilemap_display(uint16_t routine)
     switch (routine)
     {
         case ROUTINE_GAMELOOP:
+        case ROUTINE_SUBSCREEN:
+        case ROUTINE_SUBSCREEN_HELP:
+        case ROUTINE_MSGBOX:
             REG_BG12NBA = 0 << 4 | 4;
             REG_BG34NBA = (4 << 4 | 4);
 
