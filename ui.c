@@ -310,10 +310,26 @@ void UserInterface_DrawEnemyHealthBar(struct game_object * o)
 void UserInterface_UpdateMoneyCounters()
 {
     // Copy these values
-    uint32_t temp_money = obj_player_pointer->struct_data.npc_data.money;
-
     uint8_t temp_string[6] = "     " ; // 5 spaces
 
+    int32_t temp_counter_adjust = (obj_player_pointer->struct_data.npc_data.money - ui_display_money) / 2; // The amount of money to change to the visual display.
+    if (temp_counter_adjust == 0)
+    {
+        if (obj_player_pointer->struct_data.npc_data.money - ui_display_money > 0)
+        {
+            temp_counter_adjust = 1;
+        }
+        else if (obj_player_pointer->struct_data.npc_data.money - ui_display_money == 0)
+        {
+            temp_counter_adjust = 0;
+        }
+        else
+        {
+            temp_counter_adjust = -1;
+        }
+    }
+
+    uint32_t temp_money = ui_display_money + temp_counter_adjust;
     uint32_t temp_money_copy;
 
     // Reduce the visible length of the money.
@@ -380,8 +396,13 @@ void UserInterface_UpdateMoneyCounters()
         0
         ) == 0)
     {
-        ui_cached_money = temp_money;
+        if (temp_money == obj_player_pointer->struct_data.npc_data.money)
+        {
+            ui_cached_money = temp_money;
+        }
     }
+
+    ui_display_money = temp_money;
 
     return;
 }
