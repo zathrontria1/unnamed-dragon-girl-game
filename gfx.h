@@ -8,6 +8,6 @@ extern int16_t gfx_cmath_r;
 extern int16_t gfx_cmath_g;
 extern int16_t gfx_cmath_b;
 
-void gfx_process_mosaic();
-void gfx_process_screen_cmath();
-FORCE_INLINE void gfx_cmath_set(int16_t r, int16_t g, int16_t b);
+void Gfx_ProcessMosaic();
+void Gfx_ProcessColorMath();
+FORCE_INLINE void Gfx_SetColorMath(int16_t r, int16_t g, int16_t b);

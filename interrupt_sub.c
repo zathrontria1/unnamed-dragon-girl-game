@@ -150,7 +150,7 @@
     // Do not interfere with HDMA
 
     // Reuse the existing mosaic code, plenty of time
-    gfx_process_mosaic();
+    Gfx_ProcessMosaic();
 
     // Write the current MOSAIC value
     REG_MOSAIC = shadow_mosaic;

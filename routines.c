@@ -364,7 +364,7 @@ void routines_drop_rec_meat(struct game_object * o)
                     p->struct_data.npc_data.hp += o->struct_data.npc_data.hp;
                 }
 
-                gfx_cmath_set(0,4,0);
+                Gfx_SetColorMath(0,4,0);
                 gfx_cmath_change = -64 * V_MUL;
                 shadow_cgwsub = 0x00;
                 shadow_cgadsub = 0x32;

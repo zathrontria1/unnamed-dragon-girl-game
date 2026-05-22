@@ -240,8 +240,8 @@ void loop_game()
         }
     }
 
-    gfx_process_mosaic();
-    gfx_process_screen_cmath();
+    Gfx_ProcessMosaic();
+    Gfx_ProcessColorMath();
 
     HdmaEngine_UpdateBgScrollValues();
     

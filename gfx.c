@@ -23,7 +23,7 @@ int16_t gfx_cmath_b;
     mosaic layer is set directly
     mosaic intensity and change can be tweaked to adjust both speed and size at runtime too
 */
-void gfx_process_mosaic()
+void Gfx_ProcessMosaic()
 {
     if (gfx_mosaic_change != 0)
     {
@@ -62,7 +62,7 @@ void gfx_process_mosaic()
     return;
 }
 
-void gfx_process_screen_cmath()
+void Gfx_ProcessColorMath()
 {
     if (gfx_cmath_change != 0)
     {
@@ -111,7 +111,7 @@ void gfx_process_screen_cmath()
     return;
 }
 
-FORCE_INLINE void gfx_cmath_set(int16_t r, int16_t g, int16_t b)
+FORCE_INLINE void Gfx_SetColorMath(int16_t r, int16_t g, int16_t b)
 {
     gfx_cmath_r = r << 8;
     gfx_cmath_g = g << 8;
