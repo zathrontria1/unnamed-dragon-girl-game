@@ -97,9 +97,9 @@ void HdmaEngine_SetupPaletteHdma()
 
     hdma_windowbackground_tables[1][2].count = 0;
 
-    HdmaEngine_GeneratePaletteTable((uint16_t *)&hdma_bgpalette_data[0], 0x42, 13, RGB5(0,0,0), 0.8f, 224); // Water
-    HdmaEngine_GeneratePaletteTable((uint16_t *)&hdma_windowbackground_data[0], 0x04, 4, RGB5(0,0,0), 0.8f, 48); // UI message box using alpha towards black
-    HdmaEngine_GeneratePaletteTable((uint16_t *)&hdma_windowbackground_data[1], 0x04, 4, RGB5(0,0,0), 0.8f, 224); // UI full height using alpha towards black
+    HdmaEngine_GeneratePaletteTable((uint16_t *)&hdma_bgpalette_data[0], 0x42, 13, RGB5(0,0,0), 26, 224); // Water
+    HdmaEngine_GeneratePaletteTable((uint16_t *)&hdma_windowbackground_data[0], 0x04, 4, RGB5(0,0,0), 26, 48); // UI message box using alpha towards black
+    HdmaEngine_GeneratePaletteTable((uint16_t *)&hdma_windowbackground_data[1], 0x04, 4, RGB5(0,0,0), 26, 224); // UI full height using alpha towards black
 
     hdma_gradient_ptr = (uint16_t)((uint32_t)&hdma_windowbackground_tables[0][0]);
 
@@ -214,11 +214,19 @@ void HdmaEngine_EnableHdma()
 }
 
 /*
-    Generate HDMA palette entries using floats. Slower, but can cleanly map to any height
+    Generate HDMA palette entries using fixed point math. Slower, but can cleanly map to any height
+
+    target_color is in SNES RGB555 format
+    alpha is 0-32 unsigned integer
 */
-void HdmaEngine_GeneratePaletteTable(uint16_t * table_ptr, uint16_t pal_start, uint16_t entries, uint16_t target_color, float alpha, int16_t height)
+void HdmaEngine_GeneratePaletteTable(uint16_t * table_ptr, uint16_t pal_start, uint16_t entries, uint16_t target_color, uint16_t alpha, uint16_t height)
 {
     bool temp_overflow = false;
+
+    // Split the target colour
+    uint16_t temp_r2 = (target_color & 0x001f);
+    uint16_t temp_g2 = (target_color & 0x03e0) >> 5;
+    uint16_t temp_b2 = (target_color & 0x7c00) >> 10;
 
     for (int i = 0; i < height; i += entries)
     {
@@ -228,46 +236,30 @@ void HdmaEngine_GeneratePaletteTable(uint16_t * table_ptr, uint16_t pal_start, u
             *table_ptr = (pal_start+j) << 8;
 
             // Fetch the base colour
-            int16_t temp_r1 = (shadow_cgram.entry[pal_start+j] & 0x001f);
-            int16_t temp_g1 = (shadow_cgram.entry[pal_start+j] & 0x03e0) >> 5;
-            int16_t temp_b1 = (shadow_cgram.entry[pal_start+j] & 0x7c00) >> 10;
-
-            // Split the target colour
-            int16_t temp_r2 = (target_color & 0x001f);
-            int16_t temp_g2 = (target_color & 0x03e0) >> 5;
-            int16_t temp_b2 = (target_color & 0x7c00) >> 10;
+            uint16_t temp_r1 = (shadow_cgram.entry[pal_start+j] & 0x001f);
+            uint16_t temp_g1 = (shadow_cgram.entry[pal_start+j] & 0x03e0) >> 5;
+            uint16_t temp_b1 = (shadow_cgram.entry[pal_start+j] & 0x7c00) >> 10;
 
             // Calculate weights
-            float temp_weight_adjust = (height - (i+j)) / (float)height;
-            float temp_weight_2 = (1.0f - temp_weight_adjust) * alpha;
-            float temp_weight_1 = 1.0f - temp_weight_2;
+            uint16_t temp_weight_adjust = ((height - (i+j)) << 5) / height;
+
+            uint16_t temp_weight_2 = ((32 - temp_weight_adjust) * alpha) >> 5;
+
+            uint16_t temp_weight_1 = 32 - temp_weight_2;
 
             // Weight them
-            int16_t temp_r = (temp_r1 * temp_weight_1) + (temp_r2 * temp_weight_2);
-            int16_t temp_g = (temp_g1 * temp_weight_1) + (temp_g2 * temp_weight_2);
-            int16_t temp_b = (temp_b1 * temp_weight_1) + (temp_b2 * temp_weight_2);
+            uint16_t temp_r = ((temp_r1 * temp_weight_1) + (temp_r2 * temp_weight_2)) >> 5;
+            uint16_t temp_g = ((temp_g1 * temp_weight_1) + (temp_g2 * temp_weight_2)) >> 5;
+            uint16_t temp_b = ((temp_b1 * temp_weight_1) + (temp_b2 * temp_weight_2)) >> 5;
 
-            if (temp_r < 0)
-            {
-                temp_r = 0;
-            }
+            // Make sure the value doesn't overflow on the channel
             if (temp_r > 31)
             {
                 temp_r = 31;
             }
-
-            if (temp_g < 0)
-            {
-                temp_g = 0;
-            }
             if (temp_g > 31)
             {
                 temp_g = 31;
-            }
-
-            if (temp_b < 0)
-            {
-                temp_b = 0;
             }
             if (temp_b > 31)
             {
@@ -283,6 +275,7 @@ void HdmaEngine_GeneratePaletteTable(uint16_t * table_ptr, uint16_t pal_start, u
 
             if ((i+j+1) >= height)
             {
+                // If this is true, the next entry will go out of range, and terminate the table now
                 temp_overflow = true;
                 break;
             }
