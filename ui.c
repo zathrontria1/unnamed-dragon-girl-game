@@ -1003,8 +1003,113 @@ void UserInterface_DrawWindowBackground(uint16_t x, uint16_t y, uint16_t w, uint
             ui_window_background[i][x+w-1] = 0x0193 | 0x2000 | (PAL_UI_4BPP << 10);
         }
     }
+    
+    return;
+}
 
-    // Last row
+// Draws a simple box to the background layer
+void UserInterface_DrawWindowBox(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
+{
+    // Sanity checks
+    if ((w == 0) || (h == 0))
+    {
+        // Size is 0
+        return;
+    }
+    if ((x >= 32) || (y >= 32))
+    {
+        // Start of window is outside the screen
+        return;
+    }
+
+    // First column
+    for (int i = y; i < y+h; i++)
+    {
+        if (i >= 32)
+        {
+            // Over last row
+            break;
+        }
+
+        if (i - y == 0)
+        {
+            // First row
+            ui_window_background[i][x] = 0x018a | 0x2000 | (PAL_UI_4BPP << 10);
+        }
+        else if (i == (y + h - 1))
+        {
+            // Last row
+            ui_window_background[i][x] = 0x01aa | 0x2000 | (PAL_UI_4BPP << 10);
+        }
+        else
+        {
+            ui_window_background[i][x] = 0x019a | 0x2000 | (PAL_UI_4BPP << 10);
+        }
+    }
+
+    // Middle columns
+    if (w-2 > 0)
+    {
+        for (int i = y; i < y+h; i++)
+        {
+            if (i >= 32)
+            {
+                // Over last row
+                break;
+            }
+
+            for (int j = x+1; j < x+w-1; j++)
+            {
+                if (j >= 32)
+                {
+                    // Over last column
+                    break;
+                }
+
+                if (i - y == 0)
+                {
+                    // First row
+                    ui_window_background[i][j] = 0x018b | 0x2000 | (PAL_UI_4BPP << 10);
+                }
+                else if (i == (y + h - 1))
+                {
+                    // Last row
+                    ui_window_background[i][j] = 0x01ab | 0x2000 | (PAL_UI_4BPP << 10);
+                }
+                else
+                {
+                    ui_window_background[i][j] = 0x019b | 0x2000 | (PAL_UI_4BPP << 10);
+                }
+            }
+        }
+    }
+
+    // Rightmost column
+    for (int i = y; i < y+h; i++)
+    {
+        if (i >= 32)
+        {
+            // Over last row
+            break;
+        }
+
+        if (i - y == 0)
+        {
+            // First row
+            ui_window_background[i][x+w-1] = 0x018c | 0x2000 | (PAL_UI_4BPP << 10);
+        }
+        else if (i == (y + h - 1))
+        {
+            // Last row
+            ui_window_background[i][x+w-1] = 0x01ac | 0x2000 | (PAL_UI_4BPP << 10);
+        }
+        else
+        {
+            
+            ui_window_background[i][x+w-1] = 0x019c | 0x2000 | (PAL_UI_4BPP << 10);
+        }
+    }
+
     return;
 }
 
