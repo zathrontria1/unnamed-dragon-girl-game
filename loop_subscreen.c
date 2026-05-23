@@ -227,9 +227,11 @@ void loop_subscreen_profile()
         UserInterface_ClearWindowBuffer(false);
         UserInterface_ClearTextBuffer();
 
-        UserInterface_DrawWindowBackground(0,0,32,2);
-        UserInterface_DrawWindowBackground(0,2,32,4);
+        UserInterface_DrawWindowBackground(0,0,16,2);
+        UserInterface_DrawWindowBackground(0,2,16,6);
         UserInterface_DrawWindowBackground(0,16,32,12);
+
+        UserInterface_DrawWindowBox(16,0,16,16);
 
         loop_subscreen_profile_drawtext(false);
         
@@ -345,10 +347,10 @@ void loop_subscreen_profile_drawtext(bool copy_result)
     UserInterface_DrawWindowText((char *)&temp_string, temp_hp_offset+1, 3);
 
     snprintf((char *)&temp_string, 32, (char *)&STR_UI_SUBSCREEN_PROFILE_ATTACK, obj_player_pointer->struct_data.npc_data.attack);
-    UserInterface_DrawWindowText((char *)&temp_string, 1, 4);
+    UserInterface_DrawWindowText((char *)&temp_string, 1, 5);
 
     snprintf((char *)&temp_string, 32, (char *)&STR_UI_SUBSCREEN_PROFILE_DEFENSE, obj_player_pointer->struct_data.npc_data.defense);
-    UserInterface_DrawWindowText((char *)&temp_string, 16, 4);
+    UserInterface_DrawWindowText((char *)&temp_string, 1, 6);
 
     snprintf((char *)&temp_string, 32, (char *)&STR_UI_SUBSCREEN_PROFILE_MONEY, obj_player_pointer->struct_data.npc_data.money);
     UserInterface_DrawWindowText((char *)&temp_string, 1, 17);

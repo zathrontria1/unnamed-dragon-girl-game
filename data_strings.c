@@ -50,8 +50,8 @@ const uint8_t STR_UI_SUBSCREEN_PROFILE_HEADING[] = "Profile";
 
 const uint8_t STR_UI_SUBSCREEN_PROFILE_HEALTH[] =  "HP  %u";
 const uint8_t STR_UI_SUBSCREEN_PROFILE_HEALTH_DIV[] =  "/%u";
-const uint8_t STR_UI_SUBSCREEN_PROFILE_ATTACK[] =  "ATK %u";
-const uint8_t STR_UI_SUBSCREEN_PROFILE_DEFENSE[] = "DEF %u";
+const uint8_t STR_UI_SUBSCREEN_PROFILE_ATTACK[] =  "ATK %10u";
+const uint8_t STR_UI_SUBSCREEN_PROFILE_DEFENSE[] = "DEF %10u";
 
 const uint8_t STR_UI_SUBSCREEN_PROFILE_MONEY[] = "You have %u money."; 
 const uint8_t STR_UI_SUBSCREEN_PROFILE_UPGRADE_HP[] = "Upgrade HP +10";
