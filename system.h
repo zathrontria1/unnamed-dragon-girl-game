@@ -23,4 +23,5 @@ FORCE_INLINE uint16_t system_check_for_key_hold(enum KEYPAD_BITS k);
 FORCE_INLINE void system_interrupt_enable(void);
 FORCE_INLINE void system_interrupt_disable(void);
 FORCE_INLINE void system_check_for_soft_reset(void);
+void system_soft_reset(void);
 void system_reset(void);

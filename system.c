@@ -762,10 +762,17 @@ FORCE_INLINE void system_check_for_soft_reset()
     {
         if ((input_pad0 & 0x000f) == 0) // check signature
         {
-            SoundInterface_ResetAPU(); // Reset the SPC too
-            system_reset();
+            system_soft_reset();
         }
     }
+
+    return;
+}
+
+void system_soft_reset()
+{
+    SoundInterface_ResetAPU(); // Reset the SPC too
+    system_reset();
 
     return;
 }
