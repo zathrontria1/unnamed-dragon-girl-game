@@ -128,6 +128,13 @@ L + R + SELECT + START\n\
 Unsaved progress will\n\
 be lost.";
 
+const uint8_t STR_UI_SUBSCREEN_RESETCONFIRMATION[] = "\
+Unsaved progress will be lost.\n\
+Restart the game?";
+
+const uint8_t STR_UI_SUBSCREEN_CONFIRM_YES[] = "Yes";
+const uint8_t STR_UI_SUBSCREEN_CONFIRM_NO[] = "No";
+
 const uint8_t STR_LEVELNAME_DEBUG_B1F[] = "DEBUG Dungeon B1F";
 const uint8_t STR_LEVELNAME_DEBUG_B2F[] = "DEBUG Dungeon B2F";
 const uint8_t STR_LEVELNAME_DEBUG_B3F[] = "DEBUG Dungeon B3F";

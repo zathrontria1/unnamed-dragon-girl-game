@@ -28,9 +28,12 @@ extern uint16_t subscreen_cursor_y;
 
 extern const struct menu_item subscreen_items_toplevel[7];
 extern const struct menu_item subscreen_items_help[7];
+extern const struct menu_item subscreen_items_resetconfirm[3];
 
 void loop_subscreen_top();
 void loop_subscreen_top_drawtime();
 
 void loop_subscreen_help();
 void loop_subscreen_help_drawtext(bool copy_result);
+
+void loop_subscreen_resetconfirm();

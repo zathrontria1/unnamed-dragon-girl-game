@@ -266,7 +266,6 @@ void loop_subscreen_help()
             SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
             subscreen_rendered = 0;
             // Exiting the help subscreen.
-            SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
 
             system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_SUBSCREEN);
             system_target_routine = ROUTINE_SUBSCREEN;
@@ -326,6 +325,137 @@ void loop_subscreen_top_drawtime()
     return;
 }
 
+void loop_subscreen_resetconfirm()
+{
+    system_game_paused = 1;
+    system_dont_count_lag = 1;
+
+    hdma_use_gradient = 0xffff;
+    hdma_gradient_ptr = (uint16_t)((uint32_t)&hdma_windowbackground_tables[1][0]);
+
+    ui_in_subscreen = 1;
+
+    if (!subscreen_rendered)
+    {
+        subscreen_selection = 1;
+        subscreen_bottom_entry = 0;
+
+        for (int i = 0; i < 256; i++)
+        {
+            if ((subscreen_items_resetconfirm[i].x == 255) && (subscreen_items_resetconfirm[i].y == 255))
+            {
+                subscreen_bottom_entry = i-1;
+                break;
+            }
+        }
+        
+        UserInterface_ClearWindowBuffer(false);
+        UserInterface_ClearTextBuffer();
+
+        UserInterface_DrawWindowBackground(0,10,32,8);
+
+        UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_RESETCONFIRMATION, 1, 11);
+
+        UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_CONFIRM_YES, 3, 14);
+        UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_CONFIRM_NO, 3, 16);
+        
+        UserInterface_CopyUiBuffers();
+        
+        subscreen_rendered = 1;
+    }
+    else
+    {
+        // Perform menu navigation
+        if (system_check_for_key(KEY_UP))
+        {
+            if (subscreen_selection == 0)
+            {
+                subscreen_selection = subscreen_bottom_entry;
+            }
+            else
+            {
+                subscreen_selection--;
+            }
+            SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
+        }
+        else if (system_check_for_key(KEY_DOWN))
+        {
+            if (subscreen_selection >= subscreen_bottom_entry)
+            {
+                subscreen_selection = 0;
+            }
+            else
+            {
+                subscreen_selection++;
+            }
+            SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
+        }
+
+        int16_t x = subscreen_items_resetconfirm[subscreen_selection].x;
+        int16_t y = subscreen_items_resetconfirm[subscreen_selection].y;
+
+        SpriteEngine_DrawUISprite(x, y, (0x2c | PAL_SYS_IMPACT << 9 | 3 << 12));
+
+        SpriteEngine_ProcessSpriteLists();
+
+        SpriteEngine_ResetOam();
+        SpriteEngine_PackOamHighTable();
+
+        bool temp_exit_subscreen = false;
+
+        if (system_check_for_key(KEY_A))
+        {
+            if (subscreen_items_resetconfirm[subscreen_selection].action == MENUACTION_OPENSUBSCREEN)
+            {
+                SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
+                if (subscreen_items_resetconfirm[subscreen_selection].ptr != 0)
+                {
+                    subscreen_rendered = 0;
+                    system_loop_func_ptr = subscreen_items_resetconfirm[subscreen_selection].ptr;
+
+                    return;
+                }
+                else
+                {
+                    ;// Pointer is invalid, do nothing
+                }
+            }
+            else if (subscreen_items_resetconfirm[subscreen_selection].action == MENUACTION_CALLFUNCTION)
+            {
+                SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
+                if (subscreen_items_resetconfirm[subscreen_selection].ptr != 0)
+                {
+                    // Directly call the function without changing the subscreen
+                    void (*func)() = subscreen_items_resetconfirm[subscreen_selection].ptr;
+                    func();
+
+                    return;
+                }
+                else
+                {
+                    ;// Pointer is invalid, do nothing
+                }
+            }
+            else if (subscreen_items_resetconfirm[subscreen_selection].action == MENUACTION_EXITSUBSCREEN)
+            {
+                temp_exit_subscreen = true;
+            }
+        }
+
+        if (system_check_for_key(KEY_B) || temp_exit_subscreen)
+        {
+            SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
+            subscreen_rendered = 0;
+            // Exiting the confirmation subscreen.
+
+            system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_SUBSCREEN);
+            system_target_routine = ROUTINE_SUBSCREEN;
+        }
+    }
+
+    return;
+}
+
 const struct menu_item subscreen_items_toplevel[7] = {
     {6, 16, MENUACTION_EXITSUBSCREEN, 0}, 
 
@@ -334,7 +464,7 @@ const struct menu_item subscreen_items_toplevel[7] = {
     {6, 40, MENUACTION_OPENSUBSCREEN, (void *)&loop_subscreen_help}, 
     {6, 48, MENUACTION_OPENSUBSCREEN, 0}, 
     
-    {6, 56, MENUACTION_CALLFUNCTION, (void *)&system_soft_reset}, 
+    {6, 56, MENUACTION_OPENSUBSCREEN, (void *)&loop_subscreen_resetconfirm}, 
 
     {255, 255, 0, 0}, 
 };
@@ -346,6 +476,13 @@ const struct menu_item subscreen_items_help[7] = {
     {-2, 64, 0, (void *)&STR_UI_SUBSCREEN_HELP_PROGRESSION}, 
     {-2, 80, 0, (void *)&STR_UI_SUBSCREEN_HELP_MAP}, 
     {-2, 96, 0, (void *)&STR_UI_SUBSCREEN_HELP_RESET}, 
+
+    {255, 255, 0, 0}, 
+};
+
+const struct menu_item subscreen_items_resetconfirm[3] = {
+    {6, 112, MENUACTION_CALLFUNCTION, (void *)&system_soft_reset}, 
+    {6, 128, MENUACTION_EXITSUBSCREEN, 0}, 
 
     {255, 255, 0, 0}, 
 };

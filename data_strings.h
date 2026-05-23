@@ -35,6 +35,11 @@ extern const uint8_t STR_UI_SUBSCREEN_HELP_PROGRESSION[];
 extern const uint8_t STR_UI_SUBSCREEN_HELP_MAP[];
 extern const uint8_t STR_UI_SUBSCREEN_HELP_RESET[];
 
+extern const uint8_t STR_UI_SUBSCREEN_RESETCONFIRMATION[];
+
+extern const uint8_t STR_UI_SUBSCREEN_CONFIRM_YES[];
+extern const uint8_t STR_UI_SUBSCREEN_CONFIRM_NO[];
+
 extern const uint8_t STR_LEVELNAME_DEBUG_B1F[];
 extern const uint8_t STR_LEVELNAME_DEBUG_B2F[];
 extern const uint8_t STR_LEVELNAME_DEBUG_B3F[];
