@@ -141,6 +141,20 @@ void loop_subscreen_top()
                     ;// Pointer is invalid, do nothing
                 }
             }
+            else if (subscreen_items_toplevel[subscreen_selection].action == MENUACTION_OPENMAPSCREEN)
+            {
+                // Open the map screen.
+                SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
+
+                shadow_inidisp = 0x0f;
+                system_use_alternate_nmi = 1;
+                shadow_inidisp_change = -1;
+
+                system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_MAPDISPLAY_INIT);
+                system_target_routine = ROUTINE_MAPDISPLAY_INIT;
+
+                return;
+            }
             else if (subscreen_items_toplevel[subscreen_selection].action == MENUACTION_CALLFUNCTION)
             {
                 SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
@@ -261,7 +275,7 @@ void loop_subscreen_help()
         SpriteEngine_ResetOam();
         SpriteEngine_PackOamHighTable();
 
-        if (system_check_for_key(KEY_X) || system_check_for_key(KEY_B))
+        if (system_check_for_key(KEY_B))
         {
             SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
             subscreen_rendered = 0;
@@ -460,7 +474,7 @@ const struct menu_item subscreen_items_toplevel[7] = {
     {6, 16, MENUACTION_EXITSUBSCREEN, 0}, 
 
     {6, 24, MENUACTION_OPENSUBSCREEN, 0}, 
-    {6, 32, MENUACTION_OPENSUBSCREEN, 0}, 
+    {6, 32, MENUACTION_OPENMAPSCREEN, 0}, 
     {6, 40, MENUACTION_OPENSUBSCREEN, (void *)&loop_subscreen_help}, 
     {6, 48, MENUACTION_OPENSUBSCREEN, 0}, 
     
