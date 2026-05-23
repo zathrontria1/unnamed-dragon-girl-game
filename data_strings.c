@@ -46,6 +46,8 @@ const uint8_t STR_UI_SUBSCREEN_PLAYTIME[] =         "Play time: %6u:%02u:%02u";
 const uint8_t STR_UI_SUBSCREEN_PLAYTIME_NOCOLON[] = "Play time: %6u %02u %02u";
 const uint8_t STR_UI_SUBSCREEN_LAGCOUNTER[] =       "Lag counter: %10u";
 
+const uint8_t STR_UI_SUBSCREEN_HELP_HEADING[] = "Help";
+
 const uint8_t STR_UI_SUBSCREEN_HELP_MOVEMENT_H[] = "1";
 const uint8_t STR_UI_SUBSCREEN_HELP_INTERACTION_H[] = "2";
 const uint8_t STR_UI_SUBSCREEN_HELP_ATTACK_H[] = "3";
@@ -84,8 +86,8 @@ while you're in combat.";
 const uint8_t STR_UI_SUBSCREEN_HELP_ATTACK[] = "\
 Hold down the Y Button to\n\
 breath fire in a cone.\n\
-This does a steady amount of\n\
-damage against a wide area.\n\
+This does damage \n\
+against a wide area.\n\
 \n\
 Press the A Button during\n\
 combat to punch.\n\
@@ -119,11 +121,16 @@ to exit the screen.";
 
 const uint8_t STR_UI_SUBSCREEN_HELP_RESET[] = "\
 To restart the game,\n\
-Press the following\n\
-combination while\n\
-the game is not paused:\n\
+either: \n\
 \n\
-L + R + SELECT + START\n\
+  - Select \"Restart\"\n\
+    in the Pause Menu\n\
+\n\
+    Press the following\n\
+    combination while\n\
+    the game is not paused:\n\
+\n\
+    L + R + SELECT + START\n\
 \n\
 Unsaved progress will\n\
 be lost.";

@@ -21,6 +21,8 @@ extern const uint8_t STR_UI_SUBSCREEN_PLAYTIME[];
 extern const uint8_t STR_UI_SUBSCREEN_PLAYTIME_NOCOLON[];
 extern const uint8_t STR_UI_SUBSCREEN_LAGCOUNTER[];
 
+extern const uint8_t STR_UI_SUBSCREEN_HELP_HEADING[];
+
 extern const uint8_t STR_UI_SUBSCREEN_HELP_MOVEMENT_H[];
 extern const uint8_t STR_UI_SUBSCREEN_HELP_INTERACTION_H[];
 extern const uint8_t STR_UI_SUBSCREEN_HELP_ATTACK_H[];
