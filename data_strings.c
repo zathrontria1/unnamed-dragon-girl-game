@@ -48,8 +48,9 @@ const uint8_t STR_UI_SUBSCREEN_LAGCOUNTER[] =       "Lag counter: %10u";
 
 const uint8_t STR_UI_SUBSCREEN_PROFILE_HEADING[] = "Profile";
 
-const uint8_t STR_UI_SUBSCREEN_PROFILE_HEALTH[] = "HP %u/%u";
-const uint8_t STR_UI_SUBSCREEN_PROFILE_ATTACK[] = "ATK %u";
+const uint8_t STR_UI_SUBSCREEN_PROFILE_HEALTH[] =  "HP  %u";
+const uint8_t STR_UI_SUBSCREEN_PROFILE_HEALTH_DIV[] =  "/%u";
+const uint8_t STR_UI_SUBSCREEN_PROFILE_ATTACK[] =  "ATK %u";
 const uint8_t STR_UI_SUBSCREEN_PROFILE_DEFENSE[] = "DEF %u";
 
 const uint8_t STR_UI_SUBSCREEN_PROFILE_MONEY[] = "You have %u money."; 

@@ -24,6 +24,7 @@ extern const uint8_t STR_UI_SUBSCREEN_LAGCOUNTER[];
 extern const uint8_t STR_UI_SUBSCREEN_PROFILE_HEADING[];
 
 extern const uint8_t STR_UI_SUBSCREEN_PROFILE_HEALTH[];
+extern const uint8_t STR_UI_SUBSCREEN_PROFILE_HEALTH_DIV[];
 extern const uint8_t STR_UI_SUBSCREEN_PROFILE_ATTACK[];
 extern const uint8_t STR_UI_SUBSCREEN_PROFILE_DEFENSE[];
 

@@ -251,7 +251,6 @@ void loop_subscreen_profile()
                 subscreen_selection--;
             }
             SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
-            loop_subscreen_help_drawtext(true);
         }
         else if (system_check_for_key(KEY_DOWN))
         {
@@ -264,7 +263,6 @@ void loop_subscreen_profile()
                 subscreen_selection++;
             }
             SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
-            loop_subscreen_help_drawtext(true);
         }
 
         int16_t x = subscreen_items_profile[subscreen_selection].x;
@@ -338,17 +336,53 @@ void loop_subscreen_profile_drawtext(bool copy_result)
 
     UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_PROFILE_HEADING, 3, 1);
 
-    UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_PROFILE_HEALTH, 1, 3);
-    UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_PROFILE_ATTACK, 1, 4);
-    UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_PROFILE_DEFENSE, 16, 4);
+    char temp_string[32] = "";    
+    int temp_hp_offset = snprintf((char *)&temp_string, 32, (char *)&STR_UI_SUBSCREEN_PROFILE_HEALTH, obj_player_pointer->struct_data.npc_data.hp);
 
-    UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_PROFILE_MONEY, 1, 17);
+    UserInterface_DrawWindowText((char *)&temp_string, 1, 3);
+
+    snprintf((char *)&temp_string, 32, (char *)&STR_UI_SUBSCREEN_PROFILE_HEALTH_DIV, obj_player_pointer->struct_data.npc_data.hp_max);
+    UserInterface_DrawWindowText((char *)&temp_string, temp_hp_offset+1, 3);
+
+    snprintf((char *)&temp_string, 32, (char *)&STR_UI_SUBSCREEN_PROFILE_ATTACK, obj_player_pointer->struct_data.npc_data.attack);
+    UserInterface_DrawWindowText((char *)&temp_string, 1, 4);
+
+    snprintf((char *)&temp_string, 32, (char *)&STR_UI_SUBSCREEN_PROFILE_DEFENSE, obj_player_pointer->struct_data.npc_data.defense);
+    UserInterface_DrawWindowText((char *)&temp_string, 16, 4);
+
+    snprintf((char *)&temp_string, 32, (char *)&STR_UI_SUBSCREEN_PROFILE_MONEY, obj_player_pointer->struct_data.npc_data.money);
+    UserInterface_DrawWindowText((char *)&temp_string, 1, 17);
+
+    // Cost sections
+    int32_t temp_cost_hp = 100;
+    for (int i = 0; i < obj_player_upgrades_bought_hp; i++)
+    {
+        temp_cost_hp *= 1.1f;
+    }
+
+    int32_t temp_cost_atk = 100;
+    for (int i = 0; i < obj_player_upgrades_bought_attack; i++)
+    {
+        temp_cost_atk *= 1.1f;
+    }
+
+    int32_t temp_cost_def = 100;
+    for (int i = 0; i < obj_player_upgrades_bought_defense; i++)
+    {
+        temp_cost_def *= 1.1f;
+    }
+    
     UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_PROFILE_UPGRADE_HP, 3, 19);
-    UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_PROFILE_COST, 7, 20);
+    snprintf((char *)&temp_string, 32, (char *)&STR_UI_SUBSCREEN_PROFILE_COST, temp_cost_hp);
+    UserInterface_DrawWindowText((char *)&temp_string, 7, 20);
+
     UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_PROFILE_UPGRADE_ATTACK, 3, 21);
-    UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_PROFILE_COST, 7, 22);
+    snprintf((char *)&temp_string, 32, (char *)&STR_UI_SUBSCREEN_PROFILE_COST, temp_cost_atk);
+    UserInterface_DrawWindowText((char *)&temp_string, 7, 22);
+
     UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_PROFILE_UPGRADE_DEFENSE, 3, 23);
-    UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_PROFILE_COST, 7, 24);
+    snprintf((char *)&temp_string, 32, (char *)&STR_UI_SUBSCREEN_PROFILE_COST, temp_cost_def);
+    UserInterface_DrawWindowText((char *)&temp_string, 7, 24);
 
     UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_PROFILE_RETURN, 3, 26);
 
