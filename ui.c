@@ -496,36 +496,6 @@ void UserInterface_UpdateEnemyCounters()
     return;
 }
 
-void UserInterface_PrintSpecialText(uint8_t * string_ptr)
-{
-    char temp_str[128];
-
-    /*
-        const uint8_t STR_UI_PLAYERINFO_ML[] = "\
-        HP: %u/%u\n\
-        ATK: %u DEF: %u\n\
-        Lag frames:         %10u\n\
-        Play time:        %6u:%02u:%02u";
-    */
-
-    uint16_t temp_hp = obj_player_pointer->struct_data.npc_data.hp;
-    uint16_t temp_hp_max = obj_player_pointer->struct_data.npc_data.hp_max;
-    uint16_t temp_attack = obj_player_pointer->struct_data.npc_data.attack;
-    uint16_t temp_defense = obj_player_pointer->struct_data.npc_data.defense;
-    uint16_t temp_lagframes = system_frames_lag;
-    uint16_t temp_h = (uint16_t)((system_frames_elapsed / FPS) / (3600l));
-    uint16_t temp_m = (uint16_t)(((system_frames_elapsed / FPS) % (3600l)) / 60);
-    uint16_t temp_s = (uint16_t)((system_frames_elapsed / FPS) % 60);
-
-    snprintf(
-        (char *)&temp_str, 128, (char *)string_ptr, 
-        temp_hp, temp_hp_max, temp_attack, temp_defense, temp_lagframes, temp_h, temp_m, temp_s);
-    
-    UserInterface_PrintText_MultiLine((uint8_t *)&temp_str, UI_MSGBOX_ML_START, UI_MARGIN_LEFT);
-
-    return;
-}
-
 /* 
     Prints 4-line monospaced text to the screen and queues DMA for it
 */

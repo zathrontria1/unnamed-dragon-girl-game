@@ -36,7 +36,6 @@ void UserInterface_UpdateMoneyCounters(void);
 void UserInterface_UpdateEnemyCounters(void);
 
 void UserInterface_PrintText_MultiLine(uint8_t * string_ptr, uint16_t row, uint16_t col);
-void UserInterface_PrintSpecialText(uint8_t * string_ptr);
 void UserInterface_PrintText(uint8_t * string_ptr, uint16_t row, uint16_t col);
 void UserInterface_PrintText_Mode3(uint8_t * string_ptr, uint16_t row, uint16_t col);
 
