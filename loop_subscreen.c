@@ -487,12 +487,12 @@ const struct menu_item subscreen_items_toplevel[7] = {
 };
 
 const struct menu_item subscreen_items_help[7] = {
-    {-2, 8, 0, (void *)&STR_UI_SUBSCREEN_HELP_MOVEMENT}, 
-    {-2, 24, 0, (void *)&STR_UI_SUBSCREEN_HELP_INTERACTION}, 
-    {-2, 40, 0, (void *)&STR_UI_SUBSCREEN_HELP_ATTACK}, 
-    {-2, 56, 0, (void *)&STR_UI_SUBSCREEN_HELP_PROGRESSION}, 
-    {-2, 72, 0, (void *)&STR_UI_SUBSCREEN_HELP_MAP}, 
-    {-2, 88, 0, (void *)&STR_UI_SUBSCREEN_HELP_RESET}, 
+    {-2, 24, 0, (void *)&STR_UI_SUBSCREEN_HELP_MOVEMENT}, 
+    {-2, 40, 0, (void *)&STR_UI_SUBSCREEN_HELP_INTERACTION}, 
+    {-2, 56, 0, (void *)&STR_UI_SUBSCREEN_HELP_ATTACK}, 
+    {-2, 72, 0, (void *)&STR_UI_SUBSCREEN_HELP_PROGRESSION}, 
+    {-2, 88, 0, (void *)&STR_UI_SUBSCREEN_HELP_MAP}, 
+    {-2, 104, 0, (void *)&STR_UI_SUBSCREEN_HELP_RESET}, 
 
     {255, 255, 0, 0}, 
 };
