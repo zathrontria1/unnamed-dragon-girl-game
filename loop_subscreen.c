@@ -36,6 +36,8 @@ void loop_subscreen_top()
     hdma_use_gradient = 0xffff;
     hdma_gradient_ptr = (uint16_t)((uint32_t)&hdma_windowbackground_tables[1][0]);
 
+    ui_in_subscreen = 1;
+
     if (!subscreen_rendered)
     {
         subscreen_selection = 0;
@@ -144,6 +146,8 @@ void loop_subscreen_top()
 
             ui_force_update = 1; // Then perform a wipe of the UI
 
+            ui_in_subscreen = 0;
+
             system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_GAMELOOP);
             system_target_routine = ROUTINE_GAMELOOP;
         }
@@ -159,6 +163,8 @@ void loop_subscreen_help()
 
     hdma_use_gradient = 0xffff;
     hdma_gradient_ptr = (uint16_t)((uint32_t)&hdma_windowbackground_tables[1][0]);
+
+    ui_in_subscreen = 1;
 
     if (!subscreen_rendered)
     {

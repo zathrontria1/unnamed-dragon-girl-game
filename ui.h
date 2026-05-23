@@ -1,3 +1,4 @@
+ZP extern uint16_t ui_in_subscreen;
 extern uint16_t ui_in_bg2;
 
 // UI cache invalidation stuff

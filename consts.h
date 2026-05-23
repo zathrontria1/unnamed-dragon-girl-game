@@ -247,6 +247,7 @@
 */
 #define HDMA_USED_CHANNELS_NORMAL 0x0a
 #define HDMA_USED_CHANNELS_MSGBOX 0x4e
+#define HDMA_USED_CHANNELS_SUBSCREEN 0x0e
 //#define HDMA_USED_CHANNELS 0xfe // All channels except channel 0
 
 #define PAL_UI_TEXT_WHITE 0

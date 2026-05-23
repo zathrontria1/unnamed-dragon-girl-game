@@ -13,6 +13,7 @@
 #include "ui.h"
 #include "spr.h"
 
+ZP uint16_t ui_in_subscreen;
 uint16_t ui_in_bg2;
 
 // UI cache invalidation stuff

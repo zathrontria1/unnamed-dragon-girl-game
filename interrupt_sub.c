@@ -27,7 +27,15 @@
     // Check the current routine and set up HDMA
     if (hdma_use_gradient == 0xffff)
     {
-        REG_HDMAEN = HDMA_USED_CHANNELS_MSGBOX;
+        if (ui_in_subscreen)
+        {
+            REG_HDMAEN = HDMA_USED_CHANNELS_SUBSCREEN;
+        }
+        else
+        {
+            REG_HDMAEN = HDMA_USED_CHANNELS_MSGBOX;
+        }
+        
         // Repoint the HDMA table
         REG_A1T2LH = hdma_gradient_ptr;
         
