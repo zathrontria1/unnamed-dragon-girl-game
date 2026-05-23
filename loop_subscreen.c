@@ -56,7 +56,7 @@ void loop_subscreen_top()
         UserInterface_ClearTextBuffer();
 
         UserInterface_DrawWindowBackground(0,0,12,10);
-        UserInterface_DrawWindowBackground(6,24,26,4);
+        UserInterface_DrawWindowBackground(6,22,26,6);
 
         char temp_money_string[32] = "          ";
         
@@ -74,6 +74,7 @@ void loop_subscreen_top()
         UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS, 3, 6);
         UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_RESTART, 3, 7);
 
+        UserInterface_DrawWindowText((char *)level_data_ptr->level_name, 7, 23);
         UserInterface_DrawWindowText((char *)&temp_money_string, 7, 25);
         UserInterface_DrawWindowText((char *)&temp_lag_frames, 7, 27);
         
