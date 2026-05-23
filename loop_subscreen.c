@@ -121,19 +121,48 @@ void loop_subscreen_top()
 
         loop_subscreen_top_drawtime();
 
+        bool temp_exit_subscreen = false;
+
         if (system_check_for_key(KEY_A))
         {
             if (subscreen_items_toplevel[subscreen_selection].action == MENUACTION_OPENSUBSCREEN)
             {
                 SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
+                if (subscreen_items_toplevel[subscreen_selection].ptr != 0)
+                {
+                    subscreen_rendered = 0;
+                    system_loop_func_ptr = subscreen_items_toplevel[subscreen_selection].ptr;
 
-                subscreen_rendered = 0;
-                system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_SUBSCREEN_HELP);
-                return;
+                    return;
+                }
+                else
+                {
+                    ;// Pointer is invalid, do nothing
+                }
+            }
+            else if (subscreen_items_toplevel[subscreen_selection].action == MENUACTION_CALLFUNCTION)
+            {
+                SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
+                if (subscreen_items_toplevel[subscreen_selection].ptr != 0)
+                {
+                    // Directly call the function without changing the subscreen
+                    void (*func)() = subscreen_items_toplevel[subscreen_selection].ptr;
+                    func();
+
+                    return;
+                }
+                else
+                {
+                    ;// Pointer is invalid, do nothing
+                }
+            }
+            else if (subscreen_items_toplevel[subscreen_selection].action == MENUACTION_EXITSUBSCREEN)
+            {
+                temp_exit_subscreen = true;
             }
         }
 
-        if (system_check_for_key(KEY_X) || system_check_for_key(KEY_B))
+        if (system_check_for_key(KEY_X) || system_check_for_key(KEY_B) || temp_exit_subscreen)
         {
             // Exiting the top level subscreen.
             SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
@@ -304,7 +333,7 @@ const struct menu_item subscreen_items_toplevel[7] = {
     {6, 40, MENUACTION_OPENSUBSCREEN, (void *)&loop_subscreen_help}, 
     {6, 48, MENUACTION_OPENSUBSCREEN, 0}, 
     
-    {6, 56, MENUACTION_CALLFUNCTION, (void *)&system_reset}, 
+    {6, 56, MENUACTION_CALLFUNCTION, (void *)&system_soft_reset}, 
 
     {255, 255, 0, 0}, 
 };
