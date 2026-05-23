@@ -213,13 +213,11 @@ void loop_game()
             shadow_inidisp_change = -1;
 
             system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_MAPDISPLAY_INIT);
-            //system_current_routine = ROUTINE_MAPDISPLAY_INIT;
             system_target_routine = ROUTINE_MAPDISPLAY_INIT;
         }
         else if (system_check_for_key(KEY_START))
         {
             system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_PAUSE);
-            //system_current_routine = ROUTINE_PAUSE;
             system_target_routine = ROUTINE_PAUSE;
 
             shadow_inidisp = 0x08;
@@ -227,7 +225,6 @@ void loop_game()
         else if (system_check_for_key(KEY_L))
         {
             // Debug: Switch to new level
-            // Let's try using the new alternate NMI part
             shadow_inidisp = 0x0f;
             system_use_alternate_nmi = 1;
             shadow_inidisp_change = -1;
@@ -581,6 +578,8 @@ void loop_game_reload()
     system_use_alternate_nmi = 0;
     shadow_inidisp_change = 0;
 
+    system_game_paused = 0;
+    
     system_interrupt_enable();
 
     return;
