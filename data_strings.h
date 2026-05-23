@@ -21,6 +21,20 @@ extern const uint8_t STR_UI_SUBSCREEN_PLAYTIME[];
 extern const uint8_t STR_UI_SUBSCREEN_PLAYTIME_NOCOLON[];
 extern const uint8_t STR_UI_SUBSCREEN_LAGCOUNTER[];
 
+extern const uint8_t STR_UI_SUBSCREEN_PROFILE_HEADING[];
+
+extern const uint8_t STR_UI_SUBSCREEN_PROFILE_HEALTH[];
+extern const uint8_t STR_UI_SUBSCREEN_PROFILE_ATTACK[];
+extern const uint8_t STR_UI_SUBSCREEN_PROFILE_DEFENSE[];
+
+extern const uint8_t STR_UI_SUBSCREEN_PROFILE_MONEY[]; 
+extern const uint8_t STR_UI_SUBSCREEN_PROFILE_UPGRADE_HP[];
+extern const uint8_t STR_UI_SUBSCREEN_PROFILE_UPGRADE_ATTACK[];
+extern const uint8_t STR_UI_SUBSCREEN_PROFILE_UPGRADE_DEFENSE[];
+extern const uint8_t STR_UI_SUBSCREEN_PROFILE_COST[];
+
+extern const uint8_t STR_UI_SUBSCREEN_PROFILE_RETURN[];
+
 extern const uint8_t STR_UI_SUBSCREEN_HELP_HEADING[];
 
 extern const uint8_t STR_UI_SUBSCREEN_HELP_MOVEMENT_H[];

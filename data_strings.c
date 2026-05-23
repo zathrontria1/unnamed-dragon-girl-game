@@ -46,6 +46,23 @@ const uint8_t STR_UI_SUBSCREEN_PLAYTIME[] =         "Play time: %6u:%02u:%02u";
 const uint8_t STR_UI_SUBSCREEN_PLAYTIME_NOCOLON[] = "Play time: %6u %02u %02u";
 const uint8_t STR_UI_SUBSCREEN_LAGCOUNTER[] =       "Lag counter: %10u";
 
+const uint8_t STR_UI_SUBSCREEN_PROFILE_HEADING[] = "Profile";
+
+const uint8_t STR_UI_SUBSCREEN_PROFILE_HEALTH[] = "HP %u/%u";
+const uint8_t STR_UI_SUBSCREEN_PROFILE_ATTACK[] = "ATK %u";
+const uint8_t STR_UI_SUBSCREEN_PROFILE_DEFENSE[] = "DEF %u";
+
+const uint8_t STR_UI_SUBSCREEN_PROFILE_MONEY[] = "You have %u money."; 
+const uint8_t STR_UI_SUBSCREEN_PROFILE_UPGRADE_HP[] = "Upgrade HP +10";
+const uint8_t STR_UI_SUBSCREEN_PROFILE_UPGRADE_ATTACK[] = "Upgrade ATK +1";
+const uint8_t STR_UI_SUBSCREEN_PROFILE_UPGRADE_DEFENSE[] = "Upgrade DEF +1";
+const uint8_t STR_UI_SUBSCREEN_PROFILE_COST[] = "Cost: %u";
+
+const uint8_t STR_UI_SUBSCREEN_PROFILE_UPGRADE_SUCCESS[] = "Upgrade complete!";
+const uint8_t STR_UI_SUBSCREEN_PROFILE_UPGRADE_FAILURE[] = "Not enough money.";
+
+const uint8_t STR_UI_SUBSCREEN_PROFILE_RETURN[] = "Back";
+
 const uint8_t STR_UI_SUBSCREEN_HELP_HEADING[] = "Help";
 
 const uint8_t STR_UI_SUBSCREEN_HELP_MOVEMENT_H[] = "1";
@@ -116,21 +133,21 @@ Select \"Map\" in Pause Menu\n\
 to open the overview map\n\
 for the current level.\n\
 \n\
-Press the SELECT Button\n\
-to exit the screen.";
+Press any button\n\
+to resume the game.";
 
 const uint8_t STR_UI_SUBSCREEN_HELP_RESET[] = "\
 To restart the game,\n\
 either: \n\
 \n\
-  - Select \"Restart\"\n\
-    in the Pause Menu\n\
+- Select \"Restart\"\n\
+  in the Pause Menu\n\
 \n\
-    Press the following\n\
-    combination while\n\
-    the game is not paused:\n\
+- Press the following\n\
+  combination while\n\
+  the game is not paused:\n\
 \n\
-    L + R + SELECT + START\n\
+  L + R + SELECT + START\n\
 \n\
 Unsaved progress will\n\
 be lost.";
