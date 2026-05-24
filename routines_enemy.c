@@ -79,7 +79,7 @@ void routines_slime(struct game_object * o)
                         SoundInterface_PlaySfx(SFX_ATK_SPLASH,0);
 
                         struct game_object * p = &obj_hitbox_enemy[j];
-                        p->struct_data.npc_data.attack = ENEMY_ATTACK_VALUE * ENEMY_ATTACK_MULT_RANGED;
+                        p->struct_data.npc_data.attack = o->struct_data.npc_data.attack * ENEMY_ATTACK_MULT_RANGED;
 
                         // Angle needs to be recalculated
                         uint8_t temp_rand = (uint8_t)Math_GetRandom_u16();
@@ -145,7 +145,7 @@ void routines_slime(struct game_object * o)
                                 SoundInterface_PlaySfx(SFX_ATK_PUNCH, 0);
                             }
 
-                            long temp_dmg = (p->struct_data.npc_data.attack - p->struct_data.npc_data.defense);
+                            long temp_dmg = (p->struct_data.npc_data.attack - o->struct_data.npc_data.defense);
                             if (temp_dmg <= 0)
                             {
                                 temp_dmg = 1;

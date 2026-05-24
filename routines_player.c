@@ -212,7 +212,7 @@ void routines_player(struct game_object * o)
                     if (j >= 0)
                     {
                         struct game_object * p = &obj_hitbox_player[j];
-                        p->struct_data.npc_data.attack = PLAYER_ATTACK_VALUE * PLAYER_ATTACK_MULT_MELEE;
+                        p->struct_data.npc_data.attack = o->struct_data.npc_data.attack * PLAYER_ATTACK_MULT_MELEE;
 
                         p->struct_data.npc_data.ttl = 2; // Lasts exactly 2 frames
 
@@ -297,7 +297,7 @@ void routines_player(struct game_object * o)
                     if (j >= 0)
                     {
                         struct game_object * p = &obj_hitbox_player[j];
-                        p->struct_data.npc_data.attack = PLAYER_ATTACK_VALUE * PLAYER_ATTACK_MULT_RANGED;
+                        p->struct_data.npc_data.attack = o->struct_data.npc_data.attack * PLAYER_ATTACK_MULT_RANGED;
 
                         int32_t temp_jitter = ((int32_t)((int16_t)Math_GetRandom_u16())) * (V_MUL * 2);
 
