@@ -28,6 +28,8 @@ extern uint16_t subscreen_bottom_entry;
 extern uint16_t subscreen_cursor_x;
 extern uint16_t subscreen_cursor_y;
 
+extern bool subscreen_restore_sprite_page;
+
 extern const struct menu_item subscreen_items_toplevel[7];
 extern const struct menu_item subscreen_items_profile[5];
 extern const struct menu_item subscreen_items_help[7];
@@ -37,6 +39,9 @@ void loop_subscreen_top();
 void loop_subscreen_top_drawtime();
 
 void loop_subscreen_profile();
+void loop_subscreen_profile_save_last_sprite_page();
+void loop_subscreen_profile_upload_profile_picture();
+void loop_subscreen_profile_restore_last_sprite_page();
 void loop_subscreen_profile_calculate_costs();
 void loop_subscreen_profile_drawtext();
 void loop_subscreen_profile_upgrade_hp();

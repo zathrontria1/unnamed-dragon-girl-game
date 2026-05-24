@@ -756,3 +756,22 @@ void system_soft_reset()
 
     return;
 }
+
+// Call this to align to vblank
+void system_align_to_vblank_start()
+{
+    while ((REG_HVBJOY & VBL_READY) != VBL_READY)
+    {
+        ;
+    }
+    while ((REG_HVBJOY & VBL_READY) == VBL_READY)
+    {
+        ;
+    }
+    while ((REG_HVBJOY & VBL_READY) != VBL_READY)
+    {
+        ;
+    }
+
+    return;
+}

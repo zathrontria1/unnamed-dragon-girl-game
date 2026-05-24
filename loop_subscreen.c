@@ -29,6 +29,8 @@ uint16_t subscreen_bottom_entry;
 uint16_t subscreen_cursor_x;
 uint16_t subscreen_cursor_y;
 
+bool subscreen_restore_sprite_page;
+
 void loop_subscreen_top()
 {
     system_game_paused = 1;
@@ -52,6 +54,11 @@ void loop_subscreen_top()
                 break;
             }
         }
+
+        SpriteEngine_ProcessSpriteLists();
+
+        SpriteEngine_ResetOam();
+        SpriteEngine_PackOamHighTable();
 
         UserInterface_ClearWindowBuffer(false);
         UserInterface_ClearTextBuffer();
@@ -85,6 +92,12 @@ void loop_subscreen_top()
     }
     else
     {
+        if (subscreen_restore_sprite_page)
+        {
+            loop_subscreen_profile_restore_last_sprite_page();
+            subscreen_restore_sprite_page = false;
+        }
+
         // Perform menu navigation
         if (system_check_for_key(KEY_UP))
         {
@@ -216,6 +229,13 @@ void loop_subscreen_profile()
         subscreen_selection = subscreen_selection_profile;
         subscreen_bottom_entry = 0;
 
+        // Copy the contents of the last 8KB of VRAM to WRAM first
+        // Wait for a transition from non-vblank to vblank.
+        loop_subscreen_profile_save_last_sprite_page();
+
+        // Then copy the player character's portrait
+        loop_subscreen_profile_upload_profile_picture();
+
         for (int i = 0; i < 256; i++)
         {
             if ((subscreen_items_profile[i].x == 255) && (subscreen_items_profile[i].y == 255))
@@ -275,6 +295,14 @@ void loop_subscreen_profile()
 
         SpriteEngine_DrawUISprite(x, y, (0x2c | PAL_SYS_IMPACT << 9 | 3 << 12));
 
+        for (int px = 0; px < 8; px++)
+        {
+            for (int py = 0; py < 8; py++)
+            {
+                SpriteEngine_DrawUISprite(128 + (px << 4), 0 + (py << 4), ((0x100 + (px << 1) + (py << 5)) | 6 << 9 | 3 << 12));
+            }
+        }
+
         SpriteEngine_ProcessSpriteLists();
 
         SpriteEngine_ResetOam();
@@ -324,6 +352,9 @@ void loop_subscreen_profile()
         if (system_check_for_key(KEY_B) || temp_exit_subscreen)
         {
             SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
+
+            subscreen_restore_sprite_page = true;
+
             subscreen_selection_profile = 0;
             
             subscreen_rendered = 0;
@@ -333,6 +364,55 @@ void loop_subscreen_profile()
             system_target_routine = ROUTINE_SUBSCREEN;
         }
     }
+
+    return;
+}
+
+/*
+    Save the original sprite page
+*/
+void loop_subscreen_profile_save_last_sprite_page()
+{
+    system_align_to_vblank_start();
+
+    dma_copy_from_vram(0x7000, 0x007fe000, 4096);
+
+    system_align_to_vblank_start();
+
+    dma_copy_from_vram(0x7800, 0x007ff000, 4096);
+
+    return;
+}
+
+/*
+    Upload the player character's image to VRAM
+*/
+void loop_subscreen_profile_upload_profile_picture()
+{
+    // Currently using a placeholder
+    system_align_to_vblank_start();
+
+    dma_copy_to_vram((uint32_t)&data_bg_dungeon_anim_water, 0x7000, 4096);
+
+    system_align_to_vblank_start();
+
+    dma_copy_to_vram((uint32_t)&data_bg_dungeon_anim_water+4096, 0x7800, 4096);
+
+    return;
+}
+
+/*
+    Restore the original sprite page
+*/
+void loop_subscreen_profile_restore_last_sprite_page()
+{
+    system_align_to_vblank_start();
+
+    dma_copy_to_vram(0x007fe000, 0x7000, 4096);
+
+    system_align_to_vblank_start();
+
+    dma_copy_to_vram(0x007ff000, 0x7800, 4096);
 
     return;
 }

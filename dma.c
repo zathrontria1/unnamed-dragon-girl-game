@@ -57,6 +57,36 @@ void dma_copy_to_vram(
     return;
 }
 
+void dma_copy_from_vram(
+    uint16_t src, 
+    uint32_t dest, 
+    uint16_t length)
+{
+    // Copies VRAM to A-bus address
+    // Must be used during fblank
+    // Used for bulk transfers and bypasses the queue.
+
+    REG_DMAP0 = 0x81; // word reg write, reverse
+
+    REG_A1T0LH = (uint16_t)dest;
+    REG_A1B0 = (uint8_t)((uint32_t)dest >> 16);
+
+    REG_VMAIN = VRAM_INCHIGH;
+
+    REG_BBAD0 = 0x39; // VMDATAREADL
+
+    REG_VMADDLH = src;
+    
+    REG_DAS0LH = length;
+
+    // Perform a dummy read first
+    register volatile uint16_t temp = REG_VMDATAREADLH;
+
+    REG_MDMAEN = 0x01;
+
+    return;
+}
+
 void dma_copy_oam()
 {
     // Update OAM from shadow

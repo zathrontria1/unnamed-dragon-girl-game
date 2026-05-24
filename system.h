@@ -25,3 +25,5 @@ FORCE_INLINE void system_interrupt_disable(void);
 FORCE_INLINE void system_check_for_soft_reset(void);
 void system_soft_reset(void);
 void system_reset(void);
+
+void system_align_to_vblank_start();
