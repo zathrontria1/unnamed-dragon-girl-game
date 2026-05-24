@@ -685,7 +685,7 @@ int16_t obj_instantiate_hitbox_enemy(
     if (((id >= OBJID_START_OF_DMA_SPRITES) && (id <= OBJID_END_OF_DMA_SPRITES)) ||
         ((id >= OBJID_START_OF_DMA_LIGHT_SPRITES) && (id <= OBJID_END_OF_DMA_LIGHT_SPRITES)) )
     {
-        uint16_t k = SpriteEngine_GetVramSlot16(i);
+        uint16_t k = SpriteEngine_GetVramSlot16(OBJ_GENERAL_MAX_COUNT + i);
         
         if (k >= 128)
         {
@@ -960,7 +960,7 @@ void obj_cleanup_hitbox_enemy()
     {
         if (obj_hitbox_enemy[obj_hitbox_enemy_delete_queue[i]].id == OBJID_BUBBLE_E)
         {
-            SpriteEngine_ReleaseVramSlot(obj_hitbox_enemy_delete_queue[i], 1);
+            SpriteEngine_ReleaseVramSlot(OBJ_GENERAL_MAX_COUNT + obj_hitbox_enemy_delete_queue[i], 1);
         }
 
         obj_hitbox_enemy[obj_hitbox_enemy_delete_queue[i]].id = OBJID_NULL;
