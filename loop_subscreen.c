@@ -417,6 +417,7 @@ void loop_subscreen_profile_upgrade_hp()
         obj_player_pointer->struct_data.npc_data.hp = obj_player_pointer->struct_data.npc_data.hp_max;
 
         obj_player_pointer->struct_data.npc_data.money -= obj_player_upgrades_cost_hp;
+        ui_display_money = obj_player_pointer->struct_data.npc_data.money;
 
         obj_player_upgrades_bought_hp++;
 
@@ -435,6 +436,7 @@ void loop_subscreen_profile_upgrade_atk()
         obj_player_pointer->struct_data.npc_data.attack += 1;
 
         obj_player_pointer->struct_data.npc_data.money -= obj_player_upgrades_cost_attack;
+        ui_display_money = obj_player_pointer->struct_data.npc_data.money;
 
         obj_player_upgrades_bought_attack++;
 
@@ -453,6 +455,7 @@ void loop_subscreen_profile_upgrade_def()
         obj_player_pointer->struct_data.npc_data.defense += 1;
 
         obj_player_pointer->struct_data.npc_data.money -= obj_player_upgrades_cost_defense;
+        ui_display_money = obj_player_pointer->struct_data.npc_data.money;
 
         obj_player_upgrades_bought_defense++;
 
