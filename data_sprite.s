@@ -4,6 +4,10 @@
     .global data_sprite_player
 data_sprite_player:
     .incbin "sprites/spr_player.bin"
+    .global data_sprite_player_portrait
+.data_sprite_player_portrait:
+    .incbin "sprites/spr_player_portrait.bin"
+
     .global data_sprite_fixed_lz4
 data_sprite_fixed_lz4:
     .incbin "sprites/spr_fixed.bin.lz4"

@@ -17,7 +17,7 @@ _data_palette:
     incbin "palette/palette_spr_common2.bin"
     incbin "palette/palette_spr_common2.bin"
     incbin "palette/palette_spr_common2.bin"
-    incbin "palette/palette_spr_common2.bin"
+    incbin "palette/palette_spr_player_portrait.bin"
     incbin "palette/palette_bg_dungeon_2.bin"
     
     global _data_palette_map_0_8bpp

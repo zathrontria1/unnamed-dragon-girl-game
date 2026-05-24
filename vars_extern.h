@@ -27,7 +27,8 @@ extern const uint8_t data_ui_dynamic_hp[]; // hp bar pieces
 extern const uint8_t data_ui_dynamic_textadvance[]; // text advance cursor
 extern const uint8_t data_ui_dynamic_selectcursor[]; // selection cursor in text box
 
-extern const uint8_t data_sprite_player[]; // player  
+extern const uint8_t data_sprite_player[]; // player
+extern const uint8_t data_sprite_player_portrait[]; // player portrait
 extern const uint8_t data_sprite_fixed_lz4[]; // permanently loaded effects/system
 extern const uint8_t data_sprite_slime[]; // slime
 extern const uint8_t data_sprite_lizardman[]; // lizardman

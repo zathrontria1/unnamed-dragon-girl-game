@@ -392,11 +392,11 @@ void loop_subscreen_profile_upload_profile_picture()
     // Currently using a placeholder
     system_align_to_vblank_start();
 
-    dma_copy_to_vram((uint32_t)&data_bg_dungeon_anim_water, 0x7000, 4096);
+    dma_copy_to_vram((uint32_t)&data_sprite_player_portrait, 0x7000, 4096);
 
     system_align_to_vblank_start();
 
-    dma_copy_to_vram((uint32_t)&data_bg_dungeon_anim_water+4096, 0x7800, 4096);
+    dma_copy_to_vram((uint32_t)&data_sprite_player_portrait+4096, 0x7800, 4096);
 
     return;
 }
