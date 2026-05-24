@@ -51,8 +51,6 @@ void obj_run()
         "\ta16\n"
 	    "\tx16\n"
 
-        "\tphy\n"
-
         "\tldx #<_obj_general\n"
         "\tldy #0\n"
         "\tcpy _obj_active_count\n"
@@ -85,7 +83,6 @@ void obj_run()
             "\tbcc .object_process_loop\n"
 
         ".object_break_loop:\n"
-            "\tply\n"
     );
     #else
         int obj_process_count = 0;
@@ -120,8 +117,6 @@ void obj_run()
         __asm(
         "\ta16\n"
 	    "\tx16\n"
-
-        "\tphy\n"
         
         "\tldx #<_obj_hitbox_player\n"
         "\tlda _obj_hitbox_count_player\n"
@@ -146,7 +141,6 @@ void obj_run()
             "\tbcc .hitbox_player_process_loop\n"
 
         ".hitbox_player_break_loop:\n"
-            "\tply\n"
     );
     #else
         ptr = (struct game_object *)&obj_hitbox_player[0];
@@ -176,8 +170,6 @@ void obj_run()
         __asm(
         "\ta16\n"
 	    "\tx16\n"
-
-        "\tphy\n"
         
         "\tldx #<_obj_hitbox_enemy\n"
 
@@ -204,7 +196,6 @@ void obj_run()
             "\tbcc .hitbox_enemy_process_loop\n"
 
         ".hitbox_enemy_break_loop:\n"
-            "\tply\n"
     );
     #else
         ptr = (struct game_object *)&obj_hitbox_enemy[0];
@@ -262,12 +253,8 @@ void obj_reset(int start_index)
         __asm(
             "\ta16\n"
             "\tx16\n"
-
-            "\tphy\n"
+        
             "\tphb\n"
-
-            "\tpei (r0)\n"
-            "\tpei (r1)\n"
 
             "\txba\n" 
             "\tlsr\n" // mul 128
@@ -298,13 +285,7 @@ void obj_reset(int start_index)
             "\tdec\n" // Decrement by 2 to remove the first byte and MVN implied byte
             "\tjsl >_system_MVNCodeInWRAM;\n"
 
-            "\tply\n"
-            "\tsty r1\n"
-            "\tply\n"
-            "\tsty r0\n"
-
             "\tplb\n"
-            "\tply\n"
         );
     #else
         uint8_t * ptr = (uint8_t *)&obj_general[start_index];
@@ -340,11 +321,7 @@ void obj_reset_hitbox_player()
             "\ta16\n"
             "\tx16\n"
 
-            "\tphy\n"
             "\tphb\n"
-
-            "\tpei (r0)\n"
-            "\tpei (r1)\n"
 
             "\tstz r0\n" // offset of start, also subtract length with this
             "\tlda #2048\n"
@@ -372,13 +349,7 @@ void obj_reset_hitbox_player()
             "\tdec\n" // Decrement by 2 to remove the first byte and MVN implied byte
             "\tjsl >_system_MVNCodeInWRAM;\n"
 
-            "\tply\n"
-            "\tsty r1\n"
-            "\tply\n"
-            "\tsty r0\n"
-
-            "\tplb\n"
-            "\tply\n");
+            "\tplb\n");
     #else
         uint8_t * ptr = (uint8_t *)&obj_hitbox_player[0];
         for (int i = 0; i < (OBJ_PLAYERHITBOX_MAX_COUNT * (uint16_t)sizeof(struct game_object)); i++)
@@ -413,11 +384,7 @@ void obj_reset_hitbox_enemy()
             "\ta16\n"
             "\tx16\n"
 
-            "\tphy\n"
             "\tphb\n"
-
-            "\tpei (r0)\n"
-            "\tpei (r1)\n"
 
             "\tstz r0\n" // offset of start, also subtract length with this
             "\tlda #1024\n"
@@ -445,13 +412,7 @@ void obj_reset_hitbox_enemy()
             "\tdec\n" // Decrement by 2 to remove the first byte and MVN implied byte
             "\tjsl >_system_MVNCodeInWRAM;\n"
 
-            "\tply\n"
-            "\tsty r1\n"
-            "\tply\n"
-            "\tsty r0\n"
-
-            "\tplb\n"
-            "\tply\n");
+            "\tplb\n");
     #else
         uint8_t * ptr = (uint8_t *)&obj_hitbox_enemy[0];
 

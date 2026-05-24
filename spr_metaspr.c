@@ -18,15 +18,6 @@ void SpriteEngine_AddMetaSprite(struct game_object * o, const struct spr_metaspr
             "\ta16\n"
             "\tx16\n"
 
-            "\tphy\n"
-
-            "\tpei (r0)\n" // game object's address; r1 is untouched
-            
-            "\tpei (r2)\n" // holds sprite queue Y index
-            "\tpei (r3)\n" // holds depth
-            "\tpei (r4)\n" // holds origin X pos
-            "\tpei (r5)\n" // holds origin Y pos
-
             "\ttax\n"
             
             // Precalculate the origin and depth
@@ -175,20 +166,6 @@ void SpriteEngine_AddMetaSprite(struct game_object * o, const struct spr_metaspr
             "\tbra .metasprite_loop\n"
 
             ".finish:\n"
-
-            "\tply\n"
-            "\tsty r5\n"
-            "\tply\n"
-            "\tsty r4\n"
-            "\tply\n"
-            "\tsty r3\n"
-            "\tply\n"
-            "\tsty r2\n"
-
-            "\tply\n"
-            "\tsty r0\n"
-
-            "\tply\n"
         );
     #else
         int16_t temp_x;

@@ -94,16 +94,10 @@ void SoundInterface_StartSoundEngine()
 
     #if VBCC_ASM == 1
          __asm(
-            "\tphy\n"
-
-            "\tpei (r0)\n"
-            "\tpei (r1)\n"
-            "\tpei (r2)\n"
-
             "\tsta r0\n" // Data pointer
             "\tstx r0+2\n"
 
-            "\tlda 12,s\n" // Length of transfer
+            "\tlda 4,s\n" // Length of transfer
             "\tbeq .end_sound\n"
             "\tsta r2\n" 
             
@@ -127,14 +121,6 @@ void SoundInterface_StartSoundEngine()
             "\ta16\n"
             "\trep #$20\n"
         ".end_sound:\n"
-            "\tply\n"
-            "\tsty r2\n"
-            "\tply\n"
-            "\tsty r1\n"
-            "\tply\n"
-            "\tsty r0\n"
-
-            "\tply\n"
         );
     #else
         
@@ -169,19 +155,11 @@ void SoundInterface_StartSoundEngine()
             "\ta16\n"
             "\tx16\n"
 
-            "\tphy\n"
-
-            "\tpei (r0)\n"
-            "\tpei (r1)\n"
-            "\tpei (r2)\n"
-            "\tpei (r3)\n"
-            "\tpei (r4)\n"
-
             "\tsta r0\n" // Data pointer 0
             "\tstx r0+2\n"
             "\tstx r3+2\n"
 
-            "\tlda 16,s\n" // Length of transfer
+            "\tlda 4,s\n" // Length of transfer
             "\tbeq .end_sound\n"
             "\tsta r2\n" 
             "\tclc\n" 
@@ -210,18 +188,6 @@ void SoundInterface_StartSoundEngine()
             "\ta16\n"
             "\trep #$20\n"
         ".end_sound:\n"
-            "\tply\n"
-            "\tsty r4\n"
-            "\tply\n"
-            "\tsty r3\n"
-            "\tply\n"
-            "\tsty r2\n"
-            "\tply\n"
-            "\tsty r1\n"
-            "\tply\n"
-            "\tsty r0\n"
-
-            "\tply\n"
         );
     #else
         uint8_t * data_ptr_2 = (uint8_t *)(data_ptr + chunk_len);

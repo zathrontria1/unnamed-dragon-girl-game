@@ -358,8 +358,6 @@ uint8_t * ani_getframe_dynamic_bubble(struct game_object * o)
             "\ta16\n"
             "\tx16\n"
 
-            "\tphy\n"
-
             "\ttax\n"
             // 30 + Frame Number
             // Current frame is byte 64
@@ -377,8 +375,6 @@ uint8_t * ani_getframe_dynamic_bubble(struct game_object * o)
             "\tldx #^_data_sprite_slime\n"
 
             ".finish:\n"
-
-            "\tply\n"
 
             "\trtl\n"
         );
@@ -406,8 +402,6 @@ uint8_t * ani_getframe_dynamic_slime(struct game_object * o)
         __asm(
             "\ta16\n"
             "\tx16\n"
-
-            "\tphy\n"
 
             "\ttax\n"
 
@@ -474,8 +468,6 @@ uint8_t * ani_getframe_dynamic_slime(struct game_object * o)
             "\ttya\n"
 
             ".finish:\n"
-
-            "\tply\n"
 
             "\trtl\n"
         );

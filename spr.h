@@ -42,5 +42,8 @@ uint16_t SpriteEngine_GetVramSlot32(uint16_t i);
 void SpriteEngine_ReleaseVramSlot(uint16_t i, uint16_t slot_count);
 
 void SpriteEngine_PackOamHighTable(void);
+#if VBCC_ASM == 1
 void SpriteEngine_ResetOam(void);
-
+#else
+void SpriteEngine_ResetOam(void);
+#endif

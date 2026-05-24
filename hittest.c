@@ -18,11 +18,6 @@
         __asm(
         "\ta16\n"
 	    "\tx16\n"
-        "\tphy\n"
-        "\tpei (r0)\n"
-        "\tpei (r1)\n"
-        "\tpei (r2)\n"
-        "\tpei (r3)\n"
 
         "\tlda #<_obj_hitbox_player\n"
         "\tsta r2\n"
@@ -36,18 +31,9 @@
         "\tcmp #0\n"
         "\tbne .hittest_enemy2player_increment\n"
 
-        "\tply\n"
         "\tldx r3\n"
-        "\tsty r3\n"
-        "\tply\n"
         "\tlda r2\n"
-        "\tsty r2\n"
-        "\tply\n"
-        "\tsty r1\n"
-        "\tply\n"
-        "\tsty r0\n"
-        
-        "\tply\n"
+
         "\trtl\n"
 
         ".hittest_enemy2player_increment:\n"
@@ -59,16 +45,6 @@
         "\tbcc .hittest_enemy2player_process_loop\n"
 
         ".hittest_enemy2player_break_loop:\n"
-        
-        "\tplx\n"
-        "\tstx r3\n"
-        "\tplx\n"
-        "\tstx r2\n"
-        "\tplx\n"
-        "\tstx r1\n"
-        "\tplx\n"
-        "\tstx r0\n"
-        "\tply\n"
     );
     #else
     struct game_object * p = &obj_hitbox_player[0];

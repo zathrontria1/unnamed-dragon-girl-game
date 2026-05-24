@@ -356,8 +356,6 @@ void loop_mapdisplay_init()
             "\tx16\n"
             "\tsep #$20\n"
 
-            "\tpei (r0)\n"
-
             "\tldx #256\n"
             "\tstx r0\n"
 
@@ -378,9 +376,6 @@ void loop_mapdisplay_init()
             "\tlda #$01\n"
             "\tsta $420b\n"
 
-            "\tplx\n"
-            "\tstx r0\n"
-
             "\ta16\n"
             "\trep #$20\n"
         );
@@ -392,8 +387,6 @@ void loop_mapdisplay_init()
             "\ta8\n"
             "\tx16\n"
             "\tsep #$20\n"
-
-            "\tpei (r0)\n"
 
             "\tldx #256\n"
             "\tstx r0\n"
@@ -414,9 +407,6 @@ void loop_mapdisplay_init()
 
             "\tlda #$01\n"
             "\tsta $420b\n"
-
-            "\tplx\n"
-            "\tstx r0\n"
 
             "\ta16\n"
             "\trep #$20\n"

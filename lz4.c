@@ -221,14 +221,8 @@ FORCE_INLINE void LZ4_Internal_Copy(uint8_t * src, uint8_t * dest, uint16_t len)
         
         "\tcmp #0\n"
         "\tbeq LZ4_Internal_Skip\n"
-        
-        "\tphy\n"
-        "\tphb\n"
 
-        "\tpei (r0)\n"
-        "\tpei (r1)\n"
-        "\tpei (r2)\n"
-        "\tpei (r3)\n"
+        "\tphb\n"
 
         "\ttax\n"
         "\ta8\n"
@@ -245,17 +239,7 @@ FORCE_INLINE void LZ4_Internal_Copy(uint8_t * src, uint8_t * dest, uint16_t len)
         "\tldy r2\n"
         "\tjsl >_system_MVNCodeInWRAM;\n"
 
-        "\tply\n"
-        "\tsty r3\n"
-        "\tply\n"
-        "\tsty r2\n"
-        "\tply\n"
-        "\tsty r1\n"
-        "\tply\n"
-        "\tsty r0\n"
-
         "\tplb\n"
-        "\tply\n"
         "LZ4_Internal_Skip:\n"
         );
     #else

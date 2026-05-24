@@ -65,7 +65,7 @@ void SpriteEngine_AddToFrontLayer(struct game_object * o, uint16_t tileattrib)
         __asm(
             "\ta16\n"
             "\tx16\n"
-            "\tphy\n"
+
             "\ttax\n"
 
             // Tile attribute data is 6th item in stack
@@ -126,12 +126,11 @@ void SpriteEngine_AddToFrontLayer(struct game_object * o, uint16_t tileattrib)
             "\tadc #16\n"
             "\tand #$00ff\n"
             "\tsta _spr_queue_front+8,y\n"
-            "\tlda 6,s\n"
+            "\tlda 4,s\n"
             "\tsta _spr_queue_front+4,y\n"
             "\tinc <_spr_front_count\n"
 
             ".reject:\n"
-            "\tply\n"
         );
     #else
         if (spr_front_count >= SPR_COUNT_MAX_FRONT)
@@ -184,7 +183,6 @@ void SpriteEngine_AddToSortedLayer(struct game_object * o, uint16_t tileattrib)
         __asm(
             "\ta16\n"
             "\tx16\n"
-            "\tphy\n"
             "\ttax\n"
 
             // Tile attribute data is 6th item in stack
@@ -247,12 +245,11 @@ void SpriteEngine_AddToSortedLayer(struct game_object * o, uint16_t tileattrib)
             "\tadc #16\n"
             "\tand #$00ff\n"
             "\tsta _spr_queue_normal+8,y\n"
-            "\tlda 6,s\n"
+            "\tlda 4,s\n"
             "\tsta _spr_queue_normal+4,y\n"
             "\tinc <_spr_normal_count\n"
 
             ".reject:\n"
-            "\tply\n"
         );
     #else
         if (spr_normal_count >= SPR_COUNT_MAX_SORTED)
@@ -304,7 +301,6 @@ void SpriteEngine_AddToBackLayer(struct game_object * o, uint16_t tileattrib)
         __asm(
             "\ta16\n"
             "\tx16\n"
-            "\tphy\n"
             "\ttax\n"
 
             // Tile attribute data is 6th item in stack
@@ -365,12 +361,11 @@ void SpriteEngine_AddToBackLayer(struct game_object * o, uint16_t tileattrib)
             "\tadc #16\n"
             "\tand #$00ff\n"
             "\tsta _spr_queue_back+8,y\n"
-            "\tlda 6,s\n"
+            "\tlda 4,s\n"
             "\tsta _spr_queue_back+4,y\n"
             "\tinc <_spr_back_count\n"
 
             ".reject:\n"
-            "\tply\n"
         );
     #else
         if (spr_back_count >= SPR_COUNT_MAX_BACK)
@@ -513,10 +508,6 @@ void SpriteEngine_ProcessSpriteLists()
         "\ta16\n"
         "\tx16\n"
 
-        "\tphy\n"
-        "\tpei (r0)\n"
-        "\tpei (r1)\n"
-
         "\tlda <_spr_front_count\n"
         "\tbeq .end_drawfront\n"
         
@@ -536,12 +527,6 @@ void SpriteEngine_ProcessSpriteLists()
             "\tbne .loop_drawfrontsprites\n"
             
         ".end_drawfront:\n"
-            "\tply\n"
-            "\tsty r1\n"
-            "\tply\n"
-            "\tsty r0\n"
-
-            "\tply\n"
         );
     #else
         for (int i = 0; i < spr_front_count; i++)
@@ -595,10 +580,6 @@ void SpriteEngine_ProcessSpriteLists()
         __asm(
         "\ta16\n"
         "\tx16\n"
-
-        "\tphy\n"
-        "\tpei (r0)\n"
-        "\tpei (r2)\n"
         
         "\tlda #<_spr_queue_normal\n"
         "\tsta r0\n"
@@ -637,13 +618,7 @@ void SpriteEngine_ProcessSpriteLists()
             "\trep #$20\n"
             "\tplb\n"
 
-        ".end:\n"
-            "\tply\n"
-            "\tsty r2\n"
-            "\tply\n"
-            "\tsty r0\n"
-
-            "\tply\n");
+        ".end:\n");
     #else
         for (int i = 0; i < spr_normal_count; i++)
         {
@@ -662,7 +637,6 @@ void SpriteEngine_ProcessSpriteLists()
         "\tand #$ff00\n"
         "\tpha\n"
         "\tpld\n"
-        "\tphy\n"
         "\tx8\n"
         "\tsep #$10\n"
         "\tlda #$0000\n"
@@ -719,7 +693,6 @@ void SpriteEngine_ProcessSpriteLists()
         "\trep #$30\n"
         "\ta16\n"
         "\tx16\n"
-        "\tply\n"
         "\tpld\n");
     #else
         uint16_t temp_offset = spr_sprite_count + spr_normal_count;
@@ -740,8 +713,6 @@ void SpriteEngine_ProcessSpriteLists()
         __asm(
         "\ta16\n"
         "\tx16\n"
-        "\tphy\n"
-        "\tpei (r2)\n"
 
         "\tlda <_spr_normal_count\n"
         "\tbeq .end2\n"
@@ -797,10 +768,7 @@ void SpriteEngine_ProcessSpriteLists()
             "\tbne .loop_spritewrite\n"
             
         ".end2:\n"
-            "\tply\n"
-            "\tsty r2\n"
-
-            "\tply\n");    
+    );    
     #else
         for (int i = 0; i < spr_normal_count; i++)
         {
@@ -823,10 +791,6 @@ void SpriteEngine_ProcessSpriteLists()
         "\ta16\n"
         "\tx16\n"
 
-        "\tphy\n"
-        "\tpei (r0)\n"
-        "\tpei (r1)\n"
-
         "\tlda <_spr_back_count\n"
         "\tbeq .end_drawback\n"
 
@@ -846,12 +810,6 @@ void SpriteEngine_ProcessSpriteLists()
             "\tbne .loop_drawbacksprites\n"
 
         ".end_drawback:\n"
-            "\tply\n"
-            "\tsty r1\n"
-            "\tply\n"
-            "\tsty r0\n"
-
-            "\tply\n"
     );
     #else
         for (int i = 0; i < spr_back_count; i++)
@@ -932,7 +890,7 @@ void SpriteEngine_PackOamHighTable()
         "\tand #$ff00\n"
         "\tpha\n"
         "\tpld\n"
-        "\tphy\n"
+
         "\tsep #$31\n"
         "\ta8\n"
         "\tx8\n"
@@ -999,7 +957,7 @@ void SpriteEngine_PackOamHighTable()
         "\ta16\n"
         "\tx16\n"
         "\trep #$30\n"
-        "\tply\n"
+
         "\tpld\n"
         "\tstz <_spr_sprite_count\n"
         );
@@ -1025,17 +983,16 @@ void SpriteEngine_PackOamHighTable()
 /* 
     Clears all unused sprites from OAM
 */
-void SpriteEngine_ResetOam()
+#if VBCC_ASM == 1
+void SpriteEngine_ResetOam(void)
+#else
+void SpriteEngine_ResetOam(void)
+#endif
 {
     #if VBCC_ASM == 1
         __asm(
         "\ta16\n"
         "\tx16\n"
-
-        "\tphy\n"
-        "\tpei (r2)\n"
-        "\tpei (r3)\n"
-        "\tpei (r10)\n"
 
         "\tlda _spr_sprite_count_prev\n"
         "\tbit #3\n"
@@ -1089,15 +1046,6 @@ void SpriteEngine_ResetOam()
         ".end_sprreset:\n"
         "\tlda <_spr_sprite_count\n"
         "\tsta _spr_sprite_count_prev\n"
-        
-        "\tply\n"
-        "\tsty r10\n"
-        "\tply\n"
-        "\tsty r3\n"
-        "\tply\n"
-        "\tsty r2\n"
-
-        "\tply\n"
     );
     #else
         uint16_t temp_len = spr_sprite_count_prev;
