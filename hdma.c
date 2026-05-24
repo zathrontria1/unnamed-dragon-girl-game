@@ -287,6 +287,22 @@ void HdmaEngine_GeneratePaletteTable(uint16_t * table_ptr, uint16_t pal_start, u
         }
     }
 
+    if (height < 223-entries)
+    {
+        // Write palette restore entries
+        for (int j = 0; j < entries; j++)
+        {
+            // Write the CGRAM address
+            *table_ptr = (pal_start+j) << 8;
+
+            table_ptr++;
+
+            *table_ptr = shadow_cgram.entry[pal_start+j];
+            
+            table_ptr++;
+        }
+    }
+
     return;
 }
 
