@@ -22,6 +22,7 @@ struct menu_item {
 
 extern bool subscreen_rendered;
 extern uint16_t subscreen_selection;
+extern uint16_t subscreen_selection_profile;
 extern uint16_t subscreen_bottom_entry;
 
 extern uint16_t subscreen_cursor_x;
@@ -36,7 +37,11 @@ void loop_subscreen_top();
 void loop_subscreen_top_drawtime();
 
 void loop_subscreen_profile();
+void loop_subscreen_profile_calculate_costs();
 void loop_subscreen_profile_drawtext();
+void loop_subscreen_profile_upgrade_hp();
+void loop_subscreen_profile_upgrade_atk();
+void loop_subscreen_profile_upgrade_def();
 
 void loop_subscreen_help();
 void loop_subscreen_help_drawtext(bool copy_result);

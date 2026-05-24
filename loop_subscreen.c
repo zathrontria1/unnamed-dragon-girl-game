@@ -23,6 +23,7 @@
 
 bool subscreen_rendered;
 uint16_t subscreen_selection;
+uint16_t subscreen_selection_profile;
 uint16_t subscreen_bottom_entry;
 
 uint16_t subscreen_cursor_x;
@@ -212,7 +213,7 @@ void loop_subscreen_profile()
 
     if (!subscreen_rendered)
     {
-        subscreen_selection = 0;
+        subscreen_selection = subscreen_selection_profile;
         subscreen_bottom_entry = 0;
 
         for (int i = 0; i < 256; i++)
@@ -232,6 +233,8 @@ void loop_subscreen_profile()
         UserInterface_DrawWindowBackground(0,16,32,12);
 
         UserInterface_DrawWindowBox(16,0,16,16);
+
+        loop_subscreen_profile_calculate_costs();
 
         loop_subscreen_profile_drawtext(false);
         
@@ -321,6 +324,8 @@ void loop_subscreen_profile()
         if (system_check_for_key(KEY_B) || temp_exit_subscreen)
         {
             SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
+            subscreen_selection_profile = 0;
+            
             subscreen_rendered = 0;
             // Exiting the profile subscreen.
 
@@ -356,34 +361,16 @@ void loop_subscreen_profile_drawtext(bool copy_result)
     UserInterface_DrawWindowText((char *)&temp_string, 1, 17);
 
     // Cost sections
-    int32_t temp_cost_hp = 100;
-    for (int i = 0; i < obj_player_upgrades_bought_hp; i++)
-    {
-        temp_cost_hp *= 1.1f;
-    }
-
-    int32_t temp_cost_atk = 100;
-    for (int i = 0; i < obj_player_upgrades_bought_attack; i++)
-    {
-        temp_cost_atk *= 1.1f;
-    }
-
-    int32_t temp_cost_def = 100;
-    for (int i = 0; i < obj_player_upgrades_bought_defense; i++)
-    {
-        temp_cost_def *= 1.1f;
-    }
-    
     UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_PROFILE_UPGRADE_HP, 3, 19);
-    snprintf((char *)&temp_string, 32, (char *)&STR_UI_SUBSCREEN_PROFILE_COST, temp_cost_hp);
+    snprintf((char *)&temp_string, 32, (char *)&STR_UI_SUBSCREEN_PROFILE_COST, obj_player_upgrades_cost_hp);
     UserInterface_DrawWindowText((char *)&temp_string, 7, 20);
 
     UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_PROFILE_UPGRADE_ATTACK, 3, 21);
-    snprintf((char *)&temp_string, 32, (char *)&STR_UI_SUBSCREEN_PROFILE_COST, temp_cost_atk);
+    snprintf((char *)&temp_string, 32, (char *)&STR_UI_SUBSCREEN_PROFILE_COST, obj_player_upgrades_cost_attack);
     UserInterface_DrawWindowText((char *)&temp_string, 7, 22);
 
     UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_PROFILE_UPGRADE_DEFENSE, 3, 23);
-    snprintf((char *)&temp_string, 32, (char *)&STR_UI_SUBSCREEN_PROFILE_COST, temp_cost_def);
+    snprintf((char *)&temp_string, 32, (char *)&STR_UI_SUBSCREEN_PROFILE_COST, obj_player_upgrades_cost_defense);
     UserInterface_DrawWindowText((char *)&temp_string, 7, 24);
 
     UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_PROFILE_RETURN, 3, 26);
@@ -391,6 +378,87 @@ void loop_subscreen_profile_drawtext(bool copy_result)
     if (copy_result)
     {
         UserInterface_CopyUiBuffers();
+    }
+
+    return;
+}
+
+void loop_subscreen_profile_calculate_costs()
+{
+    int32_t temp_cost_hp = 100;
+    for (int i = 0; i < obj_player_upgrades_bought_hp; i++)
+    {
+        temp_cost_hp *= 1.1f;
+    }
+    obj_player_upgrades_cost_hp = temp_cost_hp;
+
+    int32_t temp_cost_atk = 100;
+    for (int i = 0; i < obj_player_upgrades_bought_attack; i++)
+    {
+        temp_cost_atk *= 1.1f;
+    }
+    obj_player_upgrades_cost_attack = temp_cost_atk;
+
+    int32_t temp_cost_def = 100;
+    for (int i = 0; i < obj_player_upgrades_bought_defense; i++)
+    {
+        temp_cost_def *= 1.1f;
+    }
+    obj_player_upgrades_cost_defense = temp_cost_def;
+
+    return;
+}
+
+void loop_subscreen_profile_upgrade_hp()
+{
+    if (obj_player_pointer->struct_data.npc_data.money >= obj_player_upgrades_cost_hp)
+    {
+        obj_player_pointer->struct_data.npc_data.hp_max += 10;
+        obj_player_pointer->struct_data.npc_data.hp = obj_player_pointer->struct_data.npc_data.hp_max;
+
+        obj_player_pointer->struct_data.npc_data.money -= obj_player_upgrades_cost_hp;
+
+        obj_player_upgrades_bought_hp++;
+
+        subscreen_selection_profile = subscreen_selection;
+
+        subscreen_rendered = 0;
+    }
+
+    return;
+}
+
+void loop_subscreen_profile_upgrade_atk()
+{
+    if (obj_player_pointer->struct_data.npc_data.money >= obj_player_upgrades_cost_attack)
+    {
+        obj_player_pointer->struct_data.npc_data.attack += 1;
+
+        obj_player_pointer->struct_data.npc_data.money -= obj_player_upgrades_cost_attack;
+
+        obj_player_upgrades_bought_attack++;
+
+        subscreen_selection_profile = subscreen_selection;
+
+        subscreen_rendered = 0;
+    }
+
+    return;
+}
+
+void loop_subscreen_profile_upgrade_def()
+{
+    if (obj_player_pointer->struct_data.npc_data.money >= obj_player_upgrades_cost_defense)
+    {
+        obj_player_pointer->struct_data.npc_data.defense += 1;
+
+        obj_player_pointer->struct_data.npc_data.money -= obj_player_upgrades_cost_defense;
+
+        obj_player_upgrades_bought_defense++;
+
+        subscreen_selection_profile = subscreen_selection;
+
+        subscreen_rendered = 0;
     }
 
     return;
@@ -684,9 +752,9 @@ const struct menu_item subscreen_items_toplevel[7] = {
 };
 
 const struct menu_item subscreen_items_profile[5] = {
-    {6, 152, MENUACTION_EXITSUBSCREEN, 0}, 
-    {6, 168, MENUACTION_EXITSUBSCREEN, 0}, 
-    {6, 184, MENUACTION_EXITSUBSCREEN, 0}, 
+    {6, 152, MENUACTION_CALLFUNCTION, (void *)&loop_subscreen_profile_upgrade_hp}, 
+    {6, 168, MENUACTION_CALLFUNCTION, (void *)&loop_subscreen_profile_upgrade_atk}, 
+    {6, 184, MENUACTION_CALLFUNCTION, (void *)&loop_subscreen_profile_upgrade_def}, 
 
     {6, 208, MENUACTION_EXITSUBSCREEN, 0}, 
 
