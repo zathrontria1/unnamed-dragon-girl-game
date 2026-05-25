@@ -314,11 +314,11 @@ void loop_subscreen_profile()
 
         SpriteEngine_DrawUISprite(x, y, (0x2c | PAL_SYS_IMPACT << 9 | 3 << 12));
 
-        for (int px = 0; px < 8; px++)
+        for (int py = 0; py < 4; py++)
         {
-            for (int py = 0; py < 8; py++)
+            for (int px = 0; px < 4; px++)
             {
-                SpriteEngine_DrawUISprite(128 + (px << 4), 0 + (py << 4), ((0x100 + (px << 1) + (py << 5)) | 6 << 9 | 3 << 12));
+                SpriteEngine_DrawUISprite_Large(128 + (px << 5), 0 + (py << 5), ((0x100 + (px << 2) + (py << 6)) | 6 << 9 | 3 << 12));
             }
         }
 
