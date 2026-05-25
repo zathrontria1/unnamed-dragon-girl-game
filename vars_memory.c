@@ -106,9 +106,9 @@ uint16_t obj_player_upgrades_bought_hp;
 uint16_t obj_player_upgrades_bought_attack;
 uint16_t obj_player_upgrades_bought_defense;
 
-uint16_t obj_player_upgrades_cost_hp;
-uint16_t obj_player_upgrades_cost_attack;
-uint16_t obj_player_upgrades_cost_defense;
+uint32_t obj_player_upgrades_cost_hp;
+uint32_t obj_player_upgrades_cost_attack;
+uint32_t obj_player_upgrades_cost_defense;
 
 // Hitbox data
 ZP uint16_t obj_hitbox_player_first_available;

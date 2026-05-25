@@ -83,9 +83,9 @@ extern uint16_t obj_player_upgrades_bought_hp;
 extern uint16_t obj_player_upgrades_bought_attack;
 extern uint16_t obj_player_upgrades_bought_defense;
 
-extern uint16_t obj_player_upgrades_cost_hp;
-extern uint16_t obj_player_upgrades_cost_attack;
-extern uint16_t obj_player_upgrades_cost_defense;
+extern uint32_t obj_player_upgrades_cost_hp;
+extern uint32_t obj_player_upgrades_cost_attack;
+extern uint32_t obj_player_upgrades_cost_defense;
 
 // Hitbox data
 ZP extern uint16_t obj_hitbox_player_first_available;
