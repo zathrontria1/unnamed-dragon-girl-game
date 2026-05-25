@@ -488,21 +488,21 @@ void loop_subscreen_profile_calculate_costs()
     int32_t temp_cost_hp = 100;
     for (int i = 0; i < obj_player_upgrades_bought_hp; i++)
     {
-        temp_cost_hp = (temp_cost_hp * 11) / 10;
+        temp_cost_hp = (temp_cost_hp * 5) / 4;
     }
     obj_player_upgrades_cost_hp = temp_cost_hp;
 
     int32_t temp_cost_atk = 100;
     for (int i = 0; i < obj_player_upgrades_bought_attack; i++)
     {
-        temp_cost_atk = (temp_cost_atk * 11) / 10;
+        temp_cost_atk = (temp_cost_atk * 5) / 4;
     }
     obj_player_upgrades_cost_attack = temp_cost_atk;
 
     int32_t temp_cost_def = 100;
     for (int i = 0; i < obj_player_upgrades_bought_defense; i++)
     {
-        temp_cost_def = (temp_cost_def * 11) / 10;
+        temp_cost_def = (temp_cost_def * 5) / 4;
     }
     obj_player_upgrades_cost_defense = temp_cost_def;
 
