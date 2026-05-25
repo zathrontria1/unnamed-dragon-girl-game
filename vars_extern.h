@@ -51,6 +51,8 @@ extern const int32_t data_sine_1[];
 extern const int32_t data_cosine_1[];
 extern const uint32_t data_pow_2[];
 
+extern const uint32_t data_upgrade_costs[];
+
 // Level data
 extern const uint8_t data_map_debug0[];
 extern const uint8_t data_map_debug1[];
