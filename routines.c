@@ -201,7 +201,7 @@ void routines_interactable_treasurechest(struct game_object * o)
                     o->struct_data.interactable_data.opened = true;
 
                     char temp_str[32] = "";
-                    snprintf((char *)&temp_str, 32, (char *)&STR_MSG_FOUNDMONEY, o->struct_data.interactable_data.money);
+                    snprintf((char *)&temp_str, 32, (char *)&STR_MSG_FOUNDMONEY, (int32_t)o->struct_data.interactable_data.money);
                     UserInterface_PrintText((char *)&temp_str, UI_MSGBOX_SL_START, UI_MARGIN_LEFT);
 
                     o->struct_data.interactable_data.ttl = 180 / V_MUL;

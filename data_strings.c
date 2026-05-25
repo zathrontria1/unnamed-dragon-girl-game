@@ -31,7 +31,7 @@ trying the game out.\n\
                  - Zathrontria";
 
 const uint8_t STR_MSG_INCOMBAT[] = "Can't use while in combat";
-const uint8_t STR_MSG_FOUNDMONEY[] = "Found %u money!";
+const uint8_t STR_MSG_FOUNDMONEY[] = "Found %ju money!";
 
 const uint8_t STR_UI_HELP_MAP[] = "Press any button to close.";
 
@@ -42,23 +42,23 @@ const uint8_t STR_UI_SUBSCREEN_HELP[] =    "Help";
 const uint8_t STR_UI_SUBSCREEN_OPTIONS[] = "Options";
 const uint8_t STR_UI_SUBSCREEN_RESTART[] = "Restart";
 
-const uint8_t STR_UI_SUBSCREEN_MONEY[] =            "Money:       %10u";
+const uint8_t STR_UI_SUBSCREEN_MONEY[] =            "Money:       %10lu";
 const uint8_t STR_UI_SUBSCREEN_PLAYTIME[] =         "Play time: %6u:%02u:%02u";
 const uint8_t STR_UI_SUBSCREEN_PLAYTIME_NOCOLON[] = "Play time: %6u %02u %02u";
-const uint8_t STR_UI_SUBSCREEN_LAGCOUNTER[] =       "Lag counter: %10u";
+const uint8_t STR_UI_SUBSCREEN_LAGCOUNTER[] =       "Lag counter: %10lu";
 
 const uint8_t STR_UI_SUBSCREEN_PROFILE_HEADING[] = "Profile";
 
-const uint8_t STR_UI_SUBSCREEN_PROFILE_HEALTH[] =  "HP  %u";
-const uint8_t STR_UI_SUBSCREEN_PROFILE_HEALTH_DIV[] =  "/%u";
+const uint8_t STR_UI_SUBSCREEN_PROFILE_HEALTH[] =  "HP  %lu";
+const uint8_t STR_UI_SUBSCREEN_PROFILE_HEALTH_DIV[] =  "/%lu";
 const uint8_t STR_UI_SUBSCREEN_PROFILE_ATTACK[] =  "ATK %10u";
 const uint8_t STR_UI_SUBSCREEN_PROFILE_DEFENSE[] = "DEF %10u";
 
-const uint8_t STR_UI_SUBSCREEN_PROFILE_MONEY[] = "You have %u money."; 
+const uint8_t STR_UI_SUBSCREEN_PROFILE_MONEY[] = "You have %lu money."; 
 const uint8_t STR_UI_SUBSCREEN_PROFILE_UPGRADE_HP[] = "Upgrade HP +10";
 const uint8_t STR_UI_SUBSCREEN_PROFILE_UPGRADE_ATTACK[] = "Upgrade ATK +1";
 const uint8_t STR_UI_SUBSCREEN_PROFILE_UPGRADE_DEFENSE[] = "Upgrade DEF +1";
-const uint8_t STR_UI_SUBSCREEN_PROFILE_COST[] = "Cost: %u";
+const uint8_t STR_UI_SUBSCREEN_PROFILE_COST[] = "Cost: %lu";
 
 const uint8_t STR_UI_SUBSCREEN_PROFILE_UPGRADE_SUCCESS[] = "Upgrade complete!";
 const uint8_t STR_UI_SUBSCREEN_PROFILE_UPGRADE_FAILURE[] = "Not enough money.";
