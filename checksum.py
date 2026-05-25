@@ -1,76 +1,144 @@
+import argparse
+import os
 import sys
+from pathlib import Path
 
-# applies the SNES checksum to a ROM
-# usage:
-#   checksum.py LOROM filein [fileout]
-#   checksum.py HIROM filein [fileout]
+def floor_pow2(num: int) -> int:
+	if num < 1: raise ValueError(num)
+	return 1 << (num.bit_length() - 1)
 
-def checksum(addr,filein,fileout=None):
-    assert(addr >= 0)
-    if fileout == None:
-        fileout = filein
-    rom = bytearray(open(filein,"rb").read())
-    print("ROM: %s" % filein)
-    print("SIZE: %dk + %d bytes" % (len(rom)//1024,len(rom)%1024))
-    truncate = len(rom)
-    # find power of 1 for first "half" of ROM
-    rs0 = 32 * 1024
-    rs1 = 0
-    while (rs0 * 2) <= len(rom):
-        rs0 *= 2
-    if rs0 != len(rom): # second "half" of mixed size
-        rs1 = 32 * 1024
-        while (rs0 + (rs1 * 2)) <= len(rom):
-            rs1 *= 2
-        if (rs0 + rs1) != len(rom):
-            print("ROM size must be sum of two powers of 2 larger than 32k!")
-            sys.exit(2)
-        print("SPLIT: %dk + %d bytes / %dk + %d bytes" % (rs0//1024,rs0%1024,rs1//1024,rs1%1024))
-        while rs1 < rs0:
-            rom.extend(rom[-rs1:])
-            rs1 *= 2
-        print("DUPLICATED: %dk + %d bytes" % (len(rom)//1024,len(rom)%1024))
-    # erase existing checksum
-    rom[addr+0] = 0x00
-    rom[addr+1] = 0x00
-    rom[addr+2] = 0xFF
-    rom[addr+3] = 0xFF
-    # compute
-    cs = 0x0000
-    for i in range(len(rom)):
-        cs = (cs + rom[i+0]) & 0xFFFF
-    print("CHECKSUM: $%04X" % cs)
-    rom[addr+2] = cs & 0xFF
-    rom[addr+3] = cs >> 8
-    rom[addr+0] = rom[addr+2] ^ 0xFF
-    rom[addr+1] = rom[addr+3] ^ 0xFF
-    # verify
-    cs2 = 0x0000
-    for i in range(len(rom)):
-        cs2 = (cs2 + rom[i+0]) & 0xFFFF
-    assert(cs == cs2)   
-    open(fileout,"wb").write(rom[0:truncate])
-    print("SAVED: %s" % fileout)
+def ceil_pow2(num: int) -> int:
+	if num < 1: raise ValueError(num)
+	return 1 << (num - 1).bit_length()
 
-def usage():
-    print("2 or 3 arguments required: LOROM/HIROM filein [fileout]")
-    sys.exit(1)
+def pad_rom(rom: bytes) -> bytes:
+	size = len(rom)
+	chunk1_size = floor_pow2(size)
+	chunk2_size = size - chunk1_size
+
+	if chunk2_size == 0:
+		return bytes(rom)
+
+	output = bytearray(rom)
+	padded_chunk2_size = ceil_pow2(chunk2_size)
+	output += b'\0' * (padded_chunk2_size - chunk2_size)
+	mirror_count = chunk1_size // padded_chunk2_size - 1
+	output += output[chunk1_size:] * mirror_count
+
+	return bytes(output)
+
+def calc_checksum(rom: bytes) -> int:
+	return sum(rom) % 65536
+
+def calc_complement(checksum: int) -> int:
+	return 0xffff ^ checksum
+
+def patch_rom(rom: bytes, header_addr: int, checksum: int, complement: int) -> bytes:
+	rom = bytearray(rom)
+
+	rom[header_addr + 0xdc] = (complement >> 0) & 0xff
+	rom[header_addr + 0xdd] = (complement >> 8) & 0xff
+	rom[header_addr + 0xde] = (checksum >> 0) & 0xff
+	rom[header_addr + 0xdf] = (checksum >> 8) & 0xff
+
+	return bytes(rom)
+
+def mapping_header_addr(mapping_type: str) -> int:
+	if mapping_type == 'lorom':
+		return 0x7f00
+	elif mapping_type == 'hirom':
+		return 0xff00
+	elif mapping_type == 'exhirom':
+		return 0x40ff00
+	else:
+		raise ValueError(f'Unsupported ROM mapping ({mapping_type})')
+
+def fix_rom(rom: bytes, header_addr: int) -> bytes:
+	rom = patch_rom(rom, header_addr, 0x0000, 0xffff)
+	padded_rom = pad_rom(rom)
+
+	checksum = calc_checksum(padded_rom)
+	complement = calc_complement(checksum)
+
+	return patch_rom(rom, header_addr, checksum, complement)
+
+def main():
+	parser = argparse.ArgumentParser(
+		description='SFC ROM checksum patching utility.',
+		add_help=False)
+
+	parser.add_argument('-h', '--help', action='help',
+		help='Show this help message and exit')
+
+	parser.add_argument(
+		'input', metavar='INPUT',
+		type=Path,
+		help='Input file (ROM)')
+
+	parser.add_argument(
+		'-o', '--output', metavar='OUTPUT',
+		type=Path,
+		help='Output file')
+
+	mapping_args = parser.add_mutually_exclusive_group(required=True)
+
+	mapping_args.add_argument(
+		'--lorom', action='store_true',
+		help='Input file uses LoROM mapping (header location at 0x007fxx)')
+
+	mapping_args.add_argument(
+		'--hirom', action='store_true',
+		help='Input file uses HiROM mapping (header location at 0x00ffxx)')
+
+	mapping_args.add_argument(
+		'--exhirom', action='store_true',
+		help='Input file uses LoROM mapping (header location at 0x40ffxx)')
+
+	logging_args = parser.add_mutually_exclusive_group()
+
+	logging_args.add_argument(
+		'-q', '--quiet', action='store_true',
+		help='Suppress info logging')
+
+	cmd_args = parser.parse_args()
+
+	output_file_path = cmd_args.output or cmd_args.input
+
+	def print(*args, **kwargs):
+		if cmd_args.quiet or False:
+			return
+		__builtins__.print(*args, **kwargs)
+
+	with open(cmd_args.input, 'rb') as input_file:
+		if cmd_args.lorom:
+			mapping_type = 'lorom'
+		elif cmd_args.hirom:
+			mapping_type = 'hirom'
+		elif cmd_args.exhirom:
+			mapping_type = 'exhirom'
+
+		header_addr = mapping_header_addr(mapping_type)
+
+		rom = input_file.read()
+		old_checksum = int.from_bytes(rom[header_addr + 0xde:header_addr + 0xdf + 1], 'little')
+		old_complement = int.from_bytes(rom[header_addr + 0xdc:header_addr + 0xdd + 1], 'little')
+
+		rom = fix_rom(rom, header_addr)
+		new_checksum = calc_checksum(pad_rom(rom))
+		new_complement = calc_complement(new_checksum)
+
+		print(f'Updated checksum:   0x{old_checksum:04x} -> 0x{new_checksum:04x}' + (' (identical)' if old_checksum == new_checksum else ''))
+		print(f'Updated complement: 0x{old_complement:04x} -> 0x{new_complement:04x}' + (' (identical)' if old_complement == new_complement else ''))
+
+		with open(output_file_path, 'wb') as output_file:
+			output_file.write(rom)
+			print(f'Wrote output file to {Path(output_file_path).absolute()}')
 
 if __name__ == '__main__':
-    addr = -1
-    filein = None
-    fileout = None
-    if len(sys.argv) < 3 or len(sys.argv) > 4:
-        usage()
-    if sys.argv[1].upper() == "LOROM":
-        addr = 0x7FDC
-    elif sys.argv[1].upper() == "HIROM":
-        addr = 0xFFDC
-    else:
-        usage()
-    filein = sys.argv[2]
-    if len(sys.argv) >= 4:
-        fileout = sys.argv[3]
-    checksum(addr,filein,fileout)
-    sys.exit(0)
-
+	try:
+		main()
+	except Exception as e:
+		if (os.getenv('DEBUG') or '').lower() in ['1', 'true']:
+			raise
+		print(f'Error: {e}', file=sys.stderr)
+		sys.exit(1)
