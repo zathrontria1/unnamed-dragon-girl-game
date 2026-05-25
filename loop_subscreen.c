@@ -29,6 +29,7 @@ uint16_t subscreen_bottom_entry;
 uint16_t subscreen_cursor_x;
 uint16_t subscreen_cursor_y;
 
+bool subscreen_is_in_profile;
 bool subscreen_restore_sprite_page;
 
 void loop_subscreen_top()
@@ -231,10 +232,16 @@ void loop_subscreen_profile()
 
         // Copy the contents of the last 8KB of VRAM to WRAM first
         // Wait for a transition from non-vblank to vblank.
-        loop_subscreen_profile_save_last_sprite_page();
 
-        // Then copy the player character's portrait
-        loop_subscreen_profile_upload_profile_picture();
+        if (!subscreen_is_in_profile)
+        {
+            loop_subscreen_profile_save_last_sprite_page();
+
+            // Then copy the player character's portrait
+            loop_subscreen_profile_upload_profile_picture();
+
+            subscreen_is_in_profile = true;
+        }
 
         for (int i = 0; i < 256; i++)
         {
@@ -354,6 +361,7 @@ void loop_subscreen_profile()
             SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
 
             subscreen_restore_sprite_page = true;
+            subscreen_is_in_profile = false;
 
             subscreen_selection_profile = 0;
             

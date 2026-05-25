@@ -28,6 +28,7 @@ extern uint16_t subscreen_bottom_entry;
 extern uint16_t subscreen_cursor_x;
 extern uint16_t subscreen_cursor_y;
 
+extern bool subscreen_is_in_profile;
 extern bool subscreen_restore_sprite_page;
 
 extern const struct menu_item subscreen_items_toplevel[7];
