@@ -124,6 +124,8 @@ const struct obj_list_entry_interactable data_interactables_debug0[] =
     //{OBJID_INTERACTABLE_BLOCKER_DOOR_NS, 512, 624, 0}, 
     {OBJID_INTERACTABLE_SIGN_WALL, 592, 432-8, (void *)&STR_MSG_TEST_MULTILINE}, 
     {OBJID_INTERACTABLE_SIGN_WALL, 480, 432-8, (void *)&STR_MSG_TEST_MULTIPAGE}, 
+
+    {OBJID_INTERACTABLE_TREASURECHEST, 312, 320, (void *)5000}, 
     {OBJID_NULL, 0, 0, 0}, 
 };
 

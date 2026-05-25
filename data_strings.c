@@ -31,6 +31,7 @@ trying the game out.\n\
                  - Zathrontria";
 
 const uint8_t STR_MSG_INCOMBAT[] = "Can't use while in combat";
+const uint8_t STR_MSG_FOUNDMONEY[] = "Found %u money!";
 
 const uint8_t STR_UI_HELP_MAP[] = "Press any button to close.";
 

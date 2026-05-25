@@ -233,6 +233,10 @@ struct game_data_interactable
     int16_t screen_y; 
     uint16_t screen_w; // screen size
     uint16_t screen_h;
+
+    uint16_t opened; // for treasure chests, if it's opened
+    uint16_t ttl; // time remaining for auto-despawn TODO: put this in shared area
+    uint32_t money; // held money TODO: put this in shared area
 };
 
 union game_data

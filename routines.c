@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <snes/console.h>
 
@@ -177,6 +178,63 @@ void routines_interactable_sign(struct game_object * o)
     }
 
     SpriteEngine_AddToBackLayer(o, 0x28 | PAL_INTERACTABLE_SIGN_WALL << 9 | 2 << 12);
+
+    return;
+}
+
+void routines_interactable_treasurechest(struct game_object * o)
+{
+    if (!system_game_paused)
+    {
+        if (!o->struct_data.interactable_data.opened)
+        {
+            // Check if a player hit is on the sign
+            // And while not in combat
+            if (hit_test_interaction(o) != 0)
+            {
+                if (!event_in_combat_shadow)
+                {
+                    SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
+
+                    obj_player_pointer->struct_data.npc_data.money += o->struct_data.interactable_data.money;
+                    
+                    o->struct_data.interactable_data.opened = true;
+
+                    char temp_str[32] = "";
+                    snprintf((char *)&temp_str, 32, (char *)&STR_MSG_FOUNDMONEY, o->struct_data.interactable_data.money);
+                    UserInterface_PrintText((char *)&temp_str, UI_MSGBOX_SL_START, UI_MARGIN_LEFT);
+
+                    o->struct_data.interactable_data.ttl = 180 / V_MUL;
+                }
+                else
+                {
+                    UserInterface_PrintText((uint8_t *)&STR_MSG_INCOMBAT, UI_MSGBOX_SL_START, UI_MARGIN_LEFT);
+                }
+            }
+        }
+        else
+        {
+            // Check if the object is to be destroyed
+            if (o->struct_data.interactable_data.ttl == 0)
+            {
+                obj_destroy(o->array_index);
+            }
+            else
+            {
+                // Decrement time to live
+                o->struct_data.interactable_data.ttl--;
+            }
+        }
+    }
+
+    if (!o->struct_data.interactable_data.opened)
+    {
+        SpriteEngine_AddToSortedLayer(o, 0x24 | PAL_INTERACTABLE_TREASURECHEST << 9 | 2 << 12);
+    }
+    else
+    {
+        SpriteEngine_AddToSortedLayer(o, 0x26 | PAL_INTERACTABLE_TREASURECHEST << 9 | 2 << 12);
+    }
 
     return;
 }

@@ -531,6 +531,8 @@ int16_t obj_instantiate(
         p->tile.y = (uint16_t)p->pos.y.lh.h >> 4;
 
         p->struct_data.interactable_data.event_flag = local_event_flag;
+        p->struct_data.interactable_data.money = 0;
+        p->struct_data.interactable_data.opened = false;
     }
 
     if (id == OBJID_PLAYER)
@@ -865,6 +867,10 @@ uint16_t obj_instantiate_interactables(const struct obj_list_entry_interactable*
             uint8_t * string_ptr = (uint8_t *)(list->flag);
             obj_general[index].data_ptr = string_ptr;
         }
+        else if (temp_objid == OBJID_INTERACTABLE_TREASURECHEST)
+        {
+            obj_general[index].struct_data.interactable_data.money = (uint32_t)list->flag;
+        }
 
         list++;
     }
@@ -1043,6 +1049,9 @@ void obj_set_function_pointer(struct game_object * o)
             break;
         case OBJID_SPAWNER_ENEMY:
             o->func_ptr = (void *)&routines_spawner;
+            break;
+        case OBJID_INTERACTABLE_TREASURECHEST:
+            o->func_ptr = (void *)&routines_interactable_treasurechest;
             break;
         default:
             // Unimplemented object

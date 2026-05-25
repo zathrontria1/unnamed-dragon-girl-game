@@ -6,6 +6,7 @@ extern const uint8_t STR_MSG_TEST_MULTIPAGE[];
 extern const uint8_t STR_MSG_TUTORIAL_MP[];
 
 extern const uint8_t STR_MSG_INCOMBAT[];
+extern const uint8_t STR_MSG_FOUNDMONEY[];
 
 extern const uint8_t STR_UI_HELP_MAP[];
 
