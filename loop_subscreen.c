@@ -32,8 +32,14 @@ uint16_t subscreen_cursor_y;
 bool subscreen_is_in_profile;
 bool subscreen_restore_sprite_page;
 
+uint8_t subscreen_cgadsub_copy;
+
 void loop_subscreen_top()
 {
+    // Temporarily make a copy of CGADSUB.
+    subscreen_cgadsub_copy = shadow_cgadsub;
+    shadow_cgadsub = 0x00; // Disable colour math
+
     system_game_paused = 1;
     system_dont_count_lag = 1;
 
@@ -168,6 +174,9 @@ void loop_subscreen_top()
                 system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_MAPDISPLAY_INIT);
                 system_target_routine = ROUTINE_MAPDISPLAY_INIT;
 
+                // Restore CGADSUB
+                shadow_cgadsub = subscreen_cgadsub_copy; 
+
                 return;
             }
             else if (subscreen_items_toplevel[subscreen_selection].action == MENUACTION_CALLFUNCTION)
@@ -194,6 +203,9 @@ void loop_subscreen_top()
 
         if (system_check_for_key(KEY_X) || system_check_for_key(KEY_B) || temp_exit_subscreen)
         {
+            // Restore CGADSUB
+            shadow_cgadsub = subscreen_cgadsub_copy; 
+
             // Exiting the top level subscreen.
             SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
                 
