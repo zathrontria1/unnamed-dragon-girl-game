@@ -55,6 +55,35 @@ void SpriteEngine_DrawUISprite(int16_t x, int16_t y, uint16_t tileattrib)
     return;
 }
 
+void SpriteEngine_DrawUISprite_Large(int16_t x, int16_t y, uint16_t tileattrib)
+{
+    struct spr_queue_entry s;
+    s.x = x;
+
+    if ((s.x > -32) && (s.x < 256))
+    {
+        if (s.x < 0)
+        {
+            s.signsize = 0xc0;
+        }
+        else
+        {
+            s.signsize = 0x80;
+        }
+        s.y = y;
+
+        if ((s.y > -32) && (s.y < 224))
+        {
+            s.tileattrib = tileattrib;
+            SpriteEngine_DrawSprite(&s);
+            
+            return;
+        }
+    }
+
+    return;
+}
+
 #if VBCC_ASM == 1
 NO_INLINE void SpriteEngine_AddToFrontLayer(__reg("a/x") struct game_object * o, uint16_t tileattrib)
 #else

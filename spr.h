@@ -13,6 +13,7 @@ NEAR extern uint8_t spr_depth_count[257]; // Count of sprites on each depth line
 NEAR extern struct spr_queue_entry spr_queue_normal[SPR_COUNT_MAX_SORTED]; // depth sorted sprite entries
 
 void SpriteEngine_DrawUISprite(int16_t x, int16_t y, uint16_t tileattrib);
+void SpriteEngine_DrawUISprite_Large(int16_t x, int16_t y, uint16_t tileattrib);
 
 #if VBCC_ASM == 1
 NO_INLINE void SpriteEngine_AddToFrontLayer(__reg("a/x") struct game_object * o, uint16_t tileattrib);
