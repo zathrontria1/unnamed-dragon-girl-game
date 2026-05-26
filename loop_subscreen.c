@@ -21,8 +21,6 @@
 
 #include "data_strings.h"
 
-bool subscreen_rendered;
-bool subscreen_only_redraw_text;
 uint16_t subscreen_selection;
 uint16_t subscreen_selection_profile;
 uint16_t subscreen_bottom_entry;
@@ -32,6 +30,9 @@ uint16_t subscreen_cursor_y;
 
 bool subscreen_is_in_profile;
 bool subscreen_restore_sprite_page;
+
+bool subscreen_rendered;
+bool subscreen_skip_window_redraw;
 
 uint8_t subscreen_cgadsub_copy;
 
@@ -102,8 +103,12 @@ void loop_subscreen_top()
     {
         if (subscreen_restore_sprite_page)
         {
+            SoundInterface_StopStream();
+
             loop_subscreen_profile_restore_last_sprite_page();
             subscreen_restore_sprite_page = false;
+
+            SoundInterface_ResumeStream();
         }
 
         // Perform menu navigation
@@ -248,10 +253,14 @@ void loop_subscreen_profile()
 
         if (!subscreen_is_in_profile)
         {
+            SoundInterface_StopStream();
+
             loop_subscreen_profile_save_last_sprite_page();
 
             // Then copy the player character's portrait
             loop_subscreen_profile_upload_profile_picture();
+
+            SoundInterface_ResumeStream();
 
             subscreen_is_in_profile = true;
         }
@@ -265,7 +274,7 @@ void loop_subscreen_profile()
             }
         }
         
-        if (!subscreen_only_redraw_text)
+        if (!subscreen_skip_window_redraw)
         {
             UserInterface_ClearWindowBuffer(false);
 
@@ -379,7 +388,7 @@ void loop_subscreen_profile()
 
             subscreen_restore_sprite_page = true;
             subscreen_is_in_profile = false;
-            subscreen_only_redraw_text = false;
+            subscreen_skip_window_redraw = false;
 
             subscreen_selection_profile = 0;
             
@@ -515,7 +524,7 @@ void loop_subscreen_profile_upgrade_hp()
 
         subscreen_selection_profile = subscreen_selection;
 
-        subscreen_only_redraw_text = true;
+        subscreen_skip_window_redraw = true;
 
         subscreen_rendered = 0;
     }
@@ -536,7 +545,7 @@ void loop_subscreen_profile_upgrade_atk()
 
         subscreen_selection_profile = subscreen_selection;
 
-        subscreen_only_redraw_text = true;
+        subscreen_skip_window_redraw = true;
 
         subscreen_rendered = 0;
     }
@@ -557,7 +566,7 @@ void loop_subscreen_profile_upgrade_def()
 
         subscreen_selection_profile = subscreen_selection;
 
-        subscreen_only_redraw_text = true;
+        subscreen_skip_window_redraw = true;
 
         subscreen_rendered = 0;
     }

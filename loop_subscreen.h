@@ -20,8 +20,7 @@ struct menu_item {
     uint8_t padding[6];
 };
 
-extern bool subscreen_rendered;
-extern bool subscreen_only_redraw_text;
+
 extern uint16_t subscreen_selection;
 extern uint16_t subscreen_selection_profile;
 extern uint16_t subscreen_bottom_entry;
@@ -31,6 +30,9 @@ extern uint16_t subscreen_cursor_y;
 
 extern bool subscreen_is_in_profile;
 extern bool subscreen_restore_sprite_page;
+
+extern bool subscreen_rendered;
+extern bool subscreen_skip_window_redraw;
 
 extern uint8_t subscreen_cgadsub_copy;
 
