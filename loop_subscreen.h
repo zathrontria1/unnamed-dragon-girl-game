@@ -21,6 +21,7 @@ struct menu_item {
 };
 
 extern bool subscreen_rendered;
+extern bool subscreen_only_redraw_text;
 extern uint16_t subscreen_selection;
 extern uint16_t subscreen_selection_profile;
 extern uint16_t subscreen_bottom_entry;

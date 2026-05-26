@@ -22,6 +22,7 @@
 #include "data_strings.h"
 
 bool subscreen_rendered;
+bool subscreen_only_redraw_text;
 uint16_t subscreen_selection;
 uint16_t subscreen_selection_profile;
 uint16_t subscreen_bottom_entry;
@@ -264,14 +265,18 @@ void loop_subscreen_profile()
             }
         }
         
-        UserInterface_ClearWindowBuffer(false);
+        if (!subscreen_only_redraw_text)
+        {
+            UserInterface_ClearWindowBuffer(false);
+
+            UserInterface_DrawWindowBackground(0,0,16,2);
+            UserInterface_DrawWindowBackground(0,2,16,6);
+            UserInterface_DrawWindowBackground(0,16,32,12);
+
+            UserInterface_DrawWindowBox(16,0,16,16);
+        }
+        
         UserInterface_ClearTextBuffer();
-
-        UserInterface_DrawWindowBackground(0,0,16,2);
-        UserInterface_DrawWindowBackground(0,2,16,6);
-        UserInterface_DrawWindowBackground(0,16,32,12);
-
-        UserInterface_DrawWindowBox(16,0,16,16);
 
         loop_subscreen_profile_calculate_costs();
 
@@ -374,6 +379,7 @@ void loop_subscreen_profile()
 
             subscreen_restore_sprite_page = true;
             subscreen_is_in_profile = false;
+            subscreen_only_redraw_text = false;
 
             subscreen_selection_profile = 0;
             
@@ -509,6 +515,8 @@ void loop_subscreen_profile_upgrade_hp()
 
         subscreen_selection_profile = subscreen_selection;
 
+        subscreen_only_redraw_text = true;
+
         subscreen_rendered = 0;
     }
 
@@ -528,6 +536,8 @@ void loop_subscreen_profile_upgrade_atk()
 
         subscreen_selection_profile = subscreen_selection;
 
+        subscreen_only_redraw_text = true;
+
         subscreen_rendered = 0;
     }
 
@@ -546,6 +556,8 @@ void loop_subscreen_profile_upgrade_def()
         obj_player_upgrades_bought_defense++;
 
         subscreen_selection_profile = subscreen_selection;
+
+        subscreen_only_redraw_text = true;
 
         subscreen_rendered = 0;
     }
