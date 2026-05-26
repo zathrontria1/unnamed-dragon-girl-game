@@ -104,6 +104,14 @@ _start:
     mov <REG_DSPADDR,#DSP_KOFF
     mov <REG_DSPDATA,A ; Set Key off flags; delayed to here so A is already 255
 
+    ; write hardcoded values for the 63th entry of the sample table
+    mov A, #<STR_STREAM_DATA
+    mov !global_sampletable+252, A
+    mov !global_sampletable+254, A
+    mov A, #>STR_STREAM_DATA
+    mov !global_sampletable+253, A
+    mov !global_sampletable+255, A ; Set both to the same pointer to simulate a loop
+
     mov <REG_T0DIV, #133 ; roughly 60Hz
     mov <REG_T1DIV, A ; placeholder slowest possible rate
     mov <REG_CONTROL, #$03 ; enable T0 and T1
@@ -151,6 +159,11 @@ _main:
     ; as a rule
     ; opcode echo within the routine
 
+    cmp A,#SND_CMD_STREAM_UPLOAD
+    bne :+
+        call !_stream_upload
+        bra @end
+    :
     cmp A,#SND_CMD_DATA_UPLOAD
     bne :+
         call !_sfx_upload
@@ -224,6 +237,9 @@ _main:
     mov <global_last_cmd,<global_received_cmd
     
     mov <REG_APUIO0, <global_current_command_counter
+    mov <REG_APUIO1, #0
+    mov <REG_APUIO2, #0
+    mov <REG_APUIO3, #0
 
     jmp !_main
 

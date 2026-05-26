@@ -251,6 +251,35 @@ _sfx_upload:
 
     ret
 
+_stream_upload:
+    ; fixed location, so easier
+    ; assumes fixed size
+    ;mov <r0, #72 ; always 72 bytes
+    ;mov <r0+1, #0
+
+    ;mov <r2, #<stream_data
+    ;mov <r2+1, #>stream_data
+
+    mov <REG_APUIO1,<REG_APUIO1 ;echo the opcode.
+
+    ; wait for echo from cpu on REG_APUIO1 that indicates that new data has been sent
+    mov A,#SND_CMD_STREAM_UPLOAD
+    :
+        cbne <REG_APUIO1, :-
+    :
+        cbne <REG_APUIO1, :-
+
+    ; Sample can be copied to RAM, let the other side write out now since it'll be a while
+    mov <REG_APUIO0, #$ff ; make sure the other side doesn't get Y == 0
+
+    call !_data_upload_loop_stream
+
+    ; Manually fix the last header byte
+    mov A, !stream_data+63
+    or A, #$03
+    mov !stream_data+63, A
+    ret
+
 ;_data_upload_loop:
 ;    ; Begin copy
 ;    ; r2 contains the pointer to the write dest
@@ -331,6 +360,38 @@ _data_upload_loop_2byte:
         bne @loop
             inc !@abs_ptr_0+2
             inc !@abs_ptr_1+2
+        @check_end:
+        bpl @loop
+        cmp Y,<REG_APUIO0
+        bpl @loop
+
+    ret
+
+_data_upload_loop_stream:
+    ; Begin copy
+    ; r0 contains the length of data transfer (must be even)
+    ; r2 contains the pointer to the write dest
+
+    ; faster version with hardcoded values for streaming data
+
+    mov Y,#0
+
+    @startup:
+        cmp Y,<REG_APUIO0
+        bne @startup
+        bra @write
+    @loop:
+        cmp Y,<REG_APUIO0
+        bne @check_end
+
+        @write:
+        mov A,<REG_APUIO1
+        mov !stream_data+Y,A
+        mov A,<REG_APUIO2
+        mov <REG_APUIO0,Y
+        mov !stream_data+36+Y,A
+        inc y
+        bra @loop
         @check_end:
         bpl @loop
         cmp Y,<REG_APUIO0

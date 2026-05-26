@@ -7,12 +7,14 @@ ___irq_vblank:
 	jml :+
 	: ; Jump to fastROM
 	rep	#$30
+	
 	pha
 	phx
 	phy
 
 	phb
 	phd
+
 	lda #$0000
 	tcd
 	pha
@@ -46,8 +48,16 @@ ___irq_vblank:
 l4:
 	jsl	>_interrupt_vblank_alt
 l5:
+	sep	#32
+	a8
+	lda	_snd_stream_enable
+	a16
+	rep	#32
+	beq	l7
+	jsl	>_SoundInterface_NmiAudioUpload
+l7:
 	rep	#$30
-	
+
 	plx
 	stx	r15
 	plx
@@ -100,6 +110,8 @@ l5:
 ; stacksize=0+??
 	global	_system_use_alternate_nmi
 	zpage	_system_use_alternate_nmi
+	global	_snd_stream_enable
+	global	_SoundInterface_NmiAudioUpload
 	global	_interrupt_vblank_sub
 	global	_interrupt_vblank_alt
 	zpage	r0

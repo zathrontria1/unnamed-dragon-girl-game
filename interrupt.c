@@ -5,7 +5,7 @@
 
 #include "vars.h"
 
-#include "dma.h"
+#include "snd.h"
 #include "interrupt.h"
 #include "interrupt_sub.h"
 
@@ -22,6 +22,11 @@
     else
     {
         interrupt_vblank_alt();
+    }
+
+    if (snd_stream_enable)
+    {
+        SoundInterface_NmiAudioUpload();
     }
     
     return;

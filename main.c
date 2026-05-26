@@ -41,6 +41,8 @@ int main()
     HdmaEngine_EnableHdma();
 
     SoundInterface_PlayMusic(); 
+
+    SoundInterface_PlayStream((uint8_t *)&data_sprite_player_portrait, 8136, true);
     
     system_interrupt_enable();
     

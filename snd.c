@@ -13,6 +13,12 @@ uint16_t snd_flame_active;
 uint16_t snd_flame_playing;
 uint16_t snd_firecrackle_timeout;
 
+uint8_t * snd_stream_ptr;
+uint8_t * snd_stream_ptr_start;
+uint16_t snd_stream_length;
+bool snd_stream_enable;
+bool snd_stream_loop;
+
 /*
     Convention outside the stock IPL:
 
@@ -58,7 +64,7 @@ void SoundInterface_StartSoundEngine()
     }
 
     // Address is now set
-    SoundInterface_UploadData((uint8_t *)&data_soundengine_binary, 2048);
+    SoundInterface_UploadData((uint8_t *)&data_soundengine_binary, 2560);
 
     // Start the engine
     // Write start address
@@ -746,6 +752,79 @@ void SoundInterface_StopMusic()
     snd_current_command_counter++;
 
     SoundInterface_AcknowledgeNop();
+
+    return;
+}
+
+/*
+    Set streaming engine variables
+*/
+void SoundInterface_PlayStream(uint8_t * ptr, uint16_t len, bool loop)
+{
+    SoundInterface_StopStream();
+    
+    snd_stream_ptr = ptr;
+    snd_stream_ptr_start = ptr;
+
+    snd_stream_length = len;
+    snd_stream_loop = loop;
+
+    snd_stream_enable = true; // MUST BE SET LAST
+    return;
+}
+
+void SoundInterface_ResumeStream()
+{
+    snd_stream_enable = true;
+
+    return;
+}
+
+void SoundInterface_StopStream()
+{
+    snd_stream_enable = false;
+
+    return;
+}
+
+// Call after NMI to upload 72 bytes
+void SoundInterface_NmiAudioUpload()
+{
+    SoundInterface_AcknowledgeBusy(false);
+
+    uint16_t temp_len = 72;
+
+    REG_APU01 = SND_CMD_STREAM_UPLOAD; // Initial
+
+    while (REG_APU01 != SND_CMD_STREAM_UPLOAD)
+    {
+        ; // Wait for opcode echo.
+    }
+
+    // Once the APU replies
+    // Begin transfer.
+    uint16_t temp_chunk_len = temp_len >> 1;
+
+    SoundInterface_UploadData_2byte(snd_stream_ptr, temp_chunk_len);
+
+    uint8_t temp_lobyte = (uint8_t)(REG_APU00 + 2);
+    REG_APU00 = temp_lobyte; 
+
+    snd_current_command_counter++;
+
+    SoundInterface_AcknowledgeNop();
+
+    snd_stream_ptr += 72;
+
+    if (snd_stream_ptr >= (snd_stream_ptr_start + snd_stream_length))
+    {
+        snd_stream_ptr = snd_stream_ptr_start;
+
+        if (!snd_stream_loop)
+        {
+            snd_stream_enable = false;
+        }
+    }
 
     return;
 }

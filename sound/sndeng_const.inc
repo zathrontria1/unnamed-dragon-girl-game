@@ -34,6 +34,11 @@ SND_CMD_MUS_STOP = $22
 
 SND_CMD_MUS_SET_TEMPO = $23
 
+; Streaming stuff
+SND_CMD_STREAM_START = $24
+SND_CMD_STREAM_STOP = $25
+SND_CMD_STREAM_UPLOAD = $26
+
 ; upload chain for music (length and track)
 SND_CMD_SEQ_UPLOAD = $07
 SND_CMD_SEQ_UPLOAD_TRACK = $08
@@ -49,6 +54,9 @@ SEQ_OPCODE_SETRESTARTPOINT = $83
 SEQ_OPCODE_SETLOOPPOINT = $84
 SEQ_OPCODE_LOOP = $85
 SEQ_OPCODE_RESTART = $ff
+
+; Define the stream data as this particular sample
+STR_STREAM_DATA = $3f
 
 ;SPC700 Registers
 REG_HWTEST1   = $00F0

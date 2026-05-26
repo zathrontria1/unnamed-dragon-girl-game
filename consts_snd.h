@@ -39,6 +39,10 @@
 
 #define SND_CMD_MUS_SET_TEMPO 0x23
 
+#define SND_CMD_STREAM_START 0x24
+#define SND_CMD_STREAM_STOP 0x25
+#define SND_CMD_STREAM_UPLOAD 0x26
+
 #define SND_CMD_DIR_RESET 0xfd
 #define SND_CMD_DSP_SET 0xfe
 #define SND_CMD_SOFTRESET 0xff
@@ -70,7 +74,7 @@
 #define INS_DRUM_CLAP 0x15
 #define INS_DRUM_STICK 0x16
 
-// Sound effects: 0x20-0x3f (32-63)
+// Sound effects: 0x20-0x3f (32-62)
 #define SFX_UI_CONFIRM 0x20
 #define SFX_ATK_PUNCH 0x21
 #define SFX_ATK_SWING 0x22
@@ -82,6 +86,9 @@
 #define SFX_INTERACT_SWITCH 0x28
 #define SFX_DROP_COIN 0x29
 #define SFX_DROP_BOUNCE 0x2a
+
+// The effect denoting a stream is 63
+#define STR_STREAM_DATA 0x3f
 
 /*
     Below 0x80 = play the note directly

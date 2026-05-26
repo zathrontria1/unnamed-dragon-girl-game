@@ -6,6 +6,13 @@ extern uint16_t snd_flame_active;
 extern uint16_t snd_flame_playing;
 extern uint16_t snd_firecrackle_timeout;
 
+extern uint8_t * snd_stream_ptr;
+extern uint8_t * snd_stream_ptr_start;
+extern uint16_t snd_stream_length;
+
+extern bool snd_stream_enable;
+extern bool snd_stream_loop;
+
 void SoundInterface_StartSoundEngine();
 #if VBCC_ASM == 1
     NO_INLINE void SoundInterface_UploadData(uint8_t * data_ptr, uint16_t len);
@@ -45,6 +52,12 @@ void SoundInterface_UploadMusicSequence(struct seq_command * s, uint8_t track);
 void SoundInterface_PlayMusic();
 void SoundInterface_PauseMusic();
 void SoundInterface_StopMusic();
+
+void SoundInterface_PlayStream(uint8_t * ptr, uint16_t len, bool loop);
+void SoundInterface_ResumeStream();
+void SoundInterface_StopStream();
+
+void SoundInterface_NmiAudioUpload();
 
 FORCE_INLINE void SoundInterface_AcknowledgeBusy(bool ignore_busy);
 FORCE_INLINE void SoundInterface_AcknowledgeNop();

@@ -95,3 +95,7 @@ global_sfx_samplerates: .res (2 * INTERNAL_UNIQUE_SAMPLE_COUNT)
 global_sfx_adsr: .res (2 * INTERNAL_UNIQUE_SAMPLE_COUNT)
 global_sfx_tickcounts: .res INTERNAL_UNIQUE_SAMPLE_COUNT
 global_ins_tune: .res INTERNAL_UNIQUE_SAMPLE_COUNT
+
+; for sample streaming
+stream_data: .res 72
+
