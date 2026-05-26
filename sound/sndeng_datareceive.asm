@@ -275,16 +275,16 @@ _stream_upload:
     call !_data_upload_loop_stream
 
     ; Manually fix the last header byte
-    mov A, !stream_data+63
+    mov A, !stream_data+135
     or A, #$03
-    mov !stream_data+63, A
+    mov !stream_data+135, A
 
     ; force channel 0 to #255 ticks
     mov A, #255
     mov !global_sfx_tick_counter,A
 
-    ;mov A, <stream_active
-    ;bne @stream_playing_already
+    mov A, <stream_active
+    bne @stream_playing_already
 
     ; start playback
     mov <REG_DSPADDR, #DSP_V0VOLL
@@ -317,7 +317,7 @@ _stream_upload:
     mov <REG_DSPDATA, #$01 ; channel 0
     mov <stream_active, #$01
 
-    ;@stream_playing_already:
+    @stream_playing_already:
     
     ret
 
@@ -416,7 +416,10 @@ _data_upload_loop_stream:
     ; faster version with hardcoded values for streaming data
 
     mov Y,#0
+    mov A, <stream_current_block
+    beq odd_block
 
+    even_block:
     @startup:
         cmp Y,<REG_APUIO0
         bne @startup
@@ -437,6 +440,35 @@ _data_upload_loop_stream:
         bpl @loop
         cmp Y,<REG_APUIO0
         bpl @loop
+        bra finish_block
+
+    odd_block:
+    @startup:
+        cmp Y,<REG_APUIO0
+        bne @startup
+        bra @write
+    @loop:
+        cmp Y,<REG_APUIO0
+        bne @check_end
+
+        @write:
+        mov A,<REG_APUIO1
+        mov !stream_data+72+Y,A
+        mov A,<REG_APUIO2
+        mov <REG_APUIO0,Y
+        mov !stream_data+108+Y,A
+        inc y
+        bra @loop
+        @check_end:
+        bpl @loop
+        cmp Y,<REG_APUIO0
+        bpl @loop
+
+    finish_block:
+    mov A, <stream_current_block
+    inc A
+    and A, #$01
+    mov <stream_current_block, A
 
     ret
 
