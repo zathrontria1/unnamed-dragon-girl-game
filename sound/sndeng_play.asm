@@ -461,3 +461,4 @@ _start_note:
     mov <REG_DSPDATA, <dsp_param_kon
 
     ret
+

@@ -82,6 +82,8 @@ divabs3_lo_product: .res 1
 divabs3_hi_temp: .res 1
 divabs3_quotient: .res 2
 
+stream_active: .res 1
+
 .segment "SPCBSS"
 
 .align $100

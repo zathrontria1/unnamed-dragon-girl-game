@@ -278,6 +278,47 @@ _stream_upload:
     mov A, !stream_data+63
     or A, #$03
     mov !stream_data+63, A
+
+    ; force channel 0 to #255 ticks
+    mov A, #255
+    mov !global_sfx_tick_counter,A
+
+    ;mov A, <stream_active
+    ;bne @stream_playing_already
+
+    ; start playback
+    mov <REG_DSPADDR, #DSP_V0VOLL
+    mov <REG_DSPDATA, #63
+
+    ; Remaining DSPADDR reg can be incremented
+    inc <REG_DSPADDR ; #DSP_V0VOLR
+    mov <REG_DSPDATA, #63
+
+    inc <REG_DSPADDR ; #DSP_V0PL
+    mov <REG_DSPDATA, #$d7
+
+    inc <REG_DSPADDR ; #DSP_V0PH
+    mov <REG_DSPDATA, #$03
+
+    inc <REG_DSPADDR ; #DSP_V0SRCN
+    mov <REG_DSPDATA, #63
+
+    inc <REG_DSPADDR ; #DSP_V0ADSRL
+    mov <REG_DSPDATA, #$00
+
+    inc <REG_DSPADDR ; #DSP_V0ADSRH
+    mov <REG_DSPDATA, #$00
+
+    inc <REG_DSPADDR ; #DSP_V0GAIN
+    mov <REG_DSPDATA, #$7f ; always write this regardless
+
+    ; This one is a global reg
+    mov <REG_DSPADDR, #DSP_KON
+    mov <REG_DSPDATA, #$01 ; channel 0
+    mov <stream_active, #$01
+
+    ;@stream_playing_already:
+    
     ret
 
 ;_data_upload_loop:

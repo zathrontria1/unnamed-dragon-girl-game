@@ -105,10 +105,10 @@ _start:
     mov <REG_DSPDATA,A ; Set Key off flags; delayed to here so A is already 255
 
     ; write hardcoded values for the 63th entry of the sample table
-    mov A, #<STR_STREAM_DATA
+    mov A, #<stream_data
     mov !global_sampletable+252, A
     mov !global_sampletable+254, A
-    mov A, #>STR_STREAM_DATA
+    mov A, #>stream_data
     mov !global_sampletable+253, A
     mov !global_sampletable+255, A ; Set both to the same pointer to simulate a loop
 

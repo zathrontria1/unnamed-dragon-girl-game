@@ -109,3 +109,8 @@ data_snd_smp_ins_drum_clap:
     .global data_snd_smp_ins_drum_stick
 data_snd_smp_ins_drum_stick:
     .incbin "sound/ins/ins_drum_stick.brr"
+
+    .global _data_snd_stream_crowd_talk
+.data_snd_stream_crowd_talk:
+    .incbin "sound/stream/stream_crowd_talk.brr"
+    
