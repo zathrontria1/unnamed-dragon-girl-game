@@ -273,11 +273,6 @@ _stream_upload:
     mov <REG_APUIO0, #$ff ; make sure the other side doesn't get Y == 0
 
     call !_data_upload_loop_stream
-    
-    ; Manually fix the last header byte
-    mov A, !stream_data+135
-    or A, #$03
-    mov !stream_data+135, A
 
     mov A, <stream_active
     bne @stream_playing_already

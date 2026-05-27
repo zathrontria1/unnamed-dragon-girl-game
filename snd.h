@@ -12,6 +12,7 @@ extern uint16_t snd_stream_length;
 
 extern bool snd_stream_enable;
 extern bool snd_stream_loop;
+extern bool snd_stream_odd_block;
 
 void SoundInterface_StartSoundEngine();
 #if VBCC_ASM == 1
@@ -24,6 +25,12 @@ void SoundInterface_StartSoundEngine();
     NO_INLINE void SoundInterface_UploadData_2byte(uint8_t * data_ptr, uint16_t chunk_len);
 #else
     void SoundInterface_UploadData_2byte(uint8_t * data_ptr, uint16_t chunk_len);
+#endif
+
+#if VBCC_ASM == 1
+    NO_INLINE void SoundInterface_UploadData_2byte_StreamOddBlock(uint8_t * data_ptr, uint16_t chunk_len);
+#else
+    void SoundInterface_UploadData_2byte_StreamOddBlock(uint8_t * data_ptr, uint16_t chunk_len);
 #endif
 
 /*

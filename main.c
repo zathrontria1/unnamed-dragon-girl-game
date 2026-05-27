@@ -24,7 +24,6 @@
 int main()
 {
     system_init_regs(); // Display will be turned off within this
-    //system_init_zp(); // Wipe ZP // Now done within startup
     system_init_wram_functions(); // Write opcodes for WRAM functions
     
     rand_array[0] = 1; // Set the seed here
@@ -32,7 +31,6 @@ int main()
     system_display_splash(); // A good amount of init is here.
 
     system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_FADEIN);
-    //system_current_routine = ROUTINE_FADEIN;
     system_target_routine = ROUTINE_GAMELOOP;
 
     system_setup_tilemap_display(system_target_routine);

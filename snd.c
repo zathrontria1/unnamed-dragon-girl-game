@@ -18,6 +18,7 @@ uint8_t * snd_stream_ptr_start;
 uint16_t snd_stream_length;
 bool snd_stream_enable;
 bool snd_stream_loop;
+bool snd_stream_odd_block;
 
 /*
     Convention outside the stock IPL:
@@ -203,6 +204,92 @@ void SoundInterface_StartSoundEngine()
         {
             REG_APU01 = *data_ptr++;
             REG_APU02 = *data_ptr_2++;
+
+            REG_APU00 = temp_internal_counter;
+
+            while (REG_APU00 != temp_internal_counter)
+            {
+                ; // Wait for acknowledgement
+            }
+
+            temp_internal_counter++;
+        }
+    #endif
+    return;
+}
+
+#if VBCC_ASM == 1
+    NO_INLINE void SoundInterface_UploadData_2byte_StreamOddBlock(uint8_t * data_ptr, uint16_t chunk_len)
+#else
+    void SoundInterface_UploadData_2byte_StreamOddBlock(uint8_t * data_ptr, uint16_t chunk_len)
+#endif
+{
+    // i compare with size of the binary blob
+    // May need to change i to exactly 0 and no offset on compared size
+    // when implementing actual driver.
+
+    // Special version to make sure that the 63th byte of an odd block has the loop flag set.
+
+    #if VBCC_ASM == 1
+         __asm(
+            "\ta16\n"
+            "\tx16\n"
+
+            "\tsta r0\n" // Data pointer 0
+            "\tstx r0+2\n"
+            "\tstx r3+2\n"
+
+            "\tlda 4,s\n" // Length of transfer
+            "\tbeq .end_sound\n"
+            "\tsta r2\n" 
+            "\tclc\n" 
+            "\tadc r0\n"
+            "\tsta r3\n" // Data pointer 1. Note that it won't cross pointers.
+            
+            "\tldy #0\n"
+
+            "\tsep #$20\n"
+            "\ta8\n"
+        ".write_apu_byte:\n"
+            "\tlda [r0],y\n"
+            "\tsta 8513\n"
+            "\tlda [r3],y\n" // When Y is 27, byte is 63th here.
+            "\tcpy #27\n"
+            "\tbne .not_63th_byte\n"
+            "\tora #$03\n" // set low 2 bits
+            ".not_63th_byte:\n"
+            "\tsta 8514\n"
+            "\ttya\n"
+            "\tsta 8512\n"
+        ".check_ack:\n"
+            "\tcmp 8512\n"
+            "\tbne .check_ack\n"
+
+            "\tiny\n"
+            "\tcpy r2\n"
+            "\tbcc .write_apu_byte\n"
+
+            "\ta16\n"
+            "\trep #$20\n"
+        ".end_sound:\n"
+        );
+    #else
+        uint8_t * data_ptr_2 = (uint8_t *)(data_ptr + chunk_len);
+        uint8_t temp_internal_counter = 0x00;
+
+        for (uint16_t i = 0; i < chunk_len; i += 2)
+        {
+            REG_APU01 = *data_ptr++;
+
+            if (i == 27)
+            {
+                REG_APU02 = (*data_ptr_2 | 0x03);
+                data_ptr_2++;
+            }
+            else
+            {
+                REG_APU02 = *data_ptr_2++;
+            }
 
             REG_APU00 = temp_internal_counter;
 
@@ -769,7 +856,9 @@ void SoundInterface_PlayStream(uint8_t * ptr, uint16_t len, bool loop)
     snd_stream_length = len;
     snd_stream_loop = loop;
 
+    snd_stream_odd_block = false;
     snd_stream_enable = true; // MUST BE SET LAST
+
     return;
 }
 
@@ -783,6 +872,9 @@ void SoundInterface_ResumeStream()
 void SoundInterface_StopStream()
 {
     snd_stream_enable = false;
+
+    //snd_stream_ptr = snd_stream_ptr_start;
+    //snd_stream_odd_block = false;
 
     return;
 }
@@ -805,7 +897,15 @@ void SoundInterface_NmiAudioUpload()
     // Begin transfer.
     uint16_t temp_chunk_len = temp_len >> 1;
 
-    SoundInterface_UploadData_2byte(snd_stream_ptr, temp_chunk_len);
+    if (snd_stream_odd_block)
+    {
+        SoundInterface_UploadData_2byte_StreamOddBlock(snd_stream_ptr, temp_chunk_len);
+    }
+    else
+    {
+        SoundInterface_UploadData_2byte(snd_stream_ptr, temp_chunk_len);
+    }
+    
 
     uint8_t temp_lobyte = (uint8_t)(REG_APU00 + 2);
     REG_APU00 = temp_lobyte; 
@@ -813,6 +913,15 @@ void SoundInterface_NmiAudioUpload()
     snd_current_command_counter++;
 
     SoundInterface_AcknowledgeNop();
+
+    if (snd_stream_odd_block)
+    {
+        snd_stream_odd_block = false;
+    }
+    else
+    {
+        snd_stream_odd_block = true;
+    }
 
     snd_stream_ptr += 72;
 
