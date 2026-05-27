@@ -634,6 +634,10 @@ _stream_stop:
     mov <REG_DSPADDR, #DSP_KOFF
     mov <REG_DSPDATA, #$00
 
+    mov <stream_active, #0
+    mov <stream_current_block, #0
+    mov <stream_watchdog, #0
+
     ret
 
 ; For this one, detect if it's called from _process or not

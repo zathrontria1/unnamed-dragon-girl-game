@@ -111,6 +111,6 @@ _data_snd_smp_ins_drum_stick:
     incbin "sound/ins/ins_drum_stick.brr"
 
     section "_rodata.far.bindata.1"
-    global _data_snd_stream_crowd_talk
-_data_snd_stream_crowd_talk:
-    incbin "sound/stream/stream_crowd_talk.brr"
+    global _data_snd_stream_voice_ow
+_data_snd_stream_voice_ow:
+    incbin "sound/stream/stream_voice_ow.brr"

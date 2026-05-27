@@ -465,6 +465,8 @@ void routines_player(struct game_object * o)
                     p->struct_data.npc_data.ttl = 1; // despawn the object that triggered the hit
 
                     temp_invalidate_animation_frame = 1;
+
+                    SoundInterface_PlayStream((uint8_t *)&data_snd_stream_voice_ow, 2304, false);
                 }
             }
 
