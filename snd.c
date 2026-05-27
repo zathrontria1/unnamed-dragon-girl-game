@@ -18,7 +18,7 @@ uint8_t * snd_stream_ptr_start;
 uint16_t snd_stream_length;
 bool snd_stream_enable;
 bool snd_stream_loop;
-bool snd_stream_odd_block;
+uint16_t snd_stream_current_block;
 
 /*
     Convention outside the stock IPL:
@@ -219,9 +219,9 @@ void SoundInterface_StartSoundEngine()
 }
 
 #if VBCC_ASM == 1
-    NO_INLINE void SoundInterface_UploadData_2byte_StreamOddBlock(uint8_t * data_ptr, uint16_t chunk_len)
+    NO_INLINE void SoundInterface_UploadData_2byte_StreamLoopBlock(uint8_t * data_ptr, uint16_t chunk_len)
 #else
-    void SoundInterface_UploadData_2byte_StreamOddBlock(uint8_t * data_ptr, uint16_t chunk_len)
+    void SoundInterface_UploadData_2byte_StreamLoopBlock(uint8_t * data_ptr, uint16_t chunk_len)
 #endif
 {
     // i compare with size of the binary blob
@@ -856,7 +856,7 @@ void SoundInterface_PlayStream(uint8_t * ptr, uint16_t len, bool loop)
     snd_stream_length = len;
     snd_stream_loop = loop;
 
-    snd_stream_odd_block = false;
+    snd_stream_current_block = 0;
     snd_stream_enable = true; // MUST BE SET LAST
 
     return;
@@ -873,9 +873,6 @@ void SoundInterface_PauseStream()
 {
     snd_stream_enable = false;
 
-    //snd_stream_ptr = snd_stream_ptr_start;
-    //snd_stream_odd_block = false;
-
     return;
 }
 
@@ -884,7 +881,7 @@ void SoundInterface_StopStream()
     snd_stream_enable = false;
 
     snd_stream_ptr = snd_stream_ptr_start;
-    snd_stream_odd_block = false;
+    snd_stream_current_block = 0;
 
     return;
 }
@@ -907,9 +904,9 @@ void SoundInterface_NmiAudioUpload()
     // Begin transfer.
     uint16_t temp_chunk_len = temp_len >> 1;
 
-    if (snd_stream_odd_block)
+    if (snd_stream_current_block == 3)
     {
-        SoundInterface_UploadData_2byte_StreamOddBlock(snd_stream_ptr, temp_chunk_len);
+        SoundInterface_UploadData_2byte_StreamLoopBlock(snd_stream_ptr, temp_chunk_len);
     }
     else
     {
@@ -924,17 +921,10 @@ void SoundInterface_NmiAudioUpload()
 
     SoundInterface_AcknowledgeNop();
 
-    if (snd_stream_odd_block)
-    {
-        snd_stream_odd_block = false;
-    }
-    else
-    {
-        snd_stream_odd_block = true;
-    }
+    snd_stream_current_block = ((snd_stream_current_block + 1) & 0x03);
 
     snd_stream_ptr += 72;
-
+    
     if (snd_stream_ptr >= (snd_stream_ptr_start + snd_stream_length))
     {
         snd_stream_ptr = snd_stream_ptr_start;

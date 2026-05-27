@@ -279,7 +279,9 @@ _stream_upload:
     
     mov A, <stream_active
     beq @preload_buf_wait ; Avoid playing the stream while it's not filled
-        cmp A, #2
+        cmp A, #1
+        beq @preload_buf_wait
+        cmp A, #3
         bcs @stream_playing_already
             call !_stream_play
     @preload_buf_wait:
@@ -384,9 +386,14 @@ _data_upload_loop_stream:
 
     mov Y,#0
     mov A, <stream_current_block
-    beq odd_block
+    cmp A, #1
+    beq block_1
+    cmp A, #2
+    beq block_2
+    cmp A, #3
+    beq block_3
 
-    even_block:
+    block_0:
     @startup:
         cmp Y,<REG_APUIO0
         bne @startup
@@ -409,7 +416,7 @@ _data_upload_loop_stream:
         bpl @loop
         bra finish_block
 
-    odd_block:
+    block_1:
     @startup:
         cmp Y,<REG_APUIO0
         bne @startup
@@ -430,11 +437,57 @@ _data_upload_loop_stream:
         bpl @loop
         cmp Y,<REG_APUIO0
         bpl @loop
+        bra finish_block
+
+    block_2:
+    @startup:
+        cmp Y,<REG_APUIO0
+        bne @startup
+        bra @write
+    @loop:
+        cmp Y,<REG_APUIO0
+        bne @check_end
+
+        @write:
+        mov A,<REG_APUIO1
+        mov !stream_data+144+Y,A
+        mov A,<REG_APUIO2
+        mov <REG_APUIO0,Y
+        mov !stream_data+180+Y,A
+        inc y
+        bra @loop
+        @check_end:
+        bpl @loop
+        cmp Y,<REG_APUIO0
+        bpl @loop
+        bra finish_block
+
+    block_3:
+    @startup:
+        cmp Y,<REG_APUIO0
+        bne @startup
+        bra @write
+    @loop:
+        cmp Y,<REG_APUIO0
+        bne @check_end
+
+        @write:
+        mov A,<REG_APUIO1
+        mov !stream_data+216+Y,A
+        mov A,<REG_APUIO2
+        mov <REG_APUIO0,Y
+        mov !stream_data+252+Y,A
+        inc y
+        bra @loop
+        @check_end:
+        bpl @loop
+        cmp Y,<REG_APUIO0
+        bpl @loop
 
     finish_block:
     mov A, <stream_current_block
     inc A
-    and A, #$01
+    and A, #$03
     mov <stream_current_block, A
 
     ret

@@ -29,7 +29,7 @@ int main()
     rand_array[0] = 1; // Set the seed here
 
     system_display_splash(); // A good amount of init is here.
-
+    
     system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_FADEIN);
     system_target_routine = ROUTINE_GAMELOOP;
 
@@ -40,7 +40,7 @@ int main()
 
     //SoundInterface_PlayMusic(); 
 
-    SoundInterface_PlayStream((uint8_t *)&data_snd_stream_crowd_talk, 65520, false);
+    SoundInterface_PlayStream((uint8_t *)&data_snd_stream_crowd_talk, 65376, true);
     
     system_interrupt_enable();
     

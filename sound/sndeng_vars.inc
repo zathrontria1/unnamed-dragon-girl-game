@@ -83,7 +83,7 @@ divabs3_hi_temp: .res 1
 divabs3_quotient: .res 2
 
 stream_active: .res 1
-stream_current_block: .res 1
+stream_current_block: .res 1 ; 0, 1, 2, 3
 stream_watchdog: .res 2 ; must be 2 bytes
 
 .segment "SPCBSS"
@@ -101,5 +101,4 @@ global_sfx_tickcounts: .res INTERNAL_UNIQUE_SAMPLE_COUNT
 global_ins_tune: .res INTERNAL_UNIQUE_SAMPLE_COUNT
 
 ; for sample streaming
-stream_data: .res 144
-
+stream_data: .res 288 ; 72 * 4
