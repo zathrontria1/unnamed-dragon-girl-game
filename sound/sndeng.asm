@@ -112,6 +112,14 @@ _start:
     mov !global_sampletable+253, A
     mov !global_sampletable+255, A ; Set both to the same pointer to simulate a loop
 
+    ; Place a guard header
+    mov A, !stream_data+144
+    or A, #$03
+    mov !stream_data+144, A
+
+    mov <REG_DSPADDR,#DSP_KOFF
+    mov <REG_DSPDATA, #0 ; Clear all Key offs
+
     mov <REG_T0DIV, #133 ; roughly 60Hz
     mov <REG_T1DIV, A ; placeholder slowest possible rate
     mov <REG_CONTROL, #$03 ; enable T0 and T1

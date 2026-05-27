@@ -100,5 +100,5 @@ global_sfx_tickcounts: .res INTERNAL_UNIQUE_SAMPLE_COUNT
 global_ins_tune: .res INTERNAL_UNIQUE_SAMPLE_COUNT
 
 ; for sample streaming
-stream_data: .res 144
+stream_data: .res 153
 

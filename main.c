@@ -42,7 +42,7 @@ int main()
 
     SoundInterface_PlayMusic(); 
 
-    SoundInterface_PlayStream((uint8_t *)&data_snd_stream_crowd_talk, 65529, true);
+    SoundInterface_PlayStream((uint8_t *)&data_snd_stream_crowd_talk, 65520, true);
     
     system_interrupt_enable();
     

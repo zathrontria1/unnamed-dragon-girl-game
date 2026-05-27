@@ -349,6 +349,52 @@ _sfx_play_extend:
 
     ret
 
+_stream_play:
+    mov A, #255
+    mov Y, <global_sfx_endsoonest
+    mov !global_sfx_tick_counter+Y,A
+    mov A, !lut_channel_mask+Y
+    mov <dsp_param_kon,A
+
+    mov A,<global_sfx_endsoonest
+    xcn A ; Contains the channel offset
+    clrc
+    adc A, #DSP_V0VOLL ; Contains the first channel
+    mov <REG_DSPADDR, A
+    mov <REG_DSPDATA, #63
+
+    ; Remaining DSPADDR reg can be incremented
+    inc <REG_DSPADDR ; #DSP_V0VOLR
+    mov <REG_DSPDATA, #63
+
+    inc <REG_DSPADDR ; #DSP_V0PL
+    mov <REG_DSPDATA, #$d7
+
+    inc <REG_DSPADDR ; #DSP_V0PH
+    mov <REG_DSPDATA, #$03
+
+    inc <REG_DSPADDR ; #DSP_V0SRCN
+    mov <REG_DSPDATA, #63
+
+    inc <REG_DSPADDR ; #DSP_V0ADSRL
+    mov <REG_DSPDATA, #$00
+
+    inc <REG_DSPADDR ; #DSP_V0ADSRH
+    mov <REG_DSPDATA, #$00
+
+    inc <REG_DSPADDR ; #DSP_V0GAIN
+    mov <REG_DSPDATA, #$7f ; always write this regardless
+
+    ; This one is a global reg
+    mov <REG_DSPADDR, #DSP_KON
+    mov <REG_DSPDATA, <dsp_param_kon
+
+    ; Update channel LRUs to the newest situation without ticking
+    mov A, #0
+    call !_update_channel_lru
+
+    ret
+
 ; Call after finishing setting up non-shared input to a DSP channel
 ; to play the SFX or note
 ; tickdown rate and channel use are the same setup
