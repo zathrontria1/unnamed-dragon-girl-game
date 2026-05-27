@@ -38,9 +38,9 @@ int main()
 
     HdmaEngine_EnableHdma();
 
-    SoundInterface_PlayMusic(); 
+    //SoundInterface_PlayMusic(); 
 
-    SoundInterface_PlayStream((uint8_t *)&data_snd_stream_crowd_talk, 65520, true);
+    SoundInterface_PlayStream((uint8_t *)&data_snd_stream_crowd_talk, 65520, false);
     
     system_interrupt_enable();
     

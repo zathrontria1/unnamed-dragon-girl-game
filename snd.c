@@ -848,7 +848,7 @@ void SoundInterface_StopMusic()
 */
 void SoundInterface_PlayStream(uint8_t * ptr, uint16_t len, bool loop)
 {
-    SoundInterface_StopStream();
+    SoundInterface_PauseStream();
     
     snd_stream_ptr = ptr;
     snd_stream_ptr_start = ptr;
@@ -869,12 +869,22 @@ void SoundInterface_ResumeStream()
     return;
 }
 
-void SoundInterface_StopStream()
+void SoundInterface_PauseStream()
 {
     snd_stream_enable = false;
 
     //snd_stream_ptr = snd_stream_ptr_start;
     //snd_stream_odd_block = false;
+
+    return;
+}
+
+void SoundInterface_StopStream()
+{
+    snd_stream_enable = false;
+
+    snd_stream_ptr = snd_stream_ptr_start;
+    snd_stream_odd_block = false;
 
     return;
 }
@@ -931,7 +941,7 @@ void SoundInterface_NmiAudioUpload()
 
         if (!snd_stream_loop)
         {
-            snd_stream_enable = false;
+            SoundInterface_StopStream();
         }
     }
 

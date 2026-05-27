@@ -84,6 +84,7 @@ divabs3_quotient: .res 2
 
 stream_active: .res 1
 stream_current_block: .res 1
+stream_watchdog: .res 2 ; must be 2 bytes
 
 .segment "SPCBSS"
 

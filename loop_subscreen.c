@@ -103,12 +103,20 @@ void loop_subscreen_top()
     {
         if (subscreen_restore_sprite_page)
         {
-            SoundInterface_StopStream();
+            if (snd_stream_enable)
+            {
+                SoundInterface_PauseStream();
 
-            loop_subscreen_profile_restore_last_sprite_page();
-            subscreen_restore_sprite_page = false;
+                loop_subscreen_profile_restore_last_sprite_page();
+                subscreen_restore_sprite_page = false;
 
-            SoundInterface_ResumeStream();
+                SoundInterface_ResumeStream();
+            }
+            else
+            {
+                loop_subscreen_profile_restore_last_sprite_page();
+                subscreen_restore_sprite_page = false;
+            }
         }
 
         // Perform menu navigation
@@ -253,14 +261,24 @@ void loop_subscreen_profile()
 
         if (!subscreen_is_in_profile)
         {
-            SoundInterface_StopStream();
+            if (snd_stream_enable)
+            {
+                SoundInterface_PauseStream();
 
-            loop_subscreen_profile_save_last_sprite_page();
+                loop_subscreen_profile_save_last_sprite_page();
 
-            // Then copy the player character's portrait
-            loop_subscreen_profile_upload_profile_picture();
+                // Then copy the player character's portrait
+                loop_subscreen_profile_upload_profile_picture();
 
-            SoundInterface_ResumeStream();
+                SoundInterface_ResumeStream();
+            }
+            else
+            {
+                loop_subscreen_profile_save_last_sprite_page();
+
+                // Then copy the player character's portrait
+                loop_subscreen_profile_upload_profile_picture();
+            }
 
             subscreen_is_in_profile = true;
         }

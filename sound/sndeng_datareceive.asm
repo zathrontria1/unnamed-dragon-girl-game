@@ -274,13 +274,16 @@ _stream_upload:
 
     call !_data_upload_loop_stream
 
-    mov A, <stream_active
-    bne @stream_playing_already
+    mov <stream_watchdog, #0
+    mov <stream_watchdog+1, #6 ; 1536 ticks
     
-    call !_stream_play
-
-    mov <stream_active, #$01
-
+    mov A, <stream_active
+    beq @preload_buf_wait ; Avoid playing the stream while it's not filled
+        cmp A, #2
+        bcs @stream_playing_already
+            call !_stream_play
+    @preload_buf_wait:
+    inc <stream_active
     @stream_playing_already:
     
     ret
