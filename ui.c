@@ -460,7 +460,7 @@ void UserInterface_UpdateEnemyCounters()
     {
         for (int i = 0; i < 5; i++)
         {
-            ui_level_status[i] = (0x0174+i) | 0x2000 | (PAL_UI_4BPP << 10);
+            ui_level_status[i] = (0x0195+i) | 0x2000 | (PAL_UI_4BPP << 10);
         }
     }
     else
