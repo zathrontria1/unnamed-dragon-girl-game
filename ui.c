@@ -834,8 +834,6 @@ void UserInterface_ClearTextBuffer_Line(uint16_t y)
 
 /*
     This function can draw a window anywhere, but if starting from scratch, must flush the old background
-
-    Right now it doesn't handle window sizes that aren't a multiple of 2 properly due to lack of suitable tiles
 */
 void UserInterface_DrawWindowBackground(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 {
@@ -878,7 +876,17 @@ void UserInterface_DrawWindowBackground(uint16_t x, uint16_t y, uint16_t w, uint
         else if (i == (y + h - 1))
         {
             // Last row
-            ui_window_background[i][x] = 0x01a0 | 0x2000 | (PAL_UI_4BPP << 10);
+            if ((h % 2) == 0)
+            {
+                // row height is even
+                ui_window_background[i][x] = 0x01a0 | 0x2000 | (PAL_UI_4BPP << 10);
+            }
+            else
+            {
+                // row height is odd
+                ui_window_background[i][x] = 0x01b0 | 0x2000 | (PAL_UI_4BPP << 10);
+            }
+            
         }
         else if ((i - y) & 0x0001 == 1)
         {
@@ -926,13 +934,29 @@ void UserInterface_DrawWindowBackground(uint16_t x, uint16_t y, uint16_t w, uint
                 else if (i == (y + h - 1))
                 {
                     // Last row
-                    if (x % 2 == 0)
+                    if ((h % 2) == 0)
                     {
-                        ui_window_background[i][j] = (0x01a1 + ((j + 1) % 2))  | 0x2000 | (PAL_UI_4BPP << 10);
+                        // row height is even
+                        if (x % 2 == 0)
+                        {
+                            ui_window_background[i][j] = (0x01a1 + ((j + 1) % 2))  | 0x2000 | (PAL_UI_4BPP << 10);
+                        }
+                        else
+                        {
+                            ui_window_background[i][j] = (0x01a1 + (j % 2))  | 0x2000 | (PAL_UI_4BPP << 10);
+                        }
                     }
                     else
                     {
-                        ui_window_background[i][j] = (0x01a1 + (j % 2))  | 0x2000 | (PAL_UI_4BPP << 10);
+                        // row height is odd
+                        if (x % 2 == 0)
+                        {
+                            ui_window_background[i][j] = (0x01b1 + ((j + 1) % 2))  | 0x2000 | (PAL_UI_4BPP << 10);
+                        }
+                        else
+                        {
+                            ui_window_background[i][j] = (0x01b1 + (j % 2))  | 0x2000 | (PAL_UI_4BPP << 10);
+                        }
                     }
                 }
                 else if ((i - y) & 0x0001 == 1)
@@ -972,35 +996,91 @@ void UserInterface_DrawWindowBackground(uint16_t x, uint16_t y, uint16_t w, uint
             break;
         }
 
-        if (i - y == 0)
+        if ((w % 2) == 0)
         {
-            // First row
-            ui_window_background[i][x+w-1] = 0x0173 | 0x2000 | (PAL_UI_4BPP << 10);
-        }
-        else if ((i - y == 1) && (i != (y + h - 1)))
-        {
-            // Second row, and not the last row
-            ui_window_background[i][x+w-1] = 0x0183 | 0x2000 | (PAL_UI_4BPP << 10);
-        }
-        else if (i == (y + h - 2))
-        {
-            // Second to last row
-            ui_window_background[i][x+w-1] = 0x0193 | 0x2000 | (PAL_UI_4BPP << 10);
-        }
-        else if (i == (y + h - 1))
-        {
-            // Last row
-            ui_window_background[i][x+w-1] = 0x01a3 | 0x2000 | (PAL_UI_4BPP << 10);
-        }
-        else if ((i - y) & 0x0001 == 1)
-        {
-            // Odd row
-            ui_window_background[i][x+w-1] = 0x0183 | 0x2000 | (PAL_UI_4BPP << 10);
+            // Column width is even
+            if (i - y == 0)
+            {
+                // First row
+                ui_window_background[i][x+w-1] = 0x0173 | 0x2000 | (PAL_UI_4BPP << 10);
+            }
+            else if ((i - y == 1) && (i != (y + h - 1)))
+            {
+                // Second row, and not the last row
+                ui_window_background[i][x+w-1] = 0x0183 | 0x2000 | (PAL_UI_4BPP << 10);
+            }
+            else if (i == (y + h - 2))
+            {
+                // Second to last row
+                ui_window_background[i][x+w-1] = 0x0193 | 0x2000 | (PAL_UI_4BPP << 10);
+            }
+            else if (i == (y + h - 1))
+            {
+                // Last row
+                if ((h % 2) == 0)
+                {
+                    // row height is even
+                    ui_window_background[i][x+w-1] = 0x01a3 | 0x2000 | (PAL_UI_4BPP << 10);
+                }
+                else
+                {
+                    // row height is odd
+                    ui_window_background[i][x+w-1] = 0x01b3 | 0x2000 | (PAL_UI_4BPP << 10);
+                }
+            }
+            else if ((i - y) & 0x0001 == 1)
+            {
+                // Odd row
+                ui_window_background[i][x+w-1] = 0x0183 | 0x2000 | (PAL_UI_4BPP << 10);
+            }
+            else
+            {
+                // Even row
+                ui_window_background[i][x+w-1] = 0x0193 | 0x2000 | (PAL_UI_4BPP << 10);
+            }
         }
         else
         {
-            // Even row
-            ui_window_background[i][x+w-1] = 0x0193 | 0x2000 | (PAL_UI_4BPP << 10);
+            // Column width is odd
+            if (i - y == 0)
+            {
+                // First row
+                ui_window_background[i][x+w-1] = 0x0174 | 0x2000 | (PAL_UI_4BPP << 10);
+            }
+            else if ((i - y == 1) && (i != (y + h - 1)))
+            {
+                // Second row, and not the last row
+                ui_window_background[i][x+w-1] = 0x0184 | 0x2000 | (PAL_UI_4BPP << 10);
+            }
+            else if (i == (y + h - 2))
+            {
+                // Second to last row
+                ui_window_background[i][x+w-1] = 0x0194 | 0x2000 | (PAL_UI_4BPP << 10);
+            }
+            else if (i == (y + h - 1))
+            {
+                // Last row
+                if ((h % 2) == 0)
+                {
+                    // row height is even
+                    ui_window_background[i][x+w-1] = 0x01a4 | 0x2000 | (PAL_UI_4BPP << 10);
+                }
+                else
+                {
+                    // row height is odd
+                    ui_window_background[i][x+w-1] = 0x01b4 | 0x2000 | (PAL_UI_4BPP << 10);
+                }
+            }
+            else if ((i - y) & 0x0001 == 1)
+            {
+                // Odd row
+                ui_window_background[i][x+w-1] = 0x0184 | 0x2000 | (PAL_UI_4BPP << 10);
+            }
+            else
+            {
+                // Even row
+                ui_window_background[i][x+w-1] = 0x0194 | 0x2000 | (PAL_UI_4BPP << 10);
+            }
         }
     }
     
