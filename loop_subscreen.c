@@ -296,8 +296,8 @@ void loop_subscreen_profile()
         {
             UserInterface_ClearWindowBuffer(false);
 
-            UserInterface_DrawWindowBackground(0,0,16,2);
-            UserInterface_DrawWindowBackground(0,2,16,6);
+            UserInterface_DrawWindowBackground(0,0,16,3);
+            UserInterface_DrawWindowBackground(0,3,16,6);
             UserInterface_DrawWindowBackground(0,16,32,12);
 
             UserInterface_DrawWindowBox(16,0,16,16);
@@ -479,16 +479,16 @@ void loop_subscreen_profile_drawtext(bool copy_result)
     char temp_string[32] = "";    
     int temp_hp_offset = snprintf((char *)&temp_string, 32, (char *)&STR_UI_SUBSCREEN_PROFILE_HEALTH, obj_player_pointer->struct_data.npc_data.hp);
 
-    UserInterface_DrawWindowText((char *)&temp_string, 1, 3);
+    UserInterface_DrawWindowText((char *)&temp_string, 1, 4);
 
     snprintf((char *)&temp_string, 32, (char *)&STR_UI_SUBSCREEN_PROFILE_HEALTH_DIV, obj_player_pointer->struct_data.npc_data.hp_max);
-    UserInterface_DrawWindowText((char *)&temp_string, temp_hp_offset+1, 3);
+    UserInterface_DrawWindowText((char *)&temp_string, temp_hp_offset+1, 4);
 
     snprintf((char *)&temp_string, 32, (char *)&STR_UI_SUBSCREEN_PROFILE_ATTACK, obj_player_pointer->struct_data.npc_data.attack);
-    UserInterface_DrawWindowText((char *)&temp_string, 1, 5);
+    UserInterface_DrawWindowText((char *)&temp_string, 1, 6);
 
     snprintf((char *)&temp_string, 32, (char *)&STR_UI_SUBSCREEN_PROFILE_DEFENSE, obj_player_pointer->struct_data.npc_data.defense);
-    UserInterface_DrawWindowText((char *)&temp_string, 1, 6);
+    UserInterface_DrawWindowText((char *)&temp_string, 1, 7);
 
     snprintf((char *)&temp_string, 32, (char *)&STR_UI_SUBSCREEN_PROFILE_MONEY, obj_player_pointer->struct_data.npc_data.money);
     UserInterface_DrawWindowText((char *)&temp_string, 1, 17);
@@ -619,9 +619,9 @@ void loop_subscreen_help()
         UserInterface_ClearWindowBuffer(false);
         UserInterface_ClearTextBuffer();
 
-        UserInterface_DrawWindowBackground(0,0,32,2);
-        UserInterface_DrawWindowBackground(0,2,4,26);
-        UserInterface_DrawWindowBackground(4,2,28,26);
+        UserInterface_DrawWindowBackground(0,0,32,3);
+        UserInterface_DrawWindowBackground(0,3,4,25);
+        UserInterface_DrawWindowBackground(4,3,28,25);
 
         loop_subscreen_help_drawtext(false);
         
@@ -692,14 +692,14 @@ void loop_subscreen_help_drawtext(bool copy_result)
 
     UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_HELP_HEADING, 3, 1);
     
-    UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_HELP_MOVEMENT_H, 2, 3);
-    UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_HELP_INTERACTION_H, 2, 5);
-    UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_HELP_ATTACK_H, 2, 7);
-    UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_HELP_PROGRESSION_H, 2, 9);
-    UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_HELP_MAP_H, 2, 11);
-    UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_HELP_RESET_H, 2, 13);
+    UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_HELP_MOVEMENT_H, 2, 4);
+    UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_HELP_INTERACTION_H, 2, 6);
+    UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_HELP_ATTACK_H, 2, 8);
+    UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_HELP_PROGRESSION_H, 2, 10);
+    UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_HELP_MAP_H, 2, 12);
+    UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_HELP_RESET_H, 2, 14);
 
-    UserInterface_DrawWindowText((char *)subscreen_items_help[subscreen_selection].ptr, 5, 3);
+    UserInterface_DrawWindowText((char *)subscreen_items_help[subscreen_selection].ptr, 5, 4);
 
     if (copy_result)
     {
@@ -890,13 +890,13 @@ const struct menu_item subscreen_items_profile[5] = {
 };
 
 const struct menu_item subscreen_items_help[7] = {
-    {-2, 24, 0, (void *)&STR_UI_SUBSCREEN_HELP_MOVEMENT}, 
-    {-2, 40, 0, (void *)&STR_UI_SUBSCREEN_HELP_INTERACTION}, 
-    {-2, 56, 0, (void *)&STR_UI_SUBSCREEN_HELP_ATTACK}, 
-    {-2, 72, 0, (void *)&STR_UI_SUBSCREEN_HELP_PROGRESSION}, 
-    {-2, 88, 0, (void *)&STR_UI_SUBSCREEN_HELP_MAP}, 
-    {-2, 104, 0, (void *)&STR_UI_SUBSCREEN_HELP_RESET}, 
-
+    {-2, 32, 0, (void *)&STR_UI_SUBSCREEN_HELP_MOVEMENT}, 
+    {-2, 48, 0, (void *)&STR_UI_SUBSCREEN_HELP_INTERACTION}, 
+    {-2, 64, 0, (void *)&STR_UI_SUBSCREEN_HELP_ATTACK}, 
+    {-2, 80, 0, (void *)&STR_UI_SUBSCREEN_HELP_PROGRESSION}, 
+    {-2, 96, 0, (void *)&STR_UI_SUBSCREEN_HELP_MAP}, 
+    {-2, 112, 0, (void *)&STR_UI_SUBSCREEN_HELP_RESET}, 
+    
     {255, 255, 0, 0}, 
 };
 
