@@ -17,15 +17,48 @@
 // These functions are currently separated out for organization purposes
 // Some of these will also be edited later as they're redundant at times...
 
-void UserInterface_ClearText(uint16_t len, uint16_t row, uint16_t col)
+// Starting x and y coord, followed by length to clear, linearly (this will not clear columns)
+void UserInterface_ClearTextBuffer_Subset(uint16_t row, uint16_t col, uint16_t len)
 {
-    for (int i = 0; i < len; i++)
+    if (len == 0)
     {
-        ui_window_text[0][i] = 0x0000 | 0x2000 | (PAL_UI_TEXT_WHITE << 10);
+        return;
+    }
+
+    if (row >= 32)
+    {
+        return;
+    }
+
+    if (col >= 32)
+    {
+        return;
+    }
+
+    int i = 0;
+    bool overflow = false;
+    for (int y = row; y < 32; y++)
+    {
+        for (int x = col; x < 32; x++)
+        {
+            ui_window_text[y][x] = 0x0000 | 0x2000 | (PAL_UI_TEXT_WHITE << 10);
+            i++;
+
+            if (i >= len)
+            {
+                overflow = true;
+                break;
+            }
+        }
+
+        if (overflow == true)
+        {
+            break;
+        }
     }
     
     if (dma_queue_add(
-        (uint8_t *)(&ui_window_text[0][0]), 
+        (uint8_t *)(&ui_window_text[row][col]), 
         0x3400 + (row << 5) + (col), 
         len << 1,
         VRAM_INCHIGH, 
