@@ -24,6 +24,7 @@
 #include "gfx.h"
 
 #include "ui.h"
+#include "ui_messagebox.h"
 
 #include "lz4.h"
 
@@ -184,7 +185,7 @@ void loop_game()
     }
     else if (!ui_show_message_cleared)
     {
-        UserInterface_ClearText(30, UI_MSGBOX_SL_START, 1);
+        UserInterface_ClearTextBuffer_Subset(UI_MSGBOX_SL_START, 0, 32);
     }
 
     ani_bg_update_water_anim();

@@ -19,6 +19,7 @@
 #include "system.h"
 
 #include "ui.h"
+#include "ui_messagebox.h"
 
 #include "data_strings.h"
 
