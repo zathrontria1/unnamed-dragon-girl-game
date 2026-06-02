@@ -525,6 +525,9 @@ void UserInterface_PrintText(uint8_t * string_ptr, uint16_t row, uint16_t col)
         ui_window_text[0][i] = 0x0000 | 0x2000;
     }
 
+    // Clear the line first!
+    UserInterface_ClearTextBuffer_Subset(row, col, 32);
+    
     if (dma_queue_add(
         (uint8_t *)(&ui_window_text[0][0]), 
         0x3400 + (row << 5) + (col), 
@@ -604,6 +607,12 @@ void UserInterface_ClearWindowBuffer(bool use_clear_tile)
     }
     return;
 }
+
+/*
+    This function clears the entire text buffer.
+
+    To clear a subsection, use UserInterface_ClearTextBuffer_Subset()
+*/
 void UserInterface_ClearTextBuffer()
 {
     for (int x = 0; x < 32; x++)
