@@ -14,6 +14,8 @@
 #include "ui_messagebox.h"
 #include "spr.h"
 
+uint16_t ui_show_message_char_counter;
+
 // These functions are currently separated out for organization purposes
 // Some of these will also be edited later as they're redundant at times...
 
