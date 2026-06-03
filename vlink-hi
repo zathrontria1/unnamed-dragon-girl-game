@@ -30,10 +30,10 @@ SECTIONS
 
   xrom  : {*(.ctors) *(.dtors) *(*_text.far.*) *(*_rodata.far.*) *(*_text.huge.*) *(*_rodata.huge.*) } >xrom AT>out
   fillx : {.=0x408000+OS;} >xrom AT>out
-  nrom  : {*(*_text.startup) *(*_text.near.*) *(*_rodata.near.*) *(.ctors) *(.dtors) *(text) *(*_text*) *(*_rodata.*) } >lrom AT>out
+  nrom  : {*(*_text.startup) *(*_text.near.*) *(*_rodata.near.*) *(.ctors) *(.dtors) *(text) *(*_text.far.*) *(*_text.huge.*) *(*_rodata.far.*) *(*_rodata.huge.*) } >lrom AT>out
   fill0 : {.=0xFFC0+FASTROM*0xc00000;} >lrom AT>out
-  header : {EXTERN(___header_hirom_ntsc) *(*header)} >header AT>out
-  vectors : {EXTERN(___vecs) *(*vectors)} >vectors AT>out
+  header : {EXTERN(___header_hirom_ntsc) *(header)} >header AT>out
+  vectors : {EXTERN(___vecs) *(vectors)} >vectors AT>out
 
   from (BANKSIZE=65536): {*(*_text.far.*) *(*_rodata.far.*)} >hrom AT>out
   hrom : {*(*_text.huge.*) *(*_rodata.huge.*) } >hrom AT>out
