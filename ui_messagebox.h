@@ -16,5 +16,6 @@ void UserInterface_ClearTextbox(uint16_t row, uint16_t h);
 void UserInterface_ClearTextboxText(uint16_t row, uint16_t h);
 
 void UserInterface_PrintText_PerChar();
+void UserInterface_PrintText_All();
 
 void UserInterface_CopyTextboxToVram(uint16_t row, uint16_t h);

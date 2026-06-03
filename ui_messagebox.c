@@ -417,6 +417,52 @@ void UserInterface_PrintText_PerChar()
     return;
 }
 
+/*
+    Called to forcibly print the entire contents if the user presses A mid-printing.
+*/
+void UserInterface_PrintText_All()
+{
+    if (dma_queue_add(
+        (uint8_t *)(&ui_window_text[0][0]), 
+        0x3400 + ((1 + UI_MSGBOX_ML_START) << 5) + 1, 
+        254,
+        VRAM_INCHIGH, 
+        0
+        ) == 1)
+        {
+            return;
+        }
+
+        ui_show_message_finished = true;
+        ui_show_message_char_col = 0;
+        ui_show_message_char_row = 0;
+
+        // These are for the text advance indicator
+        if (dma_queue_add(
+            (uint8_t *)(&const_ui_textadvance_tilemapentries[0]), 
+            0x3400 + ((UI_MSGBOX_ML_START + 5) << 5) + (30), 
+            4,
+            VRAM_INCHIGH, 
+            0
+            ) == 1)
+            {
+                return;
+            }
+
+        if (dma_queue_add(
+            (uint8_t *)(&const_ui_textadvance_tilemapentries[2]), 
+            0x3400 + ((UI_MSGBOX_ML_START + 6) << 5) + (30), 
+            4,
+            VRAM_INCHIGH, 
+            0
+            ) == 1)
+            {
+                return;
+            }
+
+    return;
+}
+
 
 void UserInterface_CopyTextboxToVram(uint16_t row, uint16_t h)
 {

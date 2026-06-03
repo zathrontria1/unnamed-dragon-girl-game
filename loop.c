@@ -113,8 +113,16 @@ void loop_messagebox()
     // Check if the current page has finished printing.
     if (!ui_show_message_finished)
     {
-        // It hasn't, print the next character.
-        UserInterface_PrintText_PerChar();
+
+        // It hasn't, print the next character or the entire contents depending on the button pressed.
+        if (system_check_for_key(KEY_A))
+        {
+            UserInterface_PrintText_All();
+        }
+        else
+        {
+            UserInterface_PrintText_PerChar();
+        }
     }
     else
     {
