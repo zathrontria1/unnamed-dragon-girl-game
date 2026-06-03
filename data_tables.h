@@ -22,6 +22,13 @@ const struct enemy_data data_enemy_stats_lizardman_lilsis =
     50, 1, 1, 0, 0, 16, 16
 };
 
+// Stream defs
+const struct sound_stream_data data_stream_table[] = 
+{
+    {(void *)&data_snd_stream_silence, 288, false, 0}, // STREAM_SILENCE
+    {(void *)&data_snd_stream_voice_ow, 2304, false, 0}, // STREAM_VOICE_OW
+};
+
 // wav2brr produces files with 2 byte headers. Take into account this and subtract 2 from file length on disk.
 // pitch value = (actual rate * 4096) / 32000
 // tick values will be automatically generated at runtime if set to 0

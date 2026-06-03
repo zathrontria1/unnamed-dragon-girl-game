@@ -1,3 +1,11 @@
+struct sound_stream_data
+{
+    void * ptr;
+    uint16_t len;
+    bool loop;
+    uint8_t padding;
+};
+
 struct enemy_data
 {
     int32_t hp;

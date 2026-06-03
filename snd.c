@@ -846,6 +846,17 @@ void SoundInterface_StopMusic()
 /*
     Set streaming engine variables
 */
+
+/*
+    Wrapper for PlayStream
+*/
+void SoundInterface_PlayClip(uint16_t clip_id)
+{
+    SoundInterface_PlayStream(data_stream_table[clip_id].ptr, data_stream_table[clip_id].len, data_stream_table[clip_id].loop);
+
+    return;
+}
+
 void SoundInterface_PlayStream(uint8_t * ptr, uint16_t len, bool loop)
 {
     SoundInterface_PauseStream();
@@ -912,7 +923,6 @@ void SoundInterface_NmiAudioUpload()
     {
         SoundInterface_UploadData_2byte(snd_stream_ptr, temp_chunk_len);
     }
-    
 
     uint8_t temp_lobyte = (uint8_t)(REG_APU00 + 2);
     REG_APU00 = temp_lobyte; 
@@ -935,7 +945,7 @@ void SoundInterface_NmiAudioUpload()
             if (snd_stream_ptr != (uint8_t *)&data_snd_stream_silence)
             {
                 // Make sure to play 4 blocks of silence
-                SoundInterface_PlayStream((uint8_t *)&data_snd_stream_silence, 288, false);
+                SoundInterface_PlayClip(STREAM_SILENCE);
             }
             else
             {

@@ -56,3 +56,6 @@ extern const uint8_t data_snd_smp_ins_drum_stick[];
 // Streamed audio
 extern const uint8_t data_snd_stream_silence[];
 extern const uint8_t data_snd_stream_voice_ow[];
+
+// Streamed audio table to make it easier to refer to them
+extern const struct sound_stream_data data_stream_table[];

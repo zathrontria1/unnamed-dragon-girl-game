@@ -466,7 +466,7 @@ void routines_player(struct game_object * o)
 
                     temp_invalidate_animation_frame = 1;
 
-                    SoundInterface_PlayStream((uint8_t *)&data_snd_stream_voice_ow, 2304, false);
+                    SoundInterface_PlayClip(STREAM_VOICE_OW);
                 }
             }
 

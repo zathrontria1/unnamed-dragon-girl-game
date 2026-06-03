@@ -60,6 +60,8 @@ void SoundInterface_PlayMusic();
 void SoundInterface_PauseMusic();
 void SoundInterface_StopMusic();
 
+void SoundInterface_PlayClip(uint16_t clip_id); // Wrapper function
+
 void SoundInterface_PlayStream(uint8_t * ptr, uint16_t len, bool loop);
 void SoundInterface_ResumeStream();
 void SoundInterface_PauseStream();

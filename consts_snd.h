@@ -225,3 +225,7 @@
 #define NOTE_A8 21+(8*12)
 #define NOTE_As8 22+(8*12)
 #define NOTE_B8 23+(8*12)
+
+// Check data_tables.h - this must be in array order
+#define STREAM_SILENCE 0
+#define STREAM_VOICE_OW 1
