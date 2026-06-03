@@ -110,31 +110,41 @@ void loop_messagebox()
     SpriteEngine_ResetOam();
     SpriteEngine_PackOamHighTable();
 
-    if (system_check_for_key(KEY_A))
+    // Check if the current page has finished printing.
+    if (!ui_show_message_finished)
     {
-        SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
-        
-        ui_show_message_ttl = 0;
-        ui_show_message_cleared = 1;
-
-        if (ui_show_message_page == 0)
+        // It hasn't, print the next character.
+        UserInterface_PrintText_PerChar();
+    }
+    else
+    {
+        // It has
+        if (system_check_for_key(KEY_A))
         {
-            // Clear the textbox
-            UserInterface_ClearTextbox(UI_MSGBOX_ML_START, UI_MSGBOX_HEIGHT);
-
-            if (ui_show_message_page_ptr_init == (uint8_t *)&STR_MSG_TUTORIAL_MP)
-            {
-                event_tutorial_shown = 1;
-            }
+            SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
             
-            system_game_paused = 0;
+            ui_show_message_ttl = 0;
+            ui_show_message_cleared = 1;
 
-            system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_GAMELOOP);
-            system_target_routine = ROUTINE_GAMELOOP;
-        }
-        else if (ui_show_message_page != 0)
-        {
-            UserInterface_PrintText_MultiLine(ui_show_message_page_ptr_init, UI_MSGBOX_ML_START, UI_MARGIN_LEFT);
+            if (ui_show_message_page == 0)
+            {
+                // Clear the textbox
+                UserInterface_ClearTextbox(UI_MSGBOX_ML_START, UI_MSGBOX_HEIGHT);
+
+                if (ui_show_message_page_ptr_init == (uint8_t *)&STR_MSG_TUTORIAL_MP)
+                {
+                    event_tutorial_shown = 1;
+                }
+                
+                system_game_paused = 0;
+
+                system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_GAMELOOP);
+                system_target_routine = ROUTINE_GAMELOOP;
+            }
+            else if (ui_show_message_page != 0)
+            {
+                UserInterface_PrintText_MultiLine(ui_show_message_page_ptr_init, UI_MSGBOX_ML_START, UI_MARGIN_LEFT);
+            }
         }
     }
 

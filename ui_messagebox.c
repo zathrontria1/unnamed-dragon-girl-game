@@ -14,7 +14,49 @@
 #include "ui_messagebox.h"
 #include "spr.h"
 
-uint16_t ui_show_message_char_counter;
+// Copy from this tilemap to clear the textbox immediately without having to write over the buffer.
+// Enough for 32x6
+
+// TODO: make a new "fill VRAM with 0" function
+
+const uint16_t const_ui_empty_text_tilemap[192] = {
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+    0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
+};
+
+uint16_t ui_show_message_char_col;
+uint16_t ui_show_message_char_row;
+
+bool ui_show_message_finished; // true if the current page of message is fully printed
+
+uint16_t ui_show_message_linewidth[4]; // Printable text length of a given line.
 
 // These functions are currently separated out for organization purposes
 // Some of these will also be edited later as they're redundant at times...
@@ -58,6 +100,11 @@ void UserInterface_ClearTextBuffer_Subset(uint16_t row, uint16_t col, uint16_t l
             break;
         }
     }
+
+    ui_show_message_linewidth[0] = 0;
+    ui_show_message_linewidth[1] = 0;
+    ui_show_message_linewidth[2] = 0;
+    ui_show_message_linewidth[3] = 0;
     
     if (dma_queue_add(
         (uint8_t *)(&ui_window_text[row][col]), 
@@ -78,6 +125,10 @@ void UserInterface_ClearTextBuffer_Subset(uint16_t row, uint16_t col, uint16_t l
 */
 void UserInterface_PrintText_MultiLine(uint8_t * string_ptr, uint16_t row, uint16_t col)
 {
+    ui_show_message_finished = false;
+    ui_show_message_char_col = 0;
+    ui_show_message_char_row = 0;
+
     uint16_t temp_col = 0;
     uint16_t temp_row = 0;
 
@@ -99,6 +150,18 @@ void UserInterface_PrintText_MultiLine(uint8_t * string_ptr, uint16_t row, uint1
         ui_show_message_page = 0;
     }
 
+    // Copy over the empty text
+    if (dma_queue_add(
+        (uint8_t *)(&const_ui_empty_text_tilemap[0]), 
+        0x3400 + ((UI_MSGBOX_ML_START + 1) << 5) + (0), 
+        384,
+        VRAM_INCHIGH, 
+        0
+        ) == 1)
+        {
+            return;
+        }
+
     for (; temp_row < 4;)
     {
         if (*string_ptr == 0x00)
@@ -110,6 +173,8 @@ void UserInterface_PrintText_MultiLine(uint8_t * string_ptr, uint16_t row, uint1
             // Fill the rest of the text buffer with spaces
             for (int j = temp_row; j < 4; j++)
             {
+                ui_show_message_linewidth[j] = i;
+
                 for (; i < 30; i++)
                 {
                     ui_window_text[j][i] = 0x0000 | 0x2000;
@@ -129,6 +194,8 @@ void UserInterface_PrintText_MultiLine(uint8_t * string_ptr, uint16_t row, uint1
             // Fill the rest of the text buffer with spaces
             for (int j = temp_row; j < 4; j++)
             {
+                ui_show_message_linewidth[j] = i;
+
                 for (; i < 30; i++)
                 {
                     ui_window_text[j][i] = 0x0000 | 0x2000 | (PAL_UI_TEXT_WHITE << 10);
@@ -143,6 +210,8 @@ void UserInterface_PrintText_MultiLine(uint8_t * string_ptr, uint16_t row, uint1
         {
             // Fill the rest of the line with spaces, then
             // advance the printer to the next line.
+            ui_show_message_linewidth[temp_row] = temp_col;
+
             for (int i = temp_col; temp_col < 30; temp_col++)
             {
                 ui_window_text[temp_row][temp_col] = 0x0000 | 0x2000 | (PAL_UI_TEXT_WHITE << 10);
@@ -156,6 +225,8 @@ void UserInterface_PrintText_MultiLine(uint8_t * string_ptr, uint16_t row, uint1
         {
             // Exceeds current line bounds.
             // Word wrap is not implemented, so words will be torn apart!
+            ui_show_message_linewidth[temp_row] = 30;
+
             temp_col = 0;
             temp_row++; // This might be followed by...
         }
@@ -165,6 +236,9 @@ void UserInterface_PrintText_MultiLine(uint8_t * string_ptr, uint16_t row, uint1
         {
             // Incorrectly formatted text - row overflow
             // Assume that the string has ended at this point.
+
+            ui_show_message_linewidth[3] = 30; // Just in case
+
             ui_show_message_page = 0;
             break;
         }
@@ -172,13 +246,15 @@ void UserInterface_PrintText_MultiLine(uint8_t * string_ptr, uint16_t row, uint1
         // Normal printable.
         ui_window_text[temp_row][temp_col] = (-0x0020 + *string_ptr) | 0x2000 | (PAL_UI_TEXT_WHITE << 10);
 
-
         temp_col++;
         string_ptr++;
     }
 
     ui_show_message_page_ptr = string_ptr;
 
+    // Copy the text piecemeal based on the line width array later, not here
+
+    /*
     if (dma_queue_add(
         (uint8_t *)(&ui_window_text[0][0]), 
         0x3400 + ((row + 1) << 5) + (col), 
@@ -189,28 +265,7 @@ void UserInterface_PrintText_MultiLine(uint8_t * string_ptr, uint16_t row, uint1
         {
             return;
         }
-
-    if (dma_queue_add(
-        (uint8_t *)(&const_ui_textadvance_tilemapentries[0]), 
-        0x3400 + ((row + 5) << 5) + (31 - col), 
-        4,
-        VRAM_INCHIGH, 
-        0
-        ) == 1)
-        {
-            return;
-        }
-
-    if (dma_queue_add(
-        (uint8_t *)(&const_ui_textadvance_tilemapentries[2]), 
-        0x3400 + ((row + 6) << 5) + (31 - col), 
-        4,
-        VRAM_INCHIGH, 
-        0
-        ) == 1)
-        {
-            return;
-        }
+    */
 
     ui_show_message_cleared = 0;
     
@@ -296,6 +351,66 @@ void UserInterface_ClearTextboxText(uint16_t row, uint16_t h)
             ) != 0)
         {
             return;
+        }
+    }
+
+    return;
+}
+
+/*
+    Prints a character to the text box
+
+    Uses global variables
+*/
+void UserInterface_PrintText_PerChar()
+{
+    if (dma_queue_add(
+        (uint8_t *)(&ui_window_text[ui_show_message_char_row][ui_show_message_char_col]), 
+        0x3400 + ((ui_show_message_char_row + 1 + UI_MSGBOX_ML_START) << 5) + (ui_show_message_char_col + 1), 
+        2,
+        VRAM_INCHIGH, 
+        0
+        ) == 1)
+        {
+            return;
+        }
+
+    ui_show_message_char_col++;
+    while (ui_show_message_char_col >= ui_show_message_linewidth[ui_show_message_char_row])
+    {
+        ui_show_message_char_row++;
+        ui_show_message_char_col = 0;
+
+        if (ui_show_message_char_row >= 4)
+        {
+            ui_show_message_finished = true;
+            ui_show_message_char_col = 0;
+            ui_show_message_char_row = 0;
+
+            // These are for the text advance indicator
+            if (dma_queue_add(
+                (uint8_t *)(&const_ui_textadvance_tilemapentries[0]), 
+                0x3400 + ((UI_MSGBOX_ML_START + 5) << 5) + (30), 
+                4,
+                VRAM_INCHIGH, 
+                0
+                ) == 1)
+                {
+                    return;
+                }
+
+            if (dma_queue_add(
+                (uint8_t *)(&const_ui_textadvance_tilemapentries[2]), 
+                0x3400 + ((UI_MSGBOX_ML_START + 6) << 5) + (30), 
+                4,
+                VRAM_INCHIGH, 
+                0
+                ) == 1)
+                {
+                    return;
+                }
+
+            break;
         }
     }
 
