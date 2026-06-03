@@ -367,7 +367,7 @@ void UserInterface_PrintText_PerChar()
     if (dma_queue_add(
         (uint8_t *)(&ui_window_text[ui_show_message_char_row][ui_show_message_char_col]), 
         0x3400 + ((ui_show_message_char_row + 1 + UI_MSGBOX_ML_START) << 5) + (ui_show_message_char_col + 1), 
-        2,
+        2 * V_MUL,
         VRAM_INCHIGH, 
         0
         ) == 1)
@@ -375,7 +375,7 @@ void UserInterface_PrintText_PerChar()
             return;
         }
 
-    ui_show_message_char_col++;
+    ui_show_message_char_col += 1 * V_MUL; // 1 char per 60FPS frame / 2 char per 30FPS frame
     while (ui_show_message_char_col >= ui_show_message_linewidth[ui_show_message_char_row])
     {
         ui_show_message_char_row++;
