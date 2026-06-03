@@ -54,4 +54,5 @@ extern const uint8_t data_snd_smp_ins_drum_clap[];
 extern const uint8_t data_snd_smp_ins_drum_stick[];
 
 // Streamed audio
+extern const uint8_t data_snd_stream_silence[];
 extern const uint8_t data_snd_stream_voice_ow[];

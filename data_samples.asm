@@ -110,7 +110,13 @@ _data_snd_smp_ins_drum_clap:
 _data_snd_smp_ins_drum_stick:
     incbin "sound/ins/ins_drum_stick.brr"
 
+; START OF STREAMED AUDIO
     section "_rodata.far.bindata.1"
+
     global _data_snd_stream_voice_ow
 _data_snd_stream_voice_ow:
     incbin "sound/stream/stream_voice_ow.brr"
+
+    global _data_snd_stream_silence
+_data_snd_stream_silence:
+    incbin "sound/stream/stream_silence.brr"

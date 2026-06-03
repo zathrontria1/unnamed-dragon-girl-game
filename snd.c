@@ -931,7 +931,16 @@ void SoundInterface_NmiAudioUpload()
 
         if (!snd_stream_loop)
         {
-            SoundInterface_StopStream();
+            // Check if the current stream is already silence
+            if (snd_stream_ptr != (uint8_t *)&data_snd_stream_silence)
+            {
+                // Make sure to play 4 blocks of silence
+                SoundInterface_PlayStream((uint8_t *)&data_snd_stream_silence, 288, false);
+            }
+            else
+            {
+                SoundInterface_StopStream();
+            }
         }
     }
 

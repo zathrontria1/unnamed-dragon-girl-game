@@ -110,7 +110,11 @@ data_snd_smp_ins_drum_clap:
 data_snd_smp_ins_drum_stick:
     .incbin "sound/ins/ins_drum_stick.brr"
 
-    .global _data_snd_stream_crowd_talk
-.data_snd_stream_crowd_talk:
-    .incbin "sound/stream/stream_crowd_talk.brr"
-    
+; START OF STREAMED AUDIO
+    .global _data_snd_stream_voice_ow
+.data_snd_stream_voice_ow:
+    .incbin "sound/stream/stream_voice_ow.brr"
+
+    .global _data_snd_stream_silence
+.data_snd_stream_silence:
+    .incbin "sound/stream/stream_silence.brr"
