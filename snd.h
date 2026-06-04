@@ -65,6 +65,7 @@ void SoundInterface_PlayClip(uint16_t clip_id); // Wrapper function
 void SoundInterface_PlayStream(uint8_t * ptr, uint16_t len, bool loop);
 void SoundInterface_ResumeStream();
 void SoundInterface_PauseStream();
+void SoundInterface_StopStream();
 
 void SoundInterface_NmiAudioUpload();
 

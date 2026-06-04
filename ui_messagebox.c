@@ -14,6 +14,9 @@
 #include "ui_messagebox.h"
 #include "spr.h"
 
+#include "snd.h"
+#include "consts_snd.h"
+
 // Copy from this tilemap to clear the textbox immediately without having to write over the buffer.
 // Enough for 32x6
 
@@ -268,6 +271,8 @@ void UserInterface_PrintText_MultiLine(uint8_t * string_ptr, uint16_t row, uint1
     */
 
     ui_show_message_cleared = 0;
+
+    SoundInterface_PlayClip(STREAM_TYPEWRITER);
     
     return;
 }
@@ -384,6 +389,9 @@ void UserInterface_PrintText_PerChar()
         if (ui_show_message_char_row >= 4)
         {
             ui_show_message_finished = true;
+            
+            SoundInterface_StopStream();
+
             ui_show_message_char_col = 0;
             ui_show_message_char_row = 0;
 
@@ -422,6 +430,8 @@ void UserInterface_PrintText_PerChar()
 */
 void UserInterface_PrintText_All()
 {
+    SoundInterface_StopStream();
+
     if (dma_queue_add(
         (uint8_t *)(&ui_window_text[0][0]), 
         0x3400 + ((1 + UI_MSGBOX_ML_START) << 5) + 1, 
@@ -459,6 +469,7 @@ void UserInterface_PrintText_All()
             {
                 return;
             }
+
 
     return;
 }

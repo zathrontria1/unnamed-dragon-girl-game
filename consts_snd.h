@@ -229,3 +229,4 @@
 // Check data_tables.h - this must be in array order
 #define STREAM_SILENCE 0
 #define STREAM_VOICE_OW 1
+#define STREAM_TYPEWRITER 2
