@@ -861,13 +861,14 @@ void SoundInterface_PlayStream(uint8_t * ptr, uint16_t len, bool loop)
 {
     SoundInterface_PauseStream();
     
-    snd_stream_ptr = ptr;
+    snd_stream_ptr = ptr + (snd_stream_current_block * 72);
     snd_stream_ptr_start = ptr;
-
+    
     snd_stream_length = len;
     snd_stream_loop = loop;
 
-    snd_stream_current_block = 0;
+    // Reuse the current block indicator to prevent stream errors
+    //snd_stream_current_block = 0;
     snd_stream_enable = true; // MUST BE SET LAST
 
     return;
