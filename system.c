@@ -194,7 +194,7 @@ void system_display_splash()
     LZ4_UnpackToWRAM((void *)&data_tilemap_splash_lz4, 0x007f7000);
     
     // Copy the palette
-    dma_copy_to_wram((uint32_t)data_palette_splash, (uint32_t)&shadow_cgram, 32);
+    dma_copy_to_wram((uint32_t)data_palette_splash, (uint32_t)&shadow_cgram, 256);
 
     // Upload the splash
     dma_copy_to_vram(0x007f0000, 0x0000, 0x7800); // Copy the entire section including the tilemap.

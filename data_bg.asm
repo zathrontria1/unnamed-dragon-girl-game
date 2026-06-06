@@ -21,7 +21,7 @@ _data_bg_map_dungeon_1_8bpp_lz4:
     section "_rodata.far.bindata.0"
     global  _data_bg_splash_lz4
 _data_bg_splash_lz4:
-    incbin "splash/loading_splash_mini_quantized.bin.lz4"
+    incbin "splash/loading_splash_new_quantized.bin.lz4"
     global  _data_tilemap_splash_lz4
 _data_tilemap_splash_lz4:
-    incbin "splash/loading_splash_mini_quantized_tilemap.bin.lz4"
+    incbin "splash/loading_splash_new_quantized_tilemap.bin.lz4"
