@@ -1,6 +1,6 @@
 ; For VBCC
 
-    section "_rodata.far.bindata.0"
+    ;section "_rodata.far.bindata.0"
     global _data_ui_fixed_2bpp_lz4
 _data_ui_fixed_2bpp_lz4:
     incbin "ui/ui_fixed_2bpp.bin.lz4"

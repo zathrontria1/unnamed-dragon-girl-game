@@ -1,6 +1,6 @@
 ; For VBCC
 
-    section "_rodata.far.bindata.0"
+    ;section "_rodata.far.bindata.0"
     global _data_palette
 _data_palette:
     incbin "palette/palette_ui_fixed_4bpp.bin"

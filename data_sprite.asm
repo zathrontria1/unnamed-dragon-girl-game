@@ -1,6 +1,6 @@
 ; For VBCC
 
-    section "_rodata.far.bindata.0"
+    ;section "_rodata.far.bindata.0"
     global _data_sprite_player
 _data_sprite_player:
     incbin "sprites/spr_player.bin"

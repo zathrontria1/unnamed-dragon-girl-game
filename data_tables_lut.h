@@ -4,7 +4,7 @@
   * https://github.com/ppelikan/drlut
   **/
 // Formula: sin(2*pi*t/T) 
-const int32_t data_sine_1[] = {
+NEAR const int32_t data_sine_1[] = {
           0,       1608,       3216,       4821,
        6424,       8022,       9616,      11204,
       12785,      14359,      15924,      17479,
@@ -78,7 +78,7 @@ const int32_t data_sine_1[] = {
   * https://github.com/ppelikan/drlut
   **/
 // Formula: cos(2*pi*t/T) 
-const int32_t data_cosine_1[] = {
+NEAR const int32_t data_cosine_1[] = {
       65536,      65516,      65457,      65358,
       65220,      65043,      64827,      64571,
       64277,      63944,      63572,      63162,
@@ -151,7 +151,7 @@ const int32_t data_cosine_1[] = {
 // Formula: pow(t, 2) 
 // only 0-320 needed
 //const unsigned long data_pow_2[512] = {
-const uint32_t data_pow_2[321] = {
+NEAR const uint32_t data_pow_2[321] = {
          0,         1,         4,         9,
         16,        25,        36,        49,
         64,        81,       100,       121,

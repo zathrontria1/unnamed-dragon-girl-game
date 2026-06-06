@@ -1,6 +1,6 @@
 ; For VBCC
 
-    section "_rodata.far.bindata.0"
+    ;section "_rodata.far.bindata.0"
     global _data_snd_smp_sfx_whoosh
 _data_snd_smp_sfx_whoosh:
     incbin "sound/sfx/sfx_whoosh.brr"

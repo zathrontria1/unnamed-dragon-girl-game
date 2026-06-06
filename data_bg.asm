@@ -1,6 +1,6 @@
 ; For VBCC
 
-    section "_rodata.far.bindata.0"
+    ;section "_rodata.far.bindata.0"
     global _data_bg_dungeon_lz4
 _data_bg_dungeon_lz4:
     incbin "bg/bg_dungeon.bin.lz4"
@@ -18,7 +18,7 @@ _data_bg_map_dungeon_0_8bpp_lz4:
 _data_bg_map_dungeon_1_8bpp_lz4:
     incbin "bg/bg_map_dungeon_1_8bpp.bin.lz4"
 
-    section "_rodata.far.bindata.0"
+    ;section "_rodata.far.bindata.0"
     global  _data_bg_splash_lz4
 _data_bg_splash_lz4:
     incbin "splash/loading_splash_new_quantized.bin.lz4"
