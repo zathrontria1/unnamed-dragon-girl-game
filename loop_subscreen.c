@@ -50,6 +50,13 @@ void loop_subscreen_top()
 
     ui_in_subscreen = 1;
 
+    // Silence the fire noise
+    if (snd_flame_playing == 1)
+    {
+        SoundInterface_StopSfx(SFX_ATK_FIRE_BREATH);
+        snd_flame_playing = 0;
+    }
+
     if (!subscreen_rendered)
     {
         subscreen_selection = 0;
