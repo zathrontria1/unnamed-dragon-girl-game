@@ -738,9 +738,27 @@ _dsp_reg_write:
 
     ret
 
+; Call to revert the SPC to the initial IPL loader.
 _reset_spc:
+    ; Reply to the main CPU
     mov <REG_APUIO1,#SND_CMD_SOFTRESET
     
+    ; Mute all master and echo volumes
+    mov A, #$00
+
+    mov <REG_DSPADDR,#DSP_MVOL0L
+    mov <REG_DSPDATA, A
+
+    mov <REG_DSPADDR,#DSP_MVOL0R
+    mov <REG_DSPDATA, A
+
+    mov <REG_DSPADDR,#DSP_EVOLL
+    mov <REG_DSPDATA, A
+
+    mov <REG_DSPADDR,#DSP_EVOLR
+    mov <REG_DSPDATA, A
+
+    ; Reset control register and re-enable boot IPL
     mov <REG_CONTROL,#$80
     jmp !$ffc0
 
