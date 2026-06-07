@@ -1,6 +1,7 @@
 // Lookup tables for animations
 // With flipping
 extern NEAR const uint16_t const_ani_lut_basic[56];
+extern NEAR const uint16_t const_ani_lut_lizardman[56];
 extern NEAR const uint16_t const_ani_lut_frame_byteoffsets_16[512];
 
 uint16_t AniSystem_AnimateDropGravity(struct game_object * o);

@@ -38,6 +38,7 @@
 */
 
 // With flipping
+// Used for the slime and any other enemy with similar set up
 NEAR const uint16_t const_ani_lut_basic[56] = 
 {
    0, 1, 2, 2,
@@ -61,6 +62,31 @@ NEAR const uint16_t const_ani_lut_basic[56] =
    0, 0, 0, 0,
    32, 32, 32, 32,
 };
+
+// Used for the lizardman
+NEAR const uint16_t const_ani_lut_lizardman[56] = 
+{
+    0, 1, 2, 2,
+ 
+    3, 5, 7, 7,
+    3, 5, 7, 7,
+ 
+    9, 11, 13, 13,
+    9, 11, 13, 13,
+ 
+    9, 11, 13, 13,
+    9, 11, 13, 13,
+     
+    0, 1, 2, 2,
+    3, 5, 7, 7,
+    3, 5, 7, 7,
+ 
+    15, 16, 17, 17,
+    18, 20, 22, 22,
+ 
+    0, 0, 0, 0,
+    24, 24, 24, 24,
+ };
 
 // Byte offset tables large enough to cover an entire 64KB bank
 NEAR const uint16_t const_ani_lut_frame_byteoffsets_16[512] =
@@ -544,7 +570,7 @@ uint8_t * AniSystem_GetDynamicFrame_Lizardman(struct game_object * o)
                 "\tasl\n" // Now we have the index to look into the lookup
                 "\ttxy\n"
                 "\ttax\n"
-                "\tlda >_const_ani_lut_basic, x\n"
+                "\tlda >_const_ani_lut_lizardman, x\n"
 
                 // Transform this number
                 // (temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10)
@@ -593,7 +619,7 @@ uint8_t * AniSystem_GetDynamicFrame_Lizardman(struct game_object * o)
         }
         else
         {
-            temp_tilenum += const_ani_lut_basic[(o->state << 2) + o->facing];
+            temp_tilenum += const_ani_lut_lizardman[(o->state << 2) + o->facing];
 
             if ((o->facing == FACING_LEFT) && (o->state != STATE_DIE))
             {

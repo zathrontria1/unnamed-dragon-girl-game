@@ -919,7 +919,8 @@ void obj_cleanup()
 {
     for (int i = 0; i < obj_delete_queue_count; i++)
     {
-        if (obj_general[obj_delete_queue[i]].id == OBJID_SLIME)
+        // TODO: use a function call return value
+        if ((obj_general[obj_delete_queue[i]].id == OBJID_SLIME) || (obj_general[obj_delete_queue[i]].id == OBJID_LIZARDMAN))
         {
             SpriteEngine_ReleaseVramSlot(obj_delete_queue[i], 1);
         }
