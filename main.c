@@ -60,31 +60,31 @@ void * main_GetFunctionPointer(uint16_t routine)
     switch (routine)
     {
         case ROUTINE_GAMELOOP:
-            return (void *)&loop_game;
+            return (void *)&Loop_Game;
             break;
         case ROUTINE_GAMELOOP_RELOAD:
-            return (void *)&loop_game_reload;
+            return (void *)&Loop_Game_ReloadScene;
             break;
         case ROUTINE_PAUSE:
-            return (void *)&loop_pause;
+            return (void *)&Loop_Game_Pause;
             break;
         case ROUTINE_NEWLEVEL:
-            return (void *)&loop_game_newlevel;
+            return (void *)&Loop_Game_NewLevel;
             break;
         case ROUTINE_MAPDISPLAY:
-            return (void *)&loop_mapdisplay;
+            return (void *)&Loop_Subscreen_MapDisplay;
             break;
         case ROUTINE_MAPDISPLAY_INIT:
-            return (void *)&loop_mapdisplay_init;
+            return (void *)&Loop_Subscreen_MapDisplay_Init;
             break;
         case ROUTINE_MSGBOX:
-            return (void *)&loop_messagebox;
+            return (void *)&Loop_Game_Messagebox;
             break;
         case ROUTINE_FADEIN:
-            return (void *)&loop_fadein;
+            return (void *)&Loop_Fade_In;
             break;
         case ROUTINE_FADEOUT:
-            return (void *)&loop_fadeout;
+            return (void *)&Loop_Fade_Out;
             break;
         case ROUTINE_SUBSCREEN:
             return (void *)&loop_subscreen_top;

@@ -39,7 +39,7 @@
 
 #include "main.h"
 
-void loop_fadein()
+void Loop_Fade_In()
 {
     hdma_use_gradient = 0x0000;
 
@@ -68,7 +68,7 @@ void loop_fadein()
     This loop is only used by the soft reset on game over routine.
     It's very likely it'll be gone entirely once a Game Over screen is implemented.
 */
-void loop_fadeout()
+void Loop_Fade_Out()
 {
     hdma_use_gradient = 0x0000;
 
@@ -93,7 +93,7 @@ void loop_fadeout()
     return;
 }
 
-void loop_messagebox()
+void Loop_Game_Messagebox()
 {
     system_game_paused = 1;
     system_dont_count_lag = 1;
@@ -158,7 +158,7 @@ void loop_messagebox()
     return;
 }
 
-void loop_game()
+void Loop_Game()
 {
     system_dont_count_lag = 0;
 
@@ -263,7 +263,7 @@ void loop_game()
     return;
 }
 
-void loop_pause()
+void Loop_Game_Pause()
 {
     hdma_use_gradient = 0x0001;
 
@@ -286,7 +286,7 @@ void loop_pause()
     return;
 }
 
-void loop_mapdisplay_init()
+void Loop_Subscreen_MapDisplay_Init()
 {
     system_dont_count_lag = 1;
 
@@ -460,7 +460,7 @@ void loop_mapdisplay_init()
 }
 
 
-void loop_mapdisplay()
+void Loop_Subscreen_MapDisplay()
 {
     hdma_use_gradient = 0x0000;
 
@@ -536,7 +536,7 @@ void loop_mapdisplay()
     Used when going from another mode to the game (e.g. map screens)
 */
 
-void loop_game_reload()
+void Loop_Game_ReloadScene()
 {
     hdma_use_gradient = 0x0000;
 
@@ -577,7 +577,7 @@ void loop_game_reload()
     system_setup_tilemap_display(system_target_routine);
     system_init_display(system_target_routine);
 
-    loop_game_partial();
+    Loop_Game_Partial();
 
     HdmaEngine_EnableHdma(); 
 
@@ -596,7 +596,7 @@ void loop_game_reload()
 /*
     Run during initialization or scene reload to make sure everything that is supposed to be there, is
 */
-void loop_game_partial(void)
+void Loop_Game_Partial(void)
 {
     // Make a copy of the current paused state
     uint16_t temp_game_paused_copy = system_game_paused;
@@ -617,7 +617,7 @@ void loop_game_partial(void)
     Used when going from a level to another
 */
 
-void loop_game_newlevel()
+void Loop_Game_NewLevel()
 {
     hdma_use_gradient = 0x0000;
     
@@ -654,7 +654,7 @@ void loop_game_newlevel()
     system_setup_tilemap_display(system_target_routine);
     system_init_display(system_target_routine);
 
-    loop_game_partial();
+    Loop_Game_Partial();
 
     HdmaEngine_EnableHdma(); 
 

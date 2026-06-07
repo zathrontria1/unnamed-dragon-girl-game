@@ -288,7 +288,7 @@ void system_display_splash()
     system_init_graphics();
 
     // Run one frame of partial game logic to draw sprites
-    loop_game_partial();
+    Loop_Game_Partial();
     
     return;
 }
