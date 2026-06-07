@@ -14,7 +14,7 @@
     Sets the map and metatile LUT pointers,
     then loads the tilemap data.
 */
-void map_load(const uint8_t * map, const uint16_t * lut, const uint8_t * col)
+void MapSystem_LoadMap(const uint8_t * map, const uint16_t * lut, const uint8_t * col)
 {
     map_current = map;
     map_extent_tiles_x = ((uint16_t)(*map)) << 4;
@@ -36,10 +36,10 @@ void map_load(const uint8_t * map, const uint16_t * lut, const uint8_t * col)
     }
 
     // Generate the collision map
-    map_build_collision_table();
+    MapSystem_BuildCollisionTable();
 
     // Ensure that the camera is at a valid position
-    map_camera_adjust(1);
+    MapSystem_UpdateCameraPosition(1);
 
     return;
 }
@@ -48,7 +48,7 @@ void map_load(const uint8_t * map, const uint16_t * lut, const uint8_t * col)
     Call to build the collision table
     The table will be completely linear, so only ends when it's out of tiles.
 */
-void map_build_collision_table()
+void MapSystem_BuildCollisionTable()
 {
     const uint8_t * ptr = map_current;
     ptr += 2; 
@@ -88,7 +88,7 @@ void map_build_collision_table()
     return;
 }
 
-void map_regenerate()
+void MapSystem_Tilemap_RegenerateTilemap()
 {
     const uint8_t * p = (map_current+2);
 
@@ -106,7 +106,7 @@ void map_regenerate()
     // note that for the purposes of the tilemap builder always start slightly from the left and top edges - 7 and 1 tiles off on X and Y.
     for (int16_t i = temp_x_tile_offset_adj - 1; i < temp_x_tile_offset_adj_target; )
     {
-        uint16_t temp_section = map_tilemap_build_col(p, map_lut, i, temp_y_tile_offset, temp_odd);
+        uint16_t temp_section = MapSystem_Tilemap_BuildColumn(p, map_lut, i, temp_y_tile_offset, temp_odd);
 
         uint16_t temp_x_wrap = (((temp_x_tile_offset+24) & 0x1f) << 1) & 0x1f;
 
@@ -140,7 +140,7 @@ void map_regenerate()
     the camera crosses a metatile boundary. This should be suppressed only during 
     initial map load.
 */
-void map_camera_adjust(uint16_t suppress_map_gen)
+void MapSystem_UpdateCameraPosition(uint16_t suppress_map_gen)
 {
     struct game_object * ptr = obj_player_pointer;
 
@@ -400,7 +400,7 @@ void map_camera_adjust(uint16_t suppress_map_gen)
 
     if (suppress_map_gen == 0)
     {
-        map_check_tilemap_crossing();
+        MapSystem_CheckCrossedTilemapEdge();
 
         // previous values are already updated within function
         return;
@@ -413,7 +413,7 @@ void map_camera_adjust(uint16_t suppress_map_gen)
 }
 
 // Split into its own function to make code neater
-void map_check_tilemap_crossing()
+void MapSystem_CheckCrossedTilemapEdge()
 {
     const uint8_t * p = map_current;
     p += 2;
@@ -428,7 +428,7 @@ void map_check_tilemap_crossing()
     {
         if ((temp_x_tile_offset+16) < map_extent_tiles_x)
         {
-            uint16_t temp_section = map_tilemap_build_col(p, map_lut, temp_x_tile_offset+24, temp_y_tile_offset-1, temp_x_odd);
+            uint16_t temp_section = MapSystem_Tilemap_BuildColumn(p, map_lut, temp_x_tile_offset+24, temp_y_tile_offset-1, temp_x_odd);
 
             uint16_t temp_x_wrap = (((temp_x_tile_offset+24) & 0x1f) << 1) & 0x1f;
 
@@ -446,7 +446,7 @@ void map_check_tilemap_crossing()
     {
         if ((temp_x_tile_offset -7) >= -7)
         {
-            uint16_t temp_section = map_tilemap_build_col(p, map_lut, temp_x_tile_offset-7, temp_y_tile_offset-1, temp_x_odd);
+            uint16_t temp_section = MapSystem_Tilemap_BuildColumn(p, map_lut, temp_x_tile_offset-7, temp_y_tile_offset-1, temp_x_odd);
 
             uint16_t temp_x_wrap = (((temp_x_tile_offset+25) & 0x1f) << 1) & 0x1f;
 
@@ -473,7 +473,7 @@ void map_check_tilemap_crossing()
 
     if (temp_y_tile_offset_8 > temp_y_tile_offset_prev_8)
     {
-        map_tilemap_build_row(p, map_lut, temp_x_tile_offset - 7, temp_y_tile_offset + 14, temp_y_odd);
+        MapSystem_Tilemap_BuildRow(p, map_lut, temp_x_tile_offset - 7, temp_y_tile_offset + 14, temp_y_odd);
 
         uint16_t temp_y_wrap = ((((temp_y_tile_offset+14) & 0x0f) << 1) & 0x1f) << 5;
 
@@ -491,7 +491,7 @@ void map_check_tilemap_crossing()
     }
     else if (temp_y_tile_offset_8 < temp_y_tile_offset_prev_8)
     {
-        map_tilemap_build_row(p, map_lut, temp_x_tile_offset - 7, temp_y_tile_offset - 1, temp_y_odd);
+        MapSystem_Tilemap_BuildRow(p, map_lut, temp_x_tile_offset - 7, temp_y_tile_offset - 1, temp_y_odd);
 
         uint16_t temp_y_wrap = ((((temp_y_tile_offset+15) & 0x0f) << 1) & 0x1f) << 5;
 
@@ -518,7 +518,7 @@ void map_check_tilemap_crossing()
 
     Can also be invoked to force a full refresh during fblank if needed
 */
-uint16_t map_tilemap_build_col(const uint8_t * p, const uint16_t * lut, int16_t tile_x, int16_t tile_y, uint16_t odd)
+uint16_t MapSystem_Tilemap_BuildColumn(const uint8_t * p, const uint16_t * lut, int16_t tile_x, int16_t tile_y, uint16_t odd)
 {
     // tile_x to determine if it's on the odd or even section of the tilemap.
     // if x = 0:  0 + 16 = 16, 16 >> 4 = 1, 1-1 = 0, 0 & 0x01 = 0
@@ -608,7 +608,7 @@ uint16_t map_tilemap_build_col(const uint8_t * p, const uint16_t * lut, int16_t 
 }
 
 // ditto but for rows
-void map_tilemap_build_row(const uint8_t * p, const uint16_t * lut, int16_t tile_x, int16_t tile_y, uint16_t odd)
+void MapSystem_Tilemap_BuildRow(const uint8_t * p, const uint16_t * lut, int16_t tile_x, int16_t tile_y, uint16_t odd)
 {
     // tile_x to determine if it's on the odd or even section of the tilemap.
     

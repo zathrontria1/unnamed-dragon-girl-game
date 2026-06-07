@@ -407,7 +407,7 @@ void routines_player(struct game_object * o)
                 }
             }
 
-            map_camera_adjust(0);
+            MapSystem_UpdateCameraPosition(0);
 
             uint16_t temp_invalidate_animation_frame = 0;
 

@@ -96,7 +96,7 @@ bool LevelSystem_LoadLevel(const struct level_data * level)
         else
         {
             // Just load the new map cells
-            map_load(
+            MapSystem_LoadMap(
             level->map_cells, 
             level->map_lut, 
             level->map_lut_col);
@@ -129,7 +129,7 @@ void LevelSystem_LoadLevelGraphics(const struct level_data * level)
 {
     // Load the actual map data - must be done after the player is instantiated first
     // so it knows what tilemap to load. Also specify the metatile LUT.
-    map_load(
+    MapSystem_LoadMap(
         level->map_cells, 
         level->map_lut, 
         level->map_lut_col);

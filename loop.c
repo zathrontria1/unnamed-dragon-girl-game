@@ -566,7 +566,7 @@ void Loop_Game_ReloadScene()
     // DMA just the background and BG3 tiles
     DmaSystem_CopyToVram(((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_MAP << 1)), TILEDATA_ADDR_GAME_MAP, 24576);
     DmaSystem_CopyToVram(((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_UI_2BPP << 1)), TILEDATA_ADDR_GAME_UI_2BPP, 8192);
-    map_regenerate();
+    MapSystem_Tilemap_RegenerateTilemap();
     system_reset_ui_tilemap();
 
     system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_FADEIN);
@@ -646,7 +646,7 @@ void Loop_Game_NewLevel()
         DmaSystem_CopyToVram(((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_UI_2BPP << 1)), TILEDATA_ADDR_GAME_UI_2BPP, 8192);
     }
     
-    map_regenerate();
+    MapSystem_Tilemap_RegenerateTilemap();
 
     system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_FADEIN);
     system_target_routine = ROUTINE_GAMELOOP;

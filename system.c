@@ -306,7 +306,7 @@ void system_init_graphics(void)
     REG_OBSEL = OBJ_SIZE16_L32|3;
 
     // Regenerate the tilemaps
-    map_regenerate();
+    MapSystem_Tilemap_RegenerateTilemap();
 
     system_reset_ui_tilemap();
 
