@@ -40,7 +40,7 @@ void AniSystem_Spr_UpdateFixedTiles()
 
     if (temp_src != ani_bg_addr_coin)
     {
-        if (dma_queue_add(temp_src, temp_dest, 128, VRAM_INCHIGH, 1) != 1)
+        if (DmaSystem_AddItemToQueue(temp_src, temp_dest, 128, VRAM_INCHIGH, 1) != 1)
         {
             ani_bg_addr_coin = temp_src;
         }

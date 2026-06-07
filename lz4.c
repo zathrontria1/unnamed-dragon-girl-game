@@ -23,7 +23,7 @@ uint32_t LZ4_UnpackToWRAM(void * src, uint32_t dest)
 
         LZ4_DecompressFrame(src, (void *)dest);
 
-        //dma_copy_to_wram((uint32_t)LZ4_BUFFER_ADDR, dest, temp_length);
+        //DmaSystem_CopyToWram((uint32_t)LZ4_BUFFER_ADDR, dest, temp_length);
     }
 
     return temp_length;
@@ -45,7 +45,7 @@ uint32_t LZ4_UnpackToVRAM(void * src, uint16_t dest)
         
         LZ4_DecompressFrame(src, (void *)LZ4_BUFFER_ADDR);
 
-        dma_copy_to_vram((uint32_t)LZ4_BUFFER_ADDR, dest, temp_length);
+        DmaSystem_CopyToVram((uint32_t)LZ4_BUFFER_ADDR, dest, temp_length);
     }
 
     return temp_length;

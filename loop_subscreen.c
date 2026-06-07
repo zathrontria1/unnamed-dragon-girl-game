@@ -435,11 +435,11 @@ void loop_subscreen_profile_save_last_sprite_page()
 {
     system_align_to_vblank_start();
 
-    dma_copy_from_vram(0x7000, 0x007fe000, 4096);
+    DmaSystem_CopyFromVramToWram(0x7000, 0x007fe000, 4096);
 
     system_align_to_vblank_start();
 
-    dma_copy_from_vram(0x7800, 0x007ff000, 4096);
+    DmaSystem_CopyFromVramToWram(0x7800, 0x007ff000, 4096);
 
     return;
 }
@@ -452,11 +452,11 @@ void loop_subscreen_profile_upload_profile_picture()
     // Currently using a placeholder
     system_align_to_vblank_start();
 
-    dma_copy_to_vram((uint32_t)&data_sprite_player_portrait, 0x7000, 4096);
+    DmaSystem_CopyToVram((uint32_t)&data_sprite_player_portrait, 0x7000, 4096);
 
     system_align_to_vblank_start();
 
-    dma_copy_to_vram((uint32_t)&data_sprite_player_portrait+4096, 0x7800, 4096);
+    DmaSystem_CopyToVram((uint32_t)&data_sprite_player_portrait+4096, 0x7800, 4096);
 
     return;
 }
@@ -468,11 +468,11 @@ void loop_subscreen_profile_restore_last_sprite_page()
 {
     system_align_to_vblank_start();
 
-    dma_copy_to_vram(0x007fe000, 0x7000, 4096);
+    DmaSystem_CopyToVram(0x007fe000, 0x7000, 4096);
 
     system_align_to_vblank_start();
 
-    dma_copy_to_vram(0x007ff000, 0x7800, 4096);
+    DmaSystem_CopyToVram(0x007ff000, 0x7800, 4096);
 
     return;
 }

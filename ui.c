@@ -180,7 +180,7 @@ void UserInterface_UpdateHealthCounters()
                 temp_extra_length = 1;
                 ui_hp_gauge[i+1] = 0x016a | 0x2000 | (PAL_UI_4BPP << 10);
 
-                if ((dma_queue_add(
+                if ((DmaSystem_AddItemToQueue(
                     (uint8_t *)(&data_ui_dynamic_hp) + (((temp_bar_length_max % 8) + 1) << 5) + temp_bar_tile_offset, 
                     0x56a0, 
                     32,
@@ -193,7 +193,7 @@ void UserInterface_UpdateHealthCounters()
                 }
             }
 
-            if ((dma_queue_add(
+            if ((DmaSystem_AddItemToQueue(
                 (uint8_t *)(&data_ui_dynamic_hp) + (temp_bar_partial_tile << 5) + temp_bar_tile_offset, 
                 0x5690, 
                 32,
@@ -229,7 +229,7 @@ void UserInterface_UpdateHealthCounters()
             ui_hp_gauge[i] = (0x0169) | 0x2000 | (PAL_UI_4BPP << 10);
             ui_hp_gauge[i+1] = (0x016a) | 0x2000 | (PAL_UI_4BPP << 10);
 
-            if (dma_queue_add(
+            if (DmaSystem_AddItemToQueue(
                     (uint8_t *)(&data_ui_dynamic_hp) + (((temp_bar_length_max % 8) + 1) << 5) + temp_bar_tile_offset, 
                     0x56a0, 
                     32,
@@ -241,7 +241,7 @@ void UserInterface_UpdateHealthCounters()
                 return;
             }
 
-            if (dma_queue_add(
+            if (DmaSystem_AddItemToQueue(
                 (uint8_t *)(&data_ui_dynamic_hp) + temp_bar_tile_offset, 
                 0x5690, 
                 32,
@@ -267,7 +267,7 @@ void UserInterface_UpdateHealthCounters()
     }
 
     // Upload the tilemap data itself
-    if (dma_queue_add(
+    if (DmaSystem_AddItemToQueue(
         (uint8_t *)(&ui_hp_gauge[0]), 
         0x3000 + 4 + ((UI_MARGIN_TOP) << 5), 
         (temp_bar_filled_tiles + temp_bar_empty_tiles + 2 + temp_extra_length) << 1,
@@ -421,7 +421,7 @@ void UserInterface_UpdateMoneyCounters()
         ui_money_counter[i] = 0x00e0+(temp_string[i-1]) | 0x2000 | (PAL_UI_4BPP << 10);
     }
 
-    if (dma_queue_add(
+    if (DmaSystem_AddItemToQueue(
         (uint8_t *)(&ui_money_counter[0]), 
         0x3000 + 1 + ((27 - UI_MARGIN_TOP) << 5), 
         12,
@@ -472,7 +472,7 @@ void UserInterface_UpdateEnemyCounters()
         }
     }
 
-    if (dma_queue_add(
+    if (DmaSystem_AddItemToQueue(
         (uint8_t *)(&ui_level_status[0]), 
         0x3000 + 0x12 + ((27 - UI_MARGIN_TOP) << 5),  
         10,
@@ -483,7 +483,7 @@ void UserInterface_UpdateEnemyCounters()
         return;
     }
 
-    if (dma_queue_add(
+    if (DmaSystem_AddItemToQueue(
         (uint8_t *)(&ui_enemy_counter[0]), 
         0x3000 + 0x17 + ((27 - UI_MARGIN_TOP) << 5),  
         16,
@@ -528,7 +528,7 @@ void UserInterface_PrintText(uint8_t * string_ptr, uint16_t row, uint16_t col)
     // Clear the line first!
     UserInterface_ClearTextBuffer_Subset(row, col, 32);
     
-    if (dma_queue_add(
+    if (DmaSystem_AddItemToQueue(
         (uint8_t *)(&ui_window_text[0][0]), 
         0x3400 + (row << 5) + (col), 
         temp_len,
@@ -571,7 +571,7 @@ void UserInterface_PrintText_Mode3(uint8_t * string_ptr, uint16_t row, uint16_t 
         ui_window_text[0][i] = 0x0100 | 0x2000;
     }
 
-    if (dma_queue_add(
+    if (DmaSystem_AddItemToQueue(
         (uint8_t *)(&ui_window_text[0][0]), 
         0x4c00 + (row << 5) + (col), 
         temp_len,
@@ -1045,7 +1045,7 @@ void UserInterface_DrawWindowText(char * string_ptr, uint16_t x, uint16_t y)
 */
 void UserInterface_CopyUiBuffers()
 {
-    if (dma_queue_add(
+    if (DmaSystem_AddItemToQueue(
         (uint8_t *)(&ui_window_background[0][0]), 
         0x3000, 
         2048,
@@ -1056,7 +1056,7 @@ void UserInterface_CopyUiBuffers()
         return;
     }
 
-    if (dma_queue_add(
+    if (DmaSystem_AddItemToQueue(
         (uint8_t *)(&ui_window_text[0][0]), 
         0x3400, 
         2048,
@@ -1072,7 +1072,7 @@ void UserInterface_CopyUiBuffers()
 
 void UserInterface_CopyTextBuffer_Line(uint16_t y)
 {
-    if (dma_queue_add(
+    if (DmaSystem_AddItemToQueue(
         (uint8_t *)(&ui_window_text[y][0]), 
         0x3400 + (y << 5), 
         64,
@@ -1088,8 +1088,8 @@ void UserInterface_CopyTextBuffer_Line(uint16_t y)
 
 void UserInterface_CopyUiGraphicsToVram()
 {
-    dma_queue_add((uint8_t *)((uint32_t)&data_ui_dynamic_textadvance + ((uint16_t)((system_frames_elapsed >> 2) % 4) * 32)), 0x4300, 32, VRAM_INCHIGH, 0);
-    dma_queue_add((uint8_t *)((uint32_t)&data_ui_dynamic_textadvance + 256 + ((uint16_t)((system_frames_elapsed >> 2) % 4) * 32)), 0x4380, 32, VRAM_INCHIGH, 0);
+    DmaSystem_AddItemToQueue((uint8_t *)((uint32_t)&data_ui_dynamic_textadvance + ((uint16_t)((system_frames_elapsed >> 2) % 4) * 32)), 0x4300, 32, VRAM_INCHIGH, 0);
+    DmaSystem_AddItemToQueue((uint8_t *)((uint32_t)&data_ui_dynamic_textadvance + 256 + ((uint16_t)((system_frames_elapsed >> 2) % 4) * 32)), 0x4380, 32, VRAM_INCHIGH, 0);
     
     return;
 }

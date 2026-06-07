@@ -328,7 +328,7 @@ void routines_slime(struct game_object * o)
         // for comparison and in case it fails
         o->struct_data.npc_data.ani.last_address = temp_addr;
 
-        if (dma_queue_add(temp_addr, 0x6000+(o->struct_data.npc_data.vram_addr), 128, VRAM_INCHIGH, 1))
+        if (DmaSystem_AddItemToQueue(temp_addr, 0x6000+(o->struct_data.npc_data.vram_addr), 128, VRAM_INCHIGH, 1))
         {
             o->struct_data.npc_data.ani.last_dmafailed = 1;
         }
@@ -340,7 +340,7 @@ void routines_slime(struct game_object * o)
     else if ((o->struct_data.npc_data.ani.last_dmafailed))
     {
         // The previous DMA failed. Attempt it again.
-        if (!dma_queue_add(o->struct_data.npc_data.ani.last_address, 0x6000+(o->struct_data.npc_data.vram_addr), 128, VRAM_INCHIGH, 1))
+        if (!DmaSystem_AddItemToQueue(o->struct_data.npc_data.ani.last_address, 0x6000+(o->struct_data.npc_data.vram_addr), 128, VRAM_INCHIGH, 1))
         {
             o->struct_data.npc_data.ani.last_dmafailed = 0;
         }     
@@ -409,7 +409,7 @@ void routines_bubble_e(struct game_object * o)
         // for comparison and in case it fails
         o->struct_data.npc_data.ani.last_address = temp_addr;
 
-        if (dma_queue_add(temp_addr, 0x6000+(o->struct_data.npc_data.vram_addr), 128, VRAM_INCHIGH, 1))
+        if (DmaSystem_AddItemToQueue(temp_addr, 0x6000+(o->struct_data.npc_data.vram_addr), 128, VRAM_INCHIGH, 1))
         {
             o->struct_data.npc_data.ani.last_dmafailed = 1;
         }
@@ -421,7 +421,7 @@ void routines_bubble_e(struct game_object * o)
     else if ((o->struct_data.npc_data.ani.last_dmafailed))
     {
         // The previous DMA failed. Attempt it again.
-        if (!dma_queue_add(o->struct_data.npc_data.ani.last_address, 0x6000+(o->struct_data.npc_data.vram_addr), 128, VRAM_INCHIGH, 1))
+        if (!DmaSystem_AddItemToQueue(o->struct_data.npc_data.ani.last_address, 0x6000+(o->struct_data.npc_data.vram_addr), 128, VRAM_INCHIGH, 1))
         {
             o->struct_data.npc_data.ani.last_dmafailed = 0;
         }     

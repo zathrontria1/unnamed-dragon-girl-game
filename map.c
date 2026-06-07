@@ -112,18 +112,18 @@ void map_regenerate()
 
         if (temp_odd == 0x0000)
         {
-            dma_queue_add((uint8_t *)&map_column[0], (TILEMAP_ADDR_GAME_MAP+(temp_section << 10)+temp_x_wrap), 64, (VRAM_INCHIGH|VRAM_ADRSTINC_32), 0);
+            DmaSystem_AddItemToQueue((uint8_t *)&map_column[0], (TILEMAP_ADDR_GAME_MAP+(temp_section << 10)+temp_x_wrap), 64, (VRAM_INCHIGH|VRAM_ADRSTINC_32), 0);
             temp_odd = 0x0001;
         }
         else
         {
-            dma_queue_add((uint8_t *)&map_column[0], (TILEMAP_ADDR_GAME_MAP+(temp_section << 10)+temp_x_wrap+1), 64, (VRAM_INCHIGH|VRAM_ADRSTINC_32), 0);
+            DmaSystem_AddItemToQueue((uint8_t *)&map_column[0], (TILEMAP_ADDR_GAME_MAP+(temp_section << 10)+temp_x_wrap+1), 64, (VRAM_INCHIGH|VRAM_ADRSTINC_32), 0);
             temp_odd = 0x0000;
             temp_x_tile_offset++;
             i++;
         }
 
-        dma_queue_process();
+        DmaSystem_ProcessQueue();
     }
 
     return;
@@ -434,11 +434,11 @@ void map_check_tilemap_crossing()
 
             if (temp_x_odd == 0x0000)
             {
-                dma_queue_add((uint8_t *)&map_column[0], (TILEMAP_ADDR_GAME_MAP+(temp_section * 1024)+temp_x_wrap), 64, (VRAM_INCHIGH|VRAM_ADRSTINC_32), 0);
+                DmaSystem_AddItemToQueue((uint8_t *)&map_column[0], (TILEMAP_ADDR_GAME_MAP+(temp_section * 1024)+temp_x_wrap), 64, (VRAM_INCHIGH|VRAM_ADRSTINC_32), 0);
             }
             else
             {
-                dma_queue_add((uint8_t *)&map_column[0], (TILEMAP_ADDR_GAME_MAP+(temp_section * 1024)+temp_x_wrap+1), 64, (VRAM_INCHIGH|VRAM_ADRSTINC_32), 0);
+                DmaSystem_AddItemToQueue((uint8_t *)&map_column[0], (TILEMAP_ADDR_GAME_MAP+(temp_section * 1024)+temp_x_wrap+1), 64, (VRAM_INCHIGH|VRAM_ADRSTINC_32), 0);
             }
         }
     }
@@ -452,11 +452,11 @@ void map_check_tilemap_crossing()
 
             if (temp_x_odd == 0x0000)
             {
-                dma_queue_add((uint8_t *)&map_column[0], (TILEMAP_ADDR_GAME_MAP+(temp_section * 1024)+temp_x_wrap), 64, (VRAM_INCHIGH|VRAM_ADRSTINC_32), 0);
+                DmaSystem_AddItemToQueue((uint8_t *)&map_column[0], (TILEMAP_ADDR_GAME_MAP+(temp_section * 1024)+temp_x_wrap), 64, (VRAM_INCHIGH|VRAM_ADRSTINC_32), 0);
             }
             else
             {
-                dma_queue_add((uint8_t *)&map_column[0], (TILEMAP_ADDR_GAME_MAP+(temp_section * 1024)+temp_x_wrap+1), 64, (VRAM_INCHIGH|VRAM_ADRSTINC_32), 0);
+                DmaSystem_AddItemToQueue((uint8_t *)&map_column[0], (TILEMAP_ADDR_GAME_MAP+(temp_section * 1024)+temp_x_wrap+1), 64, (VRAM_INCHIGH|VRAM_ADRSTINC_32), 0);
             }
         }
     }
@@ -480,13 +480,13 @@ void map_check_tilemap_crossing()
         // Sections are not important for rows as both maps will be updated.
         if (temp_y_odd == 0x0000)
         {
-            dma_queue_add((uint8_t *)&map_row[0][0], (TILEMAP_ADDR_GAME_MAP+temp_y_wrap), 64, VRAM_INCHIGH, 0);
-            dma_queue_add((uint8_t *)&map_row[1][0], (TILEMAP_ADDR_GAME_MAP+1024+temp_y_wrap), 64, VRAM_INCHIGH, 0);
+            DmaSystem_AddItemToQueue((uint8_t *)&map_row[0][0], (TILEMAP_ADDR_GAME_MAP+temp_y_wrap), 64, VRAM_INCHIGH, 0);
+            DmaSystem_AddItemToQueue((uint8_t *)&map_row[1][0], (TILEMAP_ADDR_GAME_MAP+1024+temp_y_wrap), 64, VRAM_INCHIGH, 0);
         }
         else
         {
-            dma_queue_add((uint8_t *)&map_row[0][0], (TILEMAP_ADDR_GAME_MAP+32+temp_y_wrap), 64, VRAM_INCHIGH, 0);
-            dma_queue_add((uint8_t *)&map_row[1][0], (TILEMAP_ADDR_GAME_MAP+32+1024+temp_y_wrap), 64, VRAM_INCHIGH, 0);
+            DmaSystem_AddItemToQueue((uint8_t *)&map_row[0][0], (TILEMAP_ADDR_GAME_MAP+32+temp_y_wrap), 64, VRAM_INCHIGH, 0);
+            DmaSystem_AddItemToQueue((uint8_t *)&map_row[1][0], (TILEMAP_ADDR_GAME_MAP+32+1024+temp_y_wrap), 64, VRAM_INCHIGH, 0);
         }
     }
     else if (temp_y_tile_offset_8 < temp_y_tile_offset_prev_8)
@@ -498,13 +498,13 @@ void map_check_tilemap_crossing()
         // Sections are not important for rows as both maps will be updated.
         if (temp_y_odd == 0x0000)
         {
-            dma_queue_add((uint8_t *)&map_row[0][0], (TILEMAP_ADDR_GAME_MAP+temp_y_wrap), 64, VRAM_INCHIGH, 0);
-            dma_queue_add((uint8_t *)&map_row[1][0], (TILEMAP_ADDR_GAME_MAP+1024+temp_y_wrap), 64, VRAM_INCHIGH, 0);
+            DmaSystem_AddItemToQueue((uint8_t *)&map_row[0][0], (TILEMAP_ADDR_GAME_MAP+temp_y_wrap), 64, VRAM_INCHIGH, 0);
+            DmaSystem_AddItemToQueue((uint8_t *)&map_row[1][0], (TILEMAP_ADDR_GAME_MAP+1024+temp_y_wrap), 64, VRAM_INCHIGH, 0);
         }
         else
         {
-            dma_queue_add((uint8_t *)&map_row[0][0], (TILEMAP_ADDR_GAME_MAP+32+temp_y_wrap), 64, (VRAM_INCHIGH), 0);
-            dma_queue_add((uint8_t *)&map_row[1][0], (TILEMAP_ADDR_GAME_MAP+32+1024+temp_y_wrap), 64, (VRAM_INCHIGH), 0);
+            DmaSystem_AddItemToQueue((uint8_t *)&map_row[0][0], (TILEMAP_ADDR_GAME_MAP+32+temp_y_wrap), 64, (VRAM_INCHIGH), 0);
+            DmaSystem_AddItemToQueue((uint8_t *)&map_row[1][0], (TILEMAP_ADDR_GAME_MAP+32+1024+temp_y_wrap), 64, (VRAM_INCHIGH), 0);
         }
     }
 

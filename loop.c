@@ -320,7 +320,7 @@ void loop_mapdisplay_init()
     obj_player_prev_sprframe = AniSystem_GetPlayerFrame(o); 
     uint8_t * temp_addr = AniSystem_GetPlayerFrame(&temp_icon_object);
 
-    dma_queue_add(temp_addr, 0x6000, 128, VRAM_INCHIGH, 1);
+    DmaSystem_AddItemToQueue(temp_addr, 0x6000, 128, VRAM_INCHIGH, 1);
 
     ui_in_bg2 = 1;
 
@@ -343,11 +343,11 @@ void loop_mapdisplay_init()
     REG_BG2VOFS = 0xff;
 
     // Copy the ROM palette into shadow
-    dma_copy_to_wram((unsigned long int)level_data_ptr->map_overview_palette, (unsigned long int)&shadow_cgram, 480);
-    dma_copy_to_wram((unsigned long int)(level_data_ptr->tileset_palette)+256, (unsigned long int)(&shadow_cgram)+480, 32);
+    DmaSystem_CopyToWram((unsigned long int)level_data_ptr->map_overview_palette, (unsigned long int)&shadow_cgram, 480);
+    DmaSystem_CopyToWram((unsigned long int)(level_data_ptr->tileset_palette)+256, (unsigned long int)(&shadow_cgram)+480, 32);
     
     // Copy the background graphics into VRAM
-    dma_copy_to_vram(0x007f0000, 0x0000, 0x9000);
+    DmaSystem_CopyToVram(0x007f0000, 0x0000, 0x9000);
 
     int i = 0;
     REG_VMAIN = VRAM_INCHIGH;
@@ -550,7 +550,7 @@ void loop_game_reload()
     bg_scroll_x = bg_scroll_x_saved;
     bg_scroll_y = bg_scroll_y_saved;
 
-    dma_queue_add(obj_player_prev_sprframe, 0x6000, 128, VRAM_INCHIGH, 1);
+    DmaSystem_AddItemToQueue(obj_player_prev_sprframe, 0x6000, 128, VRAM_INCHIGH, 1);
 
     while (shadow_inidisp != 0x00)
     {
@@ -564,8 +564,8 @@ void loop_game_reload()
     system_reset_bg_scroll_regs();
 
     // DMA just the background and BG3 tiles
-    dma_copy_to_vram(((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_MAP << 1)), TILEDATA_ADDR_GAME_MAP, 24576);
-    dma_copy_to_vram(((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_UI_2BPP << 1)), TILEDATA_ADDR_GAME_UI_2BPP, 8192);
+    DmaSystem_CopyToVram(((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_MAP << 1)), TILEDATA_ADDR_GAME_MAP, 24576);
+    DmaSystem_CopyToVram(((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_UI_2BPP << 1)), TILEDATA_ADDR_GAME_UI_2BPP, 8192);
     map_regenerate();
     system_reset_ui_tilemap();
 
@@ -642,8 +642,8 @@ void loop_game_newlevel()
     // DMA just the background and BG3 tiles, IF there was a need to
     if (!temp_level_reuses_vram_contents)
     {
-        dma_copy_to_vram(((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_MAP << 1)), TILEDATA_ADDR_GAME_MAP, 24576);
-        dma_copy_to_vram(((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_UI_2BPP << 1)), TILEDATA_ADDR_GAME_UI_2BPP, 8192);
+        DmaSystem_CopyToVram(((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_MAP << 1)), TILEDATA_ADDR_GAME_MAP, 24576);
+        DmaSystem_CopyToVram(((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_UI_2BPP << 1)), TILEDATA_ADDR_GAME_UI_2BPP, 8192);
     }
     
     map_regenerate();

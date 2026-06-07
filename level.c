@@ -167,7 +167,7 @@ void level_load_tileset(const struct level_data * level)
 void level_load_palette(const struct level_data * level)
 {
     // Copy the ROM palette into shadow
-    dma_copy_to_wram((uint32_t)level->tileset_palette, (uint32_t)&shadow_cgram, 512);
+    DmaSystem_CopyToWram((uint32_t)level->tileset_palette, (uint32_t)&shadow_cgram, 512);
 
     return;
 }

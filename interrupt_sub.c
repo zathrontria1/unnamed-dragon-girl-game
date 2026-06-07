@@ -60,10 +60,10 @@
         // Repoint the HDMA table
         REG_A1T3LH = hdma_scroll_ptr;
         
-        dma_copy_oam();
-        dma_copy_palette();
+        DmaSystem_UploadOam();
+        DmaSystem_UploadCgram();
 
-        dma_queue_process();
+        DmaSystem_ProcessQueue();
 
         // Write background values
         bg_scroll_y_mod.full.high.a = bg_scroll_y.full.high.a - 1;
@@ -98,19 +98,19 @@
     else if (system_current_routine != ROUTINE_MAPDISPLAY)
     {
         // Just refresh the entries used by HDMA
-        dma_copy_palette_subset(0x04, 4); // UI message box
-        dma_copy_palette_subset(0x42, 13); // Water tiles
+        DmaSystem_UploadCgram_Subset(0x04, 4); // UI message box
+        DmaSystem_UploadCgram_Subset(0x42, 13); // Water tiles
 
         if (ani_bg_water_dma_ready)
         {
-            dma_copy_bg_water_anim();
+            DmaSystem_UpdateStripTiles();
 
             ani_bg_water_dma_ready = 0;
         }
 
         if (ani_bg_tallbg_dma_ready)
         {
-            dma_copy_bg_64height_anim();
+            DmaSystem_UpdateFrameTiles();
 
             ani_bg_tallbg_dma_ready = 0;
         }

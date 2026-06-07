@@ -1,38 +1,38 @@
 extern const uint16_t const_lut_dma_split_lookup[6];
 
-void dma_copy_to_wram(
+void DmaSystem_CopyToWram(
     uint32_t src, 
     uint32_t dest, 
     uint16_t length);
 
-void dma_copy_to_vram(
+void DmaSystem_CopyToVram(
     uint32_t src, 
     uint16_t dest, 
     uint16_t length);
 
-void dma_copy_from_vram(
+void DmaSystem_CopyFromVramToWram(
     uint16_t src, 
     uint32_t dest, 
     uint16_t length);
 
 #if VBCC_ASM == 1
-    NO_INLINE void dma_copy_oam(void);
+    NO_INLINE void DmaSystem_UploadOam(void);
 #else
-    void dma_copy_oam(void);
+    void DmaSystem_UploadOam(void);
 #endif
 #if VBCC_ASM == 1
-    NO_INLINE void dma_copy_palette(void);
+    NO_INLINE void DmaSystem_UploadCgram(void);
 #else
-    void dma_copy_palette(void);
+    void DmaSystem_UploadCgram(void);
 #endif
 
 #if VBCC_ASM == 1
-    NO_INLINE void dma_copy_palette_subset(uint16_t start, uint16_t len);
+    NO_INLINE void DmaSystem_UploadCgram_Subset(uint16_t start, uint16_t len);
 #else
-    void dma_copy_palette_subset(uint16_t start, uint16_t len);
+    void DmaSystem_UploadCgram_Subset(uint16_t start, uint16_t len);
 #endif
 
-uint16_t dma_queue_add(
+uint16_t DmaSystem_AddItemToQueue(
     uint8_t * src, 
     uint16_t dest, 
     uint16_t length,
@@ -40,19 +40,19 @@ uint16_t dma_queue_add(
     uint16_t split);
 
 #if VBCC_ASM == 1
-    NO_INLINE void dma_queue_process(void);
+    NO_INLINE void DmaSystem_ProcessQueue(void);
 #else
-    void dma_queue_process(void);
+    void DmaSystem_ProcessQueue(void);
 #endif
 
 #if VBCC_ASM == 1
-    NO_INLINE void dma_copy_bg_water_anim(void);
+    NO_INLINE void DmaSystem_UpdateStripTiles(void);
 #else
-    void dma_copy_bg_water_anim(void);
+    void DmaSystem_UpdateStripTiles(void);
 #endif
 
 #if VBCC_ASM == 1
-    NO_INLINE void dma_copy_bg_64height_anim(void);
+    NO_INLINE void DmaSystem_UpdateFrameTiles(void);
 #else
-    void dma_copy_bg_64height_anim(void);
+    void DmaSystem_UpdateFrameTiles(void);
 #endif

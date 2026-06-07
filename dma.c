@@ -7,7 +7,7 @@
 
 #include "dma.h"
 
-void dma_copy_to_wram(
+void DmaSystem_CopyToWram(
     uint32_t src, 
     uint32_t dest, 
     uint16_t length)
@@ -30,7 +30,7 @@ void dma_copy_to_wram(
     return;
 }
 
-void dma_copy_to_vram(
+void DmaSystem_CopyToVram(
     uint32_t src, 
     uint16_t dest, 
     uint16_t length)
@@ -57,7 +57,7 @@ void dma_copy_to_vram(
     return;
 }
 
-void dma_copy_from_vram(
+void DmaSystem_CopyFromVramToWram(
     uint16_t src, 
     uint32_t dest, 
     uint16_t length)
@@ -87,7 +87,7 @@ void dma_copy_from_vram(
     return;
 }
 
-void dma_copy_oam()
+void DmaSystem_UploadOam()
 {
     // Update OAM from shadow
     #if VBCC_ASM == 1
@@ -135,7 +135,7 @@ void dma_copy_oam()
     return;
 }
 
-void dma_copy_palette()
+void DmaSystem_UploadCgram()
 {
     // Update CGRAM from shadow
     #if VBCC_ASM == 1
@@ -190,9 +190,9 @@ void dma_copy_palette()
     length = amount of entries
 */
 #if VBCC_ASM == 1
-    NO_INLINE void dma_copy_palette_subset(uint16_t start, uint16_t len)
+    NO_INLINE void DmaSystem_UploadCgram_Subset(uint16_t start, uint16_t len)
 #else
-    void dma_copy_palette_subset(uint16_t start, uint16_t len)
+    void DmaSystem_UploadCgram_Subset(uint16_t start, uint16_t len)
 #endif
 {
     #if VBCC_ASM == 1
@@ -251,7 +251,7 @@ void dma_copy_palette()
     Dedicated routine for copying water tile animations during
     odd-frame NMI.
 */
-void dma_copy_bg_water_anim()
+void DmaSystem_UpdateStripTiles()
 {
     #if VBCC_ASM == 1
         __asm(
@@ -307,7 +307,7 @@ void dma_copy_bg_water_anim()
     Dedicated routine for copying full height (32px) background rows during
     odd-frame NMI.
 */
-void dma_copy_bg_64height_anim()
+void DmaSystem_UpdateFrameTiles()
 {
     #if VBCC_ASM == 1
         __asm(
@@ -369,7 +369,7 @@ const uint16_t const_lut_dma_split_lookup[6] = {
     (1 << 5) * DMA_QUEUE_OVERHEAD, 
 };
 
-uint16_t dma_queue_add(
+uint16_t DmaSystem_AddItemToQueue(
     uint8_t * src, 
     uint16_t dest, 
     uint16_t length,
@@ -427,7 +427,7 @@ uint16_t dma_queue_add(
     return 0;
 }
 
-void dma_queue_process() 
+void DmaSystem_ProcessQueue() 
 {
     #if VBCC_ASM == 1
         __asm(

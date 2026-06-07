@@ -109,7 +109,7 @@ void UserInterface_ClearTextBuffer_Subset(uint16_t row, uint16_t col, uint16_t l
     ui_show_message_linewidth[2] = 0;
     ui_show_message_linewidth[3] = 0;
     
-    if (dma_queue_add(
+    if (DmaSystem_AddItemToQueue(
         (uint8_t *)(&ui_window_text[row][col]), 
         0x3400 + (row << 5) + (col), 
         len << 1,
@@ -154,7 +154,7 @@ void UserInterface_PrintText_MultiLine(uint8_t * string_ptr, uint16_t row, uint1
     }
 
     // Copy over the empty text
-    if (dma_queue_add(
+    if (DmaSystem_AddItemToQueue(
         (uint8_t *)(&const_ui_empty_text_tilemap[0]), 
         0x3400 + ((UI_MSGBOX_ML_START + 1) << 5) + (0), 
         384,
@@ -258,7 +258,7 @@ void UserInterface_PrintText_MultiLine(uint8_t * string_ptr, uint16_t row, uint1
     // Copy the text piecemeal based on the line width array later, not here
 
     /*
-    if (dma_queue_add(
+    if (DmaSystem_AddItemToQueue(
         (uint8_t *)(&ui_window_text[0][0]), 
         0x3400 + ((row + 1) << 5) + (col), 
         252,
@@ -347,7 +347,7 @@ void UserInterface_ClearTextboxText(uint16_t row, uint16_t h)
 
     for (int i = 1; i < (h + 1); i++)
     {
-        if (dma_queue_add(
+        if (DmaSystem_AddItemToQueue(
             (uint8_t *)(&ui_window_text[0][0]), 
             0x3400 + ((row + i) << 5), 
             64,
@@ -369,7 +369,7 @@ void UserInterface_ClearTextboxText(uint16_t row, uint16_t h)
 */
 void UserInterface_PrintText_PerChar()
 {
-    if (dma_queue_add(
+    if (DmaSystem_AddItemToQueue(
         (uint8_t *)(&ui_window_text[ui_show_message_char_row][ui_show_message_char_col]), 
         0x3400 + ((ui_show_message_char_row + 1 + UI_MSGBOX_ML_START) << 5) + (ui_show_message_char_col + 1), 
         2 * V_MUL,
@@ -396,7 +396,7 @@ void UserInterface_PrintText_PerChar()
             ui_show_message_char_row = 0;
 
             // These are for the text advance indicator
-            if (dma_queue_add(
+            if (DmaSystem_AddItemToQueue(
                 (uint8_t *)(&const_ui_textadvance_tilemapentries[0]), 
                 0x3400 + ((UI_MSGBOX_ML_START + 5) << 5) + (30), 
                 4,
@@ -407,7 +407,7 @@ void UserInterface_PrintText_PerChar()
                     return;
                 }
 
-            if (dma_queue_add(
+            if (DmaSystem_AddItemToQueue(
                 (uint8_t *)(&const_ui_textadvance_tilemapentries[2]), 
                 0x3400 + ((UI_MSGBOX_ML_START + 6) << 5) + (30), 
                 4,
@@ -432,7 +432,7 @@ void UserInterface_PrintText_All()
 {
     SoundInterface_StopStream();
 
-    if (dma_queue_add(
+    if (DmaSystem_AddItemToQueue(
         (uint8_t *)(&ui_window_text[0][0]), 
         0x3400 + ((1 + UI_MSGBOX_ML_START) << 5) + 1, 
         254,
@@ -448,7 +448,7 @@ void UserInterface_PrintText_All()
         ui_show_message_char_row = 0;
 
         // These are for the text advance indicator
-        if (dma_queue_add(
+        if (DmaSystem_AddItemToQueue(
             (uint8_t *)(&const_ui_textadvance_tilemapentries[0]), 
             0x3400 + ((UI_MSGBOX_ML_START + 5) << 5) + (30), 
             4,
@@ -459,7 +459,7 @@ void UserInterface_PrintText_All()
                 return;
             }
 
-        if (dma_queue_add(
+        if (DmaSystem_AddItemToQueue(
             (uint8_t *)(&const_ui_textadvance_tilemapentries[2]), 
             0x3400 + ((UI_MSGBOX_ML_START + 6) << 5) + (30), 
             4,
@@ -477,7 +477,7 @@ void UserInterface_PrintText_All()
 
 void UserInterface_CopyTextboxToVram(uint16_t row, uint16_t h)
 {
-    if (dma_queue_add(
+    if (DmaSystem_AddItemToQueue(
         (uint8_t *)(&ui_window_background[0][0]), 
         0x3000 + (row << 5), 
         128,
@@ -490,7 +490,7 @@ void UserInterface_CopyTextboxToVram(uint16_t row, uint16_t h)
 
     for (int i = 2; i < (h - 1); i++)
     {
-        if (dma_queue_add(
+        if (DmaSystem_AddItemToQueue(
             (uint8_t *)(&ui_window_background[2+(i%2)][0]), 
             0x3000 + ((row + i) << 5), 
             64,
@@ -502,7 +502,7 @@ void UserInterface_CopyTextboxToVram(uint16_t row, uint16_t h)
         }
     }
 
-    if (dma_queue_add(
+    if (DmaSystem_AddItemToQueue(
         (uint8_t *)(&ui_window_background[4][0]), 
         0x3000 + ((row + h - 2) << 5), 
         128,
