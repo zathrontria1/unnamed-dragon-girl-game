@@ -38,7 +38,7 @@
 */
 
 // With flipping
-const uint16_t const_ani_lut_basic[56] = 
+NEAR const uint16_t const_ani_lut_basic[56] = 
 {
    0, 1, 2, 2,
 
@@ -63,7 +63,7 @@ const uint16_t const_ani_lut_basic[56] =
 };
 
 // Byte offset tables large enough to cover an entire 64KB bank
-const uint16_t const_ani_lut_frame_byteoffsets_16[512] =
+NEAR const uint16_t const_ani_lut_frame_byteoffsets_16[512] =
 {
     0x0000, 0x0040, 0x0080, 0x00c0, 0x0100, 0x0140, 0x0180, 0x01c0, 
     0x0400, 0x0440, 0x0480, 0x04c0, 0x0500, 0x0540, 0x0580, 0x05c0, 
