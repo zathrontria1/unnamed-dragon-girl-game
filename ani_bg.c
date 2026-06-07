@@ -15,12 +15,14 @@ uint8_t ani_bg_frame[8192];
 uint16_t ani_bg_frame_water;
 uint16_t ani_bg_row_water;
 uint8_t * ani_bg_addr_water;
+uint8_t * ani_bg_addr_water_start;
 uint16_t ani_bg_dest_water;
 ZP uint16_t ani_bg_water_dma_ready;
 
 // 64px dedicated section is updated in one go. has to go to the odd frame NMI DMAs.
 uint16_t ani_bg_frame_tallbg; // the 2KB sheet
 uint8_t * ani_bg_addr_tallbg;
+uint8_t * ani_bg_addr_tallbg_start;
 uint16_t ani_bg_dest_tallbg;
 ZP uint16_t ani_bg_tallbg_dma_ready;
 
@@ -47,7 +49,7 @@ void AniSystem_BgTile_UpdateStrip()
     }
 
     // Calculate the new address
-    uint8_t * temp_src = ((uint8_t *)&data_bg_dungeon_anim_water) + (ani_bg_frame_water << 11) + (ani_bg_row_water << 9);
+    uint8_t * temp_src = ani_bg_addr_water_start + (ani_bg_frame_water << 11) + (ani_bg_row_water << 9);
     uint16_t temp_dest = 0x2000 + (ani_bg_row_water << 8);
 
     if (temp_src != ani_bg_addr_water)
@@ -79,7 +81,7 @@ void AniSystem_BgTile_UpdateFrame()
     }
 
     // Calculate the new address
-    uint8_t * temp_src = ((uint8_t *)&data_bg_dungeon_anim_torch) + (ani_bg_frame_tallbg << 11);
+    uint8_t * temp_src = ani_bg_addr_tallbg_start + (ani_bg_frame_tallbg << 11);
     uint16_t temp_dest = 0x2400;
 
     if (temp_src != ani_bg_addr_tallbg)
@@ -88,6 +90,31 @@ void AniSystem_BgTile_UpdateFrame()
         ani_bg_dest_tallbg = temp_dest;
         ani_bg_tallbg_dma_ready = 1;
     }
+
+    return;
+}
+
+void AniSystem_BgTile_SetStripPointer(uint8_t * ptr)
+{
+    ani_bg_addr_water = ptr;
+    ani_bg_addr_water_start = ptr;
+
+    ani_bg_row_water = 0;
+    ani_bg_frame_water = 0;
+
+    ani_bg_water_dma_ready = 0;
+
+    return;
+}
+
+void AniSystem_BgTile_SetFramePointer(uint8_t * ptr)
+{
+    ani_bg_addr_tallbg = ptr;
+    ani_bg_addr_tallbg_start = ptr;
+
+    ani_bg_frame_tallbg = 0;
+
+    ani_bg_tallbg_dma_ready = 0;
 
     return;
 }

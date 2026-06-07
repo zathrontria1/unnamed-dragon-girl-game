@@ -74,7 +74,12 @@ bool LevelSystem_LoadLevel(const struct level_data * level)
     
     // initialize global DMA tile animation
     // TODO: currently hardcoded. In the future, pointers may be part of map data.
-    ani_bg_addr_water = (uint8_t *)&data_bg_dungeon_anim_water;
+    LZ4_UnpackToWRAM((uint8_t *)&data_bg_dungeon_anim_water_lz4, (uint32_t)&ani_bg_strip);
+    LZ4_UnpackToWRAM((uint8_t *)&data_bg_dungeon_anim_torch_lz4, (uint32_t)&ani_bg_frame);
+
+    AniSystem_BgTile_SetStripPointer((uint8_t *)&ani_bg_strip);
+    AniSystem_BgTile_SetFramePointer((uint8_t *)&ani_bg_frame);
+
     ani_bg_addr_coin = (uint8_t *)&data_sprite_drop_coin;
 
     // If the pointers point to the same thing, assume that a full reload is needed

@@ -13,8 +13,8 @@ extern const uint8_t data_palette_map_1_8bpp[];
 extern const uint8_t data_palette_splash[];
 
 extern const uint8_t data_bg_dungeon_lz4[]; // dungeon tiles
-extern const uint8_t data_bg_dungeon_anim_water[]; // dungeon water animation tiles
-extern const uint8_t data_bg_dungeon_anim_torch[]; // dungeon torch animation tiles
+extern const uint8_t data_bg_dungeon_anim_water_lz4[]; // dungeon water animation tiles
+extern const uint8_t data_bg_dungeon_anim_torch_lz4[]; // dungeon torch animation tiles
 extern const uint8_t data_bg_map_dungeon_0_8bpp_lz4[]; // dungeon map, compressed
 extern const uint8_t data_bg_map_dungeon_1_8bpp_lz4[]; // dungeon map, compressed
 
