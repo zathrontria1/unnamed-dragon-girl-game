@@ -5,6 +5,25 @@
 
 #include "ani_bg.h"
 
+
+// Decompress animation strips and frames for backgrounds here
+uint8_t ani_bg_strip[16384];
+uint8_t ani_bg_frame[8192];
+
+// These are handled separately compared to normal DMA
+// to make them possible to run on odd frames.
+uint16_t ani_bg_frame_water;
+uint16_t ani_bg_row_water;
+uint8_t * ani_bg_addr_water;
+uint16_t ani_bg_dest_water;
+ZP uint16_t ani_bg_water_dma_ready;
+
+// 64px dedicated section is updated in one go. has to go to the odd frame NMI DMAs.
+uint16_t ani_bg_frame_tallbg; // the 2KB sheet
+uint8_t * ani_bg_addr_tallbg;
+uint16_t ani_bg_dest_tallbg;
+ZP uint16_t ani_bg_tallbg_dma_ready;
+
 /*
     Updates strip animation tiles with 512 byte chunks
 

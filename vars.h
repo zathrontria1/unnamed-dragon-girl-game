@@ -169,20 +169,6 @@ extern uint16_t bg_scroll_x_at_final;
 extern uint16_t bg_scroll_y_at_final;
 extern uint16_t bg_scroll_suppress_interpolation_state_change;
 
-// Background tile anims
-// Water animations are updated per 512byte row
-extern uint16_t ani_bg_frame_water; // the 2KB sheet
-extern uint16_t ani_bg_row_water; // the 512 byte row section
-extern uint8_t * ani_bg_addr_water;
-extern uint16_t ani_bg_dest_water;
-ZP extern uint16_t ani_bg_water_dma_ready;
-
-// 64px dedicated section is updated in one go. has to go to the odd frame NMI DMAs.
-extern uint16_t ani_bg_frame_tallbg; // the 2KB sheet
-extern uint8_t * ani_bg_addr_tallbg;
-extern uint16_t ani_bg_dest_tallbg;
-ZP extern uint16_t ani_bg_tallbg_dma_ready;
-
 // Fixed sprite tile anims
 extern uint16_t ani_bg_frame_coin;
 extern uint8_t * ani_bg_addr_coin;

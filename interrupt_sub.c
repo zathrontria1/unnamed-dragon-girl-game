@@ -12,6 +12,8 @@
 #include "interrupt_sub.h"
 #include "gfx.h"
 
+#include "ani_bg.h"
+
 #if VBCC_ASM == 1
     NO_INLINE void Nmi_Primary()
 #else
