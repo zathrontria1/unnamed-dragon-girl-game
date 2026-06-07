@@ -1,1 +1,1 @@
-void ani_fixedspr_process(void);
+void AniSystem_Spr_UpdateFixedTiles(void);

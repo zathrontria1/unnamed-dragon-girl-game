@@ -8,7 +8,10 @@
 #include "ani_fixedspr.h"
 #include "dma.h"
 
-void ani_fixedspr_process()
+/*
+    Process DMA tile animations for sprites in the fixed area.
+*/
+void AniSystem_Spr_UpdateFixedTiles()
 {
     if ((((uint16_t)system_frames_elapsed) & ANI_INTERVAL_8) == ANI_INTERVAL_8)
     {
@@ -42,7 +45,6 @@ void ani_fixedspr_process()
             ani_bg_addr_coin = temp_src;
         }
     }
-    
 
     return;
 }
