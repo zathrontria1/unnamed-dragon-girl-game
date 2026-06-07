@@ -205,8 +205,8 @@ void loop_game()
         UserInterface_ClearTextBuffer_Subset(UI_MSGBOX_SL_START, 0, 32);
     }
 
-    ani_bg_update_water_anim();
-    ani_bg_update_bg_anim();
+    AniSystem_BgTile_UpdateStrip();
+    AniSystem_BgTile_UpdateFrame();
     ani_fixedspr_process();
     ani_pal_process();
 

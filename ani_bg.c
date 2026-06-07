@@ -6,9 +6,11 @@
 #include "ani_bg.h"
 
 /*
-    Updates water animation tiles with 512 byte chunks
+    Updates strip animation tiles with 512 byte chunks
+
+    These animations update one row of tiles at a time (512 bytes = 16 4bpp tiles = 1 row of tiles in VRAM)
 */
-void ani_bg_update_water_anim()
+void AniSystem_BgTile_UpdateStrip()
 {
     if (((uint16_t)system_frames_elapsed & ANI_INTERVAL_2) == ANI_INTERVAL_2)
     {
@@ -40,9 +42,12 @@ void ani_bg_update_water_anim()
 }
 
 /*
-    Updates bg animation tiles in the entire 128x32 section (2KB)
+    Update frame animation tiles with 2048 byte chunks
+
+    These animations update four row of tiles at a time (2048 bytes = 64 4bpp tiles = 4 row of tiles in VRAM)
+    Equivalent to updating a 128x32 section.
 */
-void ani_bg_update_bg_anim()
+void AniSystem_BgTile_UpdateFrame()
 {
     if (((uint16_t)system_frames_elapsed & ANI_INTERVAL_4) == ANI_INTERVAL_4)
     {
