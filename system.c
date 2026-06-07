@@ -222,7 +222,7 @@ void system_display_splash()
     level_data_ptr = LEVEL_INITIAL; // Set the initial level here
     level_data_ptr_prev = LEVEL_INITIAL;
 
-    level_load(level_data_ptr); // non-VRAM hitting parts here
+    LevelSystem_LoadLevel(level_data_ptr); // non-VRAM hitting parts here
     
     while (shadow_inidisp != 0x0f)
     {

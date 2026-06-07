@@ -22,7 +22,7 @@
 
     Split into two parts so part of it can be done while the screen is turned on
 */
-bool level_load(const struct level_data * level)
+bool LevelSystem_LoadLevel(const struct level_data * level)
 {
     // Instantiate player if the player isn't already instantiated
 
@@ -80,8 +80,8 @@ bool level_load(const struct level_data * level)
     // If the pointers point to the same thing, assume that a full reload is needed
     if (level_data_ptr_prev == level_data_ptr)
     {
-        level_load_graphics(level); // Now no longer hits VRAM
-        level_load_palette(level); // Must do before making palette calcs
+        LevelSystem_LoadLevelGraphics(level); // Now no longer hits VRAM
+        LevelSystem_LoadLevelPalette(level); // Must do before making palette calcs
     
         AniSystem_Pal_PrecalcPaletteChanges();
         HdmaEngine_SetupHdma();
@@ -91,7 +91,7 @@ bool level_load(const struct level_data * level)
         // Note that these don't need to be reloaded if the graphics and palettes are the same as the last time.
         if (level->tileset_tiles_lz4 != level_data_ptr_prev->tileset_tiles_lz4)
         {
-            level_load_graphics(level); // Now no longer hits VRAM
+            LevelSystem_LoadLevelGraphics(level); // Now no longer hits VRAM
         }
         else
         {
@@ -106,7 +106,7 @@ bool level_load(const struct level_data * level)
 
         if (level->tileset_palette != level_data_ptr_prev->tileset_palette)
         {
-            level_load_palette(level); // Must do before making palette calcs
+            LevelSystem_LoadLevelPalette(level); // Must do before making palette calcs
         
             AniSystem_Pal_PrecalcPaletteChanges();
             HdmaEngine_SetupHdma();
@@ -125,7 +125,7 @@ bool level_load(const struct level_data * level)
 /*
     Map graphics that require fblank go here
 */
-void level_load_graphics(const struct level_data * level)
+void LevelSystem_LoadLevelGraphics(const struct level_data * level)
 {
     // Load the actual map data - must be done after the player is instantiated first
     // so it knows what tilemap to load. Also specify the metatile LUT.
@@ -134,7 +134,7 @@ void level_load_graphics(const struct level_data * level)
         level->map_lut, 
         level->map_lut_col);
 
-    level_load_tileset(level); 
+    LevelSystem_LoadLevelTileset(level); 
     
     return;
 }
@@ -142,7 +142,7 @@ void level_load_graphics(const struct level_data * level)
 /*
     Reload level tileset, when changing screens or video modes
 */
-void level_load_tileset(const struct level_data * level)
+void LevelSystem_LoadLevelTileset(const struct level_data * level)
 {
     // Copy fixed sprite graphics
     LZ4_UnpackToWRAM((void *)&data_sprite_fixed_lz4, ((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_SPRITES << 1))); 
@@ -164,7 +164,7 @@ void level_load_tileset(const struct level_data * level)
 /*
     Same for the palette
 */
-void level_load_palette(const struct level_data * level)
+void LevelSystem_LoadLevelPalette(const struct level_data * level)
 {
     // Copy the ROM palette into shadow
     DmaSystem_CopyToWram((uint32_t)level->tileset_palette, (uint32_t)&shadow_cgram, 512);

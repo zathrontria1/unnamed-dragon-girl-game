@@ -541,8 +541,8 @@ void loop_game_reload()
     hdma_use_gradient = 0x0000;
 
     // Perform a partial load
-    level_load_tileset(level_data_ptr);
-    level_load_palette(level_data_ptr);
+    LevelSystem_LoadLevelTileset(level_data_ptr);
+    LevelSystem_LoadLevelPalette(level_data_ptr);
 
     ui_in_bg2 = 0;
     ui_force_update = 1;
@@ -623,7 +623,7 @@ void loop_game_newlevel()
     
     system_init_partial();
     
-    bool temp_level_reuses_vram_contents = level_load(level_data_ptr);
+    bool temp_level_reuses_vram_contents = LevelSystem_LoadLevel(level_data_ptr);
 
     ui_in_bg2 = 0;
     ui_force_update = 1;
