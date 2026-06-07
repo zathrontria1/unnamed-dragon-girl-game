@@ -103,7 +103,7 @@ void routines_slime(struct game_object * o)
                 {
                     if ((o->uid & 0x0001) == ((unsigned int)system_frames_elapsed & 0x0001))
                     {
-                        struct game_object * p = hit_test_enemy(o);
+                        struct game_object * p = CollisionCheck_EnemyTestPlayer(o);
                         if (p != NULL)
                         {
                             // spawn an impact FX object

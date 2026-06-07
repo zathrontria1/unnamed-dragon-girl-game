@@ -413,7 +413,7 @@ void routines_player(struct game_object * o)
 
             if ((o->uid & 0x0001) == ((uint16_t)system_frames_elapsed & 0x0001))
             {
-                struct game_object * p = hit_test_player(o);
+                struct game_object * p = CollisionCheck_PlayerTestEnemy(o);
                 if (p != NULL)
                 {
                     SoundInterface_PlaySfx(SFX_ATK_SPLAT_HIT, 0);

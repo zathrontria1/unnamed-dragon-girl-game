@@ -9,9 +9,9 @@
 
 // Call from an enemy to hit test
 #if VBCC_ASM == 1
-    NO_INLINE struct game_object * hit_test_enemy(__reg("r0/r1") struct game_object * o)
+    NO_INLINE struct game_object * CollisionCheck_EnemyTestPlayer(__reg("r0/r1") struct game_object * o)
 #else
-    FORCE_INLINE struct game_object * hit_test_enemy(struct game_object * o)
+    FORCE_INLINE struct game_object * CollisionCheck_EnemyTestPlayer(struct game_object * o)
 #endif
 {
     #if VBCC_ASM == 1 // place addresses at r0 and r2
@@ -27,7 +27,7 @@
         ".hittest_enemy2player_process_loop:\n"
         "\tlda [r2]\n" // assumes object memory is in bank 7e
         "\tbeq .hittest_enemy2player_increment\n"
-        "\tjsl >_hit_test\n"
+        "\tjsl >_CollisionCheck_Aabb_BetweenObjects\n"
         "\tcmp #0\n"
         "\tbne .hittest_enemy2player_increment\n"
 
@@ -53,7 +53,7 @@
     {
         if (p->id != OBJID_NULL)
         {
-            if (hit_test(o, p) == 0)
+            if (CollisionCheck_Aabb_BetweenObjects(o, p) == 0)
             {
                 return p;
             }
@@ -66,12 +66,12 @@
     return NULL;
 }
 
-FORCE_INLINE uint16_t hit_test_interaction(struct game_object * o)
+FORCE_INLINE uint16_t CollisionCheck_InteractableTestPlayerAction(struct game_object * o)
 {
     int16_t x1 = o->pos.x.lh.h;
     int16_t y1 = o->pos.y.lh.h;
 
-    if (hit_test_direct(x1, event_interaction_x, y1, event_interaction_y, 16, 16) == 0)
+    if (CollisionCheck_Aabb_Direct_Square(x1, event_interaction_x, y1, event_interaction_y, 16, 16) == 0)
     {
         return 1;
     }
@@ -80,7 +80,7 @@ FORCE_INLINE uint16_t hit_test_interaction(struct game_object * o)
 }
 
 // Call from player to hit test
-FORCE_INLINE struct game_object * hit_test_player(struct game_object * o)
+FORCE_INLINE struct game_object * CollisionCheck_PlayerTestEnemy(struct game_object * o)
 {
     // shrink the player's hitbox
     // for this we'll make a copy
@@ -100,7 +100,7 @@ FORCE_INLINE struct game_object * hit_test_player(struct game_object * o)
         {
             if (p->hit_type == 0x8001)
             {
-                if (hit_test(&temp, p) == 0)
+                if (CollisionCheck_Aabb_BetweenObjects(&temp, p) == 0)
                 {
                     if (hit == NULL)
                     {
@@ -118,15 +118,15 @@ FORCE_INLINE struct game_object * hit_test_player(struct game_object * o)
     return hit;
 }
 
-// Hit tests return 0 on hit.
+// NOTE: Hit tests return 0 on hit.
 
 /*
-    Two game objects
+    Axis-aligned bounding box test between two objects
 */
 #if VBCC_ASM == 1
-    NO_INLINE uint16_t hit_test(__reg("r0/r1") struct game_object * a, __reg("r2/r3") struct game_object * b)
+    NO_INLINE uint16_t CollisionCheck_Aabb_BetweenObjects(__reg("r0/r1") struct game_object * a, __reg("r2/r3") struct game_object * b)
 #else
-    FORCE_INLINE uint16_t hit_test(struct game_object * a, struct game_object * b)
+    FORCE_INLINE uint16_t CollisionCheck_Aabb_BetweenObjects(struct game_object * a, struct game_object * b)
 #endif
 {
     // a.x < b.x + b.w && b.x < a.x + a.w
@@ -153,8 +153,10 @@ FORCE_INLINE struct game_object * hit_test_player(struct game_object * o)
 
 /*
     Directly specified with square size
+
+    Slower, but enables not using game objects
 */
-FORCE_INLINE uint16_t hit_test_direct(int16_t x1, int16_t x2, int16_t y1, int16_t y2, int16_t s1, int16_t s2)
+FORCE_INLINE uint16_t CollisionCheck_Aabb_Direct_Square(int16_t x1, int16_t x2, int16_t y1, int16_t y2, int16_t s1, int16_t s2)
 {
     // a.x < b.x + b.w && b.x < a.x + a.w
     if ((x2 + s2) < x1)
@@ -180,8 +182,10 @@ FORCE_INLINE uint16_t hit_test_direct(int16_t x1, int16_t x2, int16_t y1, int16_
 
 /*
     Directly specified with non-square size
+
+    Slowest (most stack pushes), but allows any size tests
 */
-FORCE_INLINE uint16_t hit_test_extended(int16_t x1, int16_t x2, int16_t y1, int16_t y2, int16_t w1, int16_t w2, int16_t h1, int16_t h2)
+FORCE_INLINE uint16_t CollisionCheck_Aabb_Direct_Rectangle(int16_t x1, int16_t x2, int16_t y1, int16_t y2, int16_t w1, int16_t w2, int16_t h1, int16_t h2)
 {
     // a.x < b.x + b.w && b.x < a.x + a.w
     if ((x2 + w2) < x1)

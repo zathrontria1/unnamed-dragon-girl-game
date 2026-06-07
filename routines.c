@@ -105,7 +105,7 @@ void routines_interactable_switch(struct game_object * o)
         // And while not in combat
         if (o->struct_data.interactable_data.delay_time == 0)
         {
-            if (hit_test_interaction(o) != 0)
+            if (CollisionCheck_InteractableTestPlayerAction(o) != 0)
             {
                 if (!event_in_combat_shadow)
                 {
@@ -152,7 +152,7 @@ void routines_interactable_sign(struct game_object * o)
         // And while not in combat
         if (o->struct_data.interactable_data.delay_time == 0)
         {
-            if (hit_test_interaction(o) != 0)
+            if (CollisionCheck_InteractableTestPlayerAction(o) != 0)
             {
                 if (!event_in_combat_shadow)
                 {
@@ -191,7 +191,7 @@ void routines_interactable_treasurechest(struct game_object * o)
         {
             // Check if a player hit is on the sign
             // And while not in combat
-            if (hit_test_interaction(o) != 0)
+            if (CollisionCheck_InteractableTestPlayerAction(o) != 0)
             {
                 if (!event_in_combat_shadow)
                 {
@@ -333,7 +333,7 @@ void routines_spawner(struct game_object * o)
         int16_t y1 = obj_player_pointer->pos.y.lh.h;
 
         // Check if the player is within the designated box
-        if (hit_test_extended(x1, o->struct_data.interactable_data.spawn_area_x, y1, o->struct_data.interactable_data.spawn_area_y, 16, o->struct_data.interactable_data.spawn_area_w, 16, o->struct_data.interactable_data.spawn_area_h) == 0)
+        if (CollisionCheck_Aabb_Direct_Rectangle(x1, o->struct_data.interactable_data.spawn_area_x, y1, o->struct_data.interactable_data.spawn_area_y, 16, o->struct_data.interactable_data.spawn_area_w, 16, o->struct_data.interactable_data.spawn_area_h) == 0)
         {
             obj_instantiate_npcs((struct obj_list_entry_spawns *)o->data_ptr, o->pos.x.lh.h, o->pos.y.lh.h);
 
@@ -377,7 +377,7 @@ void routines_drop_money(struct game_object * o)
             struct game_object * p = obj_player_pointer;
 
             // Check if the player is within the designated box
-            if (hit_test(p, o) == 0)
+            if (CollisionCheck_Aabb_BetweenObjects(p, o) == 0)
             {
                 SoundInterface_PlaySfx(SFX_DROP_COIN,0);
 
@@ -410,7 +410,7 @@ void routines_drop_rec_meat(struct game_object * o)
             struct game_object * p = obj_player_pointer;
             
             // Check if the player is within the designated box
-            if (hit_test(p, o) == 0)
+            if (CollisionCheck_Aabb_BetweenObjects(p, o) == 0)
             {
                 SoundInterface_PlaySfx(SFX_DROP_BOUNCE,0);
                 
