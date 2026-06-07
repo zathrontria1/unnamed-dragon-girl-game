@@ -43,10 +43,10 @@ ___irq_vblank:
 	pei	(r15)
 	lda	_system_use_alternate_nmi
 	bne	l4
-	jsl	>_interrupt_vblank_sub
+	jsl	>_Nmi_Primary
 	bra	l5
 l4:
-	jsl	>_interrupt_vblank_alt
+	jsl	>_Nmi_Alternate
 l5:
 	sep	#32
 	a8

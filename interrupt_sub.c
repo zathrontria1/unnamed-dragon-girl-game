@@ -13,9 +13,9 @@
 #include "gfx.h"
 
 #if VBCC_ASM == 1
-    NO_INLINE void interrupt_vblank_sub()
+    NO_INLINE void Nmi_Primary()
 #else
-    void interrupt_vblank_sub()
+    void Nmi_Primary()
 #endif
 {
     // Write the current INIDISP value
@@ -129,9 +129,9 @@
     during heavy processing elsewhere
 */
 #if VBCC_ASM == 1
-    NO_INLINE void interrupt_vblank_alt()
+    NO_INLINE void Nmi_Alternate()
 #else
-    void interrupt_vblank_alt()
+    void Nmi_Alternate()
 #endif
 {
     // Write the current INIDISP value

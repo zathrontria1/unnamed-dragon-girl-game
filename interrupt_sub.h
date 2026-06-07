@@ -1,7 +1,7 @@
 #if VBCC_ASM == 1
-    NO_INLINE void interrupt_vblank_sub();
-    NO_INLINE void interrupt_vblank_alt();
+    NO_INLINE void Nmi_Primary();
+    NO_INLINE void Nmi_Alternate();
 #else
-    void interrupt_vblank_sub();
-    void interrupt_vblank_alt();
+    void Nmi_Primary();
+    void Nmi_Alternate();
 #endif

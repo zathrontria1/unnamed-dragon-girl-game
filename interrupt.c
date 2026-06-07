@@ -17,11 +17,11 @@
 {
     if (system_use_alternate_nmi == 0)
     {
-        interrupt_vblank_sub();
+        Nmi_Primary();
     }
     else
     {
-        interrupt_vblank_alt();
+        Nmi_Alternate();
     }
 
     if (snd_stream_enable)
