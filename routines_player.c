@@ -569,7 +569,7 @@ void routines_player(struct game_object * o)
         }
     }
 
-    uint8_t * temp_addr = ani_getframe_player(o);
+    uint8_t * temp_addr = AniSystem_GetPlayerFrame(o);
 
     if ((temp_addr != o->struct_data.npc_data.ani.last_address))
     {
@@ -631,7 +631,7 @@ void routines_fireball(struct game_object * o)
         {
             o->struct_data.npc_data.ani.frame ^= 0x0001;
 
-            o->struct_data.npc_data.ani.display = ani_getframe_fixed_fast(o);
+            o->struct_data.npc_data.ani.display = AniSystem_GetFixedFrame_Fast(o);
         }
 
         // Decrement time to live

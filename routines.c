@@ -46,7 +46,7 @@ void routines_fx_smoke(struct game_object * o)
         {
             o->struct_data.npc_data.ani.frame ^= 0x0001;
 
-            o->struct_data.npc_data.ani.display = ani_getframe_fixed_fast(o);
+            o->struct_data.npc_data.ani.display = AniSystem_GetFixedFrame_Fast(o);
         }
 
         // Check if the object is to be destroyed
@@ -74,7 +74,7 @@ void routines_fx_smoke(struct game_object * o)
 
 void routines_fx_impact(struct game_object * o)
 {
-    SpriteEngine_AddToFrontLayer(o, (ani_getframe_fixed_fast(o) | PAL_SYS_IMPACT << 9 | 3 << 12));
+    SpriteEngine_AddToFrontLayer(o, (AniSystem_GetFixedFrame_Fast(o) | PAL_SYS_IMPACT << 9 | 3 << 12));
 
     if (system_game_paused)
     {
@@ -367,7 +367,7 @@ void routines_drop_money(struct game_object * o)
 {
     if (!system_game_paused)
     {
-        if (ani_animate_drop_gravity(o))
+        if (AniSystem_AnimateDropGravity(o))
         {
             SoundInterface_PlaySfx(SFX_DROP_COIN,0);
         }
@@ -400,7 +400,7 @@ void routines_drop_rec_meat(struct game_object * o)
 {
     if (!system_game_paused)
     {
-        if (ani_animate_drop_gravity(o))
+        if (AniSystem_AnimateDropGravity(o))
         {
             SoundInterface_PlaySfx(SFX_DROP_BOUNCE,0);
         }

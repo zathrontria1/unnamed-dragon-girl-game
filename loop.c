@@ -317,8 +317,8 @@ void loop_mapdisplay_init()
     struct game_data_npc * d = (struct game_data_npc *)&temp_icon_object.struct_data;
     d->ani.frame = 0;
 
-    obj_player_prev_sprframe = ani_getframe_player(o); 
-    uint8_t * temp_addr = ani_getframe_player(&temp_icon_object);
+    obj_player_prev_sprframe = AniSystem_GetPlayerFrame(o); 
+    uint8_t * temp_addr = AniSystem_GetPlayerFrame(&temp_icon_object);
 
     dma_queue_add(temp_addr, 0x6000, 128, VRAM_INCHIGH, 1);
 

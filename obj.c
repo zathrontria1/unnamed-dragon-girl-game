@@ -517,11 +517,11 @@ int16_t obj_instantiate(
 
         p->facing = FACING_DOWN;
 
-        p->struct_data.npc_data.ani.display = (uint16_t)((uint32_t)ani_getframe_dynamic(p));
+        p->struct_data.npc_data.ani.display = (uint16_t)((uint32_t)AniSystem_GetDynamicFrame(p));
     }
     else
     {
-        p->struct_data.npc_data.ani.display = ani_getframe_fixed_fast(p);
+        p->struct_data.npc_data.ani.display = AniSystem_GetFixedFrame_Fast(p);
     }
 
     if ((id >= OBJID_START_OF_INTERACTABLES) && (id <= OBJID_END_OF_INTERACTABLES))
@@ -647,7 +647,7 @@ int16_t obj_instantiate_hitbox_player(
     p->pos.z.a = 0;
     p->delta.z.a = 0;
 
-    p->struct_data.npc_data.ani.display = ani_getframe_fixed_fast(p);
+    p->struct_data.npc_data.ani.display = AniSystem_GetFixedFrame_Fast(p);
 
     //obj_active_count++;
     obj_hitbox_count_player++;
@@ -725,7 +725,7 @@ int16_t obj_instantiate_hitbox_enemy(
 
     p->state = STATE_IDLE;
     p->facing = FACING_DOWN;
-    p->struct_data.npc_data.ani.display = (uint16_t)((uint32_t)ani_getframe_dynamic(p));
+    p->struct_data.npc_data.ani.display = (uint16_t)((uint32_t)AniSystem_GetDynamicFrame(p));
 
     obj_hitbox_count_enemy++;
 
