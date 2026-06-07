@@ -28,6 +28,7 @@ const struct sound_stream_data data_stream_table[] =
     {(void *)&data_snd_stream_silence, 288, false, 0}, // STREAM_SILENCE
     {(void *)&data_snd_stream_voice_ow, 2304, false, 0}, // STREAM_VOICE_OW
     {(void *)&data_snd_stream_typewriter, 576, true, 0}, // STREAM_TYPEWRITER
+    {(void *)&data_snd_stream_hiss, 2304, false, 0}, // STREAM_HISS
 };
 
 // wav2brr produces files with 2 byte headers. Take into account this and subtract 2 from file length on disk.

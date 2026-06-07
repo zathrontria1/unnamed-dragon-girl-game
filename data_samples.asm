@@ -124,3 +124,7 @@ _data_snd_stream_silence:
     global _data_snd_stream_typewriter
 _data_snd_stream_typewriter:
     incbin "sound/stream/stream_typewriter.brr"
+
+    global _data_snd_stream_hiss
+_data_snd_stream_hiss:
+    incbin "sound/stream/stream_hiss.brr"

@@ -112,13 +112,17 @@ data_snd_smp_ins_drum_stick:
 
 ; START OF STREAMED AUDIO
     .global _data_snd_stream_voice_ow
-.data_snd_stream_voice_ow:
+data_snd_stream_voice_ow:
     .incbin "sound/stream/stream_voice_ow.brr"
 
     .global _data_snd_stream_silence
-.data_snd_stream_silence:
+data_snd_stream_silence:
     .incbin "sound/stream/stream_silence.brr"
     
     .global _data_snd_stream_typewriter
-.data_snd_stream_typewriter:
+data_snd_stream_typewriter:
     .incbin "sound/stream/stream_typewriter.brr"
+
+    .global data_snd_stream_hiss
+data_snd_stream_hiss:
+    .incbin "sound/stream/stream_hiss.brr"

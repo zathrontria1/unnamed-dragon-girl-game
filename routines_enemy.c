@@ -414,6 +414,8 @@ void routines_lizardman(struct game_object * o)
                 // If the object is attacking:
                 if (o->struct_data.npc_data.ai_makeattack)
                 {
+                    SoundInterface_PlayClip(STREAM_HISS);
+
                     // Spawn a hit object
                     int16_t j = obj_instantiate_hitbox_enemy(OBJID_BUBBLE_E, o->pos.x.lh.h, o->pos.y.lh.h);
 
