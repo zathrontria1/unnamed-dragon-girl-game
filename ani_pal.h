@@ -1,2 +1,2 @@
-void ani_pal_process(void);
-void ani_pal_precalc_entries(void);
+void AniSystem_Pal_UpdatePalettes(void);
+void AniSystem_Pal_PrecalcPaletteChanges(void);

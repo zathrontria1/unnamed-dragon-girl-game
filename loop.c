@@ -208,7 +208,7 @@ void loop_game()
     AniSystem_BgTile_UpdateStrip();
     AniSystem_BgTile_UpdateFrame();
     AniSystem_Spr_UpdateFixedTiles();
-    ani_pal_process();
+    AniSystem_Pal_UpdatePalettes();
 
     obj_run();
 

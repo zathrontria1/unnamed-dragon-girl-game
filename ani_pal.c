@@ -9,8 +9,10 @@
 
 /*
     Sets the palette entry based on current frame
+
+    Uses pre-calculated entries
 */
-void ani_pal_process()
+void AniSystem_Pal_UpdatePalettes()
 {
     if ((((uint16_t)system_frames_elapsed) & ANI_INTERVAL_8) == ANI_INTERVAL_8)
     {
@@ -40,9 +42,10 @@ void ani_pal_process()
 }
 
 /*
-    Pre-calculates palette entries
+    Pre-calculates palette entries for animation use so we don't need
+    to calculate them during live gameplay
 */
-void ani_pal_precalc_entries(void)
+void AniSystem_Pal_PrecalcPaletteChanges(void)
 {
     for (int i = 0; i < 8; i++)
     {
