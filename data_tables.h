@@ -162,11 +162,23 @@ const struct obj_list_entry_spawns data_spawnlist_debug0[] = {
     {OBJID_NULL, 0, 0, 0},
 };
 
+const struct obj_list_entry_spawns data_spawnlist_debug1[] = {
+    {OBJID_LIZARDMAN, 20+0, 48, 16},
+    {OBJID_LIZARDMAN, 20+56, 48, 16},
+    {OBJID_LIZARDMAN, 20+112, 48, 16},
+    {OBJID_LIZARDMAN, 20+168, 48, 16},
+    {OBJID_LIZARDMAN, 20+0, 64, 16},
+    {OBJID_LIZARDMAN, 20+56, 64, 16},
+    {OBJID_LIZARDMAN, 20+112, 64, 16},
+    {OBJID_LIZARDMAN, 20+168, 64, 16},
+    {OBJID_NULL, 0, 0, 0},
+};
+
 const struct obj_list_entry_spawners data_spawners_debug0[] = {
     {OBJID_SPAWNER_ENEMY, 400+15, 448+15, 224-31, 176-31, 384, 400, 256, 224, (void *)&data_spawnlist_debug0},
-    {OBJID_SPAWNER_ENEMY, 16+15, 448+15, 224-31, 176-31, 0, 400, 256, 224, (void *)&data_spawnlist_debug0},
+    {OBJID_SPAWNER_ENEMY, 16+15, 448+15, 224-31, 176-31, 0, 400, 256, 224, (void *)&data_spawnlist_debug1},
     {OBJID_SPAWNER_ENEMY, 400+15, 48+15, 224-31, 176-31, 384, 0, 256, 224, (void *)&data_spawnlist_debug0},
-    {OBJID_SPAWNER_ENEMY, 400+15, 848+15, 224-31, 176-31, 384, 800, 256, 224, (void *)&data_spawnlist_debug0},
+    {OBJID_SPAWNER_ENEMY, 400+15, 848+15, 224-31, 176-31, 384, 800, 256, 224, (void *)&data_spawnlist_debug1},
     // TODO: Water collision type
     //{OBJID_SPAWNER_ENEMY, 784, 448, 224, 176, 768, 400, 256, 224, (void *)&data_spawnlist_debug0},
     {OBJID_NULL, 0, 0, 1, 1, 0, 0, 0, 0, 0},

@@ -1017,6 +1017,9 @@ void obj_set_function_pointer(struct game_object * o)
         case OBJID_BUBBLE_E:
             o->func_ptr = (void *)&routines_bubble_e;
             break;
+        case OBJID_LIZARDMAN:
+            o->func_ptr = (void *)&routines_lizardman;
+            break;
         case OBJID_FX_SMOKE:
             o->func_ptr = (void *)&routines_fx_smoke;
             break;
