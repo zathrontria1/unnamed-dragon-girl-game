@@ -111,12 +111,22 @@ _data_snd_smp_ins_drum_stick:
     incbin "sound/ins/ins_drum_stick.brr"
 
 ; START OF STREAMED AUDIO
-    section "_rodata.far.bindata.1"
+;    section "_rodata.far.bindata.1"
 
-    global _data_snd_stream_voice_ow
-_data_snd_stream_voice_ow:
-    incbin "sound/stream/stream_voice_ow.brr"
+; Player voice data
+    global _data_snd_stream_voice_hurt_1
+_data_snd_stream_voice_hurt_1:
+    incbin "sound/stream/stream_voice_hurt_1.brr"
 
+    global _data_snd_stream_voice_attack_1
+_data_snd_stream_voice_attack_1:
+    incbin "sound/stream/stream_voice_attack_1.brr"
+
+    global _data_snd_stream_voice_attack_2
+_data_snd_stream_voice_attack_2:
+    incbin "sound/stream/stream_voice_attack_2.brr"
+
+; Other streams
     global _data_snd_stream_silence
 _data_snd_stream_silence:
     incbin "sound/stream/stream_silence.brr"

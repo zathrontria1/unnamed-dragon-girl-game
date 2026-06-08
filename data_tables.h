@@ -26,7 +26,11 @@ const struct enemy_data data_enemy_stats_lizardman_lilsis =
 const struct sound_stream_data data_stream_table[] = 
 {
     {(void *)&data_snd_stream_silence, 288, false, 0}, // STREAM_SILENCE
-    {(void *)&data_snd_stream_voice_ow, 2304, false, 0}, // STREAM_VOICE_OW
+
+    {(void *)&data_snd_stream_voice_hurt_1, 1440, false, 0}, // STREAM_VOICE_HURT_1
+    {(void *)&data_snd_stream_voice_attack_1, 864, false, 0}, // STREAM_VOICE_ATTACK_1
+    {(void *)&data_snd_stream_voice_attack_2, 864, false, 0}, // STREAM_VOICE_ATTACK_2
+
     {(void *)&data_snd_stream_typewriter, 576, true, 0}, // STREAM_TYPEWRITER
     {(void *)&data_snd_stream_hiss, 2304, false, 0}, // STREAM_HISS
 };

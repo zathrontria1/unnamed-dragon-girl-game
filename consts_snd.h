@@ -228,6 +228,10 @@
 
 // Check data_tables.h - this must be in array order
 #define STREAM_SILENCE 0
-#define STREAM_VOICE_OW 1
-#define STREAM_TYPEWRITER 2
-#define STREAM_HISS 3
+
+#define STREAM_VOICE_HURT_1 1
+#define STREAM_VOICE_ATTACK_1 2
+#define STREAM_VOICE_ATTACK_2 3
+
+#define STREAM_TYPEWRITER 4
+#define STREAM_HISS 5
