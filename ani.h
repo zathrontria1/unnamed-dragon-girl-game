@@ -31,3 +31,5 @@ NO_INLINE uint8_t * AniSystem_GetDynamicFrame_Bubble(struct game_object * o);
 #else
 uint8_t * AniSystem_GetDynamicFrame_Bubble(struct game_object * o);
 #endif
+
+uint8_t * AniSystem_GetDynamicFrame_Arrow(struct game_object * o);

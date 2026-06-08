@@ -350,6 +350,8 @@ uint8_t * AniSystem_GetDynamicFrame_Stateless(struct game_object * o)
     {
         case OBJID_BUBBLE_E:
             return AniSystem_GetDynamicFrame_Bubble(o);
+        case OBJID_ARROW_E:
+            return AniSystem_GetDynamicFrame_Arrow(o);
         default:
             return 0;
     }
@@ -418,6 +420,115 @@ uint8_t * AniSystem_GetDynamicFrame_Bubble(struct game_object * o)
     #endif
 
     return 0;
+}
+
+uint8_t * AniSystem_GetDynamicFrame_Arrow(struct game_object * o)
+{
+    // use a virtual tilenum system before finalizing.
+    // Arrow up is 32, arrow right is 36
+    bool hflip = false;
+    bool vflip = false;
+
+    uint8_t angle = o->angle + 64; // Angle offset
+    uint16_t temp_tilenum = 32;
+
+    // get the object angle
+    if (angle >= 240+8)
+    {
+        temp_tilenum = 32;
+    }
+    else if (angle >= 224+8)
+    {
+        temp_tilenum = 33;
+        hflip = true;
+    }
+    else if (angle >= 208+8)
+    {
+        temp_tilenum = 34;
+        hflip = true;
+    }
+    else if (angle >= 192+8)
+    {
+        temp_tilenum = 35;
+        hflip = true;
+    }
+    else if (angle >= 176+8)
+    {
+        temp_tilenum = 36;
+        hflip = true;
+    }
+    else if (angle >= 160+8)
+    {
+        temp_tilenum = 35;
+        hflip = true;
+        vflip = true;
+    }
+    else if (angle >= 144+8)
+    {
+        temp_tilenum = 34;
+        hflip = true;
+        vflip = true;
+    }
+    else if (angle >= 128+8)
+    {
+        temp_tilenum = 33;
+        hflip = true;
+        vflip = true;
+    }
+    else if (angle >= 112+8)
+    {
+        temp_tilenum = 32;
+        vflip = true;
+    }
+    else if (angle >= 96+8)
+    {
+        temp_tilenum = 33;
+        vflip = true;
+    }
+    else if (angle >= 80+8)
+    {
+        temp_tilenum = 34;
+        vflip = true;
+    }
+    else if (angle >= 64+8)
+    {
+        temp_tilenum = 35;
+        vflip = true;
+    }
+    else if (angle >= 48+8)
+    {
+        temp_tilenum = 36;
+    }
+    else if (angle >= 32+8)
+    {
+        temp_tilenum = 35;
+    }
+    else if (angle >= 16+8)
+    {
+        temp_tilenum = 34;
+    }
+    else if (angle >= 0+8)
+    {
+        temp_tilenum = 33;
+    }
+    else
+    {
+        temp_tilenum = 32;
+    }
+
+    uint32_t temp_addr = ((uint32_t)&data_sprite_lizardman + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
+
+    if (hflip)
+    {
+        temp_addr |= 0x40000000; // Set second highest bit
+    }
+    if (vflip)
+    {
+        temp_addr |= 0x80000000; // Set highest bit
+    }
+
+    // Calculate the address
+    return (uint8_t *)temp_addr;
 }
 
 #if VBCC_ASM == 1

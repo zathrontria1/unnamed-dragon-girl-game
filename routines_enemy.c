@@ -417,7 +417,7 @@ void routines_lizardman(struct game_object * o)
                     SoundInterface_PlayClip(STREAM_HISS);
 
                     // Spawn a hit object
-                    int16_t j = obj_instantiate_hitbox_enemy(OBJID_BUBBLE_E, o->pos.x.lh.h, o->pos.y.lh.h);
+                    int16_t j = obj_instantiate_hitbox_enemy(OBJID_ARROW_E, o->pos.x.lh.h, o->pos.y.lh.h);
 
                     if (j >= 0)
                     {
@@ -432,9 +432,11 @@ void routines_lizardman(struct game_object * o)
 
                         o->angle = temp_angle;
                         o->facing = ai_get_facing(o);
+
+                        p->angle = temp_angle;
                         
-                        p->delta.x.a = data_cosine_1[temp_angle] * V_MUL;
-                        p->delta.y.a = data_sine_1[temp_angle] * V_MUL;
+                        p->delta.x.a = data_cosine_1[temp_angle] * V_MUL * 2;
+                        p->delta.y.a = data_sine_1[temp_angle] * V_MUL * 2;
 
                         p->struct_data.npc_data.ttl = ENEMY_ATTACK_TTL;
                     }
@@ -779,6 +781,72 @@ void routines_bubble_e(struct game_object * o)
 
         SpriteEngine_AddToFrontLayer(o, temp_tileattrib);
     }
+
+    return;
+}
+
+void routines_arrow_e(struct game_object * o)
+{
+    if (!system_game_paused)
+    {
+        // Move the object based on the stored delta
+        move_nocol_fast(o);
+
+        // Check if the object is to be destroyed
+        if (o->struct_data.npc_data.ttl == 0)
+        {
+            obj_destroy_hitbox_enemy(o->array_index);
+        }
+        else
+        {
+            // Decrement time to live
+            o->struct_data.npc_data.ttl--;
+        }
+    }
+
+    uint8_t * temp_addr = AniSystem_GetDynamicFrame_Arrow(o);
+
+    bool hflip = false;
+    bool vflip = false;
+
+    if (((uint32_t)temp_addr & 0x40000000) == 0x40000000)
+    {
+        hflip = true;
+    }
+
+    if (((uint32_t)temp_addr & 0x80000000) == 0x80000000)
+    {
+        vflip = true;
+    }
+
+    if ((temp_addr != o->struct_data.npc_data.ani.last_address))
+    {
+        // Save the requested frame into object's data
+        // for comparison and in case it fails
+        o->struct_data.npc_data.ani.last_address = temp_addr;
+
+        if (DmaSystem_AddItemToQueue(temp_addr, 0x6000+(o->struct_data.npc_data.vram_addr), 128, VRAM_INCHIGH, 1))
+        {
+            o->struct_data.npc_data.ani.last_dmafailed = 1;
+        }
+        else
+        {
+            o->struct_data.npc_data.ani.last_dmafailed = 0;
+        }        
+    }
+    else if ((o->struct_data.npc_data.ani.last_dmafailed))
+    {
+        // The previous DMA failed. Attempt it again.
+        if (!DmaSystem_AddItemToQueue(o->struct_data.npc_data.ani.last_address, 0x6000+(o->struct_data.npc_data.vram_addr), 128, VRAM_INCHIGH, 1))
+        {
+            o->struct_data.npc_data.ani.last_dmafailed = 0;
+        }     
+    }
+
+    uint16_t temp_tileattrib;
+    temp_tileattrib = (o->struct_data.npc_data.tilenum | PAL_LIZARDMAN << 9 | 3 << 12 | hflip << 14 | vflip << 15);
+
+    SpriteEngine_AddToFrontLayer(o, temp_tileattrib);
 
     return;
 }

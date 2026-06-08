@@ -581,7 +581,7 @@ int16_t obj_instantiate(
             p->w = 16;
             p->h = 16;
         }
-        else if ((id == OBJID_HITBOX_INVISIBLE_E) || (id == OBJID_BUBBLE_E))
+        else if ((id == OBJID_HITBOX_INVISIBLE_E) || (id == OBJID_BUBBLE_E) || (id == OBJID_ARROW_E))
         {
             p->hit_type = 0x8001;
 
@@ -965,7 +965,7 @@ void obj_cleanup_hitbox_enemy()
 {
     for (int i = 0; i < obj_hitbox_enemy_delete_queue_count; i++)
     {
-        if (obj_hitbox_enemy[obj_hitbox_enemy_delete_queue[i]].id == OBJID_BUBBLE_E)
+        if ((obj_hitbox_enemy[obj_hitbox_enemy_delete_queue[i]].id == OBJID_BUBBLE_E) || (obj_hitbox_enemy[obj_hitbox_enemy_delete_queue[i]].id == OBJID_ARROW_E))
         {
             SpriteEngine_ReleaseVramSlot(OBJ_GENERAL_MAX_COUNT + obj_hitbox_enemy_delete_queue[i], 1);
         }
@@ -1017,6 +1017,9 @@ void obj_set_function_pointer(struct game_object * o)
             break;
         case OBJID_BUBBLE_E:
             o->func_ptr = (void *)&routines_bubble_e;
+            break;
+        case OBJID_ARROW_E:
+            o->func_ptr = (void *)&routines_arrow_e;
             break;
         case OBJID_LIZARDMAN:
             o->func_ptr = (void *)&routines_lizardman;
