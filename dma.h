@@ -1,5 +1,9 @@
 extern const uint16_t const_lut_dma_split_lookup[6];
 
+extern bool dma_filler_enable;
+extern uint16_t dma_filler_dest;
+extern uint16_t dma_filler_length;
+
 void DmaSystem_CopyToWram(
     uint32_t src, 
     uint32_t dest, 
@@ -38,6 +42,8 @@ uint16_t DmaSystem_AddItemToQueue(
     uint16_t length,
     uint16_t vmain, 
     uint16_t split);
+
+uint16_t DmaSystem_SetClear(uint16_t dest, uint16_t length);
 
 #if VBCC_ASM == 1
     NO_INLINE void DmaSystem_ProcessQueue(void);

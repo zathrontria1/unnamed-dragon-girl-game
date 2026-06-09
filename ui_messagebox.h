@@ -1,8 +1,6 @@
 // These functions are currently separated out for organization purposes
 // Some of these will also be edited later as they're redundant at times...
 
-const uint16_t const_ui_empty_text_tilemap[192];
-
 extern uint16_t ui_show_message_char_col;
 extern uint16_t ui_show_message_char_row;
 

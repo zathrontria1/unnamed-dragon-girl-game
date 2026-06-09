@@ -7,6 +7,10 @@
 
 #include "dma.h"
 
+bool dma_filler_enable;
+uint16_t dma_filler_dest;
+uint16_t dma_filler_length;
+
 void DmaSystem_CopyToWram(
     uint32_t src, 
     uint32_t dest, 
@@ -427,6 +431,23 @@ uint16_t DmaSystem_AddItemToQueue(
     return 0;
 }
 
+uint16_t DmaSystem_SetClear(uint16_t dest, uint16_t length)
+{
+    // Check for capacity (count, length) issues
+    uint16_t temp_length = length + const_lut_dma_split_lookup[0] + dma_queue_length;
+
+    if (temp_length > DMA_QUEUE_MAX_LENGTH)
+    {
+        return 1; // out of DMA bandwidth
+    }
+
+    dma_filler_dest = dest;
+    dma_filler_length = length;
+    dma_filler_enable = true;
+
+    return 0;
+}
+
 void DmaSystem_ProcessQueue() 
 {
     #if VBCC_ASM == 1
@@ -497,6 +518,24 @@ void DmaSystem_ProcessQueue()
         dma_queue_count = 0;
         dma_queue_length = 0;
     #endif
+
+    if (dma_filler_enable)
+    {
+        REG_DMAP0 = 0x09; // word reg write, fixed increment
+
+        REG_VMAIN = VRAM_INCHIGH;
+
+        REG_VMADDLH = dma_filler_dest;
+
+        REG_A1T0LH = (uint16_t)((uint32_t)&const_zero);
+        REG_A1B0 = (uint8_t)(((uint32_t)&const_zero) >> 16);
+
+        REG_DAS0LH = dma_filler_length;
+
+        REG_MDMAEN = 0x01;
+
+        dma_filler_enable = false;
+    }
 
     return;
 }
