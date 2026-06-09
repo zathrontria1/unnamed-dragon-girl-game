@@ -26,14 +26,14 @@
 /*
     Gameplay AI for non-player entities
 */
-uint16_t ai_run(struct game_object * o, uint32_t dist, int16_t x, int16_t y)
+uint16_t ai_run(struct game_object * o, uint32_t dist, int16_t x, int16_t y, uint32_t dist_min, uint32_t dist_max)
 {
     uint16_t temp_invalidate_animation_frame = 0;
     uint16_t temp_interrupted = 0;
 
     // Do some AI interruption given some conditions
     if (
-        (((dist <= DIST_MELEE) && o->struct_data.npc_data.ai_state != AI_STATE_IDLE) ||
+        (((dist <= dist_min) && o->struct_data.npc_data.ai_state != AI_STATE_IDLE) ||
         (o->struct_data.npc_data.status == STATUS_BURNING)) && (o->struct_data.npc_data.ai_state != AI_STATE_ATTACK)
         )
     {
@@ -53,7 +53,7 @@ uint16_t ai_run(struct game_object * o, uint32_t dist, int16_t x, int16_t y)
         {
             // Object has finished idling, time to move once more.
             // Check if a minimum distance is met or not
-            if ((dist > DIST_MELEE) && (o->struct_data.npc_data.status != STATUS_BURNING))
+            if ((dist > dist_min) && (o->struct_data.npc_data.status != STATUS_BURNING))
             {
                 // Enemy is far away from player
                 uint8_t temp_angle = Math_GetAtan2_u8(y, x) + (temp_rand & 0x0f) - 8;
@@ -126,7 +126,14 @@ uint16_t ai_run(struct game_object * o, uint32_t dist, int16_t x, int16_t y)
 
                 if (o->struct_data.npc_data.ai_state == AI_STATE_MOVE_TOWARDS)
                 {
-                    o->state = STATE_ATTACK_BASIC;
+                    if (dist <= dist_min)
+                    {
+                        o->state = STATE_ATTACK_BASIC;
+                    }
+                    else
+                    {
+                        o->state = STATE_ATTACK_SPECIAL; 
+                    }
                 }
                 else
                 {

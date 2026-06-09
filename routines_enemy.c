@@ -60,7 +60,7 @@ void routines_slime(struct game_object * o)
             {
                 event_in_combat = 1;
                 
-                temp_invalidate_animation_frame = ai_run(o, temp_dist, temp_x, temp_y);
+                temp_invalidate_animation_frame = ai_run(o, temp_dist, temp_x, temp_y, DIST_MELEE, DIST_TARGET_RANGE);
 
                 // Move the object based on the stored delta
                 if ((o->delta.x.a || o->delta.y.a) != 0)
@@ -403,7 +403,7 @@ void routines_lizardman(struct game_object * o)
             {
                 event_in_combat = 1;
                 
-                temp_invalidate_animation_frame = ai_run(o, temp_dist, temp_x, temp_y);
+                temp_invalidate_animation_frame = ai_run(o, temp_dist, temp_x, temp_y, DIST_TARGET_RANGE, DIST_TILE_16);
 
                 // Move the object based on the stored delta
                 if ((o->delta.x.a || o->delta.y.a) != 0)
@@ -636,6 +636,8 @@ void routines_lizardman(struct game_object * o)
         {
             case STATE_IDLE:
             case STATE_HURT_BURN:
+            case STATE_ATTACK_SPECIAL:
+            case STATE_ATTACK_SPECIAL_MOVE:
                 o->struct_data.npc_data.ani.frame = 0;
                 break;
             case STATE_DIE:
