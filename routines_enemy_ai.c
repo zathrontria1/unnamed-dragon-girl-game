@@ -26,7 +26,7 @@
 /*
     Gameplay AI for non-player entities
 */
-uint16_t ai_run(struct game_object * o, uint32_t dist, int16_t x, int16_t y, uint32_t dist_min, uint32_t dist_max)
+uint16_t ai_run(struct game_object * o, uint32_t dist, int16_t x, int16_t y, uint32_t dist_min, bool allow_flipflop, uint16_t attack_delay)
 {
     uint16_t temp_invalidate_animation_frame = 0;
     uint16_t temp_interrupted = 0;
@@ -44,6 +44,22 @@ uint16_t ai_run(struct game_object * o, uint32_t dist, int16_t x, int16_t y, uin
         temp_interrupted = 1;
     }
 
+    if (!allow_flipflop && (o->struct_data.npc_data.ai_state != AI_STATE_ATTACK))
+    {
+        if (dist < dist_min)
+        {
+            // If AI gets too close to the player and flipflopping is disallowed
+            o->struct_data.npc_data.ai_timer = 0;
+            temp_interrupted = 1;
+        }
+
+        if (dist > dist_min)
+        {
+            // If AI gets too far from the player and flipflopping is disallowed
+            o->struct_data.npc_data.ai_timer = 0;
+        }
+    }
+
     if (o->struct_data.npc_data.ai_timer == 0) // Only process AI state changes when this timer hits 0
     {
         uint8_t temp_rand = (uint8_t)Math_GetRandom_u16();
@@ -55,7 +71,7 @@ uint16_t ai_run(struct game_object * o, uint32_t dist, int16_t x, int16_t y, uin
             // Check if a minimum distance is met or not
             if ((dist > dist_min) && (o->struct_data.npc_data.status != STATUS_BURNING))
             {
-                // Enemy is far away from player
+                // Enemy is far away from player, and should move closer if allowed
                 uint8_t temp_angle = Math_GetAtan2_u8(y, x) + (temp_rand & 0x0f) - 8;
 
                 o->angle = temp_angle;
@@ -79,7 +95,7 @@ uint16_t ai_run(struct game_object * o, uint32_t dist, int16_t x, int16_t y, uin
             }
             else if (o->struct_data.npc_data.ai_state != AI_STATE_MOVE_AWAY) // don't recalc for anything already moving away.
             {
-                // Enemy is close to player
+                // Enemy is close to player, and should move away
                 uint8_t temp_angle = (Math_GetAtan2_u8(y, x)) + (temp_rand & 0x0f) - 136;
 
                 o->angle = temp_angle;
@@ -143,7 +159,7 @@ uint16_t ai_run(struct game_object * o, uint32_t dist, int16_t x, int16_t y, uin
                 // For now, duplicate of the other case.
                 o->struct_data.npc_data.ai_state = AI_STATE_ATTACK;
                 
-                o->struct_data.npc_data.ai_timer = (15) / V_MUL;
+                o->struct_data.npc_data.ai_timer = attack_delay;
 
                 o->struct_data.npc_data.ai_makeattack = 1;
             }
