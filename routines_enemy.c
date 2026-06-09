@@ -421,7 +421,7 @@ void routines_lizardman(struct game_object * o)
 
                     if (j >= 0)
                     {
-                        SoundInterface_PlaySfx(SFX_ATK_SPLASH,0);
+                        SoundInterface_PlaySfx(SFX_ATK_SWING,0);
 
                         struct game_object * p = &obj_hitbox_enemy[j];
                         p->struct_data.npc_data.attack = o->struct_data.npc_data.attack * ENEMY_ATTACK_MULT_RANGED;
