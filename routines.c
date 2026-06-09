@@ -206,6 +206,8 @@ void routines_interactable_treasurechest(struct game_object * o)
                     UserInterface_PrintText((char *)&temp_str, UI_MSGBOX_SL_START, UI_MARGIN_LEFT);
 
                     o->struct_data.interactable_data.ttl = 180 / V_MUL;
+
+                    SoundInterface_PlayClip(STREAM_VOICE_TREASURE_1 + (Math_GetRandom_u16() & 0x01));
                 }
                 else
                 {

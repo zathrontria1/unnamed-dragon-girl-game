@@ -271,14 +271,7 @@ void routines_player(struct game_object * o)
                         event_interaction_y = p->pos.y.lh.h;
 
                         // Play a random voice here
-                        if ((Math_GetRandom_u16() & 0x01) == 0x00)
-                        {
-                            SoundInterface_PlayClip(STREAM_VOICE_ATTACK_1);
-                        }
-                        else
-                        {
-                            SoundInterface_PlayClip(STREAM_VOICE_ATTACK_2);
-                        }
+                        SoundInterface_PlayClip(STREAM_VOICE_ATTACK_1 + (Math_GetRandom_u16() & 0x01));
                     }
                 }
             }
@@ -476,7 +469,7 @@ void routines_player(struct game_object * o)
 
                     temp_invalidate_animation_frame = 1;
 
-                    SoundInterface_PlayClip(STREAM_VOICE_HURT_1);
+                    SoundInterface_PlayClip(STREAM_VOICE_HURT_1 + (Math_GetRandom_u16() & 0x01));
                 }
             }
 

@@ -21,6 +21,8 @@
 
 #include "data_strings.h"
 
+#include "math_int.h"
+
 uint16_t subscreen_selection;
 uint16_t subscreen_selection_profile;
 uint16_t subscreen_bottom_entry;
@@ -552,6 +554,8 @@ void loop_subscreen_profile_upgrade_hp()
         subscreen_skip_window_redraw = true;
 
         subscreen_rendered = 0;
+
+        SoundInterface_PlayClip(STREAM_VOICE_UPGRADE_SUCCESS_1 + (Math_GetRandom_u16() & 0x01));
     }
 
     return;
@@ -573,6 +577,8 @@ void loop_subscreen_profile_upgrade_atk()
         subscreen_skip_window_redraw = true;
 
         subscreen_rendered = 0;
+
+        SoundInterface_PlayClip(STREAM_VOICE_UPGRADE_SUCCESS_1 + (Math_GetRandom_u16() & 0x01));
     }
 
     return;
@@ -594,6 +600,8 @@ void loop_subscreen_profile_upgrade_def()
         subscreen_skip_window_redraw = true;
 
         subscreen_rendered = 0;
+
+        SoundInterface_PlayClip(STREAM_VOICE_UPGRADE_SUCCESS_1 + (Math_GetRandom_u16() & 0x01));
     }
 
     return;
