@@ -1,6 +1,6 @@
 ; For VBCC
 
-    ;section "_rodata.far.bindata.0"
+    section "_rodata.far.bindata.palette.maingame.0"
     global _data_palette
 _data_palette:
     incbin "palette/palette_ui_fixed_4bpp.bin"
@@ -20,13 +20,17 @@ _data_palette:
     incbin "palette/palette_spr_player_portrait.bin"
     incbin "palette/palette_bg_dungeon_2.bin"
     
+    section "_rodata.far.bindata.palette.subscreen.0"
     global _data_palette_map_0_8bpp
 _data_palette_map_0_8bpp:
     incbin "palette/palette_bg_map_dungeon_0_8bpp.bin"
+
+    section "_rodata.far.bindata.palette.subscreen.1"
     global _data_palette_map_1_8bpp
 _data_palette_map_1_8bpp:
     incbin "palette/palette_bg_map_dungeon_1_8bpp.bin"
 
+    section "_rodata.far.bindata.palette.splash.0"
     global _data_palette_splash
 _data_palette_splash:
     incbin "splash/palette_splash.bin"
