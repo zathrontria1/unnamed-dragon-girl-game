@@ -648,6 +648,7 @@ int16_t obj_instantiate_hitbox_player(
     p->delta.z.a = 0;
 
     p->struct_data.npc_data.ani.display = AniSystem_GetFixedFrame_Fast(p);
+    p->struct_data.npc_data.ani.last_address = 0; // make this invalid
 
     //obj_active_count++;
     obj_hitbox_count_player++;
@@ -726,6 +727,7 @@ int16_t obj_instantiate_hitbox_enemy(
     p->state = STATE_IDLE;
     p->facing = FACING_DOWN;
     p->struct_data.npc_data.ani.display = (uint16_t)((uint32_t)AniSystem_GetDynamicFrame(p));
+    p->struct_data.npc_data.ani.last_address = 0; // make this invalid
 
     obj_hitbox_count_enemy++;
 
