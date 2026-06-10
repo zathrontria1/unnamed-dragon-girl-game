@@ -7,6 +7,15 @@
 
 uint8_t snd_current_command_counter; // Used to check if the SPC is ready for a new command
 
+// Used to implement a deferred SFX system
+bool snd_defercmd_sfx_enable;
+
+bool snd_defercmd_sfx_use_extended_format;
+uint8_t snd_defercmd_sfx_id;
+int8_t snd_defercmd_sfx_vol;
+int8_t snd_defercmd_sfx_vol_r;
+int8_t snd_defercmd_sfx_pitch;
+
 uint16_t snd_footstep_timeout;
 uint16_t snd_punch_timeout;
 uint16_t snd_flame_active;
@@ -954,6 +963,13 @@ void SoundInterface_NmiAudioUpload()
             }
         }
     }
+
+    return;
+}
+
+// Function used to play queued sfx automatically
+void SoundInterface_PlayDeferredSfx()
+{
 
     return;
 }

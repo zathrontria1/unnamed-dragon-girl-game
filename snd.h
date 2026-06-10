@@ -1,5 +1,13 @@
 extern uint8_t snd_current_command_counter;
 
+extern bool snd_defercmd_sfx_enable;
+
+extern bool snd_defercmd_sfx_use_extended_format;
+extern uint8_t snd_defercmd_sfx_id;
+extern int8_t snd_defercmd_sfx_vol;
+extern int8_t snd_defercmd_sfx_vol_r;
+extern int8_t snd_defercmd_sfx_pitch;
+
 extern uint16_t snd_footstep_timeout;
 extern uint16_t snd_punch_timeout;
 extern uint16_t snd_flame_active;
@@ -44,6 +52,8 @@ void SoundInterface_StartSoundEngine();
 FORCE_INLINE void SoundInterface_PlaySfx(uint8_t sfx_id, int8_t pan);
 FORCE_INLINE void SoundInterface_PlaySfx_Ex(uint8_t sfx_id, int8_t vol_l, int8_t vol_r, int8_t pitch);
 FORCE_INLINE void SoundInterface_StopSfx(uint8_t sfx_id);
+
+void SoundInterface_PlayDeferredSfx();
 
 void SoundInterface_SetDspRegister(uint8_t dsp_reg, uint8_t dsp_data);
 void SoundInterface_ResetAPU();

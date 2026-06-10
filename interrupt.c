@@ -28,6 +28,13 @@
     {
         SoundInterface_NmiAudioUpload();
     }
+
+    if (snd_defercmd_sfx_enable)
+    {
+        SoundInterface_PlayDeferredSfx();
+
+        snd_defercmd_sfx_enable = false;
+    }
     
     return;
 }

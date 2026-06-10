@@ -56,6 +56,19 @@ l5:
 	beq	l7
 	jsl	>_SoundInterface_NmiAudioUpload
 l7:
+	sep	#32
+	a8
+	lda	_snd_defercmd_sfx_enable
+	a16
+	rep	#32
+	beq	l9
+	jsl	>_SoundInterface_PlayDeferredSfx
+	sep	#32
+	a8
+	stz _snd_defercmd_sfx_enable
+	a16
+	rep	#32
+l9:
 	rep	#$30
 
 	plx
@@ -111,7 +124,9 @@ l7:
 	global	_system_use_alternate_nmi
 	zpage	_system_use_alternate_nmi
 	global	_snd_stream_enable
+	global  _snd_defercmd_sfx_enable
 	global	_SoundInterface_NmiAudioUpload
+	global  _SoundInterface_PlayDeferredSfx
 	global	_interrupt_vblank_sub
 	global	_interrupt_vblank_alt
 	zpage	r0
