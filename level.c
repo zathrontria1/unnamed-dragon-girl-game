@@ -15,6 +15,9 @@
 #include "dma.h"
 #include "lz4.h"
 
+const struct level_data * level_data_ptr;
+const struct level_data * level_data_ptr_prev;
+
 // All functions in level.c expect that a valid level pointer is set.
 
 /*

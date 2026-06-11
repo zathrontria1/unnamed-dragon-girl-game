@@ -4,10 +4,11 @@
 #include "vars.h"
 
 #include "obj.h"
+#include "level.h"
 
 #include "sram_management.h"
 
-// Note: the game is configured with 128KB SRAM, divided into 16 banks of 8KB.
+// Note: the game is configured with 32KB SRAM, divided into 4 banks of 8KB.
 
 /*  Check each SRAM slot for the verification string.
     If any mismatch, wipe the SRAM bank (8KB section)

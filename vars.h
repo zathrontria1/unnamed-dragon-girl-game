@@ -63,10 +63,6 @@ extern uint16_t event_in_combat_shadow;
 
 extern uint16_t event_tutorial_shown;
 
-// Map system
-extern const struct level_data * level_data_ptr;
-extern const struct level_data * level_data_ptr_prev;
-
 // Fixed sprite tile anims
 extern uint16_t ani_bg_frame_coin;
 extern uint8_t * ani_bg_addr_coin;

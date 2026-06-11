@@ -7,6 +7,7 @@
 #include "vars.h"
 
 #include "obj.h"
+#include "level.h"
 
 #include "main.h"
 #include "ui.h"
