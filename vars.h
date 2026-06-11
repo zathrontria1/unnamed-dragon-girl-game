@@ -64,10 +64,6 @@ extern uint16_t event_in_combat_shadow;
 
 extern uint16_t event_tutorial_shown;
 
-// Random numbers
-extern ZP int8_t rand_array[3];
-extern uint16_t rand_seeded;
-
 // Input system
 extern uint16_t input_pad0;
 extern uint16_t input_pad0_new;

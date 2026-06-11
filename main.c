@@ -14,6 +14,7 @@
 
 #include "hdma.h"
 
+#include "math_int.h"
 #include "snd.h"
 
 #include "main.h"

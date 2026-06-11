@@ -4,6 +4,10 @@
 #include "vars.h"
 #include "math_int.h"
 
+// Random numbers
+ZP int8_t rand_array[3];
+uint16_t rand_seeded;
+
 /* 
     C integer version of atan2 adapted from 
     Discord: flipphone22/hibber22
