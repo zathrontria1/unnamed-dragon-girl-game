@@ -438,13 +438,25 @@ void loop_subscreen_profile()
 */
 void loop_subscreen_profile_save_last_sprite_page()
 {
-    system_align_to_vblank_start();
+    // TODO: This is very hacky. Consider making a third NMI routine for this so APU playback isn't a factor.
+    if (snd_stream_enable)
+    {
+        for (int i = 0; i < 8; i++)
+        {
+            system_align_to_vblank_start();
 
-    DmaSystem_CopyFromVramToWram(0x7000, 0x007fe000, 4096);
+            DmaSystem_CopyFromVramToWram(0x7000 + (i * 0x200), 0x007fe000 + (i * 0x0400), 1024);
+        }
+    }
+    else
+    {
+        for (int i = 0; i < 2; i++)
+        {
+            system_align_to_vblank_start();
 
-    system_align_to_vblank_start();
-
-    DmaSystem_CopyFromVramToWram(0x7800, 0x007ff000, 4096);
+            DmaSystem_CopyFromVramToWram(0x7000 + (i * 0x800), 0x007fe000 + (i * 0x1000), 4096);
+        }
+    }
 
     return;
 }
@@ -454,14 +466,25 @@ void loop_subscreen_profile_save_last_sprite_page()
 */
 void loop_subscreen_profile_upload_profile_picture()
 {
-    // Currently using a placeholder
-    system_align_to_vblank_start();
+    // TODO: This is very hacky. Consider making a third NMI routine for this so APU playback isn't a factor.
+    if (snd_stream_enable)
+    {
+        for (int i = 0; i < 8; i++)
+        {
+            system_align_to_vblank_start();
 
-    DmaSystem_CopyToVram((uint32_t)&data_sprite_player_portrait, 0x7000, 4096);
+            DmaSystem_CopyToVram((uint32_t)&data_sprite_player_portrait+ (i * 0x0400), 0x7000+(i * 0x200), 1024);
+        }
+    }
+    else
+    {
+        for (int i = 0; i < 2; i++)
+        {
+            system_align_to_vblank_start();
 
-    system_align_to_vblank_start();
-
-    DmaSystem_CopyToVram((uint32_t)&data_sprite_player_portrait+4096, 0x7800, 4096);
+            DmaSystem_CopyToVram((uint32_t)&data_sprite_player_portrait+ (i * 0x1000), 0x7000+(i * 0x800), 4096);
+        }
+    }
 
     return;
 }
@@ -471,13 +494,25 @@ void loop_subscreen_profile_upload_profile_picture()
 */
 void loop_subscreen_profile_restore_last_sprite_page()
 {
-    system_align_to_vblank_start();
+    // TODO: This is very hacky. Consider making a third NMI routine for this so APU playback isn't a factor.
+    if (snd_stream_enable)
+    {
+        for (int i = 0; i < 8; i++)
+        {
+            system_align_to_vblank_start();
 
-    DmaSystem_CopyToVram(0x007fe000, 0x7000, 4096);
+            DmaSystem_CopyToVram(0x007fe000 + (i * 0x0400), 0x7000 + (i * 0x200), 1024);
+        }
+    }
+    else
+    {
+        for (int i = 0; i < 2; i++)
+        {
+            system_align_to_vblank_start();
 
-    system_align_to_vblank_start();
-
-    DmaSystem_CopyToVram(0x007ff000, 0x7800, 4096);
+            DmaSystem_CopyToVram(0x007fe000 + (i * 0x1000), 0x7000 + (i * 0x800), 4096);
+        }
+    }
 
     return;
 }
