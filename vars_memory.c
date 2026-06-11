@@ -50,8 +50,14 @@ ZP uint32_t system_frames_elapsed;
 ZP uint32_t system_frames_lag;
 uint16_t system_dont_count_lag; // set to 1 to not increment the lag counter during e.g. creating a text box
 
-ZP uint8_t shadow_stat77;
+ZP uint16_t system_nmis_counted;
+ZP uint16_t system_use_alternate_nmi;
 
+ZP uint16_t system_game_paused;
+
+ZP void * system_loop_func_ptr;
+
+// Shadow buffers
 ZP uint8_t shadow_inidisp;
 ZP int8_t shadow_inidisp_change;
 
@@ -63,12 +69,11 @@ ZP uint8_t shadow_coldata_r;
 ZP uint8_t shadow_coldata_g;
 ZP uint8_t shadow_coldata_b;
 
-ZP uint16_t system_nmis_counted;
-ZP uint16_t system_use_alternate_nmi;
+ZP uint8_t shadow_stat77;
 
-ZP uint16_t system_game_paused;
+NEAR union oam_buffer shadow_oam;
 
-ZP void * system_loop_func_ptr;
+union cgram_full shadow_cgram; // 256 palette entries, 2 bytes wide each
 
 // Event flags
 uint8_t event_flags_global[EVENT_FLAG_GLOBAL_MAX];
@@ -124,7 +129,3 @@ uint8_t * ani_bg_addr_coin;
 uint16_t pal_ani_entries[8][2]; // Just enough for the magic circle
 uint16_t pal_ani_sel;
 
-// Shadow buffers
-NEAR union oam_buffer shadow_oam;
-
-union cgram_full shadow_cgram; // 256 palette entries, 2 bytes wide each
