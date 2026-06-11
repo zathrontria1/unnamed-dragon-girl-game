@@ -31,15 +31,16 @@
 #endif
 
 // SRAM defines
-#define SRAM_TOTAL_SIZE 131072l
+#define SRAM_TOTAL_SIZE 32768l
 #define SRAM_BANK_SIZE 8192l
 #define SRAM_BANKS (SRAM_TOTAL_SIZE / SRAM_BANK_SIZE)
 #define SRAM_ADDR 0x00306000
 #define SRAM_DATA_OFFSET 0x0010 // after the checksum and reserved area
 
 // Event flags
-#define EVENT_FLAG_LOCAL_MAX 256
-#define EVENT_FLAG_GLOBAL_MAX 256
+// for now, don't need a lot of them
+#define EVENT_FLAG_LOCAL_MAX 16
+#define EVENT_FLAG_GLOBAL_MAX 16
 
 // Frame rate and velocity defines
 #define FPS 30
@@ -214,7 +215,7 @@
 #define ENEMY_DROP_REC_AMOUNT 5
 #define ENEMY_DROP_REC_PITY 7 // after this amount of drops, next drop is guaranteed to be a recovery item if none of the previous drops is
 
-#define FX_SMOKE_INTERVAL ANI_INTERVAL_16 // Must be a power of 2
+#define FX_SMOKE_INTERVAL ANI_INTERVAL_16 // Must be a power of 2 minus 1. Using an ANI_INTERVAL makes sense.
 #define FX_SMOKE_TTL ((60) / V_MUL)
 
 #define TILEDATA_ADDR_GAME_MAP 0x0000
@@ -231,9 +232,6 @@
 #define TILEMAP_ADDR_MAP_UI 0x4c00
 
 #define LZ4_BUFFER_ADDR 0x007f0000
-
-#define BLENDMODE_ADDSUB 0
-#define BLENDMODE_ALPHA_TOWARDS_BLACK 1
 
 /*
     HDMA channel setup:
@@ -256,9 +254,9 @@
 #define PAL_UI_TEXT_BLACK 3
 #define PAL_UI_4BPP 0
 
-#define TM_MODE1 0x17 // BG1, BG2, BG3, and OBJ
-#define TM_MODE1_MSGBOX 0x07 // BG1, BG2, BG3, and OBJ
-#define TM_MODE3 0x13 // BG1, BG2, and OBJ
+#define TM_MODE1 0x17 // BG1, BG2, BG3, OBJ
+#define TM_MODE1_MSGBOX 0x07 // BG1, BG2, BG3
+#define TM_MODE3 0x13 // BG1, BG2, OBJ
 
 // Sprite management defines
 #define SPR_COUNT_MAX_FRONT 64
