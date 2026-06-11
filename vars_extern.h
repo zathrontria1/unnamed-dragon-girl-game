@@ -47,9 +47,9 @@ extern const struct obj_list_entry_spawners data_spawners_debug0[];
 extern const struct obj_list_entry_spawners data_spawners_debug1[];
 extern const struct obj_list_entry_spawners data_spawners_debug2[];
 
-extern NEAR const int32_t data_sine_1[];
-extern NEAR const int32_t data_cosine_1[];
-extern NEAR const uint32_t data_pow_2[];
+extern const int32_t data_sine_1[];
+extern const int32_t data_cosine_1[];
+extern const uint32_t data_pow_2[];
 
 extern const uint32_t data_upgrade_costs[];
 

@@ -4,6 +4,7 @@
 
 #ifdef __VBCC__
     #define NEAR __near
+    #define HUGE __huge
     #define ZP __zpage
     #define NO_INLINE __noinline
     #define FORCE_INLINE inline
@@ -14,6 +15,7 @@
 
 #ifdef __CALYPSI__
     #define NEAR 
+    #define HUGE 
     #define ZP 
     #define NO_INLINE 
     #define FORCE_INLINE 
@@ -24,6 +26,7 @@
 
 #if CPU_65816 != 1
     #define NEAR
+    #define HUGE 
     #define ZP
     #define NO_INLINE 
     #define FORCE_INLINE 
