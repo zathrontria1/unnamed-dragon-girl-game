@@ -821,6 +821,8 @@ void routines_arrow_e(struct game_object * o)
         vflip = true;
     }
 
+    uint16_t temp_selected_tile = (((uint32_t)temp_addr >> 24) & 0x3f) << 1;
+
     if ((temp_addr != o->struct_data.npc_data.ani.last_address))
     {
         // Save the requested frame into object's data
@@ -849,6 +851,20 @@ void routines_arrow_e(struct game_object * o)
     temp_tileattrib = (o->struct_data.npc_data.tilenum | PAL_LIZARDMAN << 9 | 3 << 12 | hflip << 14 | vflip << 15);
 
     SpriteEngine_AddToFrontLayer(o, temp_tileattrib);
+
+    // Also draw a drop shadow 
+    if ((o->uid & 0x0001) == ((uint16_t)system_frames_elapsed & 0x0001))
+    {
+        struct game_object temp;
+        temp.pos.x.a = o->pos.x.a;
+        temp.pos.y.a = o->pos.y.a + 524288l; // 8 full pixels
+        temp.pos.z.a = 0;
+
+        uint16_t temp_tileattrib;
+        temp_tileattrib = 0x80 + (temp_selected_tile) | PAL_FX_SHADOW << 9 | 2 << 12 | hflip << 14 | vflip << 15;
+
+        SpriteEngine_AddToBackLayer(&temp, temp_tileattrib);
+    }
 
     return;
 }

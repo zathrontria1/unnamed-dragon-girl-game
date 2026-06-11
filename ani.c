@@ -527,6 +527,8 @@ uint8_t * AniSystem_GetDynamicFrame_Arrow(struct game_object * o)
         temp_addr |= 0x80000000; // Set highest bit
     }
 
+    temp_addr |= ((uint32_t)temp_tilenum - 32l) << 24; // use 6 bits of the highest bytes to store the tile number minus 32
+
     // Calculate the address
     return (uint8_t *)temp_addr;
 }
