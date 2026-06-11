@@ -942,6 +942,18 @@ bool SoundInterface_IsHigherPriority(uint8_t sfx_id)
         return true;
     }
 
+    // Then make sure item drop sounds play if the current queued sound isn't fire breath
+    if ((sfx_id == SFX_DROP_BOUNCE || sfx_id == SFX_DROP_COIN) && (snd_defercmd_sfx_id != SFX_ATK_FIRE_BREATH))
+    {
+        return true;
+    }
+
+    // Then for on-hit noises
+    if ((sfx_id == SFX_ATK_PUNCH || sfx_id == SFX_ATK_SPLASH || sfx_id == SFX_ATK_SPLAT_HIT) && (snd_defercmd_sfx_id != SFX_ATK_FIRE_BREATH && snd_defercmd_sfx_id != SFX_DROP_BOUNCE && snd_defercmd_sfx_id != SFX_DROP_COIN))
+    {
+        return true;
+    }
+
     // If the currently queued sound is these do not let anything else overwrite them
     if ((snd_defercmd_sfx_id == SFX_ATK_FIRE_BREATH) || (snd_defercmd_sfx_id == SFX_UI_CONFIRM) || (snd_defercmd_sfx_id == SFX_MOV_FOOTSTEP))
     {
