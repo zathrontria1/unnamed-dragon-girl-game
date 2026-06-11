@@ -139,11 +139,6 @@ uint16_t event_tutorial_shown;
 ZP int8_t rand_array[3];
 uint16_t rand_seeded;
 
-// DMA system
-NEAR struct dma_entry dma_queue[DMA_QUEUE_MAX_ENTRIES];
-uint16_t dma_queue_count;
-uint16_t dma_queue_length;
-
 // Input system
 uint16_t input_pad0;
 uint16_t input_pad0_new;

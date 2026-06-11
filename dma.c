@@ -7,6 +7,10 @@
 
 #include "dma.h"
 
+NEAR struct dma_entry dma_queue[DMA_QUEUE_MAX_ENTRIES];
+uint16_t dma_queue_count;
+uint16_t dma_queue_length;
+
 bool dma_filler_enable;
 uint16_t dma_filler_dest;
 uint16_t dma_filler_length;

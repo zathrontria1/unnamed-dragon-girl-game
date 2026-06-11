@@ -1,5 +1,9 @@
 extern const uint16_t const_lut_dma_split_lookup[6];
 
+extern NEAR struct dma_entry dma_queue[DMA_QUEUE_MAX_ENTRIES];
+extern uint16_t dma_queue_count;
+extern uint16_t dma_queue_length;
+
 extern bool dma_filler_enable;
 extern uint16_t dma_filler_dest;
 extern uint16_t dma_filler_length;

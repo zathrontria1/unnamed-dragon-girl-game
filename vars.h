@@ -116,11 +116,6 @@ extern uint16_t event_tutorial_shown;
 extern ZP int8_t rand_array[3];
 extern uint16_t rand_seeded;
 
-// DMA system
-extern NEAR struct dma_entry dma_queue[DMA_QUEUE_MAX_ENTRIES];
-extern uint16_t dma_queue_count;
-extern uint16_t dma_queue_length;
-
 // Input system
 extern uint16_t input_pad0;
 extern uint16_t input_pad0_new;
