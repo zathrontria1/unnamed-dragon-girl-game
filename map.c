@@ -5,6 +5,8 @@
 
 #include "vars.h"
 
+#include "obj.h"
+
 #include "map.h"
 #include "dma.h"
 

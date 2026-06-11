@@ -6,6 +6,8 @@
 
 #include "vars.h"
 
+#include "obj.h"
+
 #include "main.h"
 #include "ui.h"
 #include "dma.h"

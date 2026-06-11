@@ -5,6 +5,8 @@
 
 #include "vars.h"
 
+#include "obj.h"
+
 #include "hittest.h"
 
 // Call from an enemy to hit test

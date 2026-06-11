@@ -5,6 +5,8 @@
 
 #include "vars.h"
 
+#include "obj.h"
+
 #include "hdma.h"
 
 struct hdma_indirect_table_entry hdma_bgpalette_tables[3];

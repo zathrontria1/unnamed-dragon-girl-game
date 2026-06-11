@@ -47,59 +47,6 @@ ZP extern uint16_t system_game_paused;
 
 ZP extern void * system_loop_func_ptr;
 
-ZP extern struct game_object * obj_player_pointer;
-
-// Object system
-ZP extern uint16_t obj_first_available;
-extern struct game_object obj_general[OBJ_GENERAL_MAX_COUNT];
-
-extern uint16_t obj_delete_queue[OBJ_GENERAL_MAX_COUNT];
-extern uint16_t obj_delete_queue_count;
-
-extern int16_t obj_player_index;
-extern uint16_t obj_active_count;
-
-extern uint16_t obj_next_uid;
-
-// Enemy data that shouldn't be in the object area
-extern uint16_t obj_enemies_defeated;
-extern uint16_t obj_enemies_target_count;
-extern uint16_t obj_enemies_max_count;
-
-// Player only data that shouldn't be in the object area
-extern uint16_t obj_player_attack_interval;
-extern uint16_t obj_player_prev_facing;
-extern uint8_t * obj_player_prev_sprframe;
-extern uint16_t obj_player_active_fireballs;
-
-extern uint16_t obj_player_health_regen_delay;
-extern uint16_t obj_player_health_regen_interval;
-extern uint16_t obj_player_health_regen_value;
-extern uint16_t obj_player_health_regen_limit;
-
-extern uint16_t obj_player_recovery_drop_pity;
-
-extern uint16_t obj_player_upgrades_bought_hp;
-extern uint16_t obj_player_upgrades_bought_attack;
-extern uint16_t obj_player_upgrades_bought_defense;
-
-extern uint32_t obj_player_upgrades_cost_hp;
-extern uint32_t obj_player_upgrades_cost_attack;
-extern uint32_t obj_player_upgrades_cost_defense;
-
-// Hitbox data
-ZP extern uint16_t obj_hitbox_player_first_available;
-extern struct game_object obj_hitbox_player[OBJ_PLAYERHITBOX_MAX_COUNT];
-extern uint16_t obj_hitbox_player_delete_queue[OBJ_PLAYERHITBOX_MAX_COUNT];
-extern uint16_t obj_hitbox_player_delete_queue_count;
-extern uint16_t obj_hitbox_count_player;
-
-ZP extern uint16_t obj_hitbox_enemy_first_available;
-extern struct game_object obj_hitbox_enemy[OBJ_ENEMYHITBOX_MAX_COUNT];
-extern uint16_t obj_hitbox_enemy_delete_queue[OBJ_ENEMYHITBOX_MAX_COUNT];
-extern uint16_t obj_hitbox_enemy_delete_queue_count;
-extern uint16_t obj_hitbox_count_enemy;
-
 // Event flags
 extern uint8_t event_flags_global[EVENT_FLAG_GLOBAL_MAX];
 extern uint8_t event_flags_local[EVENT_FLAG_LOCAL_MAX];

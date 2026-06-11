@@ -8,6 +8,8 @@
 
 #include "vars.h"
 
+#include "obj.h"
+
 #include "dma.h"
 
 #include "ui.h"

@@ -3,6 +3,8 @@
 
 #include "vars.h"
 
+#include "obj.h"
+
 #include "sram_management.h"
 
 // Note: the game is configured with 128KB SRAM, divided into 16 banks of 8KB.

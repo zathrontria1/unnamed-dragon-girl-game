@@ -70,59 +70,6 @@ ZP uint16_t system_game_paused;
 
 ZP void * system_loop_func_ptr;
 
-ZP struct game_object * obj_player_pointer;
-
-// Object system
-ZP uint16_t obj_first_available;
-struct game_object obj_general[OBJ_GENERAL_MAX_COUNT];
-
-uint16_t obj_delete_queue[OBJ_GENERAL_MAX_COUNT];
-uint16_t obj_delete_queue_count;
-
-int16_t obj_player_index;
-uint16_t obj_active_count;
-
-uint16_t obj_next_uid;
-
-// Enemy data that shouldn't be in the object area
-uint16_t obj_enemies_defeated;
-uint16_t obj_enemies_target_count;
-uint16_t obj_enemies_max_count;
-
-// Player only data that shouldn't be in the object area
-uint16_t obj_player_attack_interval;
-uint16_t obj_player_prev_facing;
-uint8_t * obj_player_prev_sprframe;
-uint16_t obj_player_active_fireballs;
-
-uint16_t obj_player_health_regen_delay;
-uint16_t obj_player_health_regen_interval;
-uint16_t obj_player_health_regen_value;
-uint16_t obj_player_health_regen_limit;
-
-uint16_t obj_player_recovery_drop_pity;
-
-uint16_t obj_player_upgrades_bought_hp;
-uint16_t obj_player_upgrades_bought_attack;
-uint16_t obj_player_upgrades_bought_defense;
-
-uint32_t obj_player_upgrades_cost_hp;
-uint32_t obj_player_upgrades_cost_attack;
-uint32_t obj_player_upgrades_cost_defense;
-
-// Hitbox data
-ZP uint16_t obj_hitbox_player_first_available;
-struct game_object obj_hitbox_player[OBJ_PLAYERHITBOX_MAX_COUNT];
-uint16_t obj_hitbox_player_delete_queue[OBJ_PLAYERHITBOX_MAX_COUNT];
-uint16_t obj_hitbox_player_delete_queue_count;
-uint16_t obj_hitbox_count_player;
-
-ZP uint16_t obj_hitbox_enemy_first_available;
-struct game_object obj_hitbox_enemy[OBJ_ENEMYHITBOX_MAX_COUNT];
-uint16_t obj_hitbox_enemy_delete_queue[OBJ_ENEMYHITBOX_MAX_COUNT];
-uint16_t obj_hitbox_enemy_delete_queue_count;
-uint16_t obj_hitbox_count_enemy;
-
 // Event flags
 uint8_t event_flags_global[EVENT_FLAG_GLOBAL_MAX];
 uint8_t event_flags_local[EVENT_FLAG_LOCAL_MAX];
