@@ -29,45 +29,15 @@
 uint8_t system_MVNCodeInWRAM[4];
 uint8_t system_JMLCodeInWRAM[4];
 
+// Input system
+uint16_t input_pad0;
+uint16_t input_pad0_new;
+
 /*
-    VBCC doesn't initialize the zero page variables
-    So do it for it
+    VBCC doesn't initialize the zero page variables by default.
 
-    Now using custom startup that does indeed init ZP, so commented out
+    Now using custom startup that does indeed init ZP
 */
-
-/*void system_init_zp()
-{
-    system_in_vblank = 0;
-    system_current_routine = 0;
-    system_target_routine = 0;
-    system_frames_elapsed = 0;
-
-    shadow_stat77 = 0;
-    shadow_inidisp = 0;
-    shadow_inidisp_change = 0;
-    shadow_mosaic = 0;
-    system_nmis_counted = 0;
-    shadow_cgwsub = 0;
-    shadow_cgadsub = 0;
-    shadow_coldata_r = 0;
-    shadow_coldata_g = 0;
-    shadow_coldata_b = 0;
-
-    bg_scroll_x.a = 0;
-    bg_scroll_y.a = 0;
-    bg_scroll_y_mod.a = 0;
-    ani_bg_water_dma_ready = 0;
-    ani_bg_tallbg_dma_ready = 0;
-
-    obj_first_available = 0;
-    obj_hitbox_player_first_available = 0;
-
-    system_game_paused = 0;
-    system_use_alternate_nmi = 0;
-
-    return;
-}*/
 
 /*
     Initialize all system registers. In case something else was running beforehand

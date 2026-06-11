@@ -64,12 +64,6 @@ extern uint16_t event_in_combat_shadow;
 
 extern uint16_t event_tutorial_shown;
 
-// Input system
-extern uint16_t input_pad0;
-extern uint16_t input_pad0_new;
-//extern uint16_t input_pad1;
-//extern uint16_t input_pad1_new;
-
 // Map system
 extern const struct level_data * level_data_ptr;
 extern const struct level_data * level_data_ptr_prev;

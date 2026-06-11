@@ -87,12 +87,6 @@ uint16_t event_in_combat_shadow;
 
 uint16_t event_tutorial_shown;
 
-// Input system
-uint16_t input_pad0;
-uint16_t input_pad0_new;
-//uint16_t input_pad1;
-//uint16_t input_pad1_new;
-
 // Map system
 const struct level_data * level_data_ptr;
 const struct level_data * level_data_ptr_prev;

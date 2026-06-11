@@ -3,6 +3,10 @@
 extern uint8_t system_MVNCodeInWRAM[4];
 extern uint8_t system_JMLCodeInWRAM[4];
 
+// Input system
+extern uint16_t input_pad0;
+extern uint16_t input_pad0_new;
+
 //void system_init_zp(void); // The custom startup code now wipes the entirety of ZP
 void system_init_regs(void);
 void system_init_wram_functions(void);
