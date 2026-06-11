@@ -8,6 +8,9 @@ extern int8_t snd_defercmd_sfx_vol;
 extern int8_t snd_defercmd_sfx_vol_r;
 extern int8_t snd_defercmd_sfx_pitch;
 
+extern bool snd_defercmd_sfx_stop_enable;
+extern uint8_t snd_defercmd_sfx_stop_sfx_id;
+
 extern uint16_t snd_footstep_timeout;
 extern uint16_t snd_punch_timeout;
 extern uint16_t snd_flame_active;
@@ -41,19 +44,14 @@ void SoundInterface_StartSoundEngine();
     void SoundInterface_UploadData_2byte_StreamLoopBlock(uint8_t * data_ptr, uint16_t chunk_len);
 #endif
 
-/*
-#if VBCC_ASM == 1
-    NO_INLINE void SoundInterface_UploadData_3byte(uint8_t * data_ptr, uint16_t chunk_len);
-#else
-    void SoundInterface_UploadData_3byte(uint8_t * data_ptr, uint16_t chunk_len);
-#endif
-*/
+void SoundInterface_PlaySfx(uint8_t sfx_id, int8_t pan);
+void SoundInterface_PlaySfx_Internal(uint8_t sfx_id, int8_t pan);
+void SoundInterface_PlaySfx_Ex(uint8_t sfx_id, int8_t vol_l, int8_t vol_r, int8_t pitch);
+void SoundInterface_PlaySfx_Ex_Internal(uint8_t sfx_id, int8_t vol_l, int8_t vol_r, int8_t pitch);
+void SoundInterface_StopSfx(uint8_t sfx_id);
+void SoundInterface_StopSfx_Internal(uint8_t sfx_id);
 
-FORCE_INLINE void SoundInterface_PlaySfx(uint8_t sfx_id, int8_t pan);
-FORCE_INLINE void SoundInterface_PlaySfx_Ex(uint8_t sfx_id, int8_t vol_l, int8_t vol_r, int8_t pitch);
-FORCE_INLINE void SoundInterface_StopSfx(uint8_t sfx_id);
-
-void SoundInterface_PlayDeferredSfx();
+void SoundInterface_RunDeferredCommands();
 
 void SoundInterface_SetDspRegister(uint8_t dsp_reg, uint8_t dsp_data);
 void SoundInterface_ResetAPU();
@@ -81,3 +79,5 @@ void SoundInterface_NmiAudioUpload();
 
 FORCE_INLINE void SoundInterface_AcknowledgeBusy(bool ignore_busy);
 FORCE_INLINE void SoundInterface_AcknowledgeNop();
+
+bool SoundInterface_IsHigherPriority(uint8_t sfx_id);

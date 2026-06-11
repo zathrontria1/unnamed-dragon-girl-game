@@ -16,6 +16,9 @@ int8_t snd_defercmd_sfx_vol;
 int8_t snd_defercmd_sfx_vol_r;
 int8_t snd_defercmd_sfx_pitch;
 
+bool snd_defercmd_sfx_stop_enable;
+uint8_t snd_defercmd_sfx_stop_sfx_id;
+
 uint16_t snd_footstep_timeout;
 uint16_t snd_punch_timeout;
 uint16_t snd_flame_active;
@@ -453,7 +456,21 @@ FORCE_INLINE void SoundInterface_AcknowledgeNop()
     REG_APU01 = SND_CMD_NOP;
 }
 
-FORCE_INLINE void SoundInterface_PlaySfx(uint8_t sfx_id, int8_t pan)
+void SoundInterface_PlaySfx(uint8_t sfx_id, int8_t pan)
+{
+    snd_defercmd_sfx_enable = false;
+    
+    snd_defercmd_sfx_use_extended_format = false;
+
+    snd_defercmd_sfx_id = sfx_id;
+    snd_defercmd_sfx_vol = pan;
+
+    snd_defercmd_sfx_enable = true;
+
+    return;
+}
+
+void SoundInterface_PlaySfx_Internal(uint8_t sfx_id, int8_t pan)
 {
     SoundInterface_AcknowledgeBusy(true);
 
@@ -467,7 +484,23 @@ FORCE_INLINE void SoundInterface_PlaySfx(uint8_t sfx_id, int8_t pan)
     return;
 }
 
-FORCE_INLINE void SoundInterface_PlaySfx_Ex(uint8_t sfx_id, int8_t vol_l, int8_t vol_r, int8_t pitch)
+void SoundInterface_PlaySfx_Ex(uint8_t sfx_id, int8_t vol_l, int8_t vol_r, int8_t pitch)
+{
+    snd_defercmd_sfx_enable = false;
+
+    snd_defercmd_sfx_use_extended_format = true;
+
+    snd_defercmd_sfx_id = sfx_id;
+    snd_defercmd_sfx_vol = vol_l;
+    snd_defercmd_sfx_vol_r = vol_r;
+    snd_defercmd_sfx_pitch = pitch;
+
+    snd_defercmd_sfx_enable = true;
+
+    return;
+}
+
+void SoundInterface_PlaySfx_Ex_Internal(uint8_t sfx_id, int8_t vol_l, int8_t vol_r, int8_t pitch)
 {
     SoundInterface_AcknowledgeBusy(true);
     
@@ -492,7 +525,18 @@ FORCE_INLINE void SoundInterface_PlaySfx_Ex(uint8_t sfx_id, int8_t vol_l, int8_t
 }
 
 // stop an SFX
-FORCE_INLINE void SoundInterface_StopSfx(uint8_t sfx_id)
+void SoundInterface_StopSfx(uint8_t sfx_id)
+{
+    snd_defercmd_sfx_stop_enable = false;
+
+    snd_defercmd_sfx_stop_sfx_id = sfx_id;
+
+    snd_defercmd_sfx_stop_enable = true;
+
+    return;
+}
+
+void SoundInterface_StopSfx_Internal(uint8_t sfx_id)
 {
     SoundInterface_AcknowledgeBusy(true);
 
@@ -967,9 +1011,54 @@ void SoundInterface_NmiAudioUpload()
     return;
 }
 
-// Function used to play queued sfx automatically
-void SoundInterface_PlayDeferredSfx()
+// Function used to play and stop queued sfx automatically
+void SoundInterface_RunDeferredCommands()
 {
+    if (snd_defercmd_sfx_enable)
+    {
+        if (snd_defercmd_sfx_use_extended_format)
+        {
+            SoundInterface_PlaySfx_Ex_Internal(snd_defercmd_sfx_id, snd_defercmd_sfx_vol, snd_defercmd_sfx_vol_r, snd_defercmd_sfx_pitch);
+
+            snd_defercmd_sfx_use_extended_format = false;
+        }
+        else
+        {
+            SoundInterface_PlaySfx_Internal(snd_defercmd_sfx_id, snd_defercmd_sfx_vol);
+        }
+
+        snd_defercmd_sfx_enable = false;
+
+        snd_defercmd_sfx_id = 0; // Set this to invalid
+    }
+
+    if (snd_defercmd_sfx_stop_enable)
+    {
+        SoundInterface_StopSfx_Internal(snd_defercmd_sfx_stop_sfx_id);
+
+        snd_defercmd_sfx_stop_enable = false;
+
+        snd_defercmd_sfx_stop_sfx_id = 0; // Set this to invalid
+    }
 
     return;
+}
+
+// Compare the supplied ID with the currently loaded ID
+bool SoundInterface_IsHigherPriority(uint8_t sfx_id)
+{
+    // Just make sure this doesn't get dropped
+    if (sfx_id == SFX_ATK_FIRE_BREATH)
+    {
+        return true;
+    }
+
+    // If the currently queued sound is these do not let anything else overwrite them
+    if ((snd_defercmd_sfx_id == SFX_ATK_FIRE_BREATH) || (snd_defercmd_sfx_id == SFX_UI_CONFIRM) || (snd_defercmd_sfx_id == SFX_MOV_FOOTSTEP))
+    {
+        return false;
+    }
+
+    // Otherwise it's safe
+    return true;
 }
