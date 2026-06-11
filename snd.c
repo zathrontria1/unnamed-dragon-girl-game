@@ -843,7 +843,7 @@ void SoundInterface_StopStream()
 // Call after NMI to upload 72 bytes
 void SoundInterface_NmiAudioUpload()
 {
-    SoundInterface_AcknowledgeBusy(false);
+    SoundInterface_AcknowledgeBusy(true); // hack it here to avoid lockups?
 
     uint16_t temp_len = 72;
 
