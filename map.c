@@ -30,6 +30,26 @@ const uint8_t * map_lut_col;
 // Collision buffer decompresses here for speed and editability
 uint8_t map_collision_buf[64*64]; // 4KB // There is no speed benefit from making this 16-bit wide
 
+// Camera/background scroll
+ZP union pos_bgscroll bg_scroll_x;
+ZP union pos_bgscroll bg_scroll_y;
+union pos_bgscroll bg_scroll_x_prev;
+union pos_bgscroll bg_scroll_y_prev;
+ZP union pos_bgscroll bg_scroll_y_mod;
+
+union pos_bgscroll bg_scroll_x_saved;
+union pos_bgscroll bg_scroll_y_saved;
+
+union pos_bgscroll bg_scroll_x_bounds_min;
+union pos_bgscroll bg_scroll_y_bounds_min;
+union pos_bgscroll bg_scroll_x_bounds_max;
+union pos_bgscroll bg_scroll_y_bounds_max;
+
+uint16_t bg_scroll_use_interpolation;
+uint16_t bg_scroll_x_at_final;
+uint16_t bg_scroll_y_at_final;
+uint16_t bg_scroll_suppress_interpolation_state_change;
+
 /*
     Sets the map and metatile LUT pointers,
     then loads the tilemap data.

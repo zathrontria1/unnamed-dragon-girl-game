@@ -15,6 +15,26 @@ extern const uint8_t * map_lut_col;
 // Collision buffer decompresses here for speed and editability
 extern uint8_t map_collision_buf[64*64]; // 4KB // There is no speed benefit from making this 16-bit wide
 
+// Camera/background scroll
+ZP extern union pos_bgscroll bg_scroll_x;
+ZP extern union pos_bgscroll bg_scroll_y;
+extern union pos_bgscroll bg_scroll_x_prev;
+extern union pos_bgscroll bg_scroll_y_prev;
+ZP extern union pos_bgscroll bg_scroll_y_mod;
+
+extern union pos_bgscroll bg_scroll_x_saved;
+extern union pos_bgscroll bg_scroll_y_saved;
+
+extern union pos_bgscroll bg_scroll_x_bounds_min;
+extern union pos_bgscroll bg_scroll_y_bounds_min;
+extern union pos_bgscroll bg_scroll_x_bounds_max;
+extern union pos_bgscroll bg_scroll_y_bounds_max;
+
+extern uint16_t bg_scroll_use_interpolation;
+extern uint16_t bg_scroll_x_at_final;
+extern uint16_t bg_scroll_y_at_final;
+extern uint16_t bg_scroll_suppress_interpolation_state_change;
+
 void MapSystem_LoadMap(const uint8_t * map, const uint16_t * lut, const uint8_t * col);
 void MapSystem_BuildCollisionTable();
 

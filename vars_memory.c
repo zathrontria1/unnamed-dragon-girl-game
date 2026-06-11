@@ -90,26 +90,6 @@ uint16_t event_tutorial_shown;
 const struct level_data * level_data_ptr;
 const struct level_data * level_data_ptr_prev;
 
-// Camera/background scroll
-ZP union pos_bgscroll bg_scroll_x;
-ZP union pos_bgscroll bg_scroll_y;
-union pos_bgscroll bg_scroll_x_prev;
-union pos_bgscroll bg_scroll_y_prev;
-ZP union pos_bgscroll bg_scroll_y_mod;
-
-union pos_bgscroll bg_scroll_x_saved;
-union pos_bgscroll bg_scroll_y_saved;
-
-union pos_bgscroll bg_scroll_x_bounds_min;
-union pos_bgscroll bg_scroll_y_bounds_min;
-union pos_bgscroll bg_scroll_x_bounds_max;
-union pos_bgscroll bg_scroll_y_bounds_max;
-
-uint16_t bg_scroll_use_interpolation;
-uint16_t bg_scroll_x_at_final;
-uint16_t bg_scroll_y_at_final;
-uint16_t bg_scroll_suppress_interpolation_state_change;
-
 // Fixed sprite tile anims
 uint16_t ani_bg_frame_coin;
 uint8_t * ani_bg_addr_coin;

@@ -67,26 +67,6 @@ extern uint16_t event_tutorial_shown;
 extern const struct level_data * level_data_ptr;
 extern const struct level_data * level_data_ptr_prev;
 
-// Camera/background scroll
-ZP extern union pos_bgscroll bg_scroll_x;
-ZP extern union pos_bgscroll bg_scroll_y;
-extern union pos_bgscroll bg_scroll_x_prev;
-extern union pos_bgscroll bg_scroll_y_prev;
-ZP extern union pos_bgscroll bg_scroll_y_mod;
-
-extern union pos_bgscroll bg_scroll_x_saved;
-extern union pos_bgscroll bg_scroll_y_saved;
-
-extern union pos_bgscroll bg_scroll_x_bounds_min;
-extern union pos_bgscroll bg_scroll_y_bounds_min;
-extern union pos_bgscroll bg_scroll_x_bounds_max;
-extern union pos_bgscroll bg_scroll_y_bounds_max;
-
-extern uint16_t bg_scroll_use_interpolation;
-extern uint16_t bg_scroll_x_at_final;
-extern uint16_t bg_scroll_y_at_final;
-extern uint16_t bg_scroll_suppress_interpolation_state_change;
-
 // Fixed sprite tile anims
 extern uint16_t ani_bg_frame_coin;
 extern uint8_t * ani_bg_addr_coin;

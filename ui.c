@@ -8,6 +8,8 @@
 
 #include "vars.h"
 
+#include "map.h"
+
 #include "obj.h"
 
 #include "dma.h"

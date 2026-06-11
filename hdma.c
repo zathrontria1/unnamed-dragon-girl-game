@@ -7,6 +7,7 @@
 
 #include "obj.h"
 
+#include "map.h"
 #include "hdma.h"
 
 struct hdma_indirect_table_entry hdma_bgpalette_tables[3];
