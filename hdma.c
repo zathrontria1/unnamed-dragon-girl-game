@@ -309,7 +309,7 @@ void HdmaEngine_GeneratePaletteTable(uint16_t * table_ptr, uint16_t pal_start, u
 }
 
 // sine offsets, intensity 0-15, 2 cycles each
-const int16_t const_hdma_scroll_sine[16][64] = 
+NEAR const int16_t const_hdma_scroll_sine[16][64] = 
 {
     {
      0,     0,     0,     0,     0,     0,     0,
