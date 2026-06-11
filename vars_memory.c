@@ -149,24 +149,6 @@ uint16_t input_pad0_new;
 const struct level_data * level_data_ptr;
 const struct level_data * level_data_ptr_prev;
 
-// Map decompression buffers.
-uint16_t map_column[32]; // one contiguous column
-uint16_t map_row[2][32]; // two contiguous rows: left and right rows (2x32)
-
-const uint8_t * map_current;
-uint16_t map_extent_x;
-uint16_t map_extent_y;
-uint16_t map_extent_tiles_x;
-uint16_t map_extent_tiles_y;
-
-uint16_t map_extent_tiles_x_shiftcount; // converted into amount of shifts. 16 being 4, 32 being 5, 64 being 6, 128 being 7
-
-const uint16_t * map_lut;
-const uint8_t * map_lut_col;
-
-// Collision buffer decompresses here for speed and editability
-uint8_t map_collision_buf[64*64]; // 4KB // There is no speed benefit from making this 16-bit wide
-
 // Camera/background scroll
 ZP union pos_bgscroll bg_scroll_x;
 ZP union pos_bgscroll bg_scroll_y;
