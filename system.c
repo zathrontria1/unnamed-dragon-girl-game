@@ -44,7 +44,7 @@ uint16_t input_pad0_new;
 
     TODO: if to be released outside of SNES this will need to be #ifdef'd
 */
-void system_init_regs(void)
+void System_Init_CpuRegs(void)
 {
     // Must do first
     REG_NMITIMEN = 0x00; // Disable interrupts
@@ -68,7 +68,7 @@ void system_init_regs(void)
     REG_BG12NBA = 0x00;
     REG_BG34NBA = 0x00;
 
-    system_reset_bg_scroll_regs();
+    System_Init_BgScroll();
 
     REG_VMAIN = 0x80;
 
@@ -117,7 +117,7 @@ void system_init_regs(void)
 }
 
 // Write out the MVN and JML opcodes here so that they can be used ASAP
-void system_init_wram_functions(void)
+void System_Init_WramFunctions(void)
 {
     // Write out the MVN and JML program codes
     #if VBCC_ASM == 1
@@ -148,10 +148,10 @@ void system_init_wram_functions(void)
     Throw a splash screen during initialization to prevent extended black screens
     Put as many init parts as possible here
 */
-void system_display_splash()
+void System_DisplayStartupSplash()
 {
     // Set up the PPU regs to what we want.
-    system_reset_bg_scroll_regs();
+    System_Init_BgScroll();
 
     REG_BGMODE = 0x09; // Mode 1, high priority bg3
     REG_TM = 0x01; // BG1 only
@@ -180,13 +180,13 @@ void system_display_splash()
 
     shadow_inidisp = 0x00;
 
-    system_interrupt_enable();
+    System_EnableInterrupts();
 
     // Check the SRAM contents
     sram_check();
 
     // The SPC takes a while to init itself, so do something else in the meantime.
-    system_init(); // Do the init here too
+    System_Init(); // Do the init here too
     
     // Load the level
     level_data_ptr = LEVEL_INITIAL; // Set the initial level here
@@ -200,7 +200,7 @@ void system_display_splash()
     }
 
     // In case the above initialization take too short this should prevent issues
-    system_interrupt_disable(); // uploading the SPC while interrupts are on can cause lock-ups
+    System_DisableInterrupts(); // uploading the SPC while interrupts are on can cause lock-ups
 
     snd_current_command_counter = 0;
     SoundInterface_StartSoundEngine(); // start the SPC
@@ -255,7 +255,7 @@ void system_display_splash()
     DmaSystem_CopyToVram(0x007f0000, 0x0000, 0);
 
     // Finish initializing graphics
-    system_init_graphics();
+    System_Init_Graphics();
 
     // Run one frame of partial game logic to draw sprites
     Loop_Game_Partial();
@@ -267,10 +267,10 @@ void system_display_splash()
     Initialization of fixed sprites that touch VRAM must be done in fblank
     Also for safety, PPU registers that are touched also go here
 */
-void system_init_graphics(void)
+void System_Init_Graphics(void)
 {
     // Write BG1, BG2, BG3 and BG4 scroll to 0 on X and negative 1 on Y axis
-    system_reset_bg_scroll_regs();
+    System_Init_BgScroll();
 
     // Set up sprite display
     REG_OBSEL = OBJ_SIZE16_L32|3;
@@ -278,12 +278,12 @@ void system_init_graphics(void)
     // Regenerate the tilemaps
     MapSystem_Tilemap_RegenerateTilemap();
 
-    system_reset_ui_tilemap();
+    System_Init_UiTilemap();
 
     return;
 }
 
-void system_reset_ui_tilemap()
+void System_Init_UiTilemap()
 {
     // flush the BG1 tilemap with the correct null tiles
     #if VBCC_ASM == 1
@@ -410,7 +410,7 @@ void system_reset_ui_tilemap()
 /*
     First part of initialization that doesn't touch graphics (can be done during the splash screen)
 */
-void system_init()
+void System_Init()
 {
     // Initialize VRAM slot allocator
     SpriteEngine_InitVramSlot();
@@ -450,7 +450,7 @@ void system_init()
 /*
     Call during a live game
 */
-void system_init_partial()
+void System_Init_Partial()
 {
     // Initialize VRAM slot allocator
     SpriteEngine_InitVramSlot();
@@ -490,7 +490,7 @@ void system_init_partial()
     return;
 }
 
-void system_reset_bg_scroll_regs(void)
+void System_Init_BgScroll(void)
 {
     REG_BG1HOFS = 0;
     REG_BG1HOFS = 0;
@@ -516,7 +516,7 @@ void system_reset_bg_scroll_regs(void)
 /*
     Call when the display mode is to be changed
 */
-void system_init_display(uint16_t routine)
+void System_Init_DisplaySettings(uint16_t routine)
 {
     switch (routine)
     {
@@ -537,7 +537,7 @@ void system_init_display(uint16_t routine)
 }
 
 // Set background tile entries and tilemap locations
-void system_setup_tilemap_display(uint16_t routine)
+void System_Init_TilemapSettings(uint16_t routine)
 {
     switch (routine)
     {
@@ -563,7 +563,7 @@ void system_setup_tilemap_display(uint16_t routine)
     return;
 }
 
-FORCE_INLINE void system_wait_vblank()
+FORCE_INLINE void System_WaitUntilVblank()
 {
     // A workaround has been done on the ASM code side
     system_in_vblank = 1; // This must be the last value written.
@@ -573,12 +573,12 @@ FORCE_INLINE void system_wait_vblank()
         emitWAI();
     }  
 
-    system_poll_input();
+    System_GetInput();
         
     return;
 }
 
-void system_poll_input()
+void System_GetInput()
 {
     #if VBCC_ASM == 1 // Don't bother changing memory bit
         __asm(
@@ -620,7 +620,7 @@ void system_poll_input()
         input_pad1_new = ((temp_pad1 ^ input_pad1) & input_pad1);*/
     #endif
 
-    system_check_for_soft_reset(); // Place the soft reset check at the end of input polling
+    System_CheckSoftReset(); // Place the soft reset check at the end of input polling
     
     if (input_pad0_new != 0 && !rand_seeded)
     {
@@ -631,7 +631,7 @@ void system_poll_input()
     return;
 }
 
-FORCE_INLINE uint16_t system_check_for_key(enum KEYPAD_BITS k)
+FORCE_INLINE uint16_t System_CheckKey(enum KEYPAD_BITS k)
 {
     if ((input_pad0_new & k) == k)
     {
@@ -641,7 +641,7 @@ FORCE_INLINE uint16_t system_check_for_key(enum KEYPAD_BITS k)
     return 0;
 }
 
-FORCE_INLINE uint16_t system_check_for_any_key()
+FORCE_INLINE uint16_t System_CheckKeyAny()
 {
     if (input_pad0_new != 0x0000)
     {
@@ -651,7 +651,7 @@ FORCE_INLINE uint16_t system_check_for_any_key()
     return 0;
 }
 
-FORCE_INLINE uint16_t system_check_for_key_hold(enum KEYPAD_BITS k)
+FORCE_INLINE uint16_t System_CheckKeyHeld(enum KEYPAD_BITS k)
 {
     if ((input_pad0 & k) == k)
     {
@@ -661,7 +661,7 @@ FORCE_INLINE uint16_t system_check_for_key_hold(enum KEYPAD_BITS k)
     return 0;
 }
 
-FORCE_INLINE void system_interrupt_enable()
+FORCE_INLINE void System_EnableInterrupts()
 {
     // Set up interrupts
     register volatile uint8_t temp1 = REG_RDNMI;
@@ -675,7 +675,7 @@ FORCE_INLINE void system_interrupt_enable()
     return;
 }
 
-FORCE_INLINE void system_interrupt_disable()
+FORCE_INLINE void System_DisableInterrupts()
 {
     // Set up interrupts
     register volatile uint8_t temp1 = REG_RDNMI;
@@ -689,9 +689,9 @@ FORCE_INLINE void system_interrupt_disable()
     return;
 }
 
-void system_reset()
+void System_Reset()
 {
-    system_interrupt_disable();
+    System_DisableInterrupts();
 
     REG_INIDISP = 0x8f;
 
@@ -706,29 +706,29 @@ void system_reset()
     return;
 }
 
-FORCE_INLINE void system_check_for_soft_reset()
+FORCE_INLINE void System_CheckSoftReset()
 {
     if ((input_pad0 & (KEY_L | KEY_R | KEY_SELECT | KEY_START)) == (KEY_L | KEY_R | KEY_SELECT | KEY_START)) // check soft reset combo
     {
         if ((input_pad0 & 0x000f) == 0) // check signature
         {
-            system_soft_reset();
+            System_SoftReset();
         }
     }
 
     return;
 }
 
-void system_soft_reset()
+void System_SoftReset()
 {
     SoundInterface_ResetAPU(); // Reset the SPC too
-    system_reset();
+    System_Reset();
 
     return;
 }
 
 // Call this to align to vblank
-void system_align_to_vblank_start()
+void System_AlignToVblank()
 {
     while ((REG_HVBJOY & VBL_READY) != VBL_READY)
     {

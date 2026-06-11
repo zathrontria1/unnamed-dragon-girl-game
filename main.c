@@ -24,28 +24,28 @@
 
 int main()
 {
-    system_init_regs(); // Display will be turned off within this
-    system_init_wram_functions(); // Write opcodes for WRAM functions
+    System_Init_CpuRegs(); // Display will be turned off within this
+    System_Init_WramFunctions(); // Write opcodes for WRAM functions
     
     rand_array[0] = 1; // Set the seed here
 
-    system_display_splash(); // A good amount of init is here.
+    System_DisplayStartupSplash(); // A good amount of init is here.
     
     system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_FADEIN);
     system_target_routine = ROUTINE_GAMELOOP;
 
-    system_setup_tilemap_display(system_target_routine);
-    system_init_display(system_target_routine);
+    System_Init_TilemapSettings(system_target_routine);
+    System_Init_DisplaySettings(system_target_routine);
 
     HdmaEngine_EnableHdma();
 
     SoundInterface_PlayMusic(); 
     
-    system_interrupt_enable();
+    System_EnableInterrupts();
     
     while (1)
     {   
-        system_wait_vblank();
+        System_WaitUntilVblank();
 
         void (*func)() = system_loop_func_ptr;
         func();
@@ -107,7 +107,7 @@ void * main_GetFunctionPointer(uint16_t routine)
 void main_Reset()
 {
     SoundInterface_ResetAPU();
-    system_reset();
+    System_Reset();
 
     // Unreachable
 

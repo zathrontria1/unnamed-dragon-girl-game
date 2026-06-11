@@ -7,27 +7,31 @@ extern uint8_t system_JMLCodeInWRAM[4];
 extern uint16_t input_pad0;
 extern uint16_t input_pad0_new;
 
-//void system_init_zp(void); // The custom startup code now wipes the entirety of ZP
-void system_init_regs(void);
-void system_init_wram_functions(void);
-void system_display_splash();
-void system_init(void);
-void system_init_partial(void);
-void system_init_graphics(void);
-void system_reset_bg_scroll_regs(void);
-void system_init_display(uint16_t routine);
-void system_setup_tilemap_display(uint16_t routine);
-void system_reset_ui_tilemap();
+// The custom startup code now wipes the entirety of ZP
 
-FORCE_INLINE void system_wait_vblank(void);
-void system_poll_input(void);
-FORCE_INLINE uint16_t system_check_for_key(enum KEYPAD_BITS k);
-FORCE_INLINE uint16_t system_check_for_any_key();
-FORCE_INLINE uint16_t system_check_for_key_hold(enum KEYPAD_BITS k);
-FORCE_INLINE void system_interrupt_enable(void);
-FORCE_INLINE void system_interrupt_disable(void);
-FORCE_INLINE void system_check_for_soft_reset(void);
-void system_soft_reset(void);
-void system_reset(void);
+void System_DisplayStartupSplash();
 
-void system_align_to_vblank_start();
+void System_Init(void);
+void System_Init_CpuRegs(void);
+void System_Init_WramFunctions(void);
+void System_Init_Graphics(void);
+void System_Init_BgScroll(void);
+void System_Init_DisplaySettings(uint16_t routine);
+void System_Init_TilemapSettings(uint16_t routine);
+void System_Init_UiTilemap();
+
+void System_Init_Partial(void);
+
+FORCE_INLINE void System_WaitUntilVblank(void);
+void System_GetInput(void);
+FORCE_INLINE uint16_t System_CheckKey(enum KEYPAD_BITS k);
+FORCE_INLINE uint16_t System_CheckKeyAny();
+FORCE_INLINE uint16_t System_CheckKeyHeld(enum KEYPAD_BITS k);
+
+FORCE_INLINE void System_EnableInterrupts(void);
+FORCE_INLINE void System_DisableInterrupts(void);
+FORCE_INLINE void System_CheckSoftReset(void);
+void System_SoftReset(void);
+void System_Reset(void);
+
+void System_AlignToVblank();

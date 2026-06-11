@@ -132,7 +132,7 @@ void loop_subscreen_top()
         }
 
         // Perform menu navigation
-        if (system_check_for_key(KEY_UP))
+        if (System_CheckKey(KEY_UP))
         {
             if (subscreen_selection == 0)
             {
@@ -144,7 +144,7 @@ void loop_subscreen_top()
             }
             SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
         }
-        else if (system_check_for_key(KEY_DOWN))
+        else if (System_CheckKey(KEY_DOWN))
         {
             if (subscreen_selection >= subscreen_bottom_entry)
             {
@@ -171,7 +171,7 @@ void loop_subscreen_top()
 
         bool temp_exit_subscreen = false;
 
-        if (system_check_for_key(KEY_A))
+        if (System_CheckKey(KEY_A))
         {
             if (subscreen_items_toplevel[subscreen_selection].action == MENUACTION_OPENSUBSCREEN)
             {
@@ -227,7 +227,7 @@ void loop_subscreen_top()
             }
         }
 
-        if (system_check_for_key(KEY_X) || system_check_for_key(KEY_B) || temp_exit_subscreen)
+        if (System_CheckKey(KEY_X) || System_CheckKey(KEY_B) || temp_exit_subscreen)
         {
             // Restore CGADSUB
             shadow_cgadsub = subscreen_cgadsub_copy; 
@@ -328,7 +328,7 @@ void loop_subscreen_profile()
     else
     {
         // Perform menu navigation
-        if (system_check_for_key(KEY_UP))
+        if (System_CheckKey(KEY_UP))
         {
             if (subscreen_selection == 0)
             {
@@ -340,7 +340,7 @@ void loop_subscreen_profile()
             }
             SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
         }
-        else if (system_check_for_key(KEY_DOWN))
+        else if (System_CheckKey(KEY_DOWN))
         {
             if (subscreen_selection >= subscreen_bottom_entry)
             {
@@ -373,7 +373,7 @@ void loop_subscreen_profile()
 
         bool temp_exit_subscreen = false;
 
-        if (system_check_for_key(KEY_A))
+        if (System_CheckKey(KEY_A))
         {
             if (subscreen_items_profile[subscreen_selection].action == MENUACTION_OPENSUBSCREEN)
             {
@@ -412,7 +412,7 @@ void loop_subscreen_profile()
             }
         }
 
-        if (system_check_for_key(KEY_B) || temp_exit_subscreen)
+        if (System_CheckKey(KEY_B) || temp_exit_subscreen)
         {
             SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
 
@@ -443,7 +443,7 @@ void loop_subscreen_profile_save_last_sprite_page()
     {
         for (int i = 0; i < 8; i++)
         {
-            system_align_to_vblank_start();
+            System_AlignToVblank();
 
             DmaSystem_CopyFromVramToWram(0x7000 + (i * 0x200), 0x007fe000 + (i * 0x0400), 1024);
         }
@@ -452,7 +452,7 @@ void loop_subscreen_profile_save_last_sprite_page()
     {
         for (int i = 0; i < 2; i++)
         {
-            system_align_to_vblank_start();
+            System_AlignToVblank();
 
             DmaSystem_CopyFromVramToWram(0x7000 + (i * 0x800), 0x007fe000 + (i * 0x1000), 4096);
         }
@@ -471,7 +471,7 @@ void loop_subscreen_profile_upload_profile_picture()
     {
         for (int i = 0; i < 8; i++)
         {
-            system_align_to_vblank_start();
+            System_AlignToVblank();
 
             DmaSystem_CopyToVram((uint32_t)&data_sprite_player_portrait+ (i * 0x0400), 0x7000+(i * 0x200), 1024);
         }
@@ -480,7 +480,7 @@ void loop_subscreen_profile_upload_profile_picture()
     {
         for (int i = 0; i < 2; i++)
         {
-            system_align_to_vblank_start();
+            System_AlignToVblank();
 
             DmaSystem_CopyToVram((uint32_t)&data_sprite_player_portrait+ (i * 0x1000), 0x7000+(i * 0x800), 4096);
         }
@@ -499,7 +499,7 @@ void loop_subscreen_profile_restore_last_sprite_page()
     {
         for (int i = 0; i < 8; i++)
         {
-            system_align_to_vblank_start();
+            System_AlignToVblank();
 
             DmaSystem_CopyToVram(0x007fe000 + (i * 0x0400), 0x7000 + (i * 0x200), 1024);
         }
@@ -508,7 +508,7 @@ void loop_subscreen_profile_restore_last_sprite_page()
     {
         for (int i = 0; i < 2; i++)
         {
-            system_align_to_vblank_start();
+            System_AlignToVblank();
 
             DmaSystem_CopyToVram(0x007fe000 + (i * 0x1000), 0x7000 + (i * 0x800), 4096);
         }
@@ -685,7 +685,7 @@ void loop_subscreen_help()
     else
     {
         // Perform menu navigation
-        if (system_check_for_key(KEY_UP))
+        if (System_CheckKey(KEY_UP))
         {
             if (subscreen_selection == 0)
             {
@@ -698,7 +698,7 @@ void loop_subscreen_help()
             SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
             loop_subscreen_help_drawtext(true);
         }
-        else if (system_check_for_key(KEY_DOWN))
+        else if (System_CheckKey(KEY_DOWN))
         {
             if (subscreen_selection >= subscreen_bottom_entry)
             {
@@ -722,7 +722,7 @@ void loop_subscreen_help()
         SpriteEngine_ResetOam();
         SpriteEngine_PackOamHighTable();
 
-        if (system_check_for_key(KEY_B))
+        if (System_CheckKey(KEY_B))
         {
             SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
             subscreen_rendered = 0;
@@ -829,7 +829,7 @@ void loop_subscreen_resetconfirm()
     else
     {
         // Perform menu navigation
-        if (system_check_for_key(KEY_UP))
+        if (System_CheckKey(KEY_UP))
         {
             if (subscreen_selection == 0)
             {
@@ -841,7 +841,7 @@ void loop_subscreen_resetconfirm()
             }
             SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
         }
-        else if (system_check_for_key(KEY_DOWN))
+        else if (System_CheckKey(KEY_DOWN))
         {
             if (subscreen_selection >= subscreen_bottom_entry)
             {
@@ -866,7 +866,7 @@ void loop_subscreen_resetconfirm()
 
         bool temp_exit_subscreen = false;
 
-        if (system_check_for_key(KEY_A))
+        if (System_CheckKey(KEY_A))
         {
             if (subscreen_items_resetconfirm[subscreen_selection].action == MENUACTION_OPENSUBSCREEN)
             {
@@ -905,7 +905,7 @@ void loop_subscreen_resetconfirm()
             }
         }
 
-        if (system_check_for_key(KEY_B) || temp_exit_subscreen)
+        if (System_CheckKey(KEY_B) || temp_exit_subscreen)
         {
             SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
             subscreen_rendered = 0;
@@ -954,7 +954,7 @@ const struct menu_item subscreen_items_help[7] = {
 };
 
 const struct menu_item subscreen_items_resetconfirm[3] = {
-    {6, 112, MENUACTION_CALLFUNCTION, (void *)&system_soft_reset}, 
+    {6, 112, MENUACTION_CALLFUNCTION, (void *)&System_SoftReset}, 
     {6, 128, MENUACTION_EXITSUBSCREEN, 0}, 
 
     {255, 255, 0, 0}, 

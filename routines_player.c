@@ -172,9 +172,9 @@ void routines_player(struct game_object * o)
 
             uint16_t temp_is_dashing = 0;
 
-            if (system_check_for_key_hold(KEY_B))
+            if (System_CheckKeyHeld(KEY_B))
             {
-                if (!system_check_for_key_hold(KEY_Y))
+                if (!System_CheckKeyHeld(KEY_Y))
                 {
                     // Speed up the player if the player isn't attacking
                     o->state = STATE_MOVE_RUN;
@@ -186,7 +186,7 @@ void routines_player(struct game_object * o)
             }
 
             // Test for what attack the player is trying 
-            if (system_check_for_key(KEY_A))
+            if (System_CheckKey(KEY_A))
             {
                 // Punching
                 // Update the animation state
@@ -275,7 +275,7 @@ void routines_player(struct game_object * o)
                     }
                 }
             }
-            else if (system_check_for_key_hold(KEY_Y))
+            else if (System_CheckKeyHeld(KEY_Y))
             {
                 // Fire breath
                 // Update the animation state

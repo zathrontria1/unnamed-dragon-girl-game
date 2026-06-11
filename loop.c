@@ -114,7 +114,7 @@ void Loop_Game_Messagebox()
     if (!ui_show_message_finished)
     {
         // It hasn't, print the next character or the entire contents depending on the button pressed.
-        if (system_check_for_key(KEY_A))
+        if (System_CheckKey(KEY_A))
         {
             UserInterface_PrintText_All();
         }
@@ -126,7 +126,7 @@ void Loop_Game_Messagebox()
     else
     {
         // It has
-        if (system_check_for_key(KEY_A))
+        if (System_CheckKey(KEY_A))
         {
             SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
             
@@ -181,7 +181,7 @@ void Loop_Game()
         return;
     }
 
-    if (system_check_for_key(KEY_X))
+    if (System_CheckKey(KEY_X))
     {
         system_dont_count_lag = 1;
 
@@ -223,7 +223,7 @@ void Loop_Game()
     // Don't bother checking for input if the player is dying
     if (obj_player_pointer->state != STATE_DIE)
     {
-        if (system_check_for_key(KEY_SELECT))
+        if (System_CheckKey(KEY_SELECT))
         {
             // Let's try using the new alternate NMI part
             shadow_inidisp = 0x0f;
@@ -233,14 +233,14 @@ void Loop_Game()
             system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_MAPDISPLAY_INIT);
             system_target_routine = ROUTINE_MAPDISPLAY_INIT;
         }
-        else if (system_check_for_key(KEY_START))
+        else if (System_CheckKey(KEY_START))
         {
             system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_PAUSE);
             system_target_routine = ROUTINE_PAUSE;
 
             shadow_inidisp = 0x08;
         }
-        else if (system_check_for_key(KEY_L))
+        else if (System_CheckKey(KEY_L))
         {
             // Debug: Switch to new level
             shadow_inidisp = 0x0f;
@@ -274,7 +274,7 @@ void Loop_Game_Pause()
         snd_flame_playing = 0;
     }
     
-    if (system_check_for_key(KEY_START))
+    if (System_CheckKey(KEY_START))
     {
         system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_GAMELOOP);
         //system_current_routine = ROUTINE_GAMELOOP;
@@ -332,7 +332,7 @@ void Loop_Subscreen_MapDisplay_Init()
     }
 
     // Try to move as many things as possible before here.
-    system_interrupt_disable();
+    System_DisableInterrupts();
     REG_INIDISP = 0x8f;
 
     REG_HDMAEN = 0x00;
@@ -446,15 +446,15 @@ void Loop_Subscreen_MapDisplay_Init()
     system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_FADEIN);
     //system_current_routine = ROUTINE_FADEIN;
     
-    system_setup_tilemap_display(system_target_routine);
-    system_init_display(system_target_routine);
+    System_Init_TilemapSettings(system_target_routine);
+    System_Init_DisplaySettings(system_target_routine);
 
     shadow_inidisp = 0x00;
 
     system_use_alternate_nmi = 0;
     shadow_inidisp_change = 0;
 
-    system_interrupt_enable();
+    System_EnableInterrupts();
 
     return;
 }
@@ -519,7 +519,7 @@ void Loop_Subscreen_MapDisplay()
     SpriteEngine_PackOamHighTable();
 
     // Check for *any* key
-    if (system_check_for_any_key())
+    if (System_CheckKeyAny())
     {
         shadow_inidisp = 0x0f;
         system_use_alternate_nmi = 1;
@@ -558,24 +558,24 @@ void Loop_Game_ReloadScene()
     }
 
     // Try to move as many things as possible before here.
-    system_interrupt_disable();
+    System_DisableInterrupts();
     REG_INIDISP = 0x8f;
 
-    system_reset_bg_scroll_regs();
+    System_Init_BgScroll();
 
     // DMA just the background and BG3 tiles
     DmaSystem_CopyToVram(((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_MAP << 1)), TILEDATA_ADDR_GAME_MAP, 24576);
     DmaSystem_CopyToVram(((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_UI_2BPP << 1)), TILEDATA_ADDR_GAME_UI_2BPP, 8192);
     MapSystem_Tilemap_RegenerateTilemap();
-    system_reset_ui_tilemap();
+    System_Init_UiTilemap();
 
     system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_FADEIN);
     //system_current_routine = ROUTINE_FADEIN;
     system_target_routine = ROUTINE_GAMELOOP;
     
 
-    system_setup_tilemap_display(system_target_routine);
-    system_init_display(system_target_routine);
+    System_Init_TilemapSettings(system_target_routine);
+    System_Init_DisplaySettings(system_target_routine);
 
     Loop_Game_Partial();
 
@@ -588,7 +588,7 @@ void Loop_Game_ReloadScene()
 
     system_game_paused = 0;
     
-    system_interrupt_enable();
+    System_EnableInterrupts();
 
     return;
 }
@@ -621,7 +621,7 @@ void Loop_Game_NewLevel()
 {
     hdma_use_gradient = 0x0000;
     
-    system_init_partial();
+    System_Init_Partial();
     
     bool temp_level_reuses_vram_contents = LevelSystem_LoadLevel(level_data_ptr);
 
@@ -634,7 +634,7 @@ void Loop_Game_NewLevel()
     }
 
     // Try to move as many things as possible before here.
-    system_interrupt_disable();
+    System_DisableInterrupts();
     REG_INIDISP = 0x8f;
 
     REG_HDMAEN = 0x00;
@@ -651,8 +651,8 @@ void Loop_Game_NewLevel()
     system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_FADEIN);
     system_target_routine = ROUTINE_GAMELOOP;
 
-    system_setup_tilemap_display(system_target_routine);
-    system_init_display(system_target_routine);
+    System_Init_TilemapSettings(system_target_routine);
+    System_Init_DisplaySettings(system_target_routine);
 
     Loop_Game_Partial();
 
@@ -665,7 +665,7 @@ void Loop_Game_NewLevel()
 
     sram_save(0);
 
-    system_interrupt_enable();
+    System_EnableInterrupts();
 
     return;
 }
