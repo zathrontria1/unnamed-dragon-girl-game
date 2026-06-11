@@ -458,7 +458,12 @@ FORCE_INLINE void SoundInterface_AcknowledgeNop()
 
 void SoundInterface_PlaySfx(uint8_t sfx_id, int8_t pan)
 {
-    snd_defercmd_sfx_enable = false;
+    if (!SoundInterface_IsHigherPriority(sfx_id))
+    {
+        return;
+    }
+
+    snd_defercmd_sfx_enable = false; // Always disable the sfx enablement while changing variables
     
     snd_defercmd_sfx_use_extended_format = false;
 
@@ -486,7 +491,12 @@ void SoundInterface_PlaySfx_Internal(uint8_t sfx_id, int8_t pan)
 
 void SoundInterface_PlaySfx_Ex(uint8_t sfx_id, int8_t vol_l, int8_t vol_r, int8_t pitch)
 {
-    snd_defercmd_sfx_enable = false;
+    if (!SoundInterface_IsHigherPriority(sfx_id))
+    {
+        return;
+    }
+
+    snd_defercmd_sfx_enable = false; // Always disable the sfx enablement while changing variables
 
     snd_defercmd_sfx_use_extended_format = true;
 
@@ -527,7 +537,7 @@ void SoundInterface_PlaySfx_Ex_Internal(uint8_t sfx_id, int8_t vol_l, int8_t vol
 // stop an SFX
 void SoundInterface_StopSfx(uint8_t sfx_id)
 {
-    snd_defercmd_sfx_stop_enable = false;
+    snd_defercmd_sfx_stop_enable = false; // Always disable the sfx enablement while changing variables
 
     snd_defercmd_sfx_stop_sfx_id = sfx_id;
 
