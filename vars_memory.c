@@ -72,8 +72,7 @@ ZP uint8_t shadow_coldata_b;
 ZP uint8_t shadow_stat77;
 
 NEAR union oam_buffer shadow_oam;
-
-union cgram_full shadow_cgram; // 256 palette entries, 2 bytes wide each
+NEAR union cgram_full shadow_cgram; // 256 palette entries, 2 bytes wide each
 
 // Event flags
 uint8_t event_flags_global[EVENT_FLAG_GLOBAL_MAX];
@@ -114,8 +113,3 @@ uint16_t bg_scroll_suppress_interpolation_state_change;
 // Fixed sprite tile anims
 uint16_t ani_bg_frame_coin;
 uint8_t * ani_bg_addr_coin;
-
-// Palette anims, non-HDMA
-uint16_t pal_ani_entries[8][2]; // Just enough for the magic circle
-uint16_t pal_ani_sel;
-

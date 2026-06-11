@@ -7,6 +7,9 @@
 
 #include "ani_pal.h"
 
+NEAR uint16_t pal_ani_entries[8][2]; // Just enough for the magic circle
+uint16_t pal_ani_sel;
+
 /*
     Sets the palette entry based on current frame
 
