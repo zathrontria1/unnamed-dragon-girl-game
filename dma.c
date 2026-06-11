@@ -368,7 +368,7 @@ void DmaSystem_UpdateFrameTiles()
 }
 
 // (1 << split count) * DMA_QUEUE_OVERHEAD
-const uint16_t const_lut_dma_split_lookup[6] = {
+NEAR const uint16_t const_lut_dma_split_lookup[6] = {
     (1 << 0) * DMA_QUEUE_OVERHEAD, 
     (1 << 1) * DMA_QUEUE_OVERHEAD, 
     (1 << 2) * DMA_QUEUE_OVERHEAD, 
