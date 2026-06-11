@@ -47,10 +47,6 @@ uint16_t snd_stream_current_block;
     APU0 should be used as echo/sync byte even with multi byte transfers.
 
     For block transfers, transfer ends are implicit.
-
-    When the SPC is ready to receive a new command,
-    APU0 will be set to 0xff
-    APU1-3 will be set to 0x000000
 */
 
 void SoundInterface_StartSoundEngine()
@@ -316,114 +312,6 @@ void SoundInterface_StartSoundEngine()
     return;
 }
 
-/*
-#if VBCC_ASM == 1
-    NO_INLINE void SoundInterface_UploadData_3byte(uint8_t * data_ptr, uint16_t len)
-#else
-    void SoundInterface_UploadData_3byte(uint8_t * data_ptr, uint16_t chunk_len)
-#endif
-{
-    // Note: the length passed is the chunk length.
-
-    // i compare with size of the binary blob
-    // May need to change i to exactly 0 and no offset on compared size
-    // when implementing actual driver.
-
-    #if VBCC_ASM == 1
-         __asm(
-            "\ta16\n"
-            "\tx16\n"
-
-            "\tphy\n"
-
-            "\tpei (r0)\n"
-            "\tpei (r1)\n"
-            "\tpei (r2)\n"
-            "\tpei (r3)\n"
-            "\tpei (r4)\n"
-            "\tpei (r5)\n"
-            "\tpei (r6)\n"
-
-            "\tsta r0\n" // Data pointer 0
-            "\tstx r0+2\n" // Bank bytes
-            "\tstx r3+2\n"
-            "\tstx r5+2\n"
-
-            "\tlda 20,s\n" // Length of transfer
-            "\tbeq .end_sound\n"
-            "\tsta r2\n" 
-            "\tclc\n" 
-            "\tadc r0\n"
-            "\tsta r3\n" // Data pointer 1. Note that it won't cross pointers.
-            "\tadc r2\n"
-            "\tsta r5\n" // Data pointer 2
-            
-            "\tldy #0\n"
-
-            "\tsep #$20\n"
-            "\ta8\n"
-        ".write_apu_byte:\n"
-            "\tlda [r0],y\n"
-            "\tsta 8513\n"
-            "\tlda [r3],y\n"
-            "\tsta 8514\n"
-            "\tlda [r5],y\n"
-            "\tsta 8515\n"
-            "\ttya\n"
-            "\tsta 8512\n"
-        ".check_ack:\n"
-            "\tcmp 8512\n"
-            "\tbne .check_ack\n"
-
-            "\tiny\n"
-            "\tcpy r2\n"
-            "\tbcc .write_apu_byte\n"
-
-            "\ta16\n"
-            "\trep #$20\n"
-        ".end_sound:\n"
-            "\tply\n"
-            "\tsty r6\n"
-            "\tply\n"
-            "\tsty r5\n"
-            "\tply\n"
-            "\tsty r4\n"
-            "\tply\n"
-            "\tsty r3\n"
-            "\tply\n"
-            "\tsty r2\n"
-            "\tply\n"
-            "\tsty r1\n"
-            "\tply\n"
-            "\tsty r0\n"
-
-            "\tply\n"
-        );
-    #else
-        uint8_t * data_ptr_2 = (uint8_t *)(data_ptr + chunk_len);
-        uint8_t * data_ptr_3 = (uint8_t *)(data_ptr + chunk_len + chunk_len);
-        uint8_t temp_internal_counter = 0x00;
-
-        for (uint16_t i = 0; i < chunk_len; i += 2)
-        {
-            REG_APU01 = *data_ptr++;
-            REG_APU02 = *data_ptr_2++;
-            REG_APU03 = *data_ptr_3++;
-
-            REG_APU00 = temp_internal_counter;
-
-            while (REG_APU00 != temp_internal_counter)
-            {
-                ; // Wait for acknowledgement
-            }
-
-            temp_internal_counter++;
-        }
-    #endif
-    return;
-}
-    */
-
 FORCE_INLINE void SoundInterface_AcknowledgeBusy(bool ignore_busy)
 {
     if (!ignore_busy)
@@ -617,10 +505,6 @@ void SoundInterface_UploadSample(struct sample_list_entry * s)
         temp_len++;
     }
 
-    /*while (temp_len % 3 != 0)
-    {
-        temp_len++;
-    }*/
     REG_APU0203 = temp_len;
 
     REG_APU01 = SND_CMD_DATA_SAMPLE_UPLOAD; // Initial
@@ -686,11 +570,8 @@ void SoundInterface_UploadSample(struct sample_list_entry * s)
     ptr += 2;
     
     uint16_t temp_chunk_len = temp_len >> 1;
-    //uint16_t temp_chunk_len = temp_len / 3;
 
-    //SoundInterface_UploadData(ptr, s->len);
     SoundInterface_UploadData_2byte(ptr, temp_chunk_len);
-    //SoundInterface_UploadData_3byte(ptr, temp_chunk_len); // Provide the adjusted length
 
     uint8_t temp_lobyte = (uint8_t)(REG_APU00 + 2);
     REG_APU00 = temp_lobyte; 
@@ -839,7 +720,6 @@ void SoundInterface_UploadMusicSequence(struct seq_command * s, uint8_t track)
     
     uint16_t temp_chunk_len = temp_len >> 1;
 
-    //SoundInterface_UploadData(ptr, temp_len);
     SoundInterface_UploadData_2byte(ptr, temp_chunk_len);
 
     uint8_t temp_lobyte = (uint8_t)(REG_APU00 + 2);
@@ -931,7 +811,6 @@ void SoundInterface_PlayStream(uint8_t * ptr, uint16_t len, bool loop)
     snd_stream_loop = loop;
 
     // Reuse the current block indicator to prevent stream errors
-    //snd_stream_current_block = 0;
     snd_stream_enable = true; // MUST BE SET LAST
 
     return;
