@@ -1,5 +1,8 @@
-extern uint8_t ani_bg_strip[16384];
-extern uint8_t ani_bg_frame[8192];
+//extern uint8_t ani_bg_strip[16384];
+//extern uint8_t ani_bg_frame[8192];
+
+#define ANI_BG_STRIP_ADDR 0x007f0000
+#define ANI_BG_FRAME_ADDR 0x007f4000
 
 // Background tile anims
 // Water animations are updated per 512byte row
@@ -22,3 +25,5 @@ void AniSystem_BgTile_UpdateFrame(void);
 
 void AniSystem_BgTile_SetStripPointer(uint8_t * ptr);
 void AniSystem_BgTile_SetFramePointer(uint8_t * ptr);
+
+void AniSystem_BgTile_Setup(uint8_t * ptr_strip, uint8_t * ptr_frame);

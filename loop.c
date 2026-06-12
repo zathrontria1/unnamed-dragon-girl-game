@@ -569,10 +569,12 @@ void Loop_Game_ReloadScene()
     MapSystem_Tilemap_RegenerateTilemap();
     System_Init_UiTilemap();
 
+    // Re-copy the animated background tiles
+    AniSystem_BgTile_Setup((uint8_t *)&data_bg_dungeon_anim_water_lz4, (uint8_t *)&data_bg_dungeon_anim_torch_lz4);
+
     system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_FADEIN);
     //system_current_routine = ROUTINE_FADEIN;
     system_target_routine = ROUTINE_GAMELOOP;
-    
 
     System_Init_TilemapSettings(system_target_routine);
     System_Init_DisplaySettings(system_target_routine);
@@ -644,6 +646,9 @@ void Loop_Game_NewLevel()
     {
         DmaSystem_CopyToVram(((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_MAP << 1)), TILEDATA_ADDR_GAME_MAP, 24576);
         DmaSystem_CopyToVram(((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_UI_2BPP << 1)), TILEDATA_ADDR_GAME_UI_2BPP, 8192);
+
+        // Re-copy the animated background tiles
+        AniSystem_BgTile_Setup((uint8_t *)&data_bg_dungeon_anim_water_lz4, (uint8_t *)&data_bg_dungeon_anim_torch_lz4);
     }
     
     MapSystem_Tilemap_RegenerateTilemap();

@@ -74,15 +74,8 @@ bool LevelSystem_LoadLevel(const struct level_data * level)
     obj_instantiate_spawners((const struct obj_list_entry_spawners*)level->spawner_ptr);
 
     obj_instantiate_interactables((const struct obj_list_entry_interactable*)level->interactable_ptr);
-    
-    // initialize global DMA tile animation
-    // TODO: currently hardcoded. In the future, pointers may be part of map data.
-    LZ4_UnpackToWRAM((uint8_t *)&data_bg_dungeon_anim_water_lz4, (uint32_t)&ani_bg_strip);
-    LZ4_UnpackToWRAM((uint8_t *)&data_bg_dungeon_anim_torch_lz4, (uint32_t)&ani_bg_frame);
 
-    AniSystem_BgTile_SetStripPointer((uint8_t *)&ani_bg_strip);
-    AniSystem_BgTile_SetFramePointer((uint8_t *)&ani_bg_frame);
-
+    // initialize coin DMA tile animation
     ani_bg_addr_coin = (uint8_t *)&data_sprite_drop_coin;
 
     // If the pointers point to the same thing, assume that a full reload is needed

@@ -20,6 +20,7 @@
 #include "level.h"
 #include "gfx.h"
 
+#include "ani_bg.h"
 #include "ani_pal.h"
 #include "hdma.h"
 
@@ -253,6 +254,10 @@ void System_DisplayStartupSplash()
 
     // DMA graphics in its entirety
     DmaSystem_CopyToVram(0x007f0000, 0x0000, 0);
+
+    // Initialize global DMA tile animation
+    // TODO: currently hardcoded. In the future, pointers may be part of map data.
+    AniSystem_BgTile_Setup((uint8_t *)&data_bg_dungeon_anim_water_lz4, (uint8_t *)&data_bg_dungeon_anim_torch_lz4);
 
     // Finish initializing graphics
     System_Init_Graphics();

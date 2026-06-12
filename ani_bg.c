@@ -4,11 +4,11 @@
 #include "vars.h"
 
 #include "ani_bg.h"
-
+#include "lz4.h"
 
 // Decompress animation strips and frames for backgrounds here
-uint8_t ani_bg_strip[16384];
-uint8_t ani_bg_frame[8192];
+//uint8_t ani_bg_strip[16384];
+//uint8_t ani_bg_frame[8192];
 
 // These are handled separately compared to normal DMA
 // to make them possible to run on odd frames.
@@ -115,6 +115,18 @@ void AniSystem_BgTile_SetFramePointer(uint8_t * ptr)
     ani_bg_frame_tallbg = 0;
 
     ani_bg_tallbg_dma_ready = 0;
+
+    return;
+}
+
+// Call to decompress and set up background tiles
+void AniSystem_BgTile_Setup(uint8_t * ptr_strip, uint8_t * ptr_frame)
+{
+    LZ4_UnpackToWRAM(ptr_strip, ANI_BG_STRIP_ADDR);
+    LZ4_UnpackToWRAM(ptr_frame, ANI_BG_FRAME_ADDR);
+
+    AniSystem_BgTile_SetStripPointer((uint8_t *)ANI_BG_STRIP_ADDR);
+    AniSystem_BgTile_SetFramePointer((uint8_t *)ANI_BG_FRAME_ADDR);
 
     return;
 }
