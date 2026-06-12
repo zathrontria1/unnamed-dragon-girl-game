@@ -131,7 +131,7 @@ bool LevelSystem_LoadLevel(const struct level_data * level)
 }
 
 /*
-    Map graphics that require fblank go here
+    Map graphics that need to be copied in fblank to VRAM later go here
 */
 void LevelSystem_LoadLevelGraphics(const struct level_data * level)
 {
