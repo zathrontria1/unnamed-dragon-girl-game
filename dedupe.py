@@ -31,6 +31,10 @@ def main():
 		'--bpp4', action='store_true',
 		help='Input tile data is 4bpp (32 bytes per tile)')
     
+    bitdepth_args.add_argument(
+		'--bpp8', action='store_true',
+		help='Input tile data is 8bpp (64 bytes per tile)')
+    
     cmd_args = parser.parse_args()
 
     def print(*args, **kwargs):
@@ -43,6 +47,8 @@ def main():
 
     if cmd_args.bpp2:
         tile_size = 16
+    elif cmd_args.bpp8:
+        tile_size = 64
 
     dictionary_file = bytearray()
 
@@ -100,7 +106,7 @@ def main():
                 lookup_file += str(offset)
                 lookup_file += ", "
 
-            input_file.seek(448, os.SEEK_CUR)
+            input_file.seek((tile_size * 14), os.SEEK_CUR)
 
             tile = input_file.read(tile_size)
 
