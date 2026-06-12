@@ -1,10 +1,15 @@
+struct tile_4bpp 
+{
+    uint8_t bytes[32];
+};
+
 // Lookup tables for animations
 // With flipping
 extern NEAR const uint16_t const_ani_lut_basic[56];
 extern NEAR const uint16_t const_ani_lut_lizardman[56];
 extern NEAR const uint16_t const_ani_lut_frame_byteoffsets_16[512];
 
-extern NEAR uint16_t buf_player_sprite_tiles[64];
+extern NEAR struct tile_4bpp buf_player_sprite_tiles[4];
 
 extern uint16_t buf_player_prev_frame;
 

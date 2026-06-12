@@ -7,7 +7,7 @@
 #include "spr.h"
 #include "system.h"
 
-NEAR uint16_t buf_player_sprite_tiles[64];
+NEAR struct tile_4bpp buf_player_sprite_tiles[4];
 
 uint16_t buf_player_prev_frame;
 
@@ -596,7 +596,7 @@ uint8_t * AniSystem_GetCompressedFrame(const uint8_t * data, const uint16_t * lo
     uint32_t lookup_adjusted;
     uint16_t * lookup_ptr;
 
-    uint8_t * ptr_read;
+    struct tile_4bpp * ptr_read;
 
     uint8_t * ptr_return_val;
 
@@ -618,9 +618,9 @@ uint8_t * AniSystem_GetCompressedFrame(const uint8_t * data, const uint16_t * lo
 
         lookup_adjusted = *lookup_ptr;
 
-        ptr_read = (uint8_t *)((uint32_t)data + lookup_adjusted);
+        ptr_read = (struct tile_4bpp *)((uint32_t)data + lookup_adjusted);
 
-        System_CopyBlock(ptr_read, (uint8_t *)&buf_player_sprite_tiles[i << 4], 32);
+        buf_player_sprite_tiles[i] = *ptr_read;
 
         lookup++;
     }
