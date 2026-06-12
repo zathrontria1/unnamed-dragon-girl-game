@@ -6,10 +6,6 @@
 #include "ani_bg.h"
 #include "lz4.h"
 
-// Decompress animation strips and frames for backgrounds here
-//uint8_t ani_bg_strip[16384];
-//uint8_t ani_bg_frame[8192];
-
 // These are handled separately compared to normal DMA
 // to make them possible to run on odd frames.
 uint16_t ani_bg_frame_water;

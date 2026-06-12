@@ -1,6 +1,7 @@
-//extern uint8_t ani_bg_strip[16384];
-//extern uint8_t ani_bg_frame[8192];
-
+// These are locations the game uses to decompress graphics data.
+// This means that before running the animated tile decompressor
+// any contents in the first 24KB should
+// be copied to VRAM
 #define ANI_BG_STRIP_ADDR 0x007f0000
 #define ANI_BG_FRAME_ADDR 0x007f4000
 
