@@ -154,17 +154,13 @@ void LevelSystem_LoadLevelTileset(const struct level_data * level)
 {
     // Copy fixed sprite graphics
     LZ4_UnpackToWRAM((void *)&data_sprite_fixed_lz4, ((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_SPRITES << 1))); 
-    //LZ4_UnpackToVRAM((void *)&data_sprite_fixed_lz4, TILEDATA_ADDR_SPRITES);
 
     // Copy the background graphics into WRAM
     LZ4_UnpackToWRAM(level->tileset_tiles_lz4, ((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_MAP << 1))); 
-    //LZ4_UnpackToVRAM(level->tileset_tiles_lz4, TILEDATA_ADDR_GAME_MAP);
 
     // Copy the UI graphics into WRAM
     LZ4_UnpackToWRAM((void *)&data_ui_fixed_4bpp_lz4, ((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_UI_4BPP << 1))); 
-    //LZ4_UnpackToVRAM((void *)&data_ui_fixed_4bpp_lz4, TILEDATA_ADDR_GAME_UI_4BPP);
     LZ4_UnpackToWRAM((void *)&data_ui_fixed_2bpp_lz4, ((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_UI_2BPP << 1))); 
-    //LZ4_UnpackToVRAM((void *)&data_ui_fixed_2bpp_lz4, TILEDATA_ADDR_GAME_UI_2BPP);
 
     return;
 }
