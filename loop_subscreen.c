@@ -473,7 +473,7 @@ void loop_subscreen_profile_upload_profile_picture()
         {
             System_AlignToVblank();
 
-            DmaSystem_CopyToVram((uint32_t)&data_sprite_player_portrait+ (i * 0x0400), 0x7000+(i * 0x200), 1024);
+            DmaSystem_CopyToVram((uint32_t)&data_spr_player_portrait+ (i * 0x0400), 0x7000+(i * 0x200), 1024);
         }
     }
     else
@@ -482,7 +482,7 @@ void loop_subscreen_profile_upload_profile_picture()
         {
             System_AlignToVblank();
 
-            DmaSystem_CopyToVram((uint32_t)&data_sprite_player_portrait+ (i * 0x1000), 0x7000+(i * 0x800), 4096);
+            DmaSystem_CopyToVram((uint32_t)&data_spr_player_portrait+ (i * 0x1000), 0x7000+(i * 0x800), 4096);
         }
     }
 

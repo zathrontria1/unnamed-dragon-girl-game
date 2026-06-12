@@ -572,15 +572,17 @@ void routines_player(struct game_object * o)
         }
     }
 
-    uint8_t * temp_addr = AniSystem_GetPlayerFrame(o);
-
+    uint8_t * temp_addr = AniSystem_GetPlayerFrame(o); // This will cause a compressed frame fetch
+    
     if ((temp_addr != o->struct_data.npc_data.ani.last_address))
     {
         // Save the requested frame into object's data
         // for comparison and in case it fails
         o->struct_data.npc_data.ani.last_address = temp_addr;
 
-        if (DmaSystem_AddItemToQueue(temp_addr, 0x6000, 128, VRAM_INCHIGH, 1))
+        //if (DmaSystem_AddItemToQueue(temp_addr, 0x6000, 128, VRAM_INCHIGH, 1))
+        DmaSystem_AddItemToQueue((uint8_t *)&buf_player_sprite_tiles, 0x6000, 64, VRAM_INCHIGH, 0);
+        if (DmaSystem_AddItemToQueue((uint8_t *)&buf_player_sprite_tiles+64, 0x6100, 64, VRAM_INCHIGH, 0))
         {
             o->struct_data.npc_data.ani.last_dmafailed = 1;
         }
@@ -592,7 +594,10 @@ void routines_player(struct game_object * o)
     else if ((o->struct_data.npc_data.ani.last_dmafailed))
     {
         // The previous DMA failed. Attempt it again.
-        if (DmaSystem_AddItemToQueue(o->struct_data.npc_data.ani.last_address, 0x6000, 128, VRAM_INCHIGH, 1) == 0)
+
+        //if (DmaSystem_AddItemToQueue(o->struct_data.npc_data.ani.last_address, 0x6000, 128, VRAM_INCHIGH, 1) == 0)
+        DmaSystem_AddItemToQueue((uint8_t *)&buf_player_sprite_tiles, 0x6000, 64, VRAM_INCHIGH, 0);
+        if (DmaSystem_AddItemToQueue((uint8_t *)&buf_player_sprite_tiles+64, 0x6100, 64, VRAM_INCHIGH, 0) == 0)
         {
             o->struct_data.npc_data.ani.last_dmafailed = 0;
         }     

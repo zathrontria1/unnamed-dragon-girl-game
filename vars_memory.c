@@ -7,6 +7,9 @@
 #include "maps/map_lut_dungeon_col.h"
 #include "maps/map_debug0.h"
 #include "maps/map_debug1.h"
+
+#include "sprites/spr_player_lut.h"
+
 #include "data_tables.h"
 #include "data_tables_lut.h"
 #include "data_metaspr_list.h"

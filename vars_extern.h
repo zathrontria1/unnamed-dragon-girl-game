@@ -27,13 +27,18 @@ extern const uint8_t data_ui_dynamic_hp[]; // hp bar pieces
 extern const uint8_t data_ui_dynamic_textadvance[]; // text advance cursor
 extern const uint8_t data_ui_dynamic_selectcursor[]; // selection cursor in text box
 
-extern const uint8_t data_sprite_player[]; // player
-extern const uint8_t data_sprite_player_portrait[]; // player portrait
-extern const uint8_t data_sprite_fixed_lz4[]; // permanently loaded effects/system
-extern const uint8_t data_sprite_slime[]; // slime
-extern const uint8_t data_sprite_lizardman[]; // lizardman
-extern const uint8_t data_sprite_spawn_placeholder[]; // spawning placeholder
-extern const uint8_t data_sprite_drop_coin[]; // dropped coins
+//extern const uint8_t data_sprite_player[]; // player
+
+// TODO: compression scheme
+extern const uint8_t data_spr_player_dd[]; // player deduplicated tiles
+extern const uint16_t data_spr_player_lut[]; // player tile lookup
+
+extern const uint8_t data_spr_player_portrait[]; // player portrait
+extern const uint8_t data_spr_fixed_lz4[]; // permanently loaded effects/system
+extern const uint8_t data_spr_slime[]; // slime
+extern const uint8_t data_spr_lizardman[]; // lizardman
+extern const uint8_t data_spr_spawn_placeholder[]; // spawning placeholder
+extern const uint8_t data_spr_drop_coin[]; // dropped coins
 
 extern const struct obj_list_entry_interactable data_interactables_debug0[];
 extern const struct obj_list_entry_interactable data_interactables_debug1[];

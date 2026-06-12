@@ -76,7 +76,7 @@ bool LevelSystem_LoadLevel(const struct level_data * level)
     obj_instantiate_interactables((const struct obj_list_entry_interactable*)level->interactable_ptr);
 
     // initialize coin DMA tile animation
-    ani_bg_addr_coin = (uint8_t *)&data_sprite_drop_coin;
+    ani_bg_addr_coin = (uint8_t *)&data_spr_drop_coin;
 
     // If the pointers point to the same thing, assume that a full reload is needed
     if (level_data_ptr_prev == level_data_ptr)
@@ -146,7 +146,7 @@ void LevelSystem_LoadLevelGraphics(const struct level_data * level)
 void LevelSystem_LoadLevelTileset(const struct level_data * level)
 {
     // Copy fixed sprite graphics
-    LZ4_UnpackToWRAM((void *)&data_sprite_fixed_lz4, ((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_SPRITES << 1))); 
+    LZ4_UnpackToWRAM((void *)&data_spr_fixed_lz4, ((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_SPRITES << 1))); 
 
     // Copy the background graphics into WRAM
     LZ4_UnpackToWRAM(level->tileset_tiles_lz4, ((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_MAP << 1))); 

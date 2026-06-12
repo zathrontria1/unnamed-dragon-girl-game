@@ -5,6 +5,628 @@
 
 #include "ani.h"
 #include "spr.h"
+#include "system.h"
+
+NEAR uint16_t buf_player_sprite_tiles[64];
+
+uint16_t buf_player_prev_frame;
+
+/*
+    Animations item drop gravity, and draw a drop shadow if mid-air
+*/
+uint16_t AniSystem_AnimateDropGravity(struct game_object * o)
+{
+    uint16_t grounded = 0;
+
+    if (!((o->pos.z.a == 0) && (o->delta.z.a == 0)))
+    {
+        
+        o->pos.z.a += o->delta.z.a;
+        o->delta.z.a -= (V_GRAVITY >> 1);
+
+        if (o->pos.z.a <= 0)
+        {
+            o->pos.z.a = 0;
+            o->delta.z.a = 0;
+
+            grounded = 1;
+        }
+    }
+
+    if (o->pos.z.a != 0)
+    {
+        // also draw a shadow if relevant
+        if ((o->uid & 0x0001) == ((uint16_t)system_frames_elapsed & 0x0001))
+        {
+            struct game_object temp;
+            temp.pos.x.a = o->pos.x.a;
+            temp.pos.y.a = o->pos.y.a;
+            temp.pos.z.a = 0;
+
+            uint16_t temp_tileattrib;
+            temp_tileattrib = 0x0e | PAL_FX_SHADOW << 9 | 2 << 12;
+
+            SpriteEngine_AddToBackLayer(&temp, temp_tileattrib);
+        }
+    }
+
+    return grounded;
+}
+
+uint8_t * AniSystem_GetPlayerFrame(struct game_object * o)
+{
+    // Return player sprite address based on given information
+    // State, facing
+    // sprites are in the order of down, up, right, left
+    // use a virtual tilenum system before finalizing.
+    uint16_t temp_tilenum = 0;
+
+    switch (o->state)
+    {
+        case STATE_IDLE:
+            break;
+        case STATE_MOVE_WALK:
+            temp_tilenum += 4;
+            break;
+        case STATE_MOVE_RUN:
+            temp_tilenum += 40;
+            break;
+        case STATE_ATTACK_BASIC:
+            temp_tilenum += 24;
+            break;
+        case STATE_ATTACK_BASIC_MOVE:
+            temp_tilenum += 32;
+            break;
+        case STATE_ATTACK_SPECIAL:
+            temp_tilenum += 12;
+            break;
+        case STATE_ATTACK_SPECIAL_MOVE:
+            temp_tilenum += 16;
+            break;
+        case STATE_HURT_NORMAL:
+            temp_tilenum += 48;
+            break;
+        case STATE_HURT_NORMAL_MOVE:
+            temp_tilenum += 52;
+            break;
+        case STATE_HURT_NORMAL_MOVE_RUN:
+            temp_tilenum += 60;
+            break;
+        case STATE_HURT_BURN:
+            temp_tilenum += 48;
+            break;
+        case STATE_HURT_BURN_MOVE:
+            temp_tilenum += 52;
+            break;
+        case STATE_ICON_NORMAL:
+            temp_tilenum += 68;
+            break;
+        case STATE_ICON_BLINK:
+            temp_tilenum += 69;
+            break;
+        case STATE_ICON_HURT:
+            temp_tilenum += 70;
+            break;
+        case STATE_ICON_SPECIAL:
+            temp_tilenum += 71;
+            break;
+        case STATE_DIE:
+            temp_tilenum += 72;
+            break;
+    }
+
+    if (o->state != STATE_DIE)
+    {
+        if (o->state < STATE_ICON_NORMAL)
+        {
+            if (o->state == STATE_IDLE || o->state == STATE_ATTACK_SPECIAL || o->state == STATE_HURT_NORMAL)
+            {
+                switch (o->facing)
+                {
+                    case FACING_DOWN:
+                        break;
+                    case FACING_UP:
+                        temp_tilenum += 1;
+                        break;
+                    case FACING_RIGHT:
+                        temp_tilenum += 2;
+                        break;
+                    case FACING_LEFT:
+                        temp_tilenum += 3;
+                        break;
+                }
+            }
+            else
+            {
+                switch (o->facing)
+                {
+                    case FACING_DOWN:
+                        break;
+                    case FACING_UP:
+                        temp_tilenum += 2;
+                        break;
+                    case FACING_RIGHT:
+                        temp_tilenum += 4;
+                        break;
+                    case FACING_LEFT:
+                        temp_tilenum += 6;
+                        break;
+                }
+            }
+
+            // Now add the frame offset.
+            temp_tilenum += o->struct_data.npc_data.ani.frame;
+        }
+    }
+    else
+    {
+        // Now add the frame offset.
+        // Still needed
+        temp_tilenum += o->struct_data.npc_data.ani.frame;
+    }
+
+    // Fetch the compressed frame
+    return AniSystem_GetCompressedFrame((const uint8_t *)&data_spr_player_dd, (const uint16_t *)&data_spr_player_lut, temp_tilenum);
+}
+
+uint8_t * AniSystem_GetDynamicFrame(struct game_object * o)
+{
+    switch (o->id)
+    {
+        case OBJID_SLIME:
+            return AniSystem_GetDynamicFrame_Slime(o);
+        case OBJID_LIZARDMAN:
+            return AniSystem_GetDynamicFrame_Lizardman(o);
+        default:
+            return 0;
+    }
+}
+
+uint8_t * AniSystem_GetDynamicFrame_Stateless(struct game_object * o)
+{
+    switch (o->id)
+    {
+        case OBJID_BUBBLE_E:
+            return AniSystem_GetDynamicFrame_Bubble(o);
+        case OBJID_ARROW_E:
+            return AniSystem_GetDynamicFrame_Arrow(o);
+        default:
+            return 0;
+    }
+}
+
+// Return offset to a fixed sprite tilenum based on given information
+// object ID and frame only
+// shorter version for light objects
+FORCE_INLINE uint16_t AniSystem_GetFixedFrame_Fast(struct game_object * o)
+{
+    switch (o->id)
+    {
+        case OBJID_FX_SMOKE:
+            return 6+(o->struct_data.npc_data.ani.frame << 1);
+        case OBJID_FIREBALL:
+            return 2+(o->struct_data.npc_data.ani.frame << 1);
+        case OBJID_SYS_IMPACT:
+            return 10;
+        case OBJID_SYS_TARGET:
+            return 14; 
+        default:
+            return 0;
+    }
+}
+
+#if VBCC_ASM == 1
+NO_INLINE uint8_t * AniSystem_GetDynamicFrame_Bubble(struct game_object * o)
+#else
+uint8_t * AniSystem_GetDynamicFrame_Bubble(struct game_object * o)
+#endif
+{
+    #if VBCC_ASM == 1
+        __asm(
+            "\ta16\n"
+            "\tx16\n"
+
+            "\ttax\n"
+            // 30 + Frame Number
+            // Current frame is byte 64
+            "\tlda #30\n"
+            "\tclc\n"
+            "\tadc $7e0040,x\n" // current frame. now we have the tile num in virtual space
+
+            "\ttxy\n"
+            "\tasl\n" // This clears the carry
+            "\ttax\n"
+            "\tlda >_const_ani_lut_frame_byteoffsets_16,x\n"
+            "\ttyx\n"
+
+            "\tadc #<_data_spr_slime\n"
+            "\tldx #^_data_spr_slime\n"
+
+            ".finish:\n"
+
+            "\trtl\n"
+        );
+    #else
+        // use a virtual tilenum system before finalizing.
+        uint16_t temp_tilenum = 30;
+
+        // Now add the frame offset.
+        temp_tilenum += o->struct_data.npc_data.ani.frame;
+
+        // Calculate the address
+        return (uint8_t *)((uint32_t)&data_spr_slime + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
+    #endif
+
+    return 0;
+}
+
+uint8_t * AniSystem_GetDynamicFrame_Arrow(struct game_object * o)
+{
+    // use a virtual tilenum system before finalizing.
+    // Arrow up is 32, arrow right is 36
+    bool hflip = false;
+    bool vflip = false;
+
+    uint8_t angle = o->angle + 64; // Angle offset
+    uint16_t temp_tilenum = 32;
+
+    // get the object angle
+    if (angle >= 240+8)
+    {
+        temp_tilenum = 32;
+    }
+    else if (angle >= 224+8)
+    {
+        temp_tilenum = 33;
+        hflip = true;
+    }
+    else if (angle >= 208+8)
+    {
+        temp_tilenum = 34;
+        hflip = true;
+    }
+    else if (angle >= 192+8)
+    {
+        temp_tilenum = 35;
+        hflip = true;
+    }
+    else if (angle >= 176+8)
+    {
+        temp_tilenum = 36;
+        hflip = true;
+    }
+    else if (angle >= 160+8)
+    {
+        temp_tilenum = 35;
+        hflip = true;
+        vflip = true;
+    }
+    else if (angle >= 144+8)
+    {
+        temp_tilenum = 34;
+        hflip = true;
+        vflip = true;
+    }
+    else if (angle >= 128+8)
+    {
+        temp_tilenum = 33;
+        hflip = true;
+        vflip = true;
+    }
+    else if (angle >= 112+8)
+    {
+        temp_tilenum = 32;
+        vflip = true;
+    }
+    else if (angle >= 96+8)
+    {
+        temp_tilenum = 33;
+        vflip = true;
+    }
+    else if (angle >= 80+8)
+    {
+        temp_tilenum = 34;
+        vflip = true;
+    }
+    else if (angle >= 64+8)
+    {
+        temp_tilenum = 35;
+        vflip = true;
+    }
+    else if (angle >= 48+8)
+    {
+        temp_tilenum = 36;
+    }
+    else if (angle >= 32+8)
+    {
+        temp_tilenum = 35;
+    }
+    else if (angle >= 16+8)
+    {
+        temp_tilenum = 34;
+    }
+    else if (angle >= 0+8)
+    {
+        temp_tilenum = 33;
+    }
+    else
+    {
+        temp_tilenum = 32;
+    }
+
+    uint32_t temp_addr = ((uint32_t)&data_spr_lizardman + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
+
+    if (hflip)
+    {
+        temp_addr |= 0x40000000; // Set second highest bit
+    }
+    if (vflip)
+    {
+        temp_addr |= 0x80000000; // Set highest bit
+    }
+
+    temp_addr |= ((uint32_t)temp_tilenum - 32l) << 24; // use 6 bits of the highest bytes to store the tile number minus 32
+
+    // Calculate the address
+    return (uint8_t *)temp_addr;
+}
+
+#if VBCC_ASM == 1
+NO_INLINE uint8_t * AniSystem_GetDynamicFrame_Slime(__reg("a/x") struct game_object * o)
+#else
+uint8_t * AniSystem_GetDynamicFrame_Slime(struct game_object * o)
+#endif
+{
+    #if VBCC_ASM == 1
+        __asm(
+            "\ta16\n"
+            "\tx16\n"
+
+            "\ttax\n"
+
+            "\tlda $7e001e,x\n"
+            "\tcmp #12\n"
+            "\tbne .not_spawning\n"
+
+            ".spawning:\n"
+                // Frame Number
+                // Current frame is byte 64
+                "\tlda $7e0040,x\n" // current frame. now we have the tile num in virtual space
+                "\tasl\n" // This clears the carry
+                "\ttax\n"
+                "\tlda >_const_ani_lut_frame_byteoffsets_16,x\n"
+                "\tadc #<_data_spr_spawn_placeholder\n"
+                "\tldx #^_data_spr_spawn_placeholder\n"
+
+                "\tbra .finish\n"
+
+            ".not_spawning:\n"
+                // (State * 4 + Facing + Frame Number)
+                // state is byte 30, facing is byte 32, current frame is byte 64
+                // The state value is still loaded at this point
+                "\tasl\n"
+                "\tasl\n" // Carry is cleared here
+                "\tadc $7e0020,x\n" // facing
+                
+                "\tasl\n" // Now we have the index to look into the lookup
+                "\ttxy\n"
+                "\ttax\n"
+                "\tlda >_const_ani_lut_basic, x\n"
+
+                // Transform this number
+                // (temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10)
+                "\ttyx\n"
+                "\tadc $7e0040,x\n" // current frame. now we have the tile num in virtual space
+
+                "\ttxy\n"
+                "\tasl\n" // This clears the carry
+                "\ttax\n"
+                "\tlda >_const_ani_lut_frame_byteoffsets_16,x\n"
+                "\ttyx\n"
+                
+                "\tadc #<_data_spr_slime\n" 
+
+                "\ttay\n"
+
+                // Test for sign flip
+                "\tlda $7e001e,x\n" // state
+                "\tcmp #13\n"
+                "\tbeq .no_flip\n"
+                "\tlda $7e0020,x\n" // facing
+                "\tcmp #3\n"
+                "\tbne .no_flip\n"
+                ".flip_x:\n"
+                    "\tlda #$8000\n"
+                    "\tora #^_data_spr_slime\n"
+                    "\ttax\n"
+                    "\tbra .finalize\n"
+                ".no_flip:\n"
+                    "\tldx #^_data_spr_slime\n"
+
+            ".finalize:\n"
+            "\ttya\n"
+
+            ".finish:\n"
+
+            "\trtl\n"
+        );
+    #else
+        // use a virtual tilenum system before finalizing.
+        uint16_t temp_tilenum = o->struct_data.npc_data.ani.frame; // add the frame offset.
+
+        if (o->state == STATE_SPAWNING)
+        {
+            return (uint8_t *)((uint32_t)&data_spr_spawn_placeholder + const_ani_lut_frame_byteoffsets_16[temp_tilenum]);
+            //return (uint8_t *)((uint32_t)&data_spr_spawn_placeholder + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
+        }
+        else
+        {
+            temp_tilenum += const_ani_lut_basic[(o->state << 2) + o->facing];
+
+            if ((o->facing == FACING_LEFT) && (o->state != STATE_DIE))
+            {
+                return (uint8_t *)(((uint32_t)&data_spr_slime + const_ani_lut_frame_byteoffsets_16[temp_tilenum]) | 0x80000000); // set the negative flag
+                //return (uint8_t *)(((uint32_t)&data_spr_slime + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10)) | 0x80000000); // set the negative flag
+            }
+            else
+            {
+                // Calculate the address
+                return (uint8_t *)((uint32_t)&data_spr_slime + const_ani_lut_frame_byteoffsets_16[temp_tilenum]);
+                //return (uint8_t *)((uint32_t)&data_spr_slime + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
+            }
+        }
+    #endif
+
+    return 0;
+}
+
+
+#if VBCC_ASM == 1
+NO_INLINE uint8_t * AniSystem_GetDynamicFrame_Lizardman(__reg("a/x") struct game_object * o)
+#else
+uint8_t * AniSystem_GetDynamicFrame_Lizardman(struct game_object * o)
+#endif
+{
+    #if VBCC_ASM == 1
+        __asm(
+            "\ta16\n"
+            "\tx16\n"
+
+            "\ttax\n"
+
+            "\tlda $7e001e,x\n"
+            "\tcmp #12\n"
+            "\tbne .not_spawning\n"
+
+            ".spawning:\n"
+                // Frame Number
+                // Current frame is byte 64
+                "\tlda $7e0040,x\n" // current frame. now we have the tile num in virtual space
+                "\tasl\n" // This clears the carry
+                "\ttax\n"
+                "\tlda >_const_ani_lut_frame_byteoffsets_16,x\n"
+                "\tadc #<_data_spr_spawn_placeholder\n"
+                "\tldx #^_data_spr_spawn_placeholder\n"
+
+                "\tbra .finish\n"
+
+            ".not_spawning:\n"
+                // (State * 4 + Facing + Frame Number)
+                // state is byte 30, facing is byte 32, current frame is byte 64
+                // The state value is still loaded at this point
+                "\tasl\n"
+                "\tasl\n" // Carry is cleared here
+                "\tadc $7e0020,x\n" // facing
+                
+                "\tasl\n" // Now we have the index to look into the lookup
+                "\ttxy\n"
+                "\ttax\n"
+                "\tlda >_const_ani_lut_lizardman, x\n"
+
+                // Transform this number
+                // (temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10)
+                "\ttyx\n"
+                "\tadc $7e0040,x\n" // current frame. now we have the tile num in virtual space
+
+                "\ttxy\n"
+                "\tasl\n" // This clears the carry
+                "\ttax\n"
+                "\tlda >_const_ani_lut_frame_byteoffsets_16,x\n"
+                "\ttyx\n"
+                
+                "\tadc #<_data_spr_lizardman\n" 
+
+                "\ttay\n"
+
+                // Test for sign flip
+                "\tlda $7e001e,x\n" // state
+                "\tcmp #13\n"
+                "\tbeq .no_flip\n"
+                "\tlda $7e0020,x\n" // facing
+                "\tcmp #3\n"
+                "\tbne .no_flip\n"
+                ".flip_x:\n"
+                    "\tlda #$8000\n"
+                    "\tora #^_data_spr_lizardman\n"
+                    "\ttax\n"
+                    "\tbra .finalize\n"
+                ".no_flip:\n"
+                    "\tldx #^_data_spr_lizardman\n"
+
+            ".finalize:\n"
+            "\ttya\n"
+
+            ".finish:\n"
+
+            "\trtl\n"
+        );
+    #else
+        // use a virtual tilenum system before finalizing.
+        uint16_t temp_tilenum = o->struct_data.npc_data.ani.frame; // add the frame offset.
+
+        if (o->state == STATE_SPAWNING)
+        {
+            return (uint8_t *)((uint32_t)&data_spr_spawn_placeholder + const_ani_lut_frame_byteoffsets_16[temp_tilenum]);
+        }
+        else
+        {
+            temp_tilenum += const_ani_lut_lizardman[(o->state << 2) + o->facing];
+
+            if ((o->facing == FACING_LEFT) && (o->state != STATE_DIE))
+            {
+                return (uint8_t *)(((uint32_t)&data_spr_lizardman + const_ani_lut_frame_byteoffsets_16[temp_tilenum]) | 0x80000000); // set the negative flag
+            }
+            else
+            {
+                // Calculate the address
+                return (uint8_t *)((uint32_t)&data_spr_lizardman + const_ani_lut_frame_byteoffsets_16[temp_tilenum]);
+            }
+        }
+    #endif
+
+    return 0;
+}
+
+// Fetch and build compressed frame in WRAM
+// This will return the index in the lookup table for the purposes of checking prev frames
+uint8_t * AniSystem_GetCompressedFrame(const uint8_t * data, const uint16_t * lookup, uint16_t frame)
+{
+    uint32_t lookup_offset = frame << 3; // Each frame is 8 bytes
+
+    uint32_t lookup_adjusted;
+    uint16_t * lookup_ptr;
+
+    uint8_t * ptr_read;
+
+    uint8_t * ptr_return_val;
+
+    for (int i = 0; i < 4; i++)
+    {
+        lookup_ptr = (uint16_t *)((uint32_t)lookup + lookup_offset);
+
+        if (i == 0)
+        {
+            ptr_return_val = (uint8_t *)lookup_ptr;
+
+            if (frame == buf_player_prev_frame)
+            {
+                return ptr_return_val;
+            }
+
+            buf_player_prev_frame = frame;
+        }
+
+        lookup_adjusted = *lookup_ptr;
+
+        ptr_read = (uint8_t *)((uint32_t)data + lookup_adjusted);
+
+        System_CopyBlock(ptr_read, (uint8_t *)&buf_player_sprite_tiles[i << 4], 32);
+
+        lookup++;
+    }
+
+    return ptr_return_val;
+}
 
 // Lookup tables for animations
 /*
@@ -171,580 +793,3 @@ NEAR const uint16_t const_ani_lut_frame_byteoffsets_16[512] =
     0xf800, 0xf840, 0xf880, 0xf8c0, 0xf900, 0xf940, 0xf980, 0xf9c0, 
     0xfc00, 0xfc40, 0xfc80, 0xfcc0, 0xfd00, 0xfd40, 0xfd80, 0xfdc0,
 };
-
-/*
-    Animations item drop gravity, and draw a drop shadow if mid-air
-*/
-uint16_t AniSystem_AnimateDropGravity(struct game_object * o)
-{
-    uint16_t grounded = 0;
-
-    if (!((o->pos.z.a == 0) && (o->delta.z.a == 0)))
-    {
-        
-        o->pos.z.a += o->delta.z.a;
-        o->delta.z.a -= (V_GRAVITY >> 1);
-
-        if (o->pos.z.a <= 0)
-        {
-            o->pos.z.a = 0;
-            o->delta.z.a = 0;
-
-            grounded = 1;
-        }
-    }
-
-    if (o->pos.z.a != 0)
-    {
-        // also draw a shadow if relevant
-        if ((o->uid & 0x0001) == ((uint16_t)system_frames_elapsed & 0x0001))
-        {
-            struct game_object temp;
-            temp.pos.x.a = o->pos.x.a;
-            temp.pos.y.a = o->pos.y.a;
-            temp.pos.z.a = 0;
-
-            uint16_t temp_tileattrib;
-            temp_tileattrib = 0x0e | PAL_FX_SHADOW << 9 | 2 << 12;
-
-            SpriteEngine_AddToBackLayer(&temp, temp_tileattrib);
-        }
-    }
-
-    return grounded;
-}
-
-uint8_t * AniSystem_GetPlayerFrame(struct game_object * o)
-{
-    // Return player sprite address based on given information
-    // State, facing
-    // sprites are in the order of down, up, right, left
-    // use a virtual tilenum system before finalizing.
-    uint16_t temp_tilenum = 0;
-
-    switch (o->state)
-    {
-        case STATE_IDLE:
-            break;
-        case STATE_MOVE_WALK:
-            temp_tilenum += 4;
-            break;
-        case STATE_MOVE_RUN:
-            temp_tilenum += 40;
-            break;
-        case STATE_ATTACK_BASIC:
-            temp_tilenum += 24;
-            break;
-        case STATE_ATTACK_BASIC_MOVE:
-            temp_tilenum += 32;
-            break;
-        case STATE_ATTACK_SPECIAL:
-            temp_tilenum += 12;
-            break;
-        case STATE_ATTACK_SPECIAL_MOVE:
-            temp_tilenum += 16;
-            break;
-        case STATE_HURT_NORMAL:
-            temp_tilenum += 48;
-            break;
-        case STATE_HURT_NORMAL_MOVE:
-            temp_tilenum += 52;
-            break;
-        case STATE_HURT_NORMAL_MOVE_RUN:
-            temp_tilenum += 60;
-            break;
-        case STATE_HURT_BURN:
-            temp_tilenum += 48;
-            break;
-        case STATE_HURT_BURN_MOVE:
-            temp_tilenum += 52;
-            break;
-        case STATE_ICON_NORMAL:
-            temp_tilenum += 68;
-            break;
-        case STATE_ICON_BLINK:
-            temp_tilenum += 69;
-            break;
-        case STATE_ICON_HURT:
-            temp_tilenum += 70;
-            break;
-        case STATE_ICON_SPECIAL:
-            temp_tilenum += 71;
-            break;
-        case STATE_DIE:
-            temp_tilenum += 72;
-            break;
-    }
-
-    if (o->state != STATE_DIE)
-    {
-        if (o->state < STATE_ICON_NORMAL)
-        {
-            if (o->state == STATE_IDLE || o->state == STATE_ATTACK_SPECIAL || o->state == STATE_HURT_NORMAL)
-            {
-                switch (o->facing)
-                {
-                    case FACING_DOWN:
-                        break;
-                    case FACING_UP:
-                        temp_tilenum += 1;
-                        break;
-                    case FACING_RIGHT:
-                        temp_tilenum += 2;
-                        break;
-                    case FACING_LEFT:
-                        temp_tilenum += 3;
-                        break;
-                }
-            }
-            else
-            {
-                switch (o->facing)
-                {
-                    case FACING_DOWN:
-                        break;
-                    case FACING_UP:
-                        temp_tilenum += 2;
-                        break;
-                    case FACING_RIGHT:
-                        temp_tilenum += 4;
-                        break;
-                    case FACING_LEFT:
-                        temp_tilenum += 6;
-                        break;
-                }
-            }
-
-            // Now add the frame offset.
-            temp_tilenum += o->struct_data.npc_data.ani.frame;
-        }
-    }
-    else
-    {
-        // Now add the frame offset.
-        // Still needed
-        temp_tilenum += o->struct_data.npc_data.ani.frame;
-    }
-    
-    
-    // Calculate the address
-    return (uint8_t *)&data_sprite_player + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10);
-}
-
-uint8_t * AniSystem_GetDynamicFrame(struct game_object * o)
-{
-    switch (o->id)
-    {
-        case OBJID_SLIME:
-            return AniSystem_GetDynamicFrame_Slime(o);
-        case OBJID_LIZARDMAN:
-            return AniSystem_GetDynamicFrame_Lizardman(o);
-        default:
-            return 0;
-    }
-}
-
-uint8_t * AniSystem_GetDynamicFrame_Stateless(struct game_object * o)
-{
-    switch (o->id)
-    {
-        case OBJID_BUBBLE_E:
-            return AniSystem_GetDynamicFrame_Bubble(o);
-        case OBJID_ARROW_E:
-            return AniSystem_GetDynamicFrame_Arrow(o);
-        default:
-            return 0;
-    }
-}
-
-// Return offset to a fixed sprite tilenum based on given information
-// object ID and frame only
-// shorter version for light objects
-FORCE_INLINE uint16_t AniSystem_GetFixedFrame_Fast(struct game_object * o)
-{
-    switch (o->id)
-    {
-        case OBJID_FX_SMOKE:
-            return 6+(o->struct_data.npc_data.ani.frame << 1);
-        case OBJID_FIREBALL:
-            return 2+(o->struct_data.npc_data.ani.frame << 1);
-        case OBJID_SYS_IMPACT:
-            return 10;
-        case OBJID_SYS_TARGET:
-            return 14; 
-        default:
-            return 0;
-    }
-}
-
-#if VBCC_ASM == 1
-NO_INLINE uint8_t * AniSystem_GetDynamicFrame_Bubble(struct game_object * o)
-#else
-uint8_t * AniSystem_GetDynamicFrame_Bubble(struct game_object * o)
-#endif
-{
-    #if VBCC_ASM == 1
-        __asm(
-            "\ta16\n"
-            "\tx16\n"
-
-            "\ttax\n"
-            // 30 + Frame Number
-            // Current frame is byte 64
-            "\tlda #30\n"
-            "\tclc\n"
-            "\tadc $7e0040,x\n" // current frame. now we have the tile num in virtual space
-
-            "\ttxy\n"
-            "\tasl\n" // This clears the carry
-            "\ttax\n"
-            "\tlda >_const_ani_lut_frame_byteoffsets_16,x\n"
-            "\ttyx\n"
-
-            "\tadc #<_data_sprite_slime\n"
-            "\tldx #^_data_sprite_slime\n"
-
-            ".finish:\n"
-
-            "\trtl\n"
-        );
-    #else
-        // use a virtual tilenum system before finalizing.
-        uint16_t temp_tilenum = 30;
-
-        // Now add the frame offset.
-        temp_tilenum += o->struct_data.npc_data.ani.frame;
-
-        // Calculate the address
-        return (uint8_t *)((uint32_t)&data_sprite_slime + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
-    #endif
-
-    return 0;
-}
-
-uint8_t * AniSystem_GetDynamicFrame_Arrow(struct game_object * o)
-{
-    // use a virtual tilenum system before finalizing.
-    // Arrow up is 32, arrow right is 36
-    bool hflip = false;
-    bool vflip = false;
-
-    uint8_t angle = o->angle + 64; // Angle offset
-    uint16_t temp_tilenum = 32;
-
-    // get the object angle
-    if (angle >= 240+8)
-    {
-        temp_tilenum = 32;
-    }
-    else if (angle >= 224+8)
-    {
-        temp_tilenum = 33;
-        hflip = true;
-    }
-    else if (angle >= 208+8)
-    {
-        temp_tilenum = 34;
-        hflip = true;
-    }
-    else if (angle >= 192+8)
-    {
-        temp_tilenum = 35;
-        hflip = true;
-    }
-    else if (angle >= 176+8)
-    {
-        temp_tilenum = 36;
-        hflip = true;
-    }
-    else if (angle >= 160+8)
-    {
-        temp_tilenum = 35;
-        hflip = true;
-        vflip = true;
-    }
-    else if (angle >= 144+8)
-    {
-        temp_tilenum = 34;
-        hflip = true;
-        vflip = true;
-    }
-    else if (angle >= 128+8)
-    {
-        temp_tilenum = 33;
-        hflip = true;
-        vflip = true;
-    }
-    else if (angle >= 112+8)
-    {
-        temp_tilenum = 32;
-        vflip = true;
-    }
-    else if (angle >= 96+8)
-    {
-        temp_tilenum = 33;
-        vflip = true;
-    }
-    else if (angle >= 80+8)
-    {
-        temp_tilenum = 34;
-        vflip = true;
-    }
-    else if (angle >= 64+8)
-    {
-        temp_tilenum = 35;
-        vflip = true;
-    }
-    else if (angle >= 48+8)
-    {
-        temp_tilenum = 36;
-    }
-    else if (angle >= 32+8)
-    {
-        temp_tilenum = 35;
-    }
-    else if (angle >= 16+8)
-    {
-        temp_tilenum = 34;
-    }
-    else if (angle >= 0+8)
-    {
-        temp_tilenum = 33;
-    }
-    else
-    {
-        temp_tilenum = 32;
-    }
-
-    uint32_t temp_addr = ((uint32_t)&data_sprite_lizardman + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
-
-    if (hflip)
-    {
-        temp_addr |= 0x40000000; // Set second highest bit
-    }
-    if (vflip)
-    {
-        temp_addr |= 0x80000000; // Set highest bit
-    }
-
-    temp_addr |= ((uint32_t)temp_tilenum - 32l) << 24; // use 6 bits of the highest bytes to store the tile number minus 32
-
-    // Calculate the address
-    return (uint8_t *)temp_addr;
-}
-
-#if VBCC_ASM == 1
-NO_INLINE uint8_t * AniSystem_GetDynamicFrame_Slime(__reg("a/x") struct game_object * o)
-#else
-uint8_t * AniSystem_GetDynamicFrame_Slime(struct game_object * o)
-#endif
-{
-    #if VBCC_ASM == 1
-        __asm(
-            "\ta16\n"
-            "\tx16\n"
-
-            "\ttax\n"
-
-            "\tlda $7e001e,x\n"
-            "\tcmp #12\n"
-            "\tbne .not_spawning\n"
-
-            ".spawning:\n"
-                // Frame Number
-                // Current frame is byte 64
-                "\tlda $7e0040,x\n" // current frame. now we have the tile num in virtual space
-                "\tasl\n" // This clears the carry
-                "\ttax\n"
-                "\tlda >_const_ani_lut_frame_byteoffsets_16,x\n"
-                "\tadc #<_data_sprite_spawn_placeholder\n"
-                "\tldx #^_data_sprite_spawn_placeholder\n"
-
-                "\tbra .finish\n"
-
-            ".not_spawning:\n"
-                // (State * 4 + Facing + Frame Number)
-                // state is byte 30, facing is byte 32, current frame is byte 64
-                // The state value is still loaded at this point
-                "\tasl\n"
-                "\tasl\n" // Carry is cleared here
-                "\tadc $7e0020,x\n" // facing
-                
-                "\tasl\n" // Now we have the index to look into the lookup
-                "\ttxy\n"
-                "\ttax\n"
-                "\tlda >_const_ani_lut_basic, x\n"
-
-                // Transform this number
-                // (temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10)
-                "\ttyx\n"
-                "\tadc $7e0040,x\n" // current frame. now we have the tile num in virtual space
-
-                "\ttxy\n"
-                "\tasl\n" // This clears the carry
-                "\ttax\n"
-                "\tlda >_const_ani_lut_frame_byteoffsets_16,x\n"
-                "\ttyx\n"
-                
-                "\tadc #<_data_sprite_slime\n" 
-
-                "\ttay\n"
-
-                // Test for sign flip
-                "\tlda $7e001e,x\n" // state
-                "\tcmp #13\n"
-                "\tbeq .no_flip\n"
-                "\tlda $7e0020,x\n" // facing
-                "\tcmp #3\n"
-                "\tbne .no_flip\n"
-                ".flip_x:\n"
-                    "\tlda #$8000\n"
-                    "\tora #^_data_sprite_slime\n"
-                    "\ttax\n"
-                    "\tbra .finalize\n"
-                ".no_flip:\n"
-                    "\tldx #^_data_sprite_slime\n"
-
-            ".finalize:\n"
-            "\ttya\n"
-
-            ".finish:\n"
-
-            "\trtl\n"
-        );
-    #else
-        // use a virtual tilenum system before finalizing.
-        uint16_t temp_tilenum = o->struct_data.npc_data.ani.frame; // add the frame offset.
-
-        if (o->state == STATE_SPAWNING)
-        {
-            return (uint8_t *)((uint32_t)&data_sprite_spawn_placeholder + const_ani_lut_frame_byteoffsets_16[temp_tilenum]);
-            //return (uint8_t *)((uint32_t)&data_sprite_spawn_placeholder + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
-        }
-        else
-        {
-            temp_tilenum += const_ani_lut_basic[(o->state << 2) + o->facing];
-
-            if ((o->facing == FACING_LEFT) && (o->state != STATE_DIE))
-            {
-                return (uint8_t *)(((uint32_t)&data_sprite_slime + const_ani_lut_frame_byteoffsets_16[temp_tilenum]) | 0x80000000); // set the negative flag
-                //return (uint8_t *)(((uint32_t)&data_sprite_slime + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10)) | 0x80000000); // set the negative flag
-            }
-            else
-            {
-                // Calculate the address
-                return (uint8_t *)((uint32_t)&data_sprite_slime + const_ani_lut_frame_byteoffsets_16[temp_tilenum]);
-                //return (uint8_t *)((uint32_t)&data_sprite_slime + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
-            }
-        }
-    #endif
-
-    return 0;
-}
-
-
-#if VBCC_ASM == 1
-NO_INLINE uint8_t * AniSystem_GetDynamicFrame_Lizardman(__reg("a/x") struct game_object * o)
-#else
-uint8_t * AniSystem_GetDynamicFrame_Lizardman(struct game_object * o)
-#endif
-{
-    #if VBCC_ASM == 1
-        __asm(
-            "\ta16\n"
-            "\tx16\n"
-
-            "\ttax\n"
-
-            "\tlda $7e001e,x\n"
-            "\tcmp #12\n"
-            "\tbne .not_spawning\n"
-
-            ".spawning:\n"
-                // Frame Number
-                // Current frame is byte 64
-                "\tlda $7e0040,x\n" // current frame. now we have the tile num in virtual space
-                "\tasl\n" // This clears the carry
-                "\ttax\n"
-                "\tlda >_const_ani_lut_frame_byteoffsets_16,x\n"
-                "\tadc #<_data_sprite_spawn_placeholder\n"
-                "\tldx #^_data_sprite_spawn_placeholder\n"
-
-                "\tbra .finish\n"
-
-            ".not_spawning:\n"
-                // (State * 4 + Facing + Frame Number)
-                // state is byte 30, facing is byte 32, current frame is byte 64
-                // The state value is still loaded at this point
-                "\tasl\n"
-                "\tasl\n" // Carry is cleared here
-                "\tadc $7e0020,x\n" // facing
-                
-                "\tasl\n" // Now we have the index to look into the lookup
-                "\ttxy\n"
-                "\ttax\n"
-                "\tlda >_const_ani_lut_lizardman, x\n"
-
-                // Transform this number
-                // (temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10)
-                "\ttyx\n"
-                "\tadc $7e0040,x\n" // current frame. now we have the tile num in virtual space
-
-                "\ttxy\n"
-                "\tasl\n" // This clears the carry
-                "\ttax\n"
-                "\tlda >_const_ani_lut_frame_byteoffsets_16,x\n"
-                "\ttyx\n"
-                
-                "\tadc #<_data_sprite_lizardman\n" 
-
-                "\ttay\n"
-
-                // Test for sign flip
-                "\tlda $7e001e,x\n" // state
-                "\tcmp #13\n"
-                "\tbeq .no_flip\n"
-                "\tlda $7e0020,x\n" // facing
-                "\tcmp #3\n"
-                "\tbne .no_flip\n"
-                ".flip_x:\n"
-                    "\tlda #$8000\n"
-                    "\tora #^_data_sprite_lizardman\n"
-                    "\ttax\n"
-                    "\tbra .finalize\n"
-                ".no_flip:\n"
-                    "\tldx #^_data_sprite_lizardman\n"
-
-            ".finalize:\n"
-            "\ttya\n"
-
-            ".finish:\n"
-
-            "\trtl\n"
-        );
-    #else
-        // use a virtual tilenum system before finalizing.
-        uint16_t temp_tilenum = o->struct_data.npc_data.ani.frame; // add the frame offset.
-
-        if (o->state == STATE_SPAWNING)
-        {
-            return (uint8_t *)((uint32_t)&data_sprite_spawn_placeholder + const_ani_lut_frame_byteoffsets_16[temp_tilenum]);
-        }
-        else
-        {
-            temp_tilenum += const_ani_lut_lizardman[(o->state << 2) + o->facing];
-
-            if ((o->facing == FACING_LEFT) && (o->state != STATE_DIE))
-            {
-                return (uint8_t *)(((uint32_t)&data_sprite_lizardman + const_ani_lut_frame_byteoffsets_16[temp_tilenum]) | 0x80000000); // set the negative flag
-            }
-            else
-            {
-                // Calculate the address
-                return (uint8_t *)((uint32_t)&data_sprite_lizardman + const_ani_lut_frame_byteoffsets_16[temp_tilenum]);
-            }
-        }
-    #endif
-
-    return 0;
-}

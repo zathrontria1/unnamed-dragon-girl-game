@@ -35,7 +35,7 @@ void AniSystem_Spr_UpdateFixedTiles()
     }
 
     // Calculate the new address
-    uint8_t * temp_src = ((uint8_t *)&data_sprite_drop_coin) + (temp_frame << 6); // 64 bytes
+    uint8_t * temp_src = ((uint8_t *)&data_spr_drop_coin) + (temp_frame << 6); // 64 bytes
     uint16_t temp_dest = 0x62a0;
 
     if (temp_src != ani_bg_addr_coin)
