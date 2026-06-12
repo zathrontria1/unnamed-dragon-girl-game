@@ -20,6 +20,7 @@
 #include "level.h"
 #include "gfx.h"
 
+#include "ani.h"
 #include "ani_bg.h"
 #include "ani_pal.h"
 #include "hdma.h"
@@ -257,6 +258,8 @@ void System_DisplayStartupSplash()
 
     // Initialize global DMA tile animation
     // TODO: currently hardcoded. In the future, pointers may be part of map data.
+    buf_player_prev_frame = 0xffff; // Write an invalid frame here
+
     AniSystem_BgTile_Setup((uint8_t *)&data_bg_dungeon_anim_water_lz4, (uint8_t *)&data_bg_dungeon_anim_torch_lz4);
 
     // Finish initializing graphics
@@ -747,6 +750,54 @@ void System_AlignToVblank()
     {
         ;
     }
+
+    return;
+}
+
+#if VBCC_ASM == 1
+NO_INLINE void System_CopyBlock(__reg("r0/r1") uint8_t * src, __reg("r2/r3") uint8_t * dest, __reg("a") uint16_t len)
+#else
+FORCE_INLINE void System_CopyBlock(uint8_t * src, uint8_t * dest, uint16_t len)
+#endif
+{
+    // r0 contains source
+    // r2 contains destination
+    // a contains bytes to copy
+    #if VBCC_ASM == 1
+        __asm(
+        "\ta16\n"
+	    "\tx16\n"
+        
+        "\tcmp #0\n"
+        "\tbeq LZ4_Internal_Skip\n"
+
+        "\tphb\n"
+
+        "\ttax\n"
+        "\ta8\n"
+        "\tsep #$20\n"
+        "\tlda r3\n"
+        "\tsta >_system_MVNCodeInWRAM+1\n" // write bank byte of source 
+        "\tlda r1\n"
+        "\tsta >_system_MVNCodeInWRAM+2\n" // ditto for destination
+        "\ta16\n"
+        "\trep #$20\n"
+        "\ttxa\n"
+        "\tdec\n"
+        "\tldx r0\n"
+        "\tldy r2\n"
+        "\tjsl >_system_MVNCodeInWRAM;\n"
+
+        "\tplb\n"
+        "LZ4_Internal_Skip:\n"
+        );
+    #else
+    // Source and destination bank independent, just can't cross banks
+    for (uint16_t i = 0; i < len; i++)
+    {
+        (*dest++) = (*src++);
+    }
+    #endif
 
     return;
 }
