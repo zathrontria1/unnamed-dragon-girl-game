@@ -317,11 +317,11 @@ void Loop_Subscreen_MapDisplay_Init()
     struct game_data_npc * d = (struct game_data_npc *)&temp_icon_object.struct_data;
     d->ani.frame = 0;
 
-    obj_player_prev_sprframe = AniSystem_GetPlayerFrame(o); 
-    uint8_t * temp_addr = AniSystem_GetPlayerFrame(&temp_icon_object);
+    AniSystem_GetPlayerFrame(&temp_icon_object);
 
-    DmaSystem_AddItemToQueue(temp_addr, 0x6000, 128, VRAM_INCHIGH, 1);
-
+    DmaSystem_AddItemToQueue((uint8_t *)&buf_player_sprite_tiles, 0x6000, 64, VRAM_INCHIGH, 0);
+    DmaSystem_AddItemToQueue((uint8_t *)&buf_player_sprite_tiles+64, 0x6100, 64, VRAM_INCHIGH, 0);
+    
     ui_in_bg2 = 1;
 
     LZ4_UnpackToWRAM(level_data_ptr->map_overview_tiles_lz4, 0x007f0000);
@@ -550,8 +550,6 @@ void Loop_Game_ReloadScene()
     bg_scroll_x = bg_scroll_x_saved;
     bg_scroll_y = bg_scroll_y_saved;
 
-    DmaSystem_AddItemToQueue(obj_player_prev_sprframe, 0x6000, 128, VRAM_INCHIGH, 1);
-
     while (shadow_inidisp != 0x00)
     {
         ; // Prevent execution from continuing to VRAM writing parts while the display is turned on
@@ -578,6 +576,11 @@ void Loop_Game_ReloadScene()
 
     System_Init_TilemapSettings(system_target_routine);
     System_Init_DisplaySettings(system_target_routine);
+
+    AniSystem_GetPlayerFrame(obj_player_pointer);
+
+    DmaSystem_AddItemToQueue((uint8_t *)&buf_player_sprite_tiles, 0x6000, 64, VRAM_INCHIGH, 0);
+    DmaSystem_AddItemToQueue((uint8_t *)&buf_player_sprite_tiles+64, 0x6100, 64, VRAM_INCHIGH, 0);
 
     Loop_Game_Partial();
 

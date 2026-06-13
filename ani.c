@@ -7,6 +7,8 @@
 #include "spr.h"
 #include "system.h"
 
+#include "dma.h"
+
 NEAR struct tile_4bpp buf_player_sprite_tiles[4];
 
 uint16_t buf_player_prev_frame;
@@ -606,13 +608,49 @@ uint8_t * AniSystem_GetCompressedFrame(const uint8_t * data, const uint16_t * lo
 
     uint16_t * data_offset = (uint16_t *)ptr_return_val;
 
-    for (int i = 0; i < 4; i++)
+    struct tile_4bpp * ptr_read_0 = (struct tile_4bpp *)(data + *data_offset++);
+    struct tile_4bpp * ptr_read_1 = (struct tile_4bpp *)(data + *data_offset++);
+    struct tile_4bpp * ptr_read_2 = (struct tile_4bpp *)(data + *data_offset++);
+    struct tile_4bpp * ptr_read_3 = (struct tile_4bpp *)(data + *data_offset);
+
+    // Use the DMA unit to speed things up. Channel 7 is reserved for active display DMA.
+    // Align read
+    REG_DMAP7 = 0x00; // byte reg write
+    REG_BBAD7 = 0x80; // WMDATA
+
+    REG_WMADDLM = (uint16_t)&buf_player_sprite_tiles[0];
+    REG_WMADDH = 0x00;
+
+    REG_A1T7LH = (uint16_t)((uint32_t)ptr_read_0);
+    REG_A1B7 = (uint8_t)((uint32_t)ptr_read_0 >> 16);
+    
+    REG_DAS7LH = 32;
+
+    while ((REG_HVBJOY & HBL_READY) == HBL_READY)
     {
-        ptr_read = (struct tile_4bpp *)(data + *data_offset);
-        
-        buf_player_sprite_tiles[i] = *ptr_read;
-        data_offset++;
+        ;
     }
+
+    while ((REG_HVBJOY & HBL_READY) == 0x00)
+    {
+        ;
+    }
+    REG_MDMAEN = 0x80;
+
+    REG_A1T7LH = (uint16_t)((uint32_t)ptr_read_1);
+    
+    REG_DAS7LH = 32;
+    REG_MDMAEN = 0x80;
+
+    REG_A1T7LH = (uint16_t)((uint32_t)ptr_read_2);
+    
+    REG_DAS7LH = 32;
+    REG_MDMAEN = 0x80;
+
+    REG_A1T7LH = (uint16_t)((uint32_t)ptr_read_3);
+    
+    REG_DAS7LH = 32;
+    REG_MDMAEN = 0x80;
 
     return ptr_return_val;
 }
