@@ -27,14 +27,16 @@ extern const uint8_t data_ui_dynamic_hp[]; // hp bar pieces
 extern const uint8_t data_ui_dynamic_textadvance[]; // text advance cursor
 extern const uint8_t data_ui_dynamic_selectcursor[]; // selection cursor in text box
 
-//extern const uint8_t data_sprite_player[]; // player
-
-// TODO: compression scheme
+// Sprites may be compressed with tile deduplication or LZ4. 
+// _dd = deduped; will also have a LUT (_lut)
+// _lz4 = lz4 compressed
 extern const uint8_t data_spr_player_dd[]; // player deduplicated tiles
 extern const uint16_t data_spr_player_lut[]; // player tile lookup
 
-extern const uint8_t data_spr_player_portrait[]; // player portrait
+extern const uint8_t data_spr_player_portrait_lz4[]; // player portrait
+
 extern const uint8_t data_spr_fixed_lz4[]; // permanently loaded effects/system
+
 extern const uint8_t data_spr_slime[]; // slime
 extern const uint8_t data_spr_lizardman[]; // lizardman
 extern const uint8_t data_spr_spawn_placeholder[]; // spawning placeholder
@@ -52,9 +54,9 @@ extern const struct obj_list_entry_spawners data_spawners_debug0[];
 extern const struct obj_list_entry_spawners data_spawners_debug1[];
 extern const struct obj_list_entry_spawners data_spawners_debug2[];
 
-extern const int32_t data_sine_1[];
-extern const int32_t data_cosine_1[];
-extern const uint32_t data_pow_2[];
+extern const NEAR int32_t data_sine_1[];
+extern const NEAR int32_t data_cosine_1[];
+extern const NEAR uint32_t data_pow_2[];
 
 extern const uint32_t data_upgrade_costs[];
 
