@@ -1,12 +1,13 @@
 ; For Calypsi
 
     .section cfar,rodata
-    .global data_sprite_player
-data_sprite_player:
-    .incbin "sprites/spr_player.bin"
-    .global data_sprite_player_portrait
-.data_sprite_player_portrait:
-    .incbin "sprites/spr_player_portrait.bin"
+    .global data_sprite_player_dd
+data_sprite_player_dd:
+    .incbin "sprites/spr_player.bin.dd"
+
+    .global data_sprite_player_portrait_lz4
+.data_sprite_player_portrait_lz4:
+    .incbin "sprites/spr_player_portrait.bin.lz4"
 
     .global data_sprite_fixed_lz4
 data_sprite_fixed_lz4:

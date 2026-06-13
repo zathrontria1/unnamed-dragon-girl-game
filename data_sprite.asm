@@ -1,12 +1,9 @@
 ; For VBCC
 
     section "_rodata.far.bindata.sprtiles.0"
-    ;global _data_spr_player
-;_data_spr_player:
-    ;incbin "sprites/spr_player.bin"
-    global _data_spr_player_portrait
-_data_spr_player_portrait:
-    incbin "sprites/spr_player_portrait.bin"
+    global _data_spr_player_portrait_lz4
+_data_spr_player_portrait_lz4:
+    incbin "sprites/spr_player_portrait.bin.lz4"
     global _data_spr_player_dd
 _data_spr_player_dd:
     incbin "sprites/spr_player.bin.dd"

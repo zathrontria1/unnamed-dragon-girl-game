@@ -25,6 +25,7 @@
 #include "data_strings.h"
 
 #include "math_int.h"
+#include "lz4.h"
 
 uint16_t subscreen_selection;
 uint16_t subscreen_selection_profile;
@@ -466,6 +467,9 @@ void loop_subscreen_profile_save_last_sprite_page()
 */
 void loop_subscreen_profile_upload_profile_picture()
 {
+    // First decompress the image
+    LZ4_UnpackToWRAM(&data_spr_player_portrait_lz4, LZ4_BUFFER_ADDR+0x6000);
+
     // TODO: This is very hacky. Consider making a third NMI routine for this so APU playback isn't a factor.
     if (snd_stream_enable)
     {
@@ -473,7 +477,7 @@ void loop_subscreen_profile_upload_profile_picture()
         {
             System_AlignToVblank();
 
-            DmaSystem_CopyToVram((uint32_t)&data_spr_player_portrait+ (i * 0x0400), 0x7000+(i * 0x200), 1024);
+            DmaSystem_CopyToVram((uint32_t)LZ4_BUFFER_ADDR+0x6000 + (i * 0x0400), 0x7000+(i * 0x200), 1024);
         }
     }
     else
@@ -482,7 +486,7 @@ void loop_subscreen_profile_upload_profile_picture()
         {
             System_AlignToVblank();
 
-            DmaSystem_CopyToVram((uint32_t)&data_spr_player_portrait+ (i * 0x1000), 0x7000+(i * 0x800), 4096);
+            DmaSystem_CopyToVram((uint32_t)LZ4_BUFFER_ADDR+0x6000 + (i * 0x1000), 0x7000+(i * 0x800), 4096);
         }
     }
 
