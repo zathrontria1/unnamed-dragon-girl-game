@@ -5,8 +5,6 @@ extern NEAR const uint16_t const_ani_lut_basic[56];
 extern NEAR const uint16_t const_ani_lut_lizardman[56];
 extern NEAR const uint16_t const_ani_lut_frame_byteoffsets_16[512];
 
-extern NEAR uint8_t buf_player_sprite_tiles[128];
-
 extern uint16_t buf_player_prev_frame;
 
 uint16_t AniSystem_AnimateDropGravity(struct game_object * o);
@@ -39,4 +37,4 @@ uint8_t * AniSystem_GetDynamicFrame_Bubble(struct game_object * o);
 
 uint8_t * AniSystem_GetDynamicFrame_Arrow(struct game_object * o);
 
-uint8_t * AniSystem_GetCompressedFrame(const uint8_t * data, const uint16_t * lookup, uint16_t frame);
+uint8_t * AniSystem_GetCompressedFrame(const uint8_t * data, const uint16_t * lookup, uint8_t * buffer, uint16_t frame);

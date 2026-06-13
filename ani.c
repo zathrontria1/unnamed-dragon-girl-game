@@ -9,8 +9,6 @@
 
 #include "dma.h"
 
-NEAR uint8_t buf_player_sprite_tiles[128];
-
 uint16_t buf_player_prev_frame;
 
 /*
@@ -168,7 +166,7 @@ uint8_t * AniSystem_GetPlayerFrame(struct game_object * o)
     }
 
     // Fetch the compressed frame
-    return AniSystem_GetCompressedFrame((const uint8_t *)&data_spr_player_dd, (const uint16_t *)&data_spr_player_lut, temp_tilenum);
+    return AniSystem_GetCompressedFrame((const uint8_t *)&data_spr_player_dd, (const uint16_t *)&data_spr_player_lut, (uint8_t *)(LZ4_BUFFER_ADDR+0xc000), temp_tilenum);
 }
 
 uint8_t * AniSystem_GetDynamicFrame(struct game_object * o)
@@ -591,7 +589,7 @@ uint8_t * AniSystem_GetDynamicFrame_Lizardman(struct game_object * o)
 
 // Fetch and build compressed frame in WRAM
 // This will return the index in the lookup table for the purposes of checking prev frames
-uint8_t * AniSystem_GetCompressedFrame(const uint8_t * data, const uint16_t * lookup, uint16_t frame)
+uint8_t * AniSystem_GetCompressedFrame(const uint8_t * data, const uint16_t * lookup, uint8_t * buffer, uint16_t frame)
 {
     //uint16_t lookup_entry_offset = frame << 2; // Each frame is 8 bytes
     uint16_t lookup_entry_offset = frame << 1; // Each frame is 4 bytes
@@ -617,8 +615,8 @@ uint8_t * AniSystem_GetCompressedFrame(const uint8_t * data, const uint16_t * lo
     REG_DMAP7 = 0x00; // byte reg write
     REG_BBAD7 = 0x80; // WMDATA
 
-    REG_WMADDLM = (uint16_t)&buf_player_sprite_tiles[0];
-    REG_WMADDH = 0x00;
+    REG_WMADDLM = (uint16_t)((uint32_t)buffer);
+    REG_WMADDH = (uint8_t)((uint32_t)buffer >> 16);
 
     REG_A1T7LH = (uint16_t)((uint32_t)ptr_read_0);
     REG_A1B7 = (uint8_t)((uint32_t)ptr_read_0 >> 16);
@@ -638,6 +636,8 @@ uint8_t * AniSystem_GetCompressedFrame(const uint8_t * data, const uint16_t * lo
     REG_MDMAEN = 0x80;
 
     REG_A1T7LH = (uint16_t)((uint32_t)ptr_read_1);
+
+    REG_WMADDLM = (uint16_t)((uint32_t)buffer+512);
     
     //REG_DAS7LH = 32;
     REG_DAS7LH = 64;

@@ -319,8 +319,7 @@ void Loop_Subscreen_MapDisplay_Init()
 
     AniSystem_GetPlayerFrame(&temp_icon_object);
 
-    DmaSystem_AddItemToQueue((uint8_t *)&buf_player_sprite_tiles, 0x6000, 64, VRAM_INCHIGH, 0);
-    DmaSystem_AddItemToQueue((uint8_t *)&buf_player_sprite_tiles+64, 0x6100, 64, VRAM_INCHIGH, 0);
+    DmaSystem_AddItemToQueue((uint8_t *)(LZ4_BUFFER_ADDR+0xc000), 0x6000, 128, VRAM_INCHIGH, 1);
     
     ui_in_bg2 = 1;
 
@@ -579,8 +578,7 @@ void Loop_Game_ReloadScene()
 
     AniSystem_GetPlayerFrame(obj_player_pointer);
 
-    DmaSystem_AddItemToQueue((uint8_t *)&buf_player_sprite_tiles, 0x6000, 64, VRAM_INCHIGH, 0);
-    DmaSystem_AddItemToQueue((uint8_t *)&buf_player_sprite_tiles+64, 0x6100, 64, VRAM_INCHIGH, 0);
+    DmaSystem_AddItemToQueue((uint8_t *)(LZ4_BUFFER_ADDR+0xc000), 0x6000, 128, VRAM_INCHIGH, 1);
 
     Loop_Game_Partial();
 
