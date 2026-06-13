@@ -21,6 +21,11 @@ def main():
 		type=Path,
 		help='Output file (deduplicated tile data; lookup table will have same name with .lut appended)')
     
+    parser.add_argument(
+		'-w', '--wide', 
+        action='store_true',
+		help='Use 16x8 slices (dictionary is made of 2-tile pairs; faster to copy, but reduces efficiency)')
+    
     bitdepth_args = parser.add_mutually_exclusive_group(required=True)
 
     bitdepth_args.add_argument(
@@ -49,6 +54,9 @@ def main():
         tile_size = 16
     elif cmd_args.bpp8:
         tile_size = 64
+
+    if cmd_args.wide == True:
+        tile_size *= 2
 
     dictionary_file = bytearray()
 
@@ -96,6 +104,21 @@ def main():
                 lookup_file += str(offset)
                 lookup_file += ", "
 
+            if cmd_args.wide == False:
+                tile = input_file.read(tile_size)
+
+                if len(tile) == 0:
+                    break
+
+                if tile in dictionary_file:
+                    offset = dictionary_file.find(tile)
+                    lookup_file += str(offset)
+                    lookup_file += ", "
+
+                input_file.seek((tile_size * 14), os.SEEK_CUR)
+            else:
+                input_file.seek((tile_size * 7), os.SEEK_CUR)
+
             tile = input_file.read(tile_size)
 
             if len(tile) == 0:
@@ -106,34 +129,31 @@ def main():
                 lookup_file += str(offset)
                 lookup_file += ", "
 
-            input_file.seek((tile_size * 14), os.SEEK_CUR)
+            if cmd_args.wide == False:
+                tile = input_file.read(tile_size)
 
-            tile = input_file.read(tile_size)
+                if len(tile) == 0:
+                    break
 
-            if len(tile) == 0:
-                break
+                if tile in dictionary_file:
+                    offset = dictionary_file.find(tile)
+                    lookup_file += str(offset)
+                    lookup_file += ", \n\t"
 
-            if tile in dictionary_file:
-                offset = dictionary_file.find(tile)
-                lookup_file += str(offset)
-                lookup_file += ", "
+                current_byte += tile_size * 2
 
-            tile = input_file.read(tile_size)
+                if current_byte % (tile_size * 16) == 0:
+                    current_byte += (tile_size * 16)
 
-            if len(tile) == 0:
-                break
+                input_file.seek(current_byte, os.SEEK_SET)
+            else:
+                lookup_file += "\n\t"
+                current_byte += tile_size
 
-            if tile in dictionary_file:
-                offset = dictionary_file.find(tile)
-                lookup_file += str(offset)
-                lookup_file += ", \n\t"
+                if current_byte % (tile_size * 8) == 0:
+                    current_byte += (tile_size * 8)
 
-            current_byte += tile_size * 2
-
-            if current_byte % (tile_size * 16) == 0:
-                 current_byte += (tile_size * 16)
-
-            input_file.seek(current_byte, os.SEEK_SET)
+                input_file.seek(current_byte, os.SEEK_SET)
 
     lookup_file += "};\n"
 

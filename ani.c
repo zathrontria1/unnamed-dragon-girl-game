@@ -9,7 +9,7 @@
 
 #include "dma.h"
 
-NEAR struct tile_4bpp buf_player_sprite_tiles[4];
+NEAR uint8_t buf_player_sprite_tiles[128];
 
 uint16_t buf_player_prev_frame;
 
@@ -593,9 +593,8 @@ uint8_t * AniSystem_GetDynamicFrame_Lizardman(struct game_object * o)
 // This will return the index in the lookup table for the purposes of checking prev frames
 uint8_t * AniSystem_GetCompressedFrame(const uint8_t * data, const uint16_t * lookup, uint16_t frame)
 {
-    uint16_t lookup_entry_offset = frame << 2; // Each frame is 8 bytes
-
-    struct tile_4bpp * ptr_read;
+    //uint16_t lookup_entry_offset = frame << 2; // Each frame is 8 bytes
+    uint16_t lookup_entry_offset = frame << 1; // Each frame is 4 bytes
 
     uint8_t * ptr_return_val = (uint8_t *)(lookup + lookup_entry_offset);
 
@@ -608,10 +607,10 @@ uint8_t * AniSystem_GetCompressedFrame(const uint8_t * data, const uint16_t * lo
 
     uint16_t * data_offset = (uint16_t *)ptr_return_val;
 
-    struct tile_4bpp * ptr_read_0 = (struct tile_4bpp *)(data + *data_offset++);
-    struct tile_4bpp * ptr_read_1 = (struct tile_4bpp *)(data + *data_offset++);
-    struct tile_4bpp * ptr_read_2 = (struct tile_4bpp *)(data + *data_offset++);
-    struct tile_4bpp * ptr_read_3 = (struct tile_4bpp *)(data + *data_offset);
+    uint8_t * ptr_read_0 = (uint8_t *)(data + *data_offset++);
+    uint8_t * ptr_read_1 = (uint8_t *)(data + *data_offset++);
+    //uint8_t * ptr_read_2 = (uint8_t *)(data + *data_offset++);
+    //uint8_t * ptr_read_3 = (uint8_t *)(data + *data_offset);
 
     // Use the DMA unit to speed things up. Channel 7 is reserved for active display DMA.
     // Align read
@@ -624,7 +623,8 @@ uint8_t * AniSystem_GetCompressedFrame(const uint8_t * data, const uint16_t * lo
     REG_A1T7LH = (uint16_t)((uint32_t)ptr_read_0);
     REG_A1B7 = (uint8_t)((uint32_t)ptr_read_0 >> 16);
     
-    REG_DAS7LH = 32;
+    //REG_DAS7LH = 32;
+    REG_DAS7LH = 64;
 
     while ((REG_HVBJOY & HBL_READY) == HBL_READY)
     {
@@ -639,10 +639,11 @@ uint8_t * AniSystem_GetCompressedFrame(const uint8_t * data, const uint16_t * lo
 
     REG_A1T7LH = (uint16_t)((uint32_t)ptr_read_1);
     
-    REG_DAS7LH = 32;
+    //REG_DAS7LH = 32;
+    REG_DAS7LH = 64;
     REG_MDMAEN = 0x80;
 
-    REG_A1T7LH = (uint16_t)((uint32_t)ptr_read_2);
+    /*REG_A1T7LH = (uint16_t)((uint32_t)ptr_read_2);
     
     REG_DAS7LH = 32;
     REG_MDMAEN = 0x80;
@@ -650,7 +651,7 @@ uint8_t * AniSystem_GetCompressedFrame(const uint8_t * data, const uint16_t * lo
     REG_A1T7LH = (uint16_t)((uint32_t)ptr_read_3);
     
     REG_DAS7LH = 32;
-    REG_MDMAEN = 0x80;
+    REG_MDMAEN = 0x80;*/
 
     return ptr_return_val;
 }
