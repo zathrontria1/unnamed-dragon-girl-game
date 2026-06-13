@@ -591,38 +591,27 @@ uint8_t * AniSystem_GetDynamicFrame_Lizardman(struct game_object * o)
 // This will return the index in the lookup table for the purposes of checking prev frames
 uint8_t * AniSystem_GetCompressedFrame(const uint8_t * data, const uint16_t * lookup, uint16_t frame)
 {
-    uint32_t lookup_offset = frame << 3; // Each frame is 8 bytes
-
-    uint32_t lookup_adjusted;
-    uint16_t * lookup_ptr;
+    uint16_t lookup_entry_offset = frame << 3; // Each frame is 8 bytes
 
     struct tile_4bpp * ptr_read;
 
-    uint8_t * ptr_return_val;
+    uint8_t * ptr_return_val = (uint8_t *)(lookup + lookup_entry_offset);
+
+    if (frame == buf_player_prev_frame)
+    {
+        return ptr_return_val;
+    }
+
+    buf_player_prev_frame = frame;
+
+    uint16_t * data_offset = (uint16_t *)ptr_return_val;
 
     for (int i = 0; i < 4; i++)
     {
-        lookup_ptr = (uint16_t *)((uint32_t)lookup + lookup_offset);
-
-        if (i == 0)
-        {
-            ptr_return_val = (uint8_t *)lookup_ptr;
-
-            if (frame == buf_player_prev_frame)
-            {
-                return ptr_return_val;
-            }
-
-            buf_player_prev_frame = frame;
-        }
-
-        lookup_adjusted = *lookup_ptr;
-
-        ptr_read = (struct tile_4bpp *)((uint32_t)data + lookup_adjusted);
-
+        ptr_read = (struct tile_4bpp *)(data + *data_offset);
+        
         buf_player_sprite_tiles[i] = *ptr_read;
-
-        lookup++;
+        data_offset++;
     }
 
     return ptr_return_val;
