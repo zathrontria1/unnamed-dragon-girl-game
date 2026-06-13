@@ -85,9 +85,9 @@ def main():
     input_file_name = str(os.path.basename(input_file_path))
 
     lookup_file = str()
-    lookup_file += "const uint16_t data_" + input_file_name.rstrip(".bin") + "_lut[] = { \n\t"
+    lookup_file += "const uint16_t data_" + input_file_name.removesuffix(".bin") + "_lut[] = { \n\t"
 
-    output_file_path_str = str(output_file_path).rstrip(".bin.dd")
+    output_file_path_str = str(output_file_path).removesuffix(".bin.dd")
     output_file_path = output_file_path_str + "_lut.h"
 
     with open(cmd_args.input, 'rb') as input_file:
