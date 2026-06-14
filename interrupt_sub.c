@@ -102,7 +102,7 @@
     {
         // Just refresh the entries used by HDMA
         DmaSystem_UploadCgram_Subset(0x04, 4); // UI message box
-        DmaSystem_UploadCgram_Subset(0x42, 13); // Water tiles
+        DmaSystem_UploadCgram_Subset(0x39, 6); // Water tiles
 
         if (ani_bg_water_dma_ready)
         {
