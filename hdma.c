@@ -100,7 +100,7 @@ void HdmaEngine_SetupPaletteHdma()
 
     hdma_windowbackground_tables[1][2].count = 0;
 
-    HdmaEngine_GeneratePaletteTable((uint16_t *)&hdma_bgpalette_data[0], 0x39, 6, RGB5(0,0,0), 13, 224); // Water
+    HdmaEngine_GeneratePaletteTable((uint16_t *)&hdma_bgpalette_data[0], 0x37, 6, RGB5(0,0,0), 16, 224); // Water
     HdmaEngine_GeneratePaletteTable((uint16_t *)&hdma_windowbackground_data[0], 0x04, 4, RGB5(0,0,0), 26, 48); // UI message box using alpha towards black
     HdmaEngine_GeneratePaletteTable((uint16_t *)&hdma_windowbackground_data[1], 0x04, 4, RGB5(0,0,0), 26, 224); // UI full height using alpha towards black
 

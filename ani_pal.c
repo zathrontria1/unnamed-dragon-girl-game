@@ -38,8 +38,8 @@ void AniSystem_Pal_UpdatePalettes()
         temp_sel = pal_ani_sel;
     }
 
-    shadow_cgram.entry[0x18] = pal_ani_entries[temp_sel][0];
-    shadow_cgram.entry[0x19] = pal_ani_entries[temp_sel][1];
+    shadow_cgram.entry[0x17] = pal_ani_entries[temp_sel][0];
+    shadow_cgram.entry[0x18] = pal_ani_entries[temp_sel][1];
 
     return;
 }
@@ -60,9 +60,9 @@ void AniSystem_Pal_PrecalcPaletteChanges(void)
             int16_t temp_g;
             int16_t temp_b;
 
-            temp_r = ((shadow_cgram.entry[(0x18)+j] & 0x001f) * (31 - i)) / 31;
-            temp_g = (((shadow_cgram.entry[(0x18)+j] & 0x03e0) >> 5) * (31 - i)) / 31;
-            temp_b = (((shadow_cgram.entry[(0x18)+j] & 0x7c00) >> 10) * (31 - i)) / 31;
+            temp_r = ((shadow_cgram.entry[(0x17)+j] & 0x001f) * (31 - i)) / 31;
+            temp_g = (((shadow_cgram.entry[(0x17)+j] & 0x03e0) >> 5) * (31 - i)) / 31;
+            temp_b = (((shadow_cgram.entry[(0x17)+j] & 0x7c00) >> 10) * (31 - i)) / 31;
             
             if (temp_r < 0)
             {
