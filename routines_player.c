@@ -203,7 +203,17 @@ void routines_player(struct game_object * o)
                 {
                     if (snd_punch_timeout == 0)
                     {
-                        SoundInterface_PlaySfx(SFX_ATK_SWING, 0);
+                        int temp_snd_pan = o->pos.x.lh.h - 128 - bg_scroll_x.full.high.a;
+                        if (temp_snd_pan < -127)
+                        {
+                            temp_snd_pan = -127;
+                        }
+                        else if (temp_snd_pan > 127)
+                        {
+                            temp_snd_pan = 127;
+                        }
+
+                        SoundInterface_PlaySfx(SFX_ATK_SWING, temp_snd_pan);
 
                         snd_punch_timeout = (8 / V_MUL);
                     }
@@ -396,8 +406,17 @@ void routines_player(struct game_object * o)
 
                 if (snd_footstep_timeout == 0)
                 {
-                    SoundInterface_PlaySfx(SFX_MOV_FOOTSTEP,0);
-                    //SoundInterface_PlaySfx_Ex(SFX_MOV_FOOTSTEP,127,127,255);
+                    int temp_snd_pan = o->pos.x.lh.h - 128 - bg_scroll_x.full.high.a;
+                    if (temp_snd_pan < -127)
+                    {
+                        temp_snd_pan = -127;
+                    }
+                    else if (temp_snd_pan > 127)
+                    {
+                        temp_snd_pan = 127;
+                    }
+
+                    SoundInterface_PlaySfx(SFX_MOV_FOOTSTEP, temp_snd_pan);
                     
                     if (temp_is_dashing == 1)
                     {
@@ -419,7 +438,17 @@ void routines_player(struct game_object * o)
                 struct game_object * p = CollisionCheck_PlayerTestEnemy(o);
                 if (p != NULL)
                 {
-                    SoundInterface_PlaySfx(SFX_ATK_SPLAT_HIT, 0);
+                    int temp_snd_pan = o->pos.x.lh.h - 128 - bg_scroll_x.full.high.a;
+                    if (temp_snd_pan < -127)
+                    {
+                        temp_snd_pan = -127;
+                    }
+                    else if (temp_snd_pan > 127)
+                    {
+                        temp_snd_pan = 127;
+                    }
+
+                    SoundInterface_PlaySfx(SFX_ATK_SPLAT_HIT, temp_snd_pan);
 
                     // spawn an impact FX object
                     int16_t k = -1;

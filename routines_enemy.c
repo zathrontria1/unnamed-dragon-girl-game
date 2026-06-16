@@ -76,7 +76,17 @@ void routines_slime(struct game_object * o)
 
                     if (j >= 0)
                     {
-                        SoundInterface_PlaySfx(SFX_ATK_SPLASH,0);
+                        int temp_snd_pan = o->pos.x.lh.h - 128 - bg_scroll_x.full.high.a;
+                        if (temp_snd_pan < -127)
+                        {
+                            temp_snd_pan = -127;
+                        }
+                        else if (temp_snd_pan > 127)
+                        {
+                            temp_snd_pan = 127;
+                        }
+
+                        SoundInterface_PlaySfx(SFX_ATK_SPLASH,temp_snd_pan);
 
                         struct game_object * p = &obj_hitbox_enemy[j];
                         p->struct_data.npc_data.attack = o->struct_data.npc_data.attack * ENEMY_ATTACK_MULT_RANGED;
@@ -142,7 +152,17 @@ void routines_slime(struct game_object * o)
                                 // Single frame damage
                                 o->struct_data.npc_data.invuln_time = 10 / V_MUL;
 
-                                SoundInterface_PlaySfx(SFX_ATK_PUNCH, 0);
+                                int temp_snd_pan = o->pos.x.lh.h - 128 - bg_scroll_x.full.high.a;
+                                if (temp_snd_pan < -127)
+                                {
+                                    temp_snd_pan = -127;
+                                }
+                                else if (temp_snd_pan > 127)
+                                {
+                                    temp_snd_pan = 127;
+                                }
+
+                                SoundInterface_PlaySfx(SFX_ATK_PUNCH, temp_snd_pan);
                             }
 
                             long temp_dmg = (p->struct_data.npc_data.attack - o->struct_data.npc_data.defense);
@@ -164,7 +184,17 @@ void routines_slime(struct game_object * o)
                 {
                     if (snd_firecrackle_timeout == 0)
                     {
-                        SoundInterface_PlaySfx(SFX_ATK_FIRE_CRACKLE, 0);
+                        int temp_snd_pan = o->pos.x.lh.h - 128 - bg_scroll_x.full.high.a;
+                        if (temp_snd_pan < -127)
+                        {
+                            temp_snd_pan = -127;
+                        }
+                        else if (temp_snd_pan > 127)
+                        {
+                            temp_snd_pan = 127;
+                        }
+
+                        SoundInterface_PlaySfx(SFX_ATK_FIRE_CRACKLE, temp_snd_pan);
 
                         snd_firecrackle_timeout = (8 / V_MUL);
                     }
@@ -421,7 +451,17 @@ void routines_lizardman(struct game_object * o)
 
                     if (j >= 0)
                     {
-                        SoundInterface_PlaySfx(SFX_ATK_SWING,0);
+                        int temp_snd_pan = o->pos.x.lh.h - 128 - bg_scroll_x.full.high.a;
+                        if (temp_snd_pan < -127)
+                        {
+                            temp_snd_pan = -127;
+                        }
+                        else if (temp_snd_pan > 127)
+                        {
+                            temp_snd_pan = 127;
+                        }
+
+                        SoundInterface_PlaySfx(SFX_ATK_SWING, temp_snd_pan);
 
                         struct game_object * p = &obj_hitbox_enemy[j];
                         p->struct_data.npc_data.attack = o->struct_data.npc_data.attack * ENEMY_ATTACK_MULT_RANGED;
@@ -489,7 +529,17 @@ void routines_lizardman(struct game_object * o)
                                 // Single frame damage
                                 o->struct_data.npc_data.invuln_time = 10 / V_MUL;
 
-                                SoundInterface_PlaySfx(SFX_ATK_PUNCH, 0);
+                                int temp_snd_pan = o->pos.x.lh.h - 128 - bg_scroll_x.full.high.a;
+                                if (temp_snd_pan < -127)
+                                {
+                                    temp_snd_pan = -127;
+                                }
+                                else if (temp_snd_pan > 127)
+                                {
+                                    temp_snd_pan = 127;
+                                }
+
+                                SoundInterface_PlaySfx(SFX_ATK_PUNCH, temp_snd_pan);
                             }
 
                             long temp_dmg = (p->struct_data.npc_data.attack - o->struct_data.npc_data.defense);
@@ -511,7 +561,17 @@ void routines_lizardman(struct game_object * o)
                 {
                     if (snd_firecrackle_timeout == 0)
                     {
-                        SoundInterface_PlaySfx(SFX_ATK_FIRE_CRACKLE, 0);
+                        int temp_snd_pan = o->pos.x.lh.h - 128 - bg_scroll_x.full.high.a;
+                        if (temp_snd_pan < -127)
+                        {
+                            temp_snd_pan = -127;
+                        }
+                        else if (temp_snd_pan > 127)
+                        {
+                            temp_snd_pan = 127;
+                        }
+
+                        SoundInterface_PlaySfx(SFX_ATK_FIRE_CRACKLE, temp_snd_pan);
 
                         snd_firecrackle_timeout = (8 / V_MUL);
                     }

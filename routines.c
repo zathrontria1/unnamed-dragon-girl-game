@@ -109,7 +109,17 @@ void routines_interactable_switch(struct game_object * o)
             {
                 if (!event_in_combat_shadow)
                 {
-                    SoundInterface_PlaySfx(SFX_INTERACT_SWITCH,0);
+                    int temp_snd_pan = o->pos.x.lh.h - 128 - bg_scroll_x.full.high.a;
+                    if (temp_snd_pan < -127)
+                    {
+                        temp_snd_pan = -127;
+                    }
+                    else if (temp_snd_pan > 127)
+                    {
+                        temp_snd_pan = 127;
+                    }
+
+                    SoundInterface_PlaySfx(SFX_INTERACT_SWITCH,temp_snd_pan);
                     
                     o->state ^= STATE_SWITCH_ON;
                     event_flags_local[o->struct_data.interactable_data.event_flag] = o->state;
@@ -371,7 +381,17 @@ void routines_drop_money(struct game_object * o)
     {
         if (AniSystem_AnimateDropGravity(o))
         {
-            SoundInterface_PlaySfx(SFX_DROP_COIN,0);
+            int temp_snd_pan = o->pos.x.lh.h - 128 - bg_scroll_x.full.high.a;
+            if (temp_snd_pan < -127)
+            {
+                temp_snd_pan = -127;
+            }
+            else if (temp_snd_pan > 127)
+            {
+                temp_snd_pan = 127;
+            }
+
+            SoundInterface_PlaySfx(SFX_DROP_COIN, temp_snd_pan);
         }
 
         if (o->pos.z.a == 0) // If item is on floor
@@ -381,7 +401,17 @@ void routines_drop_money(struct game_object * o)
             // Check if the player is within the designated box
             if (CollisionCheck_Aabb_BetweenObjects(p, o) == 0)
             {
-                SoundInterface_PlaySfx(SFX_DROP_COIN,0);
+                int temp_snd_pan = o->pos.x.lh.h - 128 - bg_scroll_x.full.high.a;
+                if (temp_snd_pan < -127)
+                {
+                    temp_snd_pan = -127;
+                }
+                else if (temp_snd_pan > 127)
+                {
+                    temp_snd_pan = 127;
+                }
+
+                SoundInterface_PlaySfx(SFX_DROP_COIN, temp_snd_pan);
 
                 p->struct_data.npc_data.money += o->struct_data.npc_data.money;
 
@@ -404,7 +434,17 @@ void routines_drop_rec_meat(struct game_object * o)
     {
         if (AniSystem_AnimateDropGravity(o))
         {
-            SoundInterface_PlaySfx(SFX_DROP_BOUNCE,0);
+            int temp_snd_pan = o->pos.x.lh.h - 128 - bg_scroll_x.full.high.a;
+            if (temp_snd_pan < -127)
+            {
+                temp_snd_pan = -127;
+            }
+            else if (temp_snd_pan > 127)
+            {
+                temp_snd_pan = 127;
+            }
+
+            SoundInterface_PlaySfx(SFX_DROP_BOUNCE,temp_snd_pan);
         }
 
         if (o->pos.z.a == 0) // If item is on floor
@@ -414,7 +454,17 @@ void routines_drop_rec_meat(struct game_object * o)
             // Check if the player is within the designated box
             if (CollisionCheck_Aabb_BetweenObjects(p, o) == 0)
             {
-                SoundInterface_PlaySfx(SFX_DROP_BOUNCE,0);
+                int temp_snd_pan = o->pos.x.lh.h - 128 - bg_scroll_x.full.high.a;
+                if (temp_snd_pan < -127)
+                {
+                    temp_snd_pan = -127;
+                }
+                else if (temp_snd_pan > 127)
+                {
+                    temp_snd_pan = 127;
+                }
+
+                SoundInterface_PlaySfx(SFX_DROP_BOUNCE, temp_snd_pan);
                 
                 if (p->struct_data.npc_data.hp + o->struct_data.npc_data.hp >= p->struct_data.npc_data.hp_max)
                 {
