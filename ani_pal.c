@@ -6,9 +6,24 @@
 #include "vars.h"
 
 #include "ani_pal.h"
+#include "system.h"
 
 NEAR uint16_t pal_ani_entries[8][2]; // Just enough for the magic circle
 uint16_t pal_ani_sel;
+
+/*
+    Copy a subpalette (16 entries/32 bytes) to the shadow
+
+    ptr = pointer to subpalette
+    subpal = subpalette (0-15)
+*/
+void AniSystem_Pal_LoadSubpalette(uint8_t * ptr, uint16_t subpal)
+{
+    uint8_t * dest_ptr = (uint8_t *)&shadow_cgram + (subpal << 5);
+    System_CopyBlock(ptr, dest_ptr, 32);
+
+    return;
+}
 
 /*
     Sets the palette entry based on current frame
