@@ -179,7 +179,10 @@ void SoundInterface_StartSoundEngine()
             "\tsta r2\n" 
             "\tclc\n" 
             "\tadc r0\n"
-            "\tsta r3\n" // Data pointer 1. Note that it won't cross pointers.
+            "\tsta r3\n" // Data pointer 1
+            "\tlda r4\n"
+            "\tadc #0\n"
+            "\tsta r4\n" // Data pointer 1, high bytes
             
             "\tldy #0\n"
 
@@ -252,7 +255,10 @@ void SoundInterface_StartSoundEngine()
             "\tsta r2\n" 
             "\tclc\n" 
             "\tadc r0\n"
-            "\tsta r3\n" // Data pointer 1. Note that it won't cross pointers.
+            "\tsta r3\n" // Data pointer 1
+            "\tlda r4\n"
+            "\tadc #0\n"
+            "\tsta r4\n" // Data pointer 1, high bytes
             
             "\tldy #0\n"
 
