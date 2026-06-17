@@ -2,6 +2,27 @@
 
 #include "data_strings.h"
 
+const uint8_t * data_palette_list_0[] = 
+{
+    (void *)&data_palette_ui,
+    (void *)&data_palette_dungeon_0,
+    (void *)&data_palette_dungeon_1,
+    (void *)&data_palette_dungeon_2,
+    (void *)&data_palette_blank,
+    (void *)&data_palette_blank,
+    (void *)&data_palette_blank,
+    (void *)&data_palette_blank,
+
+    (void *)&data_palette_player,
+    (void *)&data_palette_common_0,
+    (void *)&data_palette_common_1,
+    (void *)&data_palette_blank,
+    (void *)&data_palette_blank,
+    (void *)&data_palette_blank,
+    (void *)&data_palette_blank,
+    (void *)&data_palette_dungeon_0,
+};
+
 // Enemy data 
 const struct enemy_data data_enemy_stats_slime = 
 {
@@ -207,7 +228,7 @@ const struct level_data data_level_test_0 = {
     504,
 
     (void *)&data_bg_dungeon_lz4,
-    (void *)&data_palette,
+    (void *)&data_palette_list_0,
 
     (void *)&data_map_debug0,
     (void *)&data_map_lut_dungeon,
@@ -227,7 +248,7 @@ const struct level_data data_level_test_1 = {
     960,
 
     (void *)&data_bg_dungeon_lz4,
-    (void *)&data_palette,
+    (void *)&data_palette_list_0,
 
     (void *)&data_map_debug1,
     (void *)&data_map_lut_dungeon,
@@ -247,7 +268,7 @@ const struct level_data data_level_test_2 = {
     504,
     
     (void *)&data_bg_dungeon_lz4,
-    (void *)&data_palette,
+    (void *)&data_palette_list_0,
 
     (void *)&data_map_debug0,
     (void *)&data_map_lut_dungeon,
