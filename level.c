@@ -160,11 +160,21 @@ void LevelSystem_LoadLevelTileset(const struct level_data * level)
 
 /*
     Same for the palette
+
+    Must use dedicated function here since using pointer to a table of pointers
 */
 void LevelSystem_LoadLevelPalette(const struct level_data * level)
 {
+    uint8_t ** pal_ptr = (uint8_t **)level->tileset_palette; // Pointer of pointers
     // Copy the ROM palette into shadow
-    DmaSystem_CopyToWram((uint32_t)level->tileset_palette, (uint32_t)&shadow_cgram, 512);
+    for (int i = 0; i < 16; i++)
+    {
+        uint8_t * subpal_ptr = *pal_ptr;
+
+        AniSystem_Pal_LoadSubpalette(subpal_ptr, i);
+
+        pal_ptr++;
+    }
 
     return;
 }
