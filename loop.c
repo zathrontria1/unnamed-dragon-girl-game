@@ -343,7 +343,8 @@ void Loop_Subscreen_MapDisplay_Init()
 
     // Copy the ROM palette into shadow
     DmaSystem_CopyToWram((unsigned long int)level_data_ptr->map_overview_palette, (unsigned long int)&shadow_cgram, 480);
-    DmaSystem_CopyToWram((unsigned long int)(level_data_ptr->tileset_palette)+256, (unsigned long int)(&shadow_cgram)+480, 32);
+
+    AniSystem_Pal_LoadSubpalette((uint8_t *)&data_palette_player, 15);
     
     // Copy the background graphics into VRAM
     DmaSystem_CopyToVram(0x007f0000, 0x0000, 0x9000);

@@ -27,6 +27,8 @@
 #include "math_int.h"
 #include "lz4.h"
 
+#include "ani_pal.h"
+
 uint16_t subscreen_selection;
 uint16_t subscreen_selection_profile;
 uint16_t subscreen_bottom_entry;
@@ -65,6 +67,8 @@ void loop_subscreen_top()
 
     if (!subscreen_rendered)
     {
+        AniSystem_Pal_LoadSubpalette((uint8_t *)&data_palette_player_portrait, 8);
+
         subscreen_selection = 0;
         subscreen_bottom_entry = 0;
 
@@ -161,7 +165,7 @@ void loop_subscreen_top()
         int16_t x = subscreen_items_toplevel[subscreen_selection].x;
         int16_t y = subscreen_items_toplevel[subscreen_selection].y;
 
-        SpriteEngine_DrawUISprite(x, y, (0x2c | PAL_SYS_IMPACT << 9 | 3 << 12));
+        SpriteEngine_DrawUISprite(x, y, (0xa4 | PAL_SYS_IMPACT << 9 | 3 << 12));
 
         SpriteEngine_ProcessSpriteLists();
 
@@ -235,6 +239,8 @@ void loop_subscreen_top()
 
             // Exiting the top level subscreen.
             SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
+
+            AniSystem_Pal_LoadSubpalette((uint8_t *)&data_palette_player, 8);
                 
             system_game_paused = 0;
 
@@ -357,13 +363,13 @@ void loop_subscreen_profile()
         int16_t x = subscreen_items_profile[subscreen_selection].x;
         int16_t y = subscreen_items_profile[subscreen_selection].y;
 
-        SpriteEngine_DrawUISprite(x, y, (0x2c | PAL_SYS_IMPACT << 9 | 3 << 12));
+        SpriteEngine_DrawUISprite(x, y, (0xa4 | PAL_SYS_IMPACT << 9 | 3 << 12));
 
         for (int py = 0; py < 4; py++)
         {
             for (int px = 0; px < 4; px++)
             {
-                SpriteEngine_DrawUISprite_Large(128 + (px << 5), 0 + (py << 5), ((0x100 + (px << 2) + (py << 6)) | 6 << 9 | 3 << 12));
+                SpriteEngine_DrawUISprite_Large(128 + (px << 5), 0 + (py << 5), ((0x100 + (px << 2) + (py << 6)) | 3 << 12));
             }
         }
 
@@ -719,7 +725,7 @@ void loop_subscreen_help()
         int16_t x = subscreen_items_help[subscreen_selection].x;
         int16_t y = subscreen_items_help[subscreen_selection].y;
 
-        SpriteEngine_DrawUISprite(x, y, (0x2c | PAL_SYS_IMPACT << 9 | 3 << 12));
+        SpriteEngine_DrawUISprite(x, y, (0xa4 | PAL_SYS_IMPACT << 9 | 3 << 12));
 
         SpriteEngine_ProcessSpriteLists();
 
@@ -861,7 +867,7 @@ void loop_subscreen_resetconfirm()
         int16_t x = subscreen_items_resetconfirm[subscreen_selection].x;
         int16_t y = subscreen_items_resetconfirm[subscreen_selection].y;
 
-        SpriteEngine_DrawUISprite(x, y, (0x2c | PAL_SYS_IMPACT << 9 | 3 << 12));
+        SpriteEngine_DrawUISprite(x, y, (0xa4 | PAL_SYS_IMPACT << 9 | 3 << 12));
 
         SpriteEngine_ProcessSpriteLists();
 
