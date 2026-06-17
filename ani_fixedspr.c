@@ -8,6 +8,8 @@
 #include "ani_fixedspr.h"
 #include "dma.h"
 
+bool ani_coin_flip; // Used by the coin function to enable H flip.
+
 /*
     Process DMA tile animations for sprites in the fixed area.
 */
@@ -20,18 +22,20 @@ void AniSystem_Spr_UpdateFixedTiles()
 
     uint16_t temp_frame;
 
-    if (ani_bg_frame_coin >= 13)
+    if (ani_bg_frame_coin >= 11)
     {
         ani_bg_frame_coin = 0;
         temp_frame = 0;
     }
-    else if (ani_bg_frame_coin >= 7)
+    else if (ani_bg_frame_coin >= 6)
     {
-        temp_frame = 13 - ani_bg_frame_coin;
+        temp_frame = 11 - (ani_bg_frame_coin + 1);
+        ani_coin_flip = true;
     }
     else
     {
         temp_frame = ani_bg_frame_coin;
+        ani_coin_flip = false;
     }
 
     // Calculate the new address
