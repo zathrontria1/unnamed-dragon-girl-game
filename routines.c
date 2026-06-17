@@ -8,6 +8,7 @@
 #include "spr_metaspr.h"
 
 #include "ani.h"
+#include "ani_fixedspr.h"
 
 #include "obj.h"
 #include "dma.h"
@@ -318,7 +319,7 @@ void routines_interactable_blocker(struct game_object * o)
         }
     }
 
-    if (o->state == STATE_SWITCH_OFF) // Only draw if the switch is off.
+    if (o->state == STATE_SWITCH_OFF) 
     {
         switch (o->id)
         {
@@ -326,10 +327,25 @@ void routines_interactable_blocker(struct game_object * o)
                 SpriteEngine_AddToBackLayer(o, 0x0e | PAL_INTERACTABLE_BLOCKER_FLOOR << 9 | 2 << 12);
                 break;
             case OBJID_INTERACTABLE_BLOCKER_DOOR_NS:
-                SpriteEngine_AddMetaSprite(o, &data_metaspr_door_ns[0]);
+                SpriteEngine_AddMetaSprite(o, &data_metaspr_door_ns_closed[0]);
                 break;
             case OBJID_INTERACTABLE_BLOCKER_DOOR_EW:
-                SpriteEngine_AddMetaSprite(o, &data_metaspr_door_ew[0]);
+                SpriteEngine_AddMetaSprite(o, &data_metaspr_door_ew_closed[0]);
+                break;
+        }
+    }
+    else
+    {
+        switch (o->id)
+        {
+            case OBJID_INTERACTABLE_BLOCKER_FLOOR:
+                //SpriteEngine_AddToBackLayer(o, 0x0e | PAL_INTERACTABLE_BLOCKER_FLOOR << 9 | 2 << 12);
+                break;
+            case OBJID_INTERACTABLE_BLOCKER_DOOR_NS:
+                SpriteEngine_AddMetaSprite(o, &data_metaspr_door_ns_open[0]);
+                break;
+            case OBJID_INTERACTABLE_BLOCKER_DOOR_EW:
+                //SpriteEngine_AddMetaSprite(o, &data_metaspr_door_ew_open[0]);
                 break;
         }
     }
@@ -421,7 +437,7 @@ void routines_drop_money(struct game_object * o)
     }
 
     uint16_t temp_tileattrib;
-    temp_tileattrib = (0x2a | PAL_DROP_MONEY << 9 | 2 << 12);
+    temp_tileattrib = (0x2a | PAL_DROP_MONEY << 9 | ani_coin_flip << 14 | 2 << 12);
 
     SpriteEngine_AddToSortedLayer(o, temp_tileattrib);
 
@@ -486,8 +502,8 @@ void routines_drop_rec_meat(struct game_object * o)
     }
 
     uint16_t temp_tileattrib;
-    temp_tileattrib = (0x0c | PAL_DROP_REC_MEAT << 9 | 2 << 12);
-
+    temp_tileattrib = (0xa0 | PAL_DROP_REC_MEAT << 9 | 2 << 12);
+    
     SpriteEngine_AddToSortedLayer(o, temp_tileattrib);
 
     return;
