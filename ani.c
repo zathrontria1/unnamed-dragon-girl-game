@@ -44,7 +44,7 @@ uint16_t AniSystem_AnimateDropGravity(struct game_object * o)
             temp.pos.z.a = 0;
 
             uint16_t temp_tileattrib;
-            temp_tileattrib = 0x0e | PAL_FX_SHADOW << 9 | 2 << 12;
+            temp_tileattrib = 0xa2 | PAL_FX_SHADOW << 9 | 2 << 12;
 
             SpriteEngine_AddToBackLayer(&temp, temp_tileattrib);
         }
