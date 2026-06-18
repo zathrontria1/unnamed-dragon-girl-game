@@ -2,25 +2,27 @@
 
 #include "data_strings.h"
 
-const uint8_t * data_palette_list_0[] = 
+const struct level_palette_list data_palette_list_0 = 
 {
-    (void *)&data_palette_ui,
-    (void *)&data_palette_dungeon_0,
-    (void *)&data_palette_dungeon_1,
-    (void *)&data_palette_dungeon_2,
-    (void *)&data_palette_blank,
-    (void *)&data_palette_blank,
-    (void *)&data_palette_blank,
-    (void *)&data_palette_blank,
+    {
+        (void *)&data_palette_ui,
+        (void *)&data_palette_dungeon_0,
+        (void *)&data_palette_dungeon_1,
+        (void *)&data_palette_dungeon_2,
+        (void *)&data_palette_blank,
+        (void *)&data_palette_blank,
+        (void *)&data_palette_blank,
+        (void *)&data_palette_blank,
 
-    (void *)&data_palette_player,
-    (void *)&data_palette_common_0,
-    (void *)&data_palette_common_1,
-    (void *)&data_palette_blank,
-    (void *)&data_palette_blank,
-    (void *)&data_palette_blank,
-    (void *)&data_palette_blank,
-    (void *)&data_palette_dungeon_0,
+        (void *)&data_palette_player,
+        (void *)&data_palette_common_0,
+        (void *)&data_palette_common_1,
+        (void *)&data_palette_blank,
+        (void *)&data_palette_blank,
+        (void *)&data_palette_blank,
+        (void *)&data_palette_blank,
+        (void *)&data_palette_dungeon_0
+    }
 };
 
 // Enemy data 

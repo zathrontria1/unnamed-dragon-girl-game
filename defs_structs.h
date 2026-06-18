@@ -1,3 +1,8 @@
+struct level_palette_list
+{
+    void * subpal[16];
+};
+
 struct sound_stream_data
 {
     void * ptr;

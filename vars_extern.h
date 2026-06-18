@@ -62,7 +62,7 @@ extern const NEAR uint32_t data_pow_2[];
 extern const uint32_t data_upgrade_costs[];
 
 // Level sub-data
-extern const uint8_t * data_palette_list_0[];
+extern const struct level_palette_list data_palette_list_0;
 
 extern const struct obj_list_entry_interactable data_interactables_debug0[];
 extern const struct obj_list_entry_interactable data_interactables_debug1[];
@@ -90,6 +90,8 @@ extern const uint16_t data_map_lut_dungeon[1024];
 extern const uint8_t data_map_lut_dungeon_col[256];
 
 // Metasprite lists
+extern const struct spr_metaspr_definition data_metaspr_level_warp_closed[];
+
 extern const struct spr_metaspr_definition data_metaspr_door_ns_open[];
 extern const struct spr_metaspr_definition data_metaspr_door_ns_closed[];
 extern const struct spr_metaspr_definition data_metaspr_door_ew_open[];
