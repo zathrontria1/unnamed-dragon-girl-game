@@ -710,7 +710,7 @@ void SpriteEngine_ProcessSpriteLists()
         "\tsta <_spr_depth_count+14,x\n"
 	    "\tsbc <_spr_depth_count+15,x\n"
         "\tsta <_spr_depth_count+15,x\n"
-	    "\tsbc <_spr_depth_count+16,x\n"
+	    "\tsbc !_spr_depth_count+16,x\n" // Last one breaks zp, must use abs
         "\ttay\n"
         "\ttxa\n"
         "\tclc\n"
