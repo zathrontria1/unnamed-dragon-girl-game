@@ -6,6 +6,8 @@
 #include "spr.h"
 #include "spr_metaspr.h"
 
+#include "map.h"
+
 // Draws a metasprite
 #if VBCC_ASM == 1
 NO_INLINE void SpriteEngine_AddMetaSprite(__reg("a/x") struct game_object * o, __reg("r0/r1") const struct spr_metaspr_definition * m)
