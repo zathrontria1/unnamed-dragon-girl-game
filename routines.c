@@ -35,6 +35,8 @@
 
 #include "main.h"
 
+#include "level.h"
+
 void routines_fx_smoke(struct game_object * o)
 {
     if (!system_game_paused)
@@ -354,6 +356,67 @@ void routines_interactable_blocker(struct game_object * o)
                     SpriteEngine_AddMetaSprite(o, &data_metaspr_door_ew_open[0]);
                 }
                 break;
+        }
+    }
+
+    return;
+}
+
+void routines_interactable_level_warp(struct game_object * o)
+{
+    bool warp_open = false;
+    if (!system_game_paused) // If game is not paused
+    {
+        if (obj_enemies_defeated >= obj_enemies_target_count)
+        {
+            // edit the map_collision_buf
+            // o->tile contains the x and y tile coords
+            // y needs to be shifted an amount of times
+            uint16_t q = (o->tile.y << map_extent_tiles_x_shiftcount) + o->tile.x;
+            uint16_t q2;
+            uint16_t q3;
+            uint16_t q4;
+            map_collision_buf[q] = 0xff;
+
+            q2 = (o->tile.y << map_extent_tiles_x_shiftcount) + o->tile.x + 1;
+            map_collision_buf[q2] = 0xff;
+
+            q3 = ((o->tile.y - 1) << map_extent_tiles_x_shiftcount) + o->tile.x;
+            map_collision_buf[q3] = 0xff;
+
+            q4 = ((o->tile.y - 1) << map_extent_tiles_x_shiftcount) + o->tile.x + 1;
+            map_collision_buf[q4] = 0xff;
+
+            warp_open = true;
+        }
+    }
+
+    if (!warp_open)
+    {
+        SpriteEngine_AddMetaSprite(o, &data_metaspr_level_warp_closed[0]);
+    }
+    else
+    {
+        // Test if the player is inside the warp area here.
+        // Can use same test as the drops, just use a larger area
+        struct game_object * p = obj_player_pointer;
+
+        int16_t x1 = p->pos.x.lh.h;
+        int16_t x2 = o->pos.x.lh.h;
+
+        int16_t y1 = p->pos.y.lh.h;
+        int16_t y2 = o->pos.y.lh.h - 16;
+
+        int16_t w1 = p->w;
+        int16_t w2 = 32;
+
+        int16_t h1 = p->h;
+        int16_t h2 = 16;
+
+        // Check if the player is within the designated box
+        if (CollisionCheck_Aabb_Direct_Rectangle(x1, x2, y1, y2, w1, w2, h1, h2) == 0)
+        {
+            level_data_ptr_next = (const struct level_data *)o->data_ptr;
         }
     }
 

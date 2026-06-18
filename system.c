@@ -193,6 +193,7 @@ void System_DisplayStartupSplash()
     // Load the level
     level_data_ptr = LEVEL_INITIAL; // Set the initial level here
     level_data_ptr_prev = LEVEL_INITIAL;
+    level_data_ptr_next = LEVEL_INITIAL;
 
     LevelSystem_LoadLevel(level_data_ptr); // non-VRAM hitting parts here
     

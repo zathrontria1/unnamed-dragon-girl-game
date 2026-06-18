@@ -5,6 +5,8 @@ void routines_interactable_switch(struct game_object * o);
 void routines_interactable_blocker(struct game_object * o);
 void routines_interactable_sign(struct game_object * o);
 
+void routines_interactable_level_warp(struct game_object * o);
+
 void routines_interactable_treasurechest(struct game_object * o);
 
 void routines_spawner(struct game_object * o);

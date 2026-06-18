@@ -17,6 +17,7 @@
 
 const struct level_data * level_data_ptr;
 const struct level_data * level_data_ptr_prev;
+const struct level_data * level_data_ptr_next;
 
 // All functions in level.c expect that a valid level pointer is set.
 

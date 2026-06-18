@@ -169,6 +169,8 @@ const struct obj_list_entry_interactable data_interactables_debug0[] =
     {OBJID_INTERACTABLE_SIGN_WALL, 592, 432-8, (void *)&STR_MSG_TEST_MULTILINE}, 
     {OBJID_INTERACTABLE_SIGN_WALL, 480, 432-8, (void *)&STR_MSG_TEST_MULTIPAGE}, 
 
+    {OBJID_INTERACTABLE_LEVEL_WARP, 496, 32, (void *)&data_level_test_1}, 
+
     {OBJID_INTERACTABLE_TREASURECHEST, 312, 320, (void *)5000l}, 
     {OBJID_INTERACTABLE_TREASURECHEST, 312, 320-32, (void *)100000l}, 
     {OBJID_INTERACTABLE_TREASURECHEST, 312-32, 320, (void *)500000l}, 

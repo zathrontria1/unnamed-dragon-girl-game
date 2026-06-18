@@ -583,7 +583,11 @@ int16_t obj_instantiate(
         p->tile.x = (uint16_t)p->pos.x.lh.h >> 4;
         p->tile.y = (uint16_t)p->pos.y.lh.h >> 4;
 
-        p->struct_data.interactable_data.event_flag = local_event_flag;
+        if (id != OBJID_INTERACTABLE_LEVEL_WARP)
+        {
+            p->struct_data.interactable_data.event_flag = local_event_flag;
+        }
+        
         p->struct_data.interactable_data.money = 0;
         p->struct_data.interactable_data.opened = false;
     }
@@ -926,6 +930,11 @@ uint16_t obj_instantiate_interactables(const struct obj_list_entry_interactable*
         {
             obj_general[index].struct_data.interactable_data.money = (uint32_t)list->flag;
         }
+        else if (temp_objid == OBJID_INTERACTABLE_LEVEL_WARP)
+        {
+            uint8_t * level_ptr = (uint8_t *)(list->flag);
+            obj_general[index].data_ptr = level_ptr;
+        }
 
         list++;
     }
@@ -1105,6 +1114,9 @@ void obj_set_function_pointer(struct game_object * o)
         case OBJID_INTERACTABLE_BLOCKER_DOOR_NS:
         case OBJID_INTERACTABLE_BLOCKER_DOOR_EW:
             o->func_ptr = (void *)&routines_interactable_blocker;
+            break;
+        case OBJID_INTERACTABLE_LEVEL_WARP:
+            o->func_ptr = (void *)&routines_interactable_level_warp;
             break;
         case OBJID_INTERACTABLE_SIGN_WALL:
             o->func_ptr = (void *)&routines_interactable_sign;

@@ -240,14 +240,15 @@ void Loop_Game()
 
             shadow_inidisp = 0x08;
         }
-        else if (System_CheckKey(KEY_L))
+
+        if (level_data_ptr_next != level_data_ptr)
         {
-            // Debug: Switch to new level
+            // Switch to new level
             shadow_inidisp = 0x0f;
             system_use_alternate_nmi = 1;
             shadow_inidisp_change = -1;
 
-            level_data_ptr = (const struct level_data *)&data_level_test_1;
+            level_data_ptr = level_data_ptr_next;
             system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_NEWLEVEL);
             system_target_routine = ROUTINE_NEWLEVEL;
 
