@@ -93,5 +93,6 @@ extern const uint8_t data_map_lut_dungeon_col[256];
 extern const struct spr_metaspr_definition data_metaspr_door_ns_open[];
 extern const struct spr_metaspr_definition data_metaspr_door_ns_closed[];
 extern const struct spr_metaspr_definition data_metaspr_door_ew_open[];
+extern const struct spr_metaspr_definition data_metaspr_door_ew_open_flip[];
 extern const struct spr_metaspr_definition data_metaspr_door_ew_closed[];
 

@@ -345,7 +345,14 @@ void routines_interactable_blocker(struct game_object * o)
                 SpriteEngine_AddMetaSprite(o, &data_metaspr_door_ns_open[0]);
                 break;
             case OBJID_INTERACTABLE_BLOCKER_DOOR_EW:
-                //SpriteEngine_AddMetaSprite(o, &data_metaspr_door_ew_open[0]);
+                if (system_frames_elapsed & 0x01)
+                {
+                    SpriteEngine_AddMetaSprite(o, &data_metaspr_door_ew_open_flip[0]);
+                }
+                else
+                {
+                    SpriteEngine_AddMetaSprite(o, &data_metaspr_door_ew_open[0]);
+                }
                 break;
         }
     }
