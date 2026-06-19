@@ -184,18 +184,19 @@ void System_DisplayStartupSplash()
 
     System_EnableInterrupts();
 
+    // The SPC takes a while to init itself, so do something else in the meantime.
+
     // Check the SRAM contents
     sram_check();
-
-    // The SPC takes a while to init itself, so do something else in the meantime.
+    
     System_Init(); // Do the init here too
     
-    // Load the level
+    // Assign the level pointers
     level_data_ptr = LEVEL_INITIAL; // Set the initial level here
     level_data_ptr_prev = LEVEL_INITIAL;
     level_data_ptr_next = LEVEL_INITIAL;
 
-    LevelSystem_LoadLevel(level_data_ptr); // non-VRAM hitting parts here
+    //LevelSystem_LoadLevel(level_data_ptr); // non-VRAM hitting parts here
     
     while (shadow_inidisp != 0x0f)
     {
@@ -212,6 +213,7 @@ void System_DisplayStartupSplash()
     // TODO: describe a sequence pointer and structure so this can be handled as a single pointer to pass to a function
     // Upload SFX data (shared for entire game)
     SoundInterface_UploadSampleList((struct sample_list_entry *)&data_snd_samples[0]);
+
     SoundInterface_UploadInstrumentList((struct sample_list_entry_ins *)&data_snd_instruments[0]);
     SoundInterface_UploadMusicSequence((struct seq_command *)&data_seq_test_t1[0], 0); // Drum 1
     SoundInterface_UploadMusicSequence((struct seq_command *)&data_seq_test_t2[0], 1); // Drum 2
@@ -251,23 +253,6 @@ void System_DisplayStartupSplash()
     REG_MOSAIC = shadow_mosaic;
     REG_INIDISP = 0x8f;
     shadow_inidisp = 0;
-
-    // Screen is forced blank again. Do anything that touches PPU regs here now
-
-    // DMA graphics in its entirety
-    DmaSystem_CopyToVram(0x007f0000, 0x0000, 0);
-
-    // Initialize global DMA tile animation
-    // TODO: currently hardcoded. In the future, pointers may be part of map data.
-    buf_player_prev_frame = 0xffff; // Write an invalid frame here
-
-    AniSystem_BgTile_Setup((uint8_t *)&data_bg_dungeon_anim_water_lz4, (uint8_t *)&data_bg_dungeon_anim_torch_lz4);
-
-    // Finish initializing graphics
-    System_Init_Graphics();
-
-    // Run one frame of partial game logic to draw sprites
-    Loop_Game_Partial();
     
     return;
 }
@@ -536,6 +521,11 @@ void System_Init_DisplaySettings(uint16_t routine)
             REG_BGMODE = 0x09; // Mode 1, high priority bg3
             REG_TM = TM_MODE1; // BG1, BG2, BG3, and OBJ
             break;
+        case ROUTINE_CUTSCENE:
+        case ROUTINE_CUTSCENE_INIT:
+            REG_BGMODE = 0x01; // Mode 1
+            REG_TM = TM_CS; // BG1 and OBJ
+            break;
         case ROUTINE_MAPDISPLAY:
             REG_BGMODE = 0x03; // Mode 3
             REG_TM = TM_MODE3; // BG1, BG2, and OBJ
@@ -560,6 +550,11 @@ void System_Init_TilemapSettings(uint16_t routine)
             REG_BG1SC = TILEMAP_ADDR_GAME_UI_4BPP >> 8;
             REG_BG2SC = TILEMAP_ADDR_GAME_MAP >> 8 | 1;
             REG_BG3SC = TILEMAP_ADDR_GAME_UI_2BPP >> 8;
+            break;
+        case ROUTINE_CUTSCENE:
+        case ROUTINE_CUTSCENE_INIT:
+            REG_BG12NBA = 0 << 4 | 0;
+            REG_BG1SC = TILEMAP_ADDR_CS_FRAME >> 8;
             break;
         case ROUTINE_MAPDISPLAY:
             REG_BG12NBA = 4 << 4 | 0;

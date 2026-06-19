@@ -12,6 +12,8 @@
 #include "loop.h"
 #include "loop_subscreen.h"
 
+#include "loop_cutscene.h"
+
 #include "hdma.h"
 
 #include "math_int.h"
@@ -31,15 +33,16 @@ int main()
 
     System_DisplayStartupSplash(); // A good amount of init is here.
     
-    system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_FADEIN);
-    system_target_routine = ROUTINE_GAMELOOP;
+    system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_CUTSCENE_INIT);
+    //system_target_routine = ROUTINE_GAMELOOP;
+
+    // WIP: attempt to integrate the cutscene engine
+    system_target_routine = ROUTINE_CUTSCENE_INIT;
+
+    cs_current = (struct cutscene_data *)&data_cs_bbb;
 
     System_Init_TilemapSettings(system_target_routine);
     System_Init_DisplaySettings(system_target_routine);
-
-    HdmaEngine_EnableHdma();
-
-    SoundInterface_PlayMusic(); 
     
     System_EnableInterrupts();
     
@@ -77,6 +80,12 @@ void * main_GetFunctionPointer(uint16_t routine)
             break;
         case ROUTINE_MAPDISPLAY_INIT:
             return (void *)&Loop_Subscreen_MapDisplay_Init;
+            break;
+        case ROUTINE_CUTSCENE:
+            return (void *)&CsEngine_Loop;
+            break;
+        case ROUTINE_CUTSCENE_INIT:
+            return (void *)&CsEngine_StartCutscene;
             break;
         case ROUTINE_MSGBOX:
             return (void *)&Loop_Game_Messagebox;

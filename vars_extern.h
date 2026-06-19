@@ -1,5 +1,6 @@
 // Sound engine and data
-#include "vars_snd.h"
+#include "vars_extern_snd.h"
+#include "vars_extern_cutscenes.h"
 
 extern const struct enemy_data data_enemy_stats_slime;
 extern const struct enemy_data data_enemy_stats_lizardman;

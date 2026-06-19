@@ -12,6 +12,7 @@
 
 #include "data_tables.h"
 #include "data_tables_lut.h"
+#include "data_cutscenes.h"
 #include "data_metaspr_list.h"
 
 #include "consts.h"
@@ -23,7 +24,10 @@ const uint8_t const_sram_verify_str[] = "EIEIMUN!"; // Can use any 8 character s
 uint8_t sram_available_slots;
 
 // For DMA/HDMA copies
-const uint32_t const_zero = 0;
+const uint32_t const_zero[] = 
+{
+    0, 0, 0, 0, 0, 0, 0, 0
+};
 const uint8_t const_sprite_offscreen = 0xf0;
 
 const uint8_t const_hdma_tm_msgbox[] = 

@@ -12,7 +12,7 @@ extern const uint8_t const_sram_verify_str[];
 extern uint8_t sram_available_slots;
 
 // For DMA/HDMA copies
-extern const uint32_t const_zero;
+extern const uint32_t const_zero[8];
 extern const uint8_t const_sprite_offscreen;
 extern const uint8_t const_hdma_tm_msgbox[];
 extern const uint16_t const_ui_textadvance_tilemapentries[];
