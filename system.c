@@ -554,7 +554,7 @@ void System_Init_TilemapSettings(uint16_t routine)
         case ROUTINE_CUTSCENE:
         case ROUTINE_CUTSCENE_INIT:
             REG_BG12NBA = 0 << 4 | 0;
-            REG_BG1SC = TILEMAP_ADDR_CS_FRAME >> 8;
+            REG_BG1SC = TILEMAP_ADDR_CS_FRAME_A >> 8;
             break;
         case ROUTINE_MAPDISPLAY:
             REG_BG12NBA = 4 << 4 | 0;

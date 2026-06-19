@@ -150,19 +150,19 @@ void CsEngine_StartCutscene()
     System_DisableInterrupts();
 
     // Write an empty tile
-    DmaSystem_CopyToVram((uint32_t)const_zero, 0x2800, 32);
+    DmaSystem_CopyToVram((uint32_t)const_zero, 0x3000, 32);
 
     // Clear the rest of the tiles
     DmaSystem_CopyToVram((uint32_t)cs_current->frame, 0x0000, 20480);
-    DmaSystem_CopyToVram((uint32_t)cs_current->tilemap, TILEMAP_ADDR_CS_FRAME, 1280);
+    DmaSystem_CopyToVram((uint32_t)cs_current->tilemap, TILEMAP_ADDR_CS_FRAME_A, 1280);
     DmaSystem_CopyToWram((uint32_t)cs_current->palette, (uint32_t)&shadow_cgram, 256);
 
     // Write out empty tilemap entries
     REG_VMAIN = VRAM_INCHIGH;
-    REG_VMADDLH = TILEMAP_ADDR_CS_FRAME+640;
+    REG_VMADDLH = TILEMAP_ADDR_CS_FRAME_A+640;
     for (int i = 640; i < 1024; i++)
     {
-        REG_VMDATALH = 640;
+        REG_VMDATALH = 768;
     }
 
     cs_timer = cs_current->time;
