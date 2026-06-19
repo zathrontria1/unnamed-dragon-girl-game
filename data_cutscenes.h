@@ -1,0 +1,58 @@
+// Cutscene data
+const struct cutscene_data data_cs_bbb[] = 
+{
+    {
+        (void*)&data_cs_bbb_0_f,
+        (void*)&data_cs_bbb_0_p,
+        (void*)&data_cs_bbb_0_t,
+        300
+    }, 
+    {
+        (void*)&data_cs_bbb_1_f,
+        (void*)&data_cs_bbb_1_p,
+        (void*)&data_cs_bbb_1_t,
+        300
+    }, 
+    {
+        (void*)&data_cs_bbb_2_f,
+        (void*)&data_cs_bbb_2_p,
+        (void*)&data_cs_bbb_2_t,
+        300
+    }, 
+    {
+        (void*)&data_cs_bbb_3_f,
+        (void*)&data_cs_bbb_3_p,
+        (void*)&data_cs_bbb_3_t,
+        300
+    }, 
+    {
+        (void*)&data_cs_bbb_4_f,
+        (void*)&data_cs_bbb_4_p,
+        (void*)&data_cs_bbb_4_t,
+        300
+    }, 
+    {
+        (void*)&data_cs_bbb_5_f,
+        (void*)&data_cs_bbb_5_p,
+        (void*)&data_cs_bbb_5_t,
+        300
+    }, 
+    {
+        (void*)&data_cs_bbb_6_f,
+        (void*)&data_cs_bbb_6_p,
+        (void*)&data_cs_bbb_6_t,
+        300
+    }, 
+    {
+        (void*)&data_cs_bbb_7_f,
+        (void*)&data_cs_bbb_7_p,
+        (void*)&data_cs_bbb_7_t,
+        300
+    }, 
+    {
+        (void*)0xffffffff,
+        (void*)0xffffffff,
+        (void*)0xffffffff,
+        65535
+    }, // Last entry should be all invalid values so the cutscene engine knows when to return control.
+};
