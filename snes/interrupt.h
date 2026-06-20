@@ -114,6 +114,8 @@ The H/V-IRQ flag in Bit7 of TIMEUP, Port 4211h gets set when the H-Counter gets 
 
 The H/V-IRQ flag in Bit7 of TIMEUP, Port 4211h gets set when the V-Counter gets equal to the V-Count register value.
 */
+#define REG_HTIMELH (*(vuint16 *)0x4207)
+#define REG_VTIMELH (*(vuint16 *)0x4209)
 
 /**
  *  \brief 
