@@ -39,8 +39,8 @@ int main()
     // WIP: attempt to integrate the cutscene engine
     system_target_routine = ROUTINE_CUTSCENE_INIT;
 
-    cs_current = (struct cutscene_data *)&data_cs_bbb;
-
+    cs_current = (struct cutscene_data *)&data_cs_intro;
+    
     System_Init_TilemapSettings(system_target_routine);
     System_Init_DisplaySettings(system_target_routine);
     

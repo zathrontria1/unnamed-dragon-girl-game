@@ -1,5 +1,5 @@
 // Cutscene data
-const struct cutscene_data data_cs_bbb[] = 
+/*const struct cutscene_data data_cs_bbb[] = 
 {
     {
         (void*)&data_cs_bbb_0_f,
@@ -47,6 +47,28 @@ const struct cutscene_data data_cs_bbb[] =
         (void*)&data_cs_bbb_7_f,
         (void*)&data_cs_bbb_7_p,
         (void*)&data_cs_bbb_7_t,
+        300
+    }, 
+    {
+        (void*)0xffffffff,
+        (void*)0xffffffff,
+        (void*)0xffffffff,
+        65535
+    }, // Last entry should be all invalid values so the cutscene engine knows when to return control.
+};*/
+
+const struct cutscene_data data_cs_intro[] = 
+{
+    {
+        (void*)&data_cs_intro_0_f,
+        (void*)&data_cs_intro_0_p,
+        (void*)&data_cs_intro_0_t,
+        300
+    }, 
+    {
+        (void*)&data_cs_intro_1_f,
+        (void*)&data_cs_intro_1_p,
+        (void*)&data_cs_intro_1_t,
         300
     }, 
     {
