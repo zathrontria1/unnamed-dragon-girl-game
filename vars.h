@@ -30,9 +30,13 @@ extern uint16_t system_dont_count_lag; // set to 1 to not increment the lag coun
 ZP extern uint16_t system_nmis_counted;
 ZP extern uint16_t system_use_alternate_nmi;
 
+ZP extern uint16_t system_fblank_enabled;
+
 ZP extern uint16_t system_game_paused;
 
 ZP extern void * system_loop_func_ptr;
+
+ZP extern uint8_t system_suppress_odd_transfers;
 
 // Shadow buffers
 ZP extern uint8_t shadow_inidisp;
@@ -47,6 +51,8 @@ ZP extern uint8_t shadow_coldata_g;
 ZP extern uint8_t shadow_coldata_b;
 
 ZP extern uint8_t shadow_stat77;
+
+ZP extern uint8_t shadow_hdmaen;
 
 NEAR extern union oam_buffer shadow_oam;
 NEAR extern union cgram_full shadow_cgram; // 256 palette entries, 2 bytes wide each

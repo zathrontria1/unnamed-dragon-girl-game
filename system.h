@@ -23,13 +23,18 @@ void System_Init_UiTilemap();
 void System_Init_Partial(void);
 
 FORCE_INLINE void System_WaitUntilVblank(void);
+
 void System_GetInput(void);
+void System_GetInput_Manual(void);
+
 FORCE_INLINE uint16_t System_CheckKey(enum KEYPAD_BITS k);
 FORCE_INLINE uint16_t System_CheckKeyAny();
 FORCE_INLINE uint16_t System_CheckKeyHeld(enum KEYPAD_BITS k);
 
 FORCE_INLINE void System_EnableInterrupts(void);
 FORCE_INLINE void System_DisableInterrupts(void);
+FORCE_INLINE void System_EnableFblankInterrupts(void);
+
 FORCE_INLINE void System_CheckSoftReset(void);
 void System_SoftReset(void);
 void System_Reset(void);

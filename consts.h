@@ -112,7 +112,8 @@
 #define ROUTINE_RESET 65534
 
 #define DMA_QUEUE_MAX_ENTRIES 32 // entries per queue
-#define DMA_QUEUE_MAX_LENGTH 4634 // 
+#define DMA_QUEUE_MAX_LENGTH 4634 // Fblank disabled
+#define DMA_QUEUE_MAX_LENGTH_FBE 12247 // Fblank enabled
 //#define DMA_QUEUE_OVERHEAD 64 // time, in bytes lost to overhead, to loop a DMA queue entry in NMI
 
 #if VBCC_ASM == 1
@@ -237,8 +238,8 @@
 #define TILEMAP_ADDR_MAP_MAP 0x4800
 #define TILEMAP_ADDR_MAP_UI 0x4c00
 
-#define TILEMAP_ADDR_CS_FRAME_A 0x2800
-#define TILEMAP_ADDR_CS_FRAME_B 0x2c00
+#define TILEMAP_ADDR_CS_FRAME_A 0x2c00
+#define TILEMAP_ADDR_CS_FRAME_B 0x5c00
 
 #define LZ4_BUFFER_ADDR 0x007f0000
 

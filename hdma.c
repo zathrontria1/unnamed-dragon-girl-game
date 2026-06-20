@@ -10,6 +10,8 @@
 #include "map.h"
 #include "hdma.h"
 
+#include "ui.h"
+
 struct hdma_indirect_table_entry hdma_bgpalette_tables[3];
 uint16_t hdma_bgpalette_data[448];
 
@@ -304,6 +306,31 @@ void HdmaEngine_GeneratePaletteTable(uint16_t * table_ptr, uint16_t pal_start, u
             
             table_ptr++;
         }
+    }
+
+    return;
+}
+
+void HdmaEngine_SetHdmaShadow()
+{
+    if (hdma_use_gradient == 0xffff)
+    {
+        if (ui_in_subscreen)
+        {
+            shadow_hdmaen = HDMA_USED_CHANNELS_SUBSCREEN;
+        }
+        else
+        {
+            shadow_hdmaen = HDMA_USED_CHANNELS_MSGBOX;
+        }
+    }
+    else if (hdma_use_gradient == 0)
+    {
+        ; // Do not interfere with HDMA
+    }
+    else 
+    {
+        shadow_hdmaen = HDMA_USED_CHANNELS_NORMAL;
     }
 
     return;

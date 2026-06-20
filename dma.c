@@ -387,14 +387,25 @@ uint16_t DmaSystem_AddItemToQueue(
     // Check for capacity (count, length) issues
     uint16_t temp_length = length + const_lut_dma_split_lookup[split] + dma_queue_length;
     uint16_t temp_queue_count = dma_queue_count + 1 + split;
-    
+
     if (temp_queue_count > DMA_QUEUE_MAX_ENTRIES)
     {
         return 1; // exceeds current max queue count
     }
-    else if (temp_length > DMA_QUEUE_MAX_LENGTH)
+    
+    if (system_fblank_enabled)
     {
-        return 1; // out of DMA bandwidth
+        if (temp_length > DMA_QUEUE_MAX_LENGTH_FBE)
+        {
+            return 1; // out of DMA bandwidth
+        }
+    }
+    else
+    {
+        if (temp_length > DMA_QUEUE_MAX_LENGTH)
+        {
+            return 1; // out of DMA bandwidth
+        }
     }
 
     // Add the valid entry

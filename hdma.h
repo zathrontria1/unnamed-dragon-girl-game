@@ -25,3 +25,6 @@ void HdmaEngine_UpdateBgScrollValues();
 void HdmaEngine_GeneratePaletteTable(uint16_t * table_ptr, uint16_t pal_start, uint16_t entries, uint16_t target_color, uint16_t alpha, uint16_t height);
 
 void HdmaEngine_EnableHdma(void);
+
+void HdmaEngine_SetHdmaShadow();
+

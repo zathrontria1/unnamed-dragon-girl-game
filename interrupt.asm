@@ -110,13 +110,122 @@ l7:
 
 	rti
 ; stacksize=0+??
+;vcprmin=10000
+	section	"DONTMERGE_text.near.__irq_ext.0","acrx"
+	a16
+	x16
+	global	___irq_ext
+___irq_ext:
+	jml :+
+	: ; Jump to fastROM
+	rep	#$30
+	
+	pha
+	phx
+	phy
+
+	phb
+	phd
+
+	lda #$0000
+	tcd
+	pha
+	plb
+	plb
+
+	pei	(r28)
+	pei	(r29)
+	pei	(r30)
+	pei	(r31)
+	pei	(r0)
+	pei	(r1)
+	pei	(r2)
+	pei	(r3)
+	pei	(r4)
+	pei	(r5)
+	pei	(r6)
+	pei	(r7)
+	pei	(r8)
+	pei	(r9)
+	pei	(r10)
+	pei	(r11)
+	pei	(r12)
+	pei	(r13)
+	pei	(r14)
+	pei	(r15)
+	jsl	>_Nmi_Cutscene
+	sep	#32
+	a8
+	lda	_snd_stream_enable
+	a16
+	rep	#32
+	beq	l11
+	jsl	>_SoundInterface_NmiAudioUpload
+l11:
+	jsl	>_SoundInterface_RunDeferredCommands
+
+	bit $4211
+
+	rep	#$30
+
+	plx
+	stx	r15
+	plx
+	stx	r14
+	plx
+	stx	r13
+	plx
+	stx	r12
+	plx
+	stx	r11
+	plx
+	stx	r10
+	plx
+	stx	r9
+	plx
+	stx	r8
+	plx
+	stx	r7
+	plx
+	stx	r6
+	plx
+	stx	r5
+	plx
+	stx	r4
+	plx
+	stx	r3
+	plx
+	stx	r2
+	plx
+	stx	r1
+	plx
+	stx	r0
+	pla
+	sta	r31
+	pla
+	sta	r30
+	pla
+	sta	r29
+	pla
+	sta	r28
+
+	pld
+	plb
+
+	ply
+	plx
+	pla
+
+	rti
+; stacksize=0+??
 	global	_system_use_alternate_nmi
 	zpage	_system_use_alternate_nmi
 	global	_snd_stream_enable
+	global	_SoundInterface_RunDeferredCommands
 	global	_SoundInterface_NmiAudioUpload
-	global  _SoundInterface_RunDeferredCommands
-	global	_interrupt_vblank_sub
-	global	_interrupt_vblank_alt
+	global	_Nmi_Primary
+	global	_Nmi_Alternate
+	global	_Nmi_Cutscene
 	zpage	r0
 	zpage	r1
 	zpage	r2

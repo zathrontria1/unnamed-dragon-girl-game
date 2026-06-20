@@ -14,6 +14,7 @@
 #include "obj.h"
 #include "routines.h"
 #include "loop.h"
+#include "loop_cutscene.h"
 #include "map.h"
 #include "math_int.h"
 #include "sram_management.h"
@@ -553,8 +554,16 @@ void System_Init_TilemapSettings(uint16_t routine)
             break;
         case ROUTINE_CUTSCENE:
         case ROUTINE_CUTSCENE_INIT:
-            REG_BG12NBA = 0 << 4 | 0;
-            REG_BG1SC = TILEMAP_ADDR_CS_FRAME_A >> 8;
+            if (cs_use_second_frame)
+            {
+                REG_BG12NBA = 0 << 4 | 3;
+                REG_BG1SC = TILEMAP_ADDR_CS_FRAME_B >> 8;
+            }
+            else
+            {
+                REG_BG12NBA = 0 << 4 | 0;
+                REG_BG1SC = TILEMAP_ADDR_CS_FRAME_A >> 8;
+            }
             break;
         case ROUTINE_MAPDISPLAY:
             REG_BG12NBA = 4 << 4 | 0;
@@ -577,11 +586,29 @@ FORCE_INLINE void System_WaitUntilVblank()
         emitWAI();
     }  
 
-    System_GetInput();
+    if (system_fblank_enabled)
+    {
+        System_GetInput_Manual();
+    }
+    else
+    {
+        System_GetInput();
+    }
+
+    System_CheckSoftReset(); // Place the soft reset check at the end of input polling
+    
+    if (input_pad0_new != 0 && !rand_seeded)
+    {
+        // Seed it now if it's still not seeded
+        Math_SeedRandom(system_frames_elapsed);
+    }
         
     return;
 }
 
+/*
+    Automatic input poll
+*/
 void System_GetInput()
 {
     #if VBCC_ASM == 1 // Don't bother changing memory bit
@@ -623,15 +650,37 @@ void System_GetInput()
         input_pad1 = REG_JOYxLH(1); 
         input_pad1_new = ((temp_pad1 ^ input_pad1) & input_pad1);*/
     #endif
+    
+    return;
+}
 
-    System_CheckSoftReset(); // Place the soft reset check at the end of input polling
-    
-    if (input_pad0_new != 0 && !rand_seeded)
+/*
+    Manual input poll
+
+    Use this when using fblank to prevent any chance of input read issues or lag
+*/
+void System_GetInput_Manual()
+{
+    // Reset controllers
+    REG_JOYOUT = 0x01;
+    REG_JOYOUT = 0x00;
+
+    // The controller is ready to be read.
+    uint16_t controller_bits = 0x0000;
+    uint8_t bit = 0x00; // Read and paste controller data here.
+
+    for (int i = 0; i < 16; i++) // 16 bits in standard controller
     {
-        // Seed it now if it's still not seeded
-        Math_SeedRandom(system_frames_elapsed);
+        bit = REG_JOYSERx(0);
+        bit = bit & 0x01;
+
+        controller_bits = (controller_bits << 1) | bit;
     }
-    
+
+    uint16_t temp_pad0 = input_pad0; 
+    input_pad0 = controller_bits;
+    input_pad0_new = ((temp_pad0 ^ input_pad0) & input_pad0);
+
     return;
 }
 
@@ -667,6 +716,8 @@ FORCE_INLINE uint16_t System_CheckKeyHeld(enum KEYPAD_BITS k)
 
 FORCE_INLINE void System_EnableInterrupts()
 {
+    system_fblank_enabled = false;
+
     // Set up interrupts
     register volatile uint8_t temp1 = REG_RDNMI;
     register volatile uint8_t temp2 = REG_TIMEUP;
@@ -681,14 +732,34 @@ FORCE_INLINE void System_EnableInterrupts()
 
 FORCE_INLINE void System_DisableInterrupts()
 {
+    system_fblank_enabled = false;
+
     // Set up interrupts
     register volatile uint8_t temp1 = REG_RDNMI;
     register volatile uint8_t temp2 = REG_TIMEUP;
 
     // Compiler bug has been worked around from ASM side.
-    REG_NMITIMEN = INT_JOYPAD_ENABLE;
+    REG_NMITIMEN = 0x00;
     
     emitSEI();
+
+    return;
+}
+
+FORCE_INLINE void System_EnableFblankInterrupts()
+{
+    system_fblank_enabled = true;
+
+    // Set up interrupts
+    register volatile uint8_t temp1 = REG_RDNMI;
+    register volatile uint8_t temp2 = REG_TIMEUP;
+
+    REG_VTIMELH = 209; // Fblank at line 209
+
+    // Compiler bug has been worked around from ASM side.
+    REG_NMITIMEN = (INT_HVIRQ_V);
+    
+    emitCLI();
 
     return;
 }
