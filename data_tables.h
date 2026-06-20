@@ -33,16 +33,16 @@ const struct enemy_data data_enemy_stats_slime =
 
 const struct enemy_data data_enemy_stats_lizardman = 
 {
-    30, 2, 2, 200, 300, 16, 16
+    210, 2, 2, 200, 300, 16, 16
 };
 const struct enemy_data data_enemy_stats_lizardman_archer = 
 {
-    20, 2, 2, 200, 300, 16, 16
+    140, 2, 2, 200, 300, 16, 16
 };
 const struct enemy_data data_enemy_stats_lizardman_lilsis = 
 {
     // Placeholder; this is supposed to be the alternate player
-    50, 1, 1, 0, 0, 16, 16
+    350, 1, 1, 0, 0, 16, 16
 };
 
 // Stream defs
