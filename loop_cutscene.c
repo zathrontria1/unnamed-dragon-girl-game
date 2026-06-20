@@ -173,6 +173,11 @@ void CsEngine_Loop()
         {
             CsEngine_StartCutscene();
         }
+
+        if (cs_preload_subsection == 2)
+        {
+            cs_preload_subsection = 3; // A bit hacky
+        }
     }
 
     return;
@@ -264,15 +269,21 @@ void CsEngine_StartCutscene()
 
         system_loop_func_ptr = main_GetFunctionPointer(system_current_routine);
 
-        // Usually at this point we're still within fblank, so it's likely safe to force-call the cutscene NMI routine here.
-        // Also force-set the new registers.
-        system_in_vblank = true;
-        Nmi_Cutscene();
+        // Check if we're at an idle state. If not, last frame likely was copies and we're pushed down in active display, so defer it
+        if (cs_preload_subsection >= 3)
+        {
+            // we're still within vblank, so it's likely safe to force-call the cutscene NMI routine here.
 
-        system_frames_elapsed--; // correct this to account for the extra NMI call.
-        
-        System_Init_DisplaySettings(system_target_routine);
-        System_Init_TilemapSettings(system_target_routine);
+            // It doesn't take long enough to show up as glitches on screen.
+            // Also force-set the new registers.
+            system_in_vblank = true;
+            Nmi_Cutscene();
+
+            system_frames_elapsed--; // correct this to account for the extra NMI call.
+            
+            System_Init_DisplaySettings(system_target_routine);
+            System_Init_TilemapSettings(system_target_routine);
+        }
     }
 
     return;
