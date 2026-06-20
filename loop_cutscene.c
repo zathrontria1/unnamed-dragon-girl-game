@@ -29,35 +29,72 @@
 struct cutscene_data * cs_current; // Current cutscene frame.
 uint16_t cs_timer; // Current cutscene remaining time before auto advance
 
+bool cs_use_second_frame; // Whether to use the alternate frame. Also determines which section preload
+
+/* 
+    Preload sections can be thought as follows
+    0 = first 4KB
+    1 = next 4KB
+    2, 3, 4 = ditto until 20KB has been reached
+    5 = tilemap
+
+    if 6 or above, don't preload
+*/
+uint16_t cs_preload_subsection; // Which preload section we're at
+
 void CsEngine_Loop()
 {
+    System_Init_DisplaySettings(system_target_routine);
+    System_Init_TilemapSettings(system_target_routine);
+
     bool skip = false;
-    if (cs_timer != 0)
+
+    if (cs_timer > 0)
     {
-        if (System_CheckKey(KEY_A))
-        {
-            cs_timer = 0;
+        cs_timer--;
+    }
 
-            SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
-        }
-        else
-        {
-            cs_timer--;
-        }
+    if (System_CheckKey(KEY_A))
+    {
+        cs_timer = 0;
 
-        if (System_CheckKey(KEY_START))
-        {
-            skip = true;
+        SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
+    }
 
-            SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
+    if (System_CheckKey(KEY_START))
+    {
+        skip = true;
+
+        SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
+    }
+
+    // Perform a preload if needed
+    if ((uint32_t)((cs_current+1)->frame) != 0xffffffff)
+    {
+        if (cs_preload_subsection < 2)
+        {
+            CsEngine_PreloadNextFrame();
         }
     }
-    else if ((cs_timer == 0) || skip)
+    else
     {
+        cs_preload_subsection = 2;
+    }
+    
+    if ((cs_timer == 0) || skip)
+    {
+        if (cs_preload_subsection < 2)
+        {
+            if (!skip)
+            {
+                return;
+            }
+        }
+
         // Advance the current cutscene frame
         cs_current++;
 
-        if ((cs_current->frame == (void *)0xffffffff) || skip)
+        if (((uint32_t)(cs_current->frame) == 0xffffffff) || skip)
         {
             // Cutscene has ended.
             System_DisableInterrupts();
@@ -123,6 +160,8 @@ void CsEngine_Loop()
 
             System_Init_TilemapSettings(system_target_routine);
             System_Init_DisplaySettings(system_target_routine);
+
+            system_suppress_odd_transfers = false;
             
             System_EnableInterrupts();
 
@@ -142,39 +181,58 @@ void CsEngine_Loop()
 */
 void CsEngine_StartCutscene()
 {
-    System_AlignToVblank();
-
-    shadow_inidisp = 0x8f;
-    REG_INIDISP = 0x8f;
-
-    System_DisableInterrupts();
-
-    // Write an empty tile
-    DmaSystem_CopyToVram((uint32_t)const_zero, 0x3000, 32);
-
-    // Clear the rest of the tiles
-    DmaSystem_CopyToVram((uint32_t)cs_current->frame, 0x0000, 20480);
-    DmaSystem_CopyToVram((uint32_t)cs_current->tilemap, TILEMAP_ADDR_CS_FRAME_A, 1280);
-    DmaSystem_CopyToWram((uint32_t)cs_current->palette, (uint32_t)&shadow_cgram, 256);
-
-    // Write out empty tilemap entries
-    REG_VMAIN = VRAM_INCHIGH;
-    REG_VMADDLH = TILEMAP_ADDR_CS_FRAME_A+640;
-    for (int i = 640; i < 1024; i++)
+    if (system_current_routine == ROUTINE_CUTSCENE_INIT)
     {
-        REG_VMDATALH = 768;
+        cs_use_second_frame = false;
+
+        System_AlignToVblank();
+
+        shadow_inidisp = 0x8f;
+        REG_INIDISP = 0x8f;
+
+        System_DisableInterrupts();
+
+        // Write an empty tile at the 20KB boundary of both frames.
+        DmaSystem_CopyToVram((uint32_t)const_zero, 0x2800, 32);
+        DmaSystem_CopyToVram((uint32_t)const_zero, 0x5800, 32);
+
+        // Write the frame data.
+        DmaSystem_CopyToVram((uint32_t)cs_current->frame, 0x0000, 20480);
+        DmaSystem_CopyToVram((uint32_t)cs_current->tilemap, TILEMAP_ADDR_CS_FRAME_A, 1280);
+        DmaSystem_CopyToWram((uint32_t)cs_current->palette, (uint32_t)&shadow_cgram, 256);
+
+        // Stub out the tilemap data past entry 640 (byte 1280)
+        REG_VMAIN = VRAM_INCHIGH;
+        REG_VMADDLH = TILEMAP_ADDR_CS_FRAME_A+640;
+        for (int i = 640; i < 1024; i++)
+        {
+            REG_VMDATALH = 640;
+        }
+        REG_VMADDLH = TILEMAP_ADDR_CS_FRAME_B+640;
+        for (int i = 640; i < 1024; i++)
+        {
+            REG_VMDATALH = 640;
+        }
+
+        DmaSystem_UploadCgram();
+
+        REG_BG1VOFS = 0xdf;
+        REG_BG1VOFS = 0xff;
+
+        cs_preload_subsection = 0;
+    }
+    else
+    {
+        cs_use_second_frame ^= true;
+
+        DmaSystem_CopyToWram((uint32_t)cs_current->palette, (uint32_t)&shadow_cgram, 256);
+
+        cs_preload_subsection = 0;
     }
 
     cs_timer = cs_current->time;
 
-    System_Init_DisplaySettings(system_target_routine);
-    System_Init_TilemapSettings(system_target_routine);
-
-    DmaSystem_UploadCgram();
-
     System_AlignToVblank();
-
-    
 
     if (system_current_routine == ROUTINE_CUTSCENE_INIT)
     {
@@ -193,18 +251,43 @@ void CsEngine_StartCutscene()
         system_target_routine = ROUTINE_CUTSCENE;
     }
 
+    shadow_hdmaen = 0x00;
+    system_suppress_odd_transfers = true;
+
     system_loop_func_ptr = main_GetFunctionPointer(system_current_routine);
 
-    REG_BG1VOFS = 0xdf;
-    REG_BG1VOFS = 0xff;
-
-    System_EnableInterrupts();
+    System_EnableFblankInterrupts();
 
     return;
 }
 
-void CsEngine_PreloadNext()
+/*
+    Call to preload next frame data
+*/
+void CsEngine_PreloadNextFrame()
 {
+    struct cutscene_data * ptr = cs_current + 1;
+
+    uint16_t offset_vram = cs_preload_subsection * 5120; // 5120 words
+    uint16_t offset = offset_vram << 1;
+
+    uint16_t offset_tilemap_vram = cs_preload_subsection * 320; // 320 words
+    uint16_t offset_tilemap = offset_tilemap_vram << 1;
+
+    // Tile data in 10KB chunks, and tilemap data in 640b chunks
+    // It fits in DMA queue system.
+    if (!cs_use_second_frame)
+    {
+        DmaSystem_AddItemToQueue((uint8_t *)((uint32_t)ptr->frame + offset), 0x3000+offset_vram, 10240, VRAM_INCHIGH, 0);
+        DmaSystem_AddItemToQueue((uint8_t *)((uint32_t)ptr->tilemap + offset_tilemap), TILEMAP_ADDR_CS_FRAME_B+offset_tilemap_vram, 640, VRAM_INCHIGH, 0);
+    }
+    else
+    {
+        DmaSystem_AddItemToQueue((uint8_t *)((uint32_t) ptr->frame + offset), 0x0000+offset_vram, 10240, VRAM_INCHIGH, 0);
+        DmaSystem_AddItemToQueue((uint8_t *)((uint32_t)ptr->tilemap + offset_tilemap), TILEMAP_ADDR_CS_FRAME_A+offset_tilemap_vram, 640, VRAM_INCHIGH, 0);
+    }
+
+    cs_preload_subsection++;
 
     return;
 }
