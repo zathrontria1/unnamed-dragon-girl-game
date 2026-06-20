@@ -122,6 +122,9 @@ typedef enum SUPERSCOPE_BITS
 */
 #define REG_JOYxLH(a) (((vuint16 *)0x4218)[(a)])
 
+#define REG_JOYOUT (*(vuint8 *)0x4016)
+#define REG_JOYSERx(a) (((vuint8 *)0x4016)[(a)])
+
 /*!	\fn  padsCurrent(value)
     \brief Return current value of selected pad
     \param value pad index to use (0-1 or 0-4 if multiplayer 5 connected)
