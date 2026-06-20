@@ -3,7 +3,7 @@ struct cutscene_data // in an array
     void * frame;
     void * palette;
     void * tilemap;
-    uint16_t time; // amount of 30fps frames to wait before auto-advance. Note that data decompression time is not included
+    uint16_t time; // amount of 60fps frames (16.67ms) to wait before auto-advance, including data decompression time
 }; // Last entry should be all null and invalid values so the cutscene engine knows when to return control.
 
 struct level_palette_list
