@@ -52,6 +52,8 @@ int main()
 
         void (*func)() = system_loop_func_ptr;
         func();
+
+        HdmaEngine_SetHdmaShadow();
     }
 
     return 0;
