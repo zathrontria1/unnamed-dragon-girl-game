@@ -26,6 +26,8 @@
 
 #include "main.h"
 
+#include "interrupt_sub.h"
+
 struct cutscene_data * cs_current; // Current cutscene frame.
 uint16_t cs_timer; // Current cutscene remaining time before auto advance
 
@@ -232,15 +234,22 @@ void CsEngine_StartCutscene()
 
     cs_timer = cs_current->time;
 
-    System_AlignToVblank();
-
     if (system_current_routine == ROUTINE_CUTSCENE_INIT)
     {
+        System_AlignToVblank();
+
         shadow_inidisp = 0x00;
         REG_INIDISP = 0x00;
         system_current_routine = ROUTINE_FADEIN;
 
         system_target_routine = ROUTINE_CUTSCENE;
+
+        shadow_hdmaen = 0x00;
+        system_suppress_odd_transfers = true;
+
+        system_loop_func_ptr = main_GetFunctionPointer(system_current_routine);
+
+        System_EnableFblankInterrupts();
     }
     else
     {
@@ -249,14 +258,22 @@ void CsEngine_StartCutscene()
         system_current_routine = ROUTINE_CUTSCENE;
         
         system_target_routine = ROUTINE_CUTSCENE;
+
+        shadow_hdmaen = 0x00;
+        system_suppress_odd_transfers = true;
+
+        system_loop_func_ptr = main_GetFunctionPointer(system_current_routine);
+
+        // Usually at this point we're still within fblank, so it's likely safe to force-call the cutscene NMI routine here.
+        // Also force-set the new registers.
+        system_in_vblank = true;
+        Nmi_Cutscene();
+
+        system_frames_elapsed--; // correct this to account for the extra NMI call.
+        
+        System_Init_DisplaySettings(system_target_routine);
+        System_Init_TilemapSettings(system_target_routine);
     }
-
-    shadow_hdmaen = 0x00;
-    system_suppress_odd_transfers = true;
-
-    system_loop_func_ptr = main_GetFunctionPointer(system_current_routine);
-
-    System_EnableFblankInterrupts();
 
     return;
 }

@@ -187,7 +187,6 @@
     {
         // Game has finished processing
         system_in_vblank = 0; // Clear the vblank flag now to prevent problems later.
-        system_nmis_counted = 0;
 
         // Repoint the HDMA table
         //REG_A1T3LH = hdma_scroll_ptr;
@@ -225,7 +224,12 @@
         //REG_COLDATA = shadow_coldata_g;
         //REG_COLDATA = shadow_coldata_b;
 
-        system_frames_elapsed++;
+        if (system_nmis_counted >= 2)
+        {
+            // A bit of a hack to ensure that this ticks at 30FPS, not 60
+            system_frames_elapsed++;
+            system_nmis_counted = 0;
+        }
     }
 
     if ((system_nmis_counted >= NMI_WAIT_COUNT) && !system_dont_count_lag)
