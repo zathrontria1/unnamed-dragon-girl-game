@@ -343,9 +343,9 @@ void Loop_Subscreen_MapDisplay_Init()
     REG_BG2VOFS = 0xff;
 
     // Copy the ROM palette into shadow
-    DmaSystem_CopyToWram((unsigned long int)level_data_ptr->map_overview_palette, (unsigned long int)&shadow_cgram, 480);
+    DmaSystem_CopyToWram((unsigned long int)level_data_ptr->map_overview_palette, (unsigned long int)&shadow_cgram, 512);
 
-    AniSystem_Pal_LoadSubpalette((uint8_t *)&data_palette_player, 15);
+    //AniSystem_Pal_LoadSubpalette((uint8_t *)&data_palette_player, 15);
     
     // Copy the background graphics into VRAM
     DmaSystem_CopyToVram(0x007f0000, 0x0000, 0x9000);
@@ -454,6 +454,10 @@ void Loop_Subscreen_MapDisplay_Init()
 
     system_use_alternate_nmi = 0;
     shadow_inidisp_change = 0;
+
+    shadow_hdmaen = 0x00;
+
+    system_suppress_odd_transfers = true;
 
     System_EnableInterrupts();
 
@@ -584,6 +588,8 @@ void Loop_Game_ReloadScene()
 
     Loop_Game_Partial();
 
+    system_suppress_odd_transfers = false;
+
     HdmaEngine_EnableHdma(); 
 
     shadow_inidisp = 0x00;
@@ -663,6 +669,8 @@ void Loop_Game_NewLevel()
     System_Init_DisplaySettings(system_target_routine);
 
     Loop_Game_Partial();
+
+    system_suppress_odd_transfers = false;
 
     HdmaEngine_EnableHdma(); 
 
