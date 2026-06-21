@@ -15,25 +15,144 @@ bool dma_filler_enable;
 uint16_t dma_filler_dest;
 uint16_t dma_filler_length;
 
+/*
+    Performs a block move using DMA.
+
+    Length of 0 = 65,536 bytes.
+
+    Won't work if source is internal WRAM.
+
+    Uses the reserved for main loop channels (i.e. 7) so it can be called anytime
+    though if HDMA is enabled care should be taken to avoid
+    HDMA-DMA collision crashes
+*/
+#if VBCC_ASM == 1
+    NO_INLINE void DmaSystem_CopyToWram(
+    __reg("r0/r1") uint32_t src, 
+    __reg("r2/r3") uint32_t dest, 
+    __reg("a") uint16_t length)
+#else
 void DmaSystem_CopyToWram(
     uint32_t src, 
     uint32_t dest, 
     uint16_t length)
+#endif
 {
-    // Copies A-bus address to WRAM
-    REG_DMAP0 = 0x00; // byte reg write
 
-    REG_A1T0LH = (uint16_t)src;
-    REG_A1B0 = (uint8_t)((uint32_t)src >> 16);
+    #if VBCC_ASM == 1
+        __asm(
+            "\ta16\n"
+            "\tx16\n"
 
-    REG_BBAD0 = 0x80; // WMDATA
+            "\tsta $4375\n"
 
-    REG_WMADDLM = (uint16_t)dest;
-    REG_WMADDH = (uint8_t)((uint32_t)dest >> 16);
+            "\tlda r0\n"
+            "\tsta $4372\n"
+
+            "\tlda r2\n"
+            "\tsta $2181\n"
+
+            "\tlda #$8000\n"
+            "\tsta $4370\n"
+
+            "\ta8\n"
+            "\tsep #$20\n"
+            
+            "\tlda r1\n"
+            "\tsta $4374\n"
+
+            "\tlda r3\n"
+            "\tsta $2183\n"
+
+            "\tlda #$80\n"
+            "\tsta $420b\n"
+
+            "\ta16\n"
+            "\trep #$20\n"
+        );
+    #else
+        // Copies A-bus address to WRAM
+        REG_DMAP7 = 0x00; // byte reg write
+
+        REG_A1T7LH = (uint16_t)src;
+        REG_A1B7 = (uint8_t)((uint32_t)src >> 16);
+
+        REG_BBAD7 = 0x80; // WMDATA
+
+        REG_WMADDLM = (uint16_t)dest;
+        REG_WMADDH = (uint8_t)((uint32_t)dest >> 16);
+        
+        REG_DAS7LH = length;
+
+        REG_MDMAEN = 0x80;
+    #endif
+
+    return;
+}
+
+/*
+    Helper functions for doing small DMA runs to minimize overhead. It's still faster than MVN!
+*/
+
+// Call this before performing any short runs
+void DmaSystem_CopyToWram_ShortPrep(
+    uint8_t src_bank, 
+    uint8_t dest_bank)
+{
+    REG_DMAP7 = 0x00; // byte reg write
+
+    REG_A1B7 = src_bank;
+
+    REG_BBAD7 = 0x80; // WMDATA
+
+    REG_WMADDH = dest_bank;
     
-    REG_DAS0LH = length;
+    return;
+}
 
-    REG_MDMAEN = 0x01;
+#if VBCC_ASM == 1
+    NO_INLINE void DmaSystem_CopyToWram_ShortRun(
+    __reg("r0") uint16_t src, 
+    __reg("x") uint16_t dest, 
+    __reg("a") uint16_t length)
+#else
+void DmaSystem_CopyToWram_ShortRun(
+    uint16_t src, 
+    uint16_t dest, 
+    uint16_t length)
+#endif
+{
+
+    #if VBCC_ASM == 1
+        __asm(
+            "\ta16\n"
+            "\tx16\n"
+
+            "\tsta $4375\n"
+
+            "\tlda r0\n"
+            "\tsta $4372\n"
+
+            "\tstx $2181\n"
+
+            "\ta8\n"
+            "\tsep #$20\n"
+
+            "\tlda #$80\n"
+            "\tsta $420b\n"
+
+            "\ta16\n"
+            "\trep #$20\n"
+        );
+    #else
+        REG_A1T7LH = src;
+
+        REG_WMADDLM = dest;
+        
+        REG_DAS7LH = length;
+
+        REG_MDMAEN = 0x80;
+    #endif
 
     return;
 }
