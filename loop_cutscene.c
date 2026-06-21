@@ -77,10 +77,14 @@ void CsEngine_Loop()
         {
             CsEngine_PreloadNextFrame();
         }
+        else if (cs_preload_subsection < 4)
+        {
+            cs_preload_subsection++;
+        }
     }
     else
     {
-        cs_preload_subsection = 2;
+        cs_preload_subsection = 4;
     }
     
     if ((cs_timer == 0) || skip)
@@ -173,11 +177,6 @@ void CsEngine_Loop()
         {
             CsEngine_StartCutscene();
         }
-
-        if (cs_preload_subsection == 2)
-        {
-            cs_preload_subsection = 3; // A bit hacky
-        }
     }
 
     return;
@@ -225,16 +224,12 @@ void CsEngine_StartCutscene()
 
         REG_BG1VOFS = 0xdf;
         REG_BG1VOFS = 0xff;
-
-        cs_preload_subsection = 0;
     }
     else
     {
         cs_use_second_frame ^= true;
 
         DmaSystem_CopyToWram((uint32_t)cs_current->palette, (uint32_t)&shadow_cgram, 256);
-
-        cs_preload_subsection = 0;
     }
 
     cs_timer = cs_current->time;
@@ -270,7 +265,7 @@ void CsEngine_StartCutscene()
         system_loop_func_ptr = main_GetFunctionPointer(system_current_routine);
 
         // Check if we're at an idle state. If not, last frame likely was copies and we're pushed down in active display, so defer it
-        if (cs_preload_subsection >= 3)
+        if (cs_preload_subsection >= 4)
         {
             // we're still within vblank, so it's likely safe to force-call the cutscene NMI routine here.
 
@@ -285,6 +280,8 @@ void CsEngine_StartCutscene()
             System_Init_TilemapSettings(system_target_routine);
         }
     }
+
+    cs_preload_subsection = 0;
 
     return;
 }
