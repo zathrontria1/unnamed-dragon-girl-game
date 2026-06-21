@@ -8,6 +8,8 @@ extern bool dma_filler_enable;
 extern uint16_t dma_filler_dest;
 extern uint16_t dma_filler_length;
 
+void DmaSystem_ClearWram(uint32_t dest, uint16_t length);
+
 #if VBCC_ASM == 1
     NO_INLINE void DmaSystem_CopyToWram(
     __reg("r0/r1") uint32_t src, 

@@ -16,6 +16,30 @@ uint16_t dma_filler_dest;
 uint16_t dma_filler_length;
 
 /*
+    Clears a block of WRAM.
+*/
+void DmaSystem_ClearWram(
+    uint32_t dest, 
+    uint16_t length)
+{
+    REG_DMAP7 = 0x08; // byte reg write, fixed
+
+    REG_A1T7LH = (uint16_t)((uint32_t)&const_zero);
+    REG_A1B7 = (uint8_t)((uint32_t)&const_zero >> 16);
+
+    REG_BBAD7 = 0x80; // WMDATA
+
+    REG_WMADDLM = (uint16_t)dest;
+    REG_WMADDH = (uint8_t)((uint32_t)dest >> 16);
+    
+    REG_DAS7LH = length;
+
+    REG_MDMAEN = 0x80;
+
+    return;
+}
+
+/*
     Performs a block move using DMA.
 
     Length of 0 = 65,536 bytes.
