@@ -661,25 +661,58 @@ void System_GetInput()
 */
 void System_GetInput_Manual()
 {
-    // Reset controllers
-    REG_JOYOUT = 0x01;
-    REG_JOYOUT = 0x00;
+    #if VBCC_ASM == 1 // Don't bother changing memory bit
+        __asm(
+            "\ta8\n"
+            "\tx16\n"
+            "\tsep #$20\n"
+            
+            "\tlda #$01\n"
+            "\tsta $4016\n"
+            "\tstz $4016\n"
 
-    // The controller is ready to be read.
-    uint16_t controller_bits = 0x0000;
-    uint8_t bit = 0x00; // Read and paste controller data here.
+            "\tsta r1\n"
+            "\tstz r1+1\n"
 
-    for (int i = 0; i < 16; i++) // 16 bits in standard controller
-    {
-        bit = REG_JOYSERx(0);
-        bit = bit & 0x01;
+            ".input_read:\n"
+            "\tlda $4016\n"
+            "\tlsr\n"
+            "\trol r1\n"
+            "\trol r1+1\n"
+            "\tbcc .input_read\n"
 
-        controller_bits = (controller_bits << 1) | bit;
-    }
+            "\ta16\n"
+            "\trep #$20\n"
 
-    uint16_t temp_pad0 = input_pad0; 
-    input_pad0 = controller_bits;
-    input_pad0_new = ((temp_pad0 ^ input_pad0) & input_pad0);
+            "\tlda _input_pad0\n"
+            "\tsta r0\n"
+            "\tlda r1\n"
+            "\tsta _input_pad0\n"
+            "\teor r0\n"
+            "\tand _input_pad0\n"
+            "\tsta _input_pad0_new\n"
+        );
+    #else
+        // Reset controllers
+        REG_JOYOUT = 0x01;
+        REG_JOYOUT = 0x00;
+
+        // The controller is ready to be read.
+        uint16_t controller_bits = 0x0000;
+        uint8_t bit = 0x00; // Read and paste controller data here.
+
+        for (int i = 0; i < 16; i++) // 16 bits in standard controller
+        {
+            bit = REG_JOYSERx(0);
+            bit = bit & 0x01;
+
+            controller_bits = (controller_bits << 1) | bit;
+        }
+
+        uint16_t temp_pad0 = input_pad0; 
+        input_pad0 = controller_bits;
+        input_pad0_new = ((temp_pad0 ^ input_pad0) & input_pad0);
+    #endif
 
     return;
 }
