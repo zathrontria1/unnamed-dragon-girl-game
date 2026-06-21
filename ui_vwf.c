@@ -20,6 +20,8 @@ void VwfEngine_PrintText(uint8_t * string, uint8_t * dest, uint8_t * tilemap_des
     int col = 2;
     int row = 1;
 
+    DmaSystem_CopyToWram_ShortPrep(((uint32_t)&data_ui_vwf) >> 16, ((uint32_t)dest >> 16));
+
     while (*string_ptr != 0x00)
     {
         if (*string_ptr == '\n')
@@ -47,23 +49,18 @@ void VwfEngine_PrintText(uint8_t * string, uint8_t * dest, uint8_t * tilemap_des
         int width = const_ui_vwf_offsets[glyph_sel];
 
         uint8_t * glyph_ptr = (uint8_t *)((uint32_t)&data_ui_vwf + (glyph_sel << 4));
-        uint8_t * write_ptr = (uint8_t *)((uint32_t)dest + (col << 4) + (row << 9));
+        uint16_t * write_ptr = (uint16_t *)((uint32_t)dest + (col << 4) + (row << 9));
 
         if (shift == 0)
         {
             // Copy the tile as is
-
-            for (int i = 0; i < 16; i++)
-            {
-                *write_ptr = *glyph_ptr;
-                write_ptr++;
-                glyph_ptr++;
-            }
+            DmaSystem_CopyToWram_ShortRun((uint16_t)((uint32_t)glyph_ptr), (uint16_t)((uint32_t)write_ptr), 16);
         }
         else
         {
-            // Bit shifting is needed
             uint8_t shifted_glyph[32]; // 2 tiles
+
+            // Bit shifting is needed
             for (int i = 0; i < 16; i++)
             {
                 uint8_t bitplane_row = *glyph_ptr;
@@ -93,9 +90,11 @@ void VwfEngine_PrintText(uint8_t * string, uint8_t * dest, uint8_t * tilemap_des
             }
 
             // Then OR two tiles
-            for (int i = 0; i < 32; i++)
+            uint16_t * shifted_ptr = (uint16_t *)&shifted_glyph[0];
+
+            for (int i = 0; i < 16; i++)
             {
-                *write_ptr |= shifted_glyph[i];
+                *write_ptr |= *shifted_ptr++;
                 write_ptr++;
             }
         }
