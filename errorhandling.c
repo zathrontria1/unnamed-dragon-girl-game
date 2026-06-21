@@ -11,6 +11,10 @@
 #include "system.h"
 #include "lz4.h"
 
+#include "data_strings.h"
+
+#include "ui_vwf.h"
+
 #include "errorhandling.h"
 
 void ErrorHandler_Controller()
@@ -26,24 +30,33 @@ void ErrorHandler_Controller()
     System_Init_BgScroll();
 
     REG_BGMODE = 0x09; // Mode 1, high priority bg3
-    REG_TM = 0x01; // BG1 only
-    REG_BG12NBA = 0 << 4 | 0;
+    //REG_TM = 0x01; // BG1 only
+    REG_TM = 0x04; // BG3 only
+    //REG_BG12NBA = 0 << 4 | 0;
+    REG_BG34NBA = 0 << 4 | 0;
 
-    REG_BG1SC = 0x3800 >> 8; // The image is 28KB. Have the tilemap go to the 28Kth byte.
+    //REG_BG1SC = 0x3800 >> 8; // The image is 28KB. Have the tilemap go to the 28Kth byte.
 
+    REG_BG3SC = 0x3800 >> 8; // The image is 14KB. Have the tilemap go to the 28Kth byte.
+
+    VwfEngine_PrintText((uint8_t *)&STR_ERROR_CONTROLLER, (uint8_t *)LZ4_BUFFER_ADDR, (uint8_t *)(LZ4_BUFFER_ADDR+0x7000));
+
+    /*
     // Decompress the splash and tilemap
     LZ4_UnpackToWRAM((void *)&data_bg_error_controller_lz4, 0x007f0000);
     LZ4_UnpackToWRAM((void *)&data_tilemap_error_controller_lz4, 0x007f7000);
+    */
     
     // Copy the palette
-    DmaSystem_CopyToWram((uint32_t)data_palette_splash, (uint32_t)&shadow_cgram, 256);
+    //DmaSystem_CopyToWram((uint32_t)data_palette_splash, (uint32_t)&shadow_cgram, 256);
+    DmaSystem_CopyToWram((uint32_t)data_palette_ui, (uint32_t)&shadow_cgram, 32);
+    
 
-    // Upload the splash
+    // Upload the error message
     DmaSystem_CopyToVram(0x007f0000, 0x0000, 0x7800); // Copy the entire section including the tilemap.
     DmaSystem_UploadCgram();
 
-    // Set up a fade-in. Doing this so that we can actually run the other steps
-    // while the game is still setting up.
+    // Set up a fade-in
     shadow_inidisp_change = 1;
     gfx_mosaic_change = -1;
     gfx_mosaic_layers = 0x01; // BG1

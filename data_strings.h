@@ -61,3 +61,5 @@ extern const uint8_t STR_UI_SUBSCREEN_CONFIRM_NO[];
 extern const uint8_t STR_LEVELNAME_DEBUG_B1F[];
 extern const uint8_t STR_LEVELNAME_DEBUG_B2F[];
 extern const uint8_t STR_LEVELNAME_DEBUG_B3F[];
+
+extern const uint8_t STR_ERROR_CONTROLLER[];

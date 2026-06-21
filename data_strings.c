@@ -166,3 +166,23 @@ HUGE const uint8_t STR_UI_SUBSCREEN_CONFIRM_NO[] = "No";
 HUGE const uint8_t STR_LEVELNAME_DEBUG_B1F[] = "DEBUG Dungeon B1F";
 HUGE const uint8_t STR_LEVELNAME_DEBUG_B2F[] = "DEBUG Dungeon B2F";
 HUGE const uint8_t STR_LEVELNAME_DEBUG_B3F[] = "DEBUG Dungeon B3F";
+
+HUGE const uint8_t STR_ERROR_CONTROLLER[] = "\
+\n\
+\n\
+\n\
+\n\
+\n\
+\n\
+\n\
+An unsupported peripheral has been\n\
+connected to a controller port.\n\
+\n\
+Remove any Mouse, Super Scope, or other\n\
+unsupported peripheral, and plug in a\n\
+standard controller, then restart the\n\
+SNES.\n\
+\n\
+If using an emulator, check your emulator\n\
+documentation on how to configure input\n\
+devices.";
