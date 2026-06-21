@@ -854,6 +854,11 @@ void System_AlignToVblank()
     return;
 }
 
+/*
+    Performs a block move using MVN.
+
+    Length of 0 = 65,536 bytes.
+*/
 #if VBCC_ASM == 1
 NO_INLINE void System_CopyBlock(__reg("r0/r1") uint8_t * src, __reg("r2/r3") uint8_t * dest, __reg("a") uint16_t len)
 #else
@@ -867,9 +872,6 @@ FORCE_INLINE void System_CopyBlock(uint8_t * src, uint8_t * dest, uint16_t len)
         __asm(
         "\ta16\n"
 	    "\tx16\n"
-        
-        "\tcmp #0\n"
-        "\tbeq LZ4_Internal_Skip\n"
 
         "\tphb\n"
 
@@ -889,7 +891,6 @@ FORCE_INLINE void System_CopyBlock(uint8_t * src, uint8_t * dest, uint16_t len)
         "\tjsl >_system_MVNCodeInWRAM;\n"
 
         "\tplb\n"
-        "LZ4_Internal_Skip:\n"
         );
     #else
     // Source and destination bank independent, just can't cross banks
