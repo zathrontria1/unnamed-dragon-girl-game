@@ -24,3 +24,8 @@ _data_ui_fixed_2bpp_lz4:
     global _data_ui_fixed_4bpp_lz4
 _data_ui_fixed_4bpp_lz4:
     incbin "ui/ui_fixed_4bpp.bin.lz4"
+
+    section "_rodata.far.bindata.vwf.0"
+    global _data_ui_vwf
+_data_ui_vwf:
+    incbin "ui/ui_vwf.bin"

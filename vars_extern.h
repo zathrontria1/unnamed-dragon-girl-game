@@ -44,6 +44,7 @@ extern const uint8_t data_ui_fixed_2bpp_lz4[]; // 2bpp UI
 extern const uint8_t data_ui_dynamic_hp[]; // hp bar pieces
 extern const uint8_t data_ui_dynamic_textadvance[]; // text advance cursor
 extern const uint8_t data_ui_dynamic_selectcursor[]; // selection cursor in text box
+extern const uint8_t data_ui_vwf[]; // VWF glyphs
 
 // Sprites may be compressed with tile deduplication or LZ4. 
 // _dd = deduped; will also have a LUT (_lut)
