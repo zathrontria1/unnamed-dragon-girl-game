@@ -34,7 +34,8 @@ int main()
     rand_array[0] = 1; // Set the seed here
 
     // Check controller validty. If it's the wrong type load an error message
-    if (System_CheckController() != 0x0000)
+    uint16_t controller_id = System_CheckController();
+    if ((controller_id != 0x0000) && (controller_id != 0x0004)) // If it's not standard controller or NTT Data Keypad (of which first 12 bits are identical buttons)
     {
         ErrorHandler_Controller();
     }
