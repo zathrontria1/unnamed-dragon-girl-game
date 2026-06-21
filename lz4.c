@@ -86,6 +86,12 @@ uint32_t LZ4_DecompressFrame(void * src, void * dest)
     uint8_t * ptr_read = src;
     uint8_t * ptr_write = dest;
 
+    // Only do prep for DMA if HDMA isn't in use
+    if (!shadow_hdmaen)
+    {
+        DmaSystem_CopyToWram_ShortPrep(((uint32_t)ptr_read) >> 16, ((uint32_t)ptr_write) >> 16);
+    }
+
     if ((*((uint32_t *)ptr_read)) != 0x184D2204)
     {
         // Magic ID check failure
@@ -156,11 +162,26 @@ uint32_t LZ4_DecompressFrame(void * src, void * dest)
                 }
 
                 // write out the literals
-                System_CopyBlock(ptr_read, ptr_write, temp_literal_count);
-                ptr_write += temp_literal_count;
-                ptr_read += temp_literal_count;
+                if (temp_literal_count != 0)
+                {
+                    if (!shadow_hdmaen)
+                    {
+                        // Only do this if HDMA isn't in use
+                        // This should be fine as it's always ROM to RAM
 
-                temp_frame_bytes_written += temp_literal_count;
+                        // This branch is cheap all things considered, so it's OK to leave it here.
+                        DmaSystem_CopyToWram_ShortRun((uint16_t)((uint32_t)ptr_read), (uint16_t)((uint32_t)ptr_write), temp_literal_count);
+                    }
+                    else
+                    {
+                        System_CopyBlock(ptr_read, ptr_write, temp_literal_count);
+                    }
+                    
+                    ptr_write += temp_literal_count;
+                    ptr_read += temp_literal_count;
+
+                    temp_frame_bytes_written += temp_literal_count;
+                }
 
                 // Now to start decoding for real
                 uint16_t temp_offset = (uint16_t)(*((uint32_t *)ptr_read));
