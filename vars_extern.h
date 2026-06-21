@@ -36,9 +36,6 @@ extern const uint8_t data_bg_map_dungeon_1_8bpp_lz4[]; // dungeon map, compresse
 extern const uint8_t data_bg_splash_lz4[]; // loading splash
 extern const uint8_t data_tilemap_splash_lz4[]; // loading splash tilemap
 
-extern const uint8_t data_bg_error_controller_lz4[]; // controller error 
-extern const uint8_t data_tilemap_error_controller_lz4[]; // controller error tilemap
-
 extern const uint8_t data_ui_fixed_4bpp_lz4[]; // 4bpp UI
 extern const uint8_t data_ui_fixed_2bpp_lz4[]; // 2bpp UI
 extern const uint8_t data_ui_dynamic_hp[]; // hp bar pieces
