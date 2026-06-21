@@ -15,6 +15,13 @@
 
 void ErrorHandler_Controller()
 {
+    // Disable interrupts
+    System_DisableInterrupts();
+
+    // Disable HDMA and screen
+    REG_HDMAEN = 0x00;
+    REG_INIDISP = 0x8f;
+
     // Set up the PPU regs to what we want.
     System_Init_BgScroll();
 
