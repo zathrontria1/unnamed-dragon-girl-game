@@ -606,6 +606,8 @@ FORCE_INLINE void System_WaitUntilVblank()
     return;
 }
 
+// NOTE: the game polls both controllers and merges inputs.
+
 /*
     Automatic input poll
 */
@@ -623,6 +625,7 @@ void System_GetInput()
             "\tlda _input_pad0\n"
             "\tsta r0\n"
             "\tlda $4218\n"
+            "\tora $421a\n"
             "\tsta _input_pad0\n"
             "\teor r0\n"
             "\tand _input_pad0\n"
@@ -637,18 +640,12 @@ void System_GetInput()
         uint16_t temp_pad0 = input_pad0; 
 
         // Current frame input
-        input_pad0 = REG_JOYxLH(0); 
+        input_pad0 = REG_JOYxLH(0) | REG_JOYxLH(1); // Read both and merge
 
         // Now to figure out what keys were newly pressed
         // XOR with previous frame, 
         // then AND with current frame
         input_pad0_new = ((temp_pad0 ^ input_pad0) & input_pad0);
-
-        // The game only supports 1 pad
-        /*uint16_t temp_pad1 = input_pad1; 
-
-        input_pad1 = REG_JOYxLH(1); 
-        input_pad1_new = ((temp_pad1 ^ input_pad1) & input_pad1);*/
     #endif
     
     return;
@@ -673,13 +670,22 @@ void System_GetInput_Manual()
 
             "\tsta r1\n"
             "\tstz r1+1\n"
+            "\tsta r2\n"
+            "\tstz r2+1\n"
 
-            ".input_read:\n"
+            ".input_read_1:\n"
             "\tlda $4016\n"
             "\tlsr\n"
             "\trol r1\n"
             "\trol r1+1\n"
-            "\tbcc .input_read\n"
+            "\tbcc .input_read_1\n"
+
+            ".input_read_2:\n"
+            "\tlda $4017\n"
+            "\tlsr\n"
+            "\trol r2\n"
+            "\trol r2+1\n"
+            "\tbcc .input_read_2\n"
 
             "\ta16\n"
             "\trep #$20\n"
@@ -687,6 +693,7 @@ void System_GetInput_Manual()
             "\tlda _input_pad0\n"
             "\tsta r0\n"
             "\tlda r1\n"
+            "\tora r2\n"
             "\tsta _input_pad0\n"
             "\teor r0\n"
             "\tand _input_pad0\n"
@@ -698,19 +705,30 @@ void System_GetInput_Manual()
         REG_JOYOUT = 0x00;
 
         // The controller is ready to be read.
-        uint16_t controller_bits = 0x0000;
+        uint16_t controller_bits_0 = 0x0000;
+        uint16_t controller_bits_1 = 0x0000;
         uint8_t bit = 0x00; // Read and paste controller data here.
 
+        // Controller 1
         for (int i = 0; i < 16; i++) // 16 bits in standard controller
         {
             bit = REG_JOYSERx(0);
             bit = bit & 0x01;
 
-            controller_bits = (controller_bits << 1) | bit;
+            controller_bits_0 = (controller_bits_0 << 1) | bit;
+        }
+
+        // Controller 2
+        for (int i = 0; i < 16; i++) // 16 bits in standard controller
+        {
+            bit = REG_JOYSERx(1);
+            bit = bit & 0x01;
+
+            controller_bits_1 = (controller_bits_1 << 1) | bit;
         }
 
         uint16_t temp_pad0 = input_pad0; 
-        input_pad0 = controller_bits;
+        input_pad0 = controller_bits_0 | controller_bits_1;
         input_pad0_new = ((temp_pad0 ^ input_pad0) & input_pad0);
     #endif
 
