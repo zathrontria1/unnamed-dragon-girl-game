@@ -27,6 +27,8 @@ FORCE_INLINE void System_WaitUntilVblank(void);
 void System_GetInput(void);
 void System_GetInput_Manual(void);
 
+uint16_t System_CheckController(void);
+
 FORCE_INLINE uint16_t System_CheckKey(enum KEYPAD_BITS k);
 FORCE_INLINE uint16_t System_CheckKeyAny();
 FORCE_INLINE uint16_t System_CheckKeyHeld(enum KEYPAD_BITS k);

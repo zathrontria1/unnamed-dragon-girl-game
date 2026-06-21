@@ -717,6 +717,20 @@ void System_GetInput_Manual()
     return;
 }
 
+/*
+    Returns the controller signature.
+
+    Must be called while no interrupts are enabled, as manual reads will be used.
+
+    A standard controller should be all 0s (i.e. can check if 0 or not)
+*/
+uint16_t System_CheckController(void)
+{
+    System_GetInput_Manual();
+
+    return (input_pad0 & 0x0f);
+}
+
 FORCE_INLINE uint16_t System_CheckKey(enum KEYPAD_BITS k)
 {
     if ((input_pad0_new & k) == k)

@@ -25,6 +25,8 @@ extern const uint8_t data_palette_map_1_8bpp[];
 
 extern const uint8_t data_palette_splash[];
 
+// Backgrounds and their tilemap data may be compressed with LZ4. 
+// _lz4 = lz4 compressed
 extern const uint8_t data_bg_dungeon_lz4[]; // dungeon tiles
 extern const uint8_t data_bg_dungeon_anim_water_lz4[]; // dungeon water animation tiles
 extern const uint8_t data_bg_dungeon_anim_torch_lz4[]; // dungeon torch animation tiles
@@ -33,6 +35,9 @@ extern const uint8_t data_bg_map_dungeon_1_8bpp_lz4[]; // dungeon map, compresse
 
 extern const uint8_t data_bg_splash_lz4[]; // loading splash
 extern const uint8_t data_tilemap_splash_lz4[]; // loading splash tilemap
+
+extern const uint8_t data_bg_error_controller_lz4[]; // controller error 
+extern const uint8_t data_tilemap_error_controller_lz4[]; // controller error tilemap
 
 extern const uint8_t data_ui_fixed_4bpp_lz4[]; // 4bpp UI
 extern const uint8_t data_ui_fixed_2bpp_lz4[]; // 2bpp UI

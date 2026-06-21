@@ -24,12 +24,20 @@
 
 #include "sram_management.h"
 
+#include "errorhandling.h"
+
 int main()
 {
     System_Init_CpuRegs(); // Display will be turned off within this
     System_Init_WramFunctions(); // Write opcodes for WRAM functions
     
     rand_array[0] = 1; // Set the seed here
+
+    // Check controller validty. If it's the wrong type load an error message
+    if (System_CheckController() != 0x0000)
+    {
+        ErrorHandler_Controller();
+    }
 
     System_DisplayStartupSplash(); // A good amount of init is here.
     

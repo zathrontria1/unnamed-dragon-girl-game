@@ -34,3 +34,14 @@ _data_bg_splash_lz4:
     global  _data_tilemap_splash_lz4
 _data_tilemap_splash_lz4:
     incbin "splash/loading_splash_tilemap.bin.lz4"
+
+    section "_rodata.far.bindata.error.controller.0"
+    global  _data_bg_error_controller_lz4
+_data_bg_error_controller_lz4:
+    incbin "error/error_controller.bin.lz4"
+
+    section "_rodata.far.bindata.error.controller.1"
+    global  _data_tilemap_error_controller_lz4
+_data_tilemap_error_controller_lz4:
+    incbin "error/error_controller_tilemap.bin.lz4"
+    
