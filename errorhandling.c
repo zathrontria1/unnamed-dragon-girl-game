@@ -39,7 +39,7 @@ void ErrorHandler_Controller()
 
     REG_BG3SC = 0x3800 >> 8; // The image is 14KB. Have the tilemap go to the 28Kth byte.
 
-    VwfEngine_PrintText((uint8_t *)&STR_ERROR_CONTROLLER, (uint8_t *)LZ4_BUFFER_ADDR, (uint8_t *)(LZ4_BUFFER_ADDR+0x7000));
+    uint16_t transfer_length = VwfEngine_PrintText((uint8_t *)&STR_ERROR_CONTROLLER, (uint8_t *)LZ4_BUFFER_ADDR, (uint8_t *)(LZ4_BUFFER_ADDR+0x7000), 1, 1, 0);
 
     /*
     // Decompress the splash and tilemap
@@ -50,10 +50,10 @@ void ErrorHandler_Controller()
     // Copy the palette
     //DmaSystem_CopyToWram((uint32_t)data_palette_splash, (uint32_t)&shadow_cgram, 256);
     DmaSystem_CopyToWram((uint32_t)data_palette_ui, (uint32_t)&shadow_cgram, 32);
-    
 
     // Upload the error message
-    DmaSystem_CopyToVram(0x007f0000, 0x0000, 0x7800); // Copy the entire section including the tilemap.
+    DmaSystem_CopyToVram((uint32_t)LZ4_BUFFER_ADDR, 0x0000, transfer_length); // Copy the entire section including the tilemap.
+    DmaSystem_CopyToVram((uint32_t)(LZ4_BUFFER_ADDR+0x7000), 0x3800, 1792); // Copy the entire section including the tilemap.
     DmaSystem_UploadCgram();
 
     // Set up a fade-in

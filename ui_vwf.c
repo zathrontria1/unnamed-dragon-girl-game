@@ -9,35 +9,101 @@
 
 /*
     Prints text to a VWF buffer in WRAM
-*/
-void VwfEngine_PrintText(uint8_t * string, uint8_t * dest, uint8_t * tilemap_dest)
-{
-    DmaSystem_ClearWram((uint32_t)dest, 14336);
 
+    Returns DMA transfer length in bytes.
+*/
+uint16_t VwfEngine_PrintText(uint8_t * string, uint8_t * dest, uint8_t * tilemap_dest, int col_ext, int row_ext, int id_offset)
+{
     uint8_t * string_ptr = string;
 
     int shift = 0;
-    int col = 2;
-    int row = 1;
+    int col = col_ext; // Tilemap current X
+    int row = row_ext; // Tilemap current Y
+    int tile_id = 1 | 0x2000;
+
+    uint8_t * write_ptr_start = dest;
+    uint8_t * write_ptr = (uint8_t *)((uint32_t)dest+16); // Skip 1 tile
+    // Copy an empty tile to tile 0
+    DmaSystem_CopyToWram((uint32_t)&const_zero, (uint32_t)dest, 16);
 
     DmaSystem_CopyToWram_ShortPrep(((uint32_t)&data_ui_vwf) >> 16, ((uint32_t)dest >> 16));
 
+    uint16_t * tilemap_ptr = (uint16_t *)tilemap_dest;
+
+    // Point guaranteed empty tiles to tile 0
+    for (int y = 0; y < row; y++)
+    {
+        for (int x = 0; x < 32; x++)
+        {
+            *tilemap_ptr = 0x0000;
+            tilemap_ptr++;
+        }
+    }
+
+    // Then stub out the first columns
+    for (int x = 0; x < col; x++)
+    {
+        *tilemap_ptr = 0x0000;
+        tilemap_ptr++;
+    }
+
+    bool text_rendered = false;
+
     while (*string_ptr != 0x00)
     {
+        // Efficient implementation
         if (*string_ptr == '\n')
         {
+            int i;
+            if (shift == 0)
+            {
+                i = 0;
+            }
+            else
+            {
+                i = 1;
+                *tilemap_ptr = tile_id;
+                tilemap_ptr++;
+            }
+
+            int remaining = (32-col)+col_ext;
+            for (; i < remaining; i++)
+            {
+                *tilemap_ptr = 0x0000;
+                tilemap_ptr++;
+            }
+
             row++;
-            col = 2;
+            col = col_ext;
             shift = 0;
             string_ptr++;
+
+            if (text_rendered)
+            {
+                tile_id++;
+                write_ptr += 16;
+            }
+            
             continue;
         }
         else if (col >= 32)
         {
+            tilemap_ptr += (32-col)+col_ext;
+
             row++;
-            col = 2;
+            col = col_ext;
             shift = 0;
+
+            tile_id++;
+            write_ptr += 16;
         }
+        
+        if (row >= 28)
+        {
+            break;
+        }
+
+        text_rendered = true;
         
         if (row >= 28)
         {
@@ -49,7 +115,6 @@ void VwfEngine_PrintText(uint8_t * string, uint8_t * dest, uint8_t * tilemap_des
         int width = const_ui_vwf_offsets[glyph_sel];
 
         uint8_t * glyph_ptr = (uint8_t *)((uint32_t)&data_ui_vwf + (glyph_sel << 4));
-        uint16_t * write_ptr = (uint16_t *)((uint32_t)dest + (col << 4) + (row << 9));
 
         if (shift == 0)
         {
@@ -58,71 +123,58 @@ void VwfEngine_PrintText(uint8_t * string, uint8_t * dest, uint8_t * tilemap_des
         }
         else
         {
+            uint8_t * write_ptr_saved = write_ptr; // Save the write pointer
+
             uint8_t shifted_glyph[32]; // 2 tiles
+            uint16_t bitplane_mul = 1 << (8 - shift);
+            uint16_t bitplane_row;
 
             // Bit shifting is needed
             for (int i = 0; i < 16; i++)
             {
-                uint8_t bitplane_row = *glyph_ptr;
+                bitplane_row = *glyph_ptr;
+                
+                bitplane_row = (bitplane_row * bitplane_mul);
+                shifted_glyph[i] = bitplane_row >> 8;
+                shifted_glyph[16+i] = bitplane_row;
 
-                // Make sure to clean up the second half
-                shifted_glyph[16+i] = 0x00;
-
-                for (int j = 0; j < shift; j++)
-                {
-                    if (bitplane_row & 0x01)
-                    {
-                        bitplane_row >>= 1;
-                        // Set bit
-                        shifted_glyph[i] = bitplane_row;
-                        shifted_glyph[16+i] = (shifted_glyph[16+i] >> 1) | 0x80;
-                    }
-                    else
-                    {
-                        bitplane_row >>= 1;
-                        // Clear bit
-                        shifted_glyph[i] = bitplane_row;
-                        shifted_glyph[16+i] = (shifted_glyph[16+i] >> 1);
-                    }
-                }
+                *write_ptr |= shifted_glyph[i];
+                *(write_ptr+16) = shifted_glyph[16+i];
+                write_ptr++;
 
                 glyph_ptr++;
             }
 
-            // Then OR two tiles
-            uint16_t * shifted_ptr = (uint16_t *)&shifted_glyph[0];
-
-            for (int i = 0; i < 16; i++)
-            {
-                *write_ptr |= *shifted_ptr++;
-                write_ptr++;
-            }
+            write_ptr = write_ptr_saved; // Restore the write pointer
         }
 
         shift += width;
 
+        *tilemap_ptr = tile_id;
+        *(tilemap_ptr+1) = tile_id+1;
+
         if (shift >= 8)
         {
             shift -= 8;
+            write_ptr += 16;
+            tile_id++;
+            tilemap_ptr++;
             col++;
         }
 
         string_ptr++;
     }
 
-    // Generate the tilemap
-    // Right now it's hardcoded to 0x7000 from start
-    // As it's used for the error message
-    uint16_t * tilemap_ptr = (uint16_t *)tilemap_dest;
+    // Write the remaining tilemap entries.
+    tilemap_ptr++;
 
-    for (int i = 0; i < 896; i++)
+    for (int i = (row << 5) + col + 1; i < 896; i++)
     {
-        *tilemap_ptr = i;
-
+        *tilemap_ptr = 0x0000;
         tilemap_ptr++;
     }
 
-    return;
+    return (uint16_t)((uint32_t)(write_ptr-write_ptr_start)+16);
 }
 
 const uint16_t const_ui_vwf_offsets[] = 
