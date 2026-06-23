@@ -25,6 +25,7 @@
 
 #include "ui.h"
 #include "ui_messagebox.h"
+#include "ui_vwf.h"
 
 #include "lz4.h"
 
@@ -110,18 +111,51 @@ void Loop_Game_Messagebox()
     SpriteEngine_ResetOam();
     SpriteEngine_PackOamHighTable();
 
+    uint8_t * new_data_addr;
+
     // Check if the current page has finished printing.
-    if (!ui_show_message_finished)
+    if (vwf_print_ongoing)
+    //if (!ui_show_message_finished)
     {
         // It hasn't, print the next character or the entire contents depending on the button pressed.
         if (System_CheckKey(KEY_A))
         {
-            UserInterface_PrintText_All();
+            //UserInterface_PrintText_All();
+            new_data_addr = VwfEngine_PrintText_Gradual(32767);
         }
         else
         {
-            UserInterface_PrintText_PerChar();
+            //UserInterface_PrintText_PerChar();
+            new_data_addr = VwfEngine_PrintText_Gradual(1 * V_MUL);
         }
+
+        DmaSystem_AddItemToQueue((uint8_t *)(LZ4_BUFFER_ADDR+0x8800), TILEMAP_ADDR_GAME_UI_2BPP+((UI_MSGBOX_ML_START + 1) << 5), 256, VRAM_INCHIGH, 0);
+
+        register volatile unsigned int data_len = vwf_tiledata_run;
+        DmaSystem_AddItemToQueue(new_data_addr, 0x4400+vwf_vram_offset, data_len, VRAM_INCHIGH, 0);
+
+        vwf_wram_offset = vwf_wram_offset + vwf_tiledata_advance;
+        vwf_vram_offset = vwf_vram_offset + vwf_tiledata_advance_vram;
+
+        if (!vwf_print_ongoing){
+            // These are for the text advance indicator
+            DmaSystem_AddItemToQueue(
+                (uint8_t *)(&const_ui_textadvance_tilemapentries[0]), 
+                0x3400 + ((UI_MSGBOX_ML_START + 5) << 5) + (30), 
+                4,
+                VRAM_INCHIGH, 
+                0
+                );
+
+            DmaSystem_AddItemToQueue(
+                (uint8_t *)(&const_ui_textadvance_tilemapentries[2]), 
+                0x3400 + ((UI_MSGBOX_ML_START + 6) << 5) + (30), 
+                4,
+                VRAM_INCHIGH, 
+                0
+                );
+        }
+
     }
     else
     {
@@ -133,7 +167,7 @@ void Loop_Game_Messagebox()
             ui_show_message_ttl = 0;
             ui_show_message_cleared = 1;
 
-            if (ui_show_message_page == 0)
+            if (vwf_print_finished)
             {
                 // Clear the textbox
                 UserInterface_ClearTextbox(UI_MSGBOX_ML_START, UI_MSGBOX_HEIGHT);
@@ -148,9 +182,35 @@ void Loop_Game_Messagebox()
                 system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_GAMELOOP);
                 system_target_routine = ROUTINE_GAMELOOP;
             }
-            else if (ui_show_message_page != 0)
+            else if (!vwf_print_finished)
             {
-                UserInterface_PrintText_MultiLine(ui_show_message_page_ptr_init, UI_MSGBOX_ML_START, UI_MARGIN_LEFT);
+                DmaSystem_AddItemToQueue(
+                (uint8_t *)(&const_zero), 
+                0x3400 + ((UI_MSGBOX_ML_START + 5) << 5) + (30), 
+                4,
+                VRAM_INCHIGH, 
+                0
+                );
+                DmaSystem_AddItemToQueue(
+                (uint8_t *)(&const_zero), 
+                0x3400 + ((UI_MSGBOX_ML_START + 6) << 5) + (30), 
+                4,
+                VRAM_INCHIGH, 
+                0
+                );
+                //UserInterface_PrintText_MultiLine(ui_show_message_page_ptr_init, UI_MSGBOX_ML_START, UI_MARGIN_LEFT);
+
+                VwfEngine_PrintText_StartNewPage();
+
+                new_data_addr = VwfEngine_PrintText_Gradual(1 * V_MUL);
+
+                DmaSystem_AddItemToQueue((uint8_t *)(LZ4_BUFFER_ADDR+0x8800), TILEMAP_ADDR_GAME_UI_2BPP+((UI_MSGBOX_ML_START + 1) << 5), 256, VRAM_INCHIGH, 0);
+
+                register volatile unsigned int data_len = vwf_tiledata_run;
+                DmaSystem_AddItemToQueue(new_data_addr, 0x4400+vwf_vram_offset, data_len, VRAM_INCHIGH, 0);
+
+                vwf_wram_offset = vwf_wram_offset + vwf_tiledata_advance;
+                vwf_vram_offset = vwf_vram_offset + vwf_tiledata_advance_vram;
             }
         }
     }
@@ -172,7 +232,17 @@ void Loop_Game()
 
         SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
 
-        UserInterface_PrintText_MultiLine((uint8_t *)&STR_MSG_TUTORIAL_MP, UI_MSGBOX_ML_START, UI_MARGIN_LEFT);
+        UserInterface_DrawTextbox(UI_MSGBOX_ML_START, UI_MSGBOX_HEIGHT);
+
+        VwfEngine_PrintText_Gradual_Setup((uint8_t *)&STR_MSG_TUTORIAL_MP, (uint8_t *)(LZ4_BUFFER_ADDR+0x8000), (uint8_t *)(LZ4_BUFFER_ADDR+0x8800), UI_MARGIN_LEFT, 0, 0x80, 128);
+        DmaSystem_AddItemToQueue((uint8_t *)(LZ4_BUFFER_ADDR+0x8000), 0x4400, 16, VRAM_INCHIGH, 0);
+        DmaSystem_AddItemToQueue((uint8_t *)(LZ4_BUFFER_ADDR+0x8800), 0x4800, 256, VRAM_INCHIGH, 0);
+
+        SoundInterface_PlayClip(STREAM_TYPEWRITER);
+
+        event_tutorial_shown = true;
+
+        //UserInterface_PrintText_MultiLine((uint8_t *)&STR_MSG_TUTORIAL_MP, UI_MSGBOX_ML_START, UI_MARGIN_LEFT);
 
         system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_MSGBOX);
         //system_current_routine = ROUTINE_MSGBOX;

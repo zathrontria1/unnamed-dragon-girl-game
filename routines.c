@@ -21,6 +21,7 @@
 
 #include "ui.h"
 #include "ui_messagebox.h"
+#include "ui_vwf.h"
 
 #include "data_strings.h"
 
@@ -171,8 +172,12 @@ void routines_interactable_sign(struct game_object * o)
                 {
                     SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
 
-                    UserInterface_PrintText_MultiLine(o->data_ptr, UI_MSGBOX_ML_START, UI_MARGIN_LEFT);
+                    UserInterface_DrawTextbox(UI_MSGBOX_ML_START, UI_MSGBOX_HEIGHT);
 
+                    VwfEngine_PrintText_Gradual_Setup((uint8_t *)o->data_ptr, (uint8_t *)(LZ4_BUFFER_ADDR+0x8000), (uint8_t *)(LZ4_BUFFER_ADDR+0x8800), UI_MARGIN_LEFT, 0, 0x80, 128);
+                    DmaSystem_AddItemToQueue((uint8_t *)(LZ4_BUFFER_ADDR+0x8000), 0x4400, 16, VRAM_INCHIGH, 0);
+                    DmaSystem_AddItemToQueue((uint8_t *)(LZ4_BUFFER_ADDR+0x8800), TILEMAP_ADDR_GAME_UI_2BPP+((UI_MSGBOX_ML_START + 1) << 5), 256, VRAM_INCHIGH, 0);
+                    
                     system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_MSGBOX);
                     //system_current_routine = ROUTINE_MSGBOX;
                     system_target_routine = ROUTINE_MSGBOX;
