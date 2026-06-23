@@ -4,20 +4,36 @@
 
 #include "vars.h"
 
+#include "consts_snd.h"
+
 #include "dma.h"
 #include "system.h"
 #include "ui_vwf.h"
 
+#include "snd.h"
+
 // VWF engine state, needed for gradual printing
 uint16_t vwf_shift;
+
 uint16_t vwf_col_start;
 uint16_t vwf_col;
+
+uint16_t vwf_row_start;
 uint16_t vwf_row;
+
 uint16_t vwf_tile_id;
+uint16_t vwf_tile_id_empty;
 uint8_t * vwf_string_ptr;
 uint16_t * vwf_tilemap_ptr;
+uint16_t * vwf_tilemap_ptr_start;
+uint16_t vwf_tilemap_len;
+
 uint8_t * vwf_tiledata_ptr;
+uint8_t * vwf_tiledata_ptr_start;
 bool vwf_text_rendered;
+
+uint16_t vwf_wram_offset;
+uint16_t vwf_vram_offset;
 
 // Return value for length of next VWF DMA run
 uint16_t vwf_tiledata_run;
@@ -35,182 +51,44 @@ bool vwf_print_finished;
     Prints text to a VWF buffer in WRAM
 
     Returns DMA transfer length in bytes.
+
+    Tilemap_dest should be byte-indexed! Word indexing will be handled automatically
 */
-uint16_t VwfEngine_PrintText(uint8_t * string, uint8_t * dest, uint16_t * tilemap_dest, int col_ext, int row_ext, int id_offset)
+uint16_t VwfEngine_PrintText(uint8_t * string, uint8_t * dest, uint8_t * tilemap_dest, int col_ext, int row_ext, int id_offset)
 {
-    uint8_t * string_ptr = string;
-
-    int shift = 0;
-    int col = col_ext; // Tilemap current X
-    int row = row_ext; // Tilemap current Y
-    int tile_id = (1 + id_offset) | 0x2000;
-
-    uint8_t * write_ptr_start = dest;
-    uint8_t * write_ptr = (uint8_t *)((uint32_t)dest+16); // Skip 1 tile
-    // Copy an empty tile to tile 0
-    DmaSystem_CopyToWram((uint32_t)&const_zero, (uint32_t)dest, 16);
-
-    DmaSystem_CopyToWram_ShortPrep(((uint32_t)&data_ui_vwf) >> 16, ((uint32_t)dest >> 16));
-
-    uint16_t * tilemap_ptr = tilemap_dest;
-
-    // Point guaranteed empty tiles to tile 0
-    for (int y = 0; y < row; y++)
-    {
-        for (int x = 0; x < 32; x++)
-        {
-            *tilemap_ptr = 0x0000;
-            tilemap_ptr++;
-        }
-    }
-
-    // Then stub out the first columns
-    for (int x = 0; x < col; x++)
-    {
-        *tilemap_ptr = 0x0000;
-        tilemap_ptr++;
-    }
-
-    bool text_rendered = false;
-
-    while (*string_ptr != 0x00)
-    {
-        // Efficient implementation
-        if (*string_ptr == '\n')
-        {
-            int i;
-            if (shift == 0)
-            {
-                i = 0;
-            }
-            else
-            {
-                i = 1;
-                *tilemap_ptr = tile_id;
-                tilemap_ptr++;
-            }
-
-            int remaining = (32-col)+col_ext;
-            for (; i < remaining; i++)
-            {
-                *tilemap_ptr = 0x0000;
-                tilemap_ptr++;
-            }
-
-            row++;
-            col = col_ext;
-            shift = 0;
-            string_ptr++;
-
-            if (text_rendered)
-            {
-                tile_id++;
-                write_ptr += 16;
-            }
-            
-            continue;
-        }
-        else if (col >= 32)
-        {
-            tilemap_ptr += (32-col)+col_ext;
-
-            row++;
-            col = col_ext;
-            shift = 0;
-
-            tile_id++;
-            write_ptr += 16;
-        }
-        
-        if (row >= 28)
-        {
-            break;
-        }
-
-        text_rendered = true;
-
-        int glyph_sel = (*string_ptr)-0x20;
-
-        int width = const_ui_vwf_offsets[glyph_sel];
-
-        uint8_t * glyph_ptr = (uint8_t *)((uint32_t)&data_ui_vwf + (glyph_sel << 4));
-
-        if (shift == 0)
-        {
-            // Copy the tile as is
-            DmaSystem_CopyToWram_ShortRun((uint16_t)((uint32_t)glyph_ptr), (uint16_t)((uint32_t)write_ptr), 16);
-        }
-        else
-        {
-            uint8_t * write_ptr_saved = write_ptr; // Save the write pointer
-
-            uint8_t shifted_glyph[32]; // 2 tiles
-            uint16_t bitplane_mul = 1 << (8 - shift);
-            uint16_t bitplane_row;
-
-            // Bit shifting is needed
-            for (int i = 0; i < 16; i++)
-            {
-                bitplane_row = *glyph_ptr;
-                
-                bitplane_row = (bitplane_row * bitplane_mul);
-                shifted_glyph[i] = bitplane_row >> 8;
-                shifted_glyph[16+i] = bitplane_row;
-
-                *write_ptr |= shifted_glyph[i];
-                *(write_ptr+16) = shifted_glyph[16+i];
-                write_ptr++;
-
-                glyph_ptr++;
-            }
-
-            write_ptr = write_ptr_saved; // Restore the write pointer
-        }
-
-        shift += width;
-
-        *tilemap_ptr = tile_id;
-        *(tilemap_ptr+1) = tile_id+1;
-
-        if (shift >= 8)
-        {
-            shift -= 8;
-            write_ptr += 16;
-            tile_id++;
-            tilemap_ptr++;
-            col++;
-        }
-
-        string_ptr++;
-    }
-
-    // Write the remaining tilemap entries.
-    tilemap_ptr++;
-
-    for (int i = (row << 5) + col + 1; i < 896; i++)
-    {
-        *tilemap_ptr = 0x0000;
-        tilemap_ptr++;
-    }
-
-    return (uint16_t)((uint32_t)(write_ptr-write_ptr_start)+16);
+    VwfEngine_PrintText_Gradual_Setup(string, dest, tilemap_dest, col_ext, row_ext, id_offset, 896);
+    VwfEngine_PrintText_Gradual(32767);
+    return vwf_tiledata_run+16;
 }
 
 /*
     Begin a new text print
+
+    tilemap_length is in amount of entries (words)
 */
-void VwfEngine_PrintText_Gradual_Setup(uint8_t * string, uint8_t * dest, uint16_t * tilemap_dest, int col_ext, int row_ext, int id_offset)
+void VwfEngine_PrintText_Gradual_Setup(uint8_t * string, uint8_t * dest, uint8_t * tilemap_dest, int col_ext, int row_ext, int id_offset, int tilemap_len)
 {
     vwf_shift = 0;
 
     vwf_col_start = col_ext;
     vwf_col = col_ext;
+
+    vwf_row_start = row_ext;
     vwf_row = row_ext;
+
     vwf_tile_id = (1 + id_offset) | 0x2000;
+    vwf_tile_id_empty = id_offset;
     vwf_string_ptr = string;
-    vwf_tilemap_ptr = tilemap_dest;
+    vwf_tilemap_ptr = (uint16_t *)tilemap_dest;
+    vwf_tilemap_ptr_start = (uint16_t *)tilemap_dest;
+    vwf_tilemap_len = tilemap_len;
+
     vwf_tiledata_ptr = dest+16;
+    vwf_tiledata_ptr_start = dest;
     vwf_text_rendered = false;
+
+    vwf_wram_offset = (uint16_t)((uint32_t)vwf_tiledata_ptr_start & 0xffff);
+    vwf_vram_offset = 0x0008;
 
     vwf_tiledata_run = 16;
     vwf_tiledata_advance = 0;
@@ -222,14 +100,9 @@ void VwfEngine_PrintText_Gradual_Setup(uint8_t * string, uint8_t * dest, uint16_
     // Copy an empty tile to tile 0
     System_CopyBlock((uint8_t *)&const_zero, dest, 16);
 
-    // Immediately write empty tiles to the tilemap 
-    for (int i = 0; i < 896; i++)
-    {
-        *tilemap_dest = id_offset;
-        tilemap_dest++;
-    }
+    VwfEngine_PrintText_ResetTilemap(vwf_tilemap_ptr, vwf_tilemap_len);
 
-    vwf_tilemap_ptr += (vwf_row << 5) + vwf_col;
+    SoundInterface_PlayClip(STREAM_TYPEWRITER);
 
     return;
 }
@@ -251,6 +124,13 @@ uint8_t * VwfEngine_PrintText_Gradual(int len)
     int advance_width = 0;
 
     bool shift_overflow = false;
+
+    if (!vwf_print_ongoing)
+    {
+        SoundInterface_PlayClip(STREAM_TYPEWRITER);
+    }
+    
+    vwf_print_ongoing = true;
 
     for (int c = 0; c < len; c++)
     {
@@ -292,6 +172,44 @@ uint8_t * VwfEngine_PrintText_Gradual(int len)
                 }
                 
                 continue;
+            }
+            else if (*vwf_string_ptr == '\r')
+            {
+                int i;
+                if (vwf_shift == 0)
+                {
+                    i = 0;
+                }
+                else
+                {
+                    i = 1;
+                    *vwf_tilemap_ptr = vwf_tile_id;
+                    vwf_tilemap_ptr++;
+                }
+
+                int remaining = (32-vwf_col)+vwf_col_start;
+                for (; i < remaining; i++)
+                {
+                    *vwf_tilemap_ptr = 0x0000;
+                    vwf_tilemap_ptr++;
+                }
+                
+                vwf_row = vwf_row_start;
+                vwf_col = vwf_col_start;
+                vwf_shift = 0;
+                vwf_string_ptr++;
+
+                if (vwf_text_rendered)
+                {
+                    run_width++;
+                    advance_width++;
+                    vwf_tile_id++;
+                    vwf_tiledata_ptr += 16;
+                }
+
+                vwf_print_ongoing = false;
+
+                break;
             }
             else if (vwf_col >= 32)
             {
@@ -337,25 +255,9 @@ uint8_t * VwfEngine_PrintText_Gradual(int len)
             {
                 uint8_t * write_ptr_saved = vwf_tiledata_ptr; // Save the write pointer
 
-                uint8_t shifted_glyph[32]; // 2 tiles
                 uint16_t bitplane_mul = 1 << (8 - vwf_shift);
-                uint16_t bitplane_row;
 
-                // Bit shifting is needed
-                for (int i = 0; i < 16; i++)
-                {
-                    bitplane_row = *glyph_ptr;
-                    
-                    bitplane_row = (bitplane_row * bitplane_mul);
-                    shifted_glyph[i] = bitplane_row >> 8;
-                    shifted_glyph[16+i] = bitplane_row;
-
-                    *vwf_tiledata_ptr |= shifted_glyph[i];
-                    *(vwf_tiledata_ptr+16) = shifted_glyph[16+i];
-                    vwf_tiledata_ptr++;
-
-                    glyph_ptr++;
-                }
+                VwfEngine_PrintText_Render(glyph_ptr, vwf_tiledata_ptr, bitplane_mul);
 
                 vwf_tiledata_ptr = write_ptr_saved; // Restore the write pointer
 
@@ -391,8 +293,14 @@ uint8_t * VwfEngine_PrintText_Gradual(int len)
         if (*vwf_string_ptr == 0x00)
         {
             vwf_print_finished = true;
+            vwf_print_ongoing = false;
             break;
         }
+    }
+
+    if (!vwf_print_ongoing)
+    {
+        SoundInterface_StopStream();
     }
 
     vwf_tiledata_run = run_width << 4;
@@ -402,9 +310,126 @@ uint8_t * VwfEngine_PrintText_Gradual(int len)
     return write_ptr_start;
 }
 
+#if VBCC_ASM == 1
+NO_INLINE void VwfEngine_PrintText_Render(__reg("r4/r5") uint8_t * glyph_ptr, __reg("r6/r7")uint8_t * write_ptr, __reg("a")uint16_t mul)
+#else
+void VwfEngine_PrintText_Render(uint8_t * glyph_ptr, uint8_t * write_ptr, uint16_t mul)
+#endif
+{
+    #if VBCC_ASM == 1
+        __asm(
+        "\ta8\n"
+        "\tx16\n"
+        "\tsep #$20\n"
+        "\tsta $4202\n" // Multiplication factor constant
+
+        "\tlda r7\n"
+        "\tsta r9\n"
+        
+        "\ta16\n"
+        "\trep #$21\n"
+
+        "\tlda r6\n"
+        "\tadc #16\n"
+        "\tsta r8\n"
+        
+        "\tldy #$0\n"
+        
+        "\ta8\n"
+        "\tsep #$20\n"
+
+        "\trept 16, I\n"
+        "\ta8\n"
+
+        "\tlda [r4],y\n"
+        "\tsta $4203\n"
+        
+        "\ta16\n"
+        "\trep #$20\n"
+
+        "\tnop\n"
+
+        "\tlda $804216\n"
+
+        "\ta8\n"
+        "\tsep #$20\n"
+        "\tsta [r8],y\n"
+        "\txba\n"
+        "\tora [r6],y\n"
+        "\tsta [r6],y\n"
+
+        "\tiny\n"
+        
+        "\tendr\n"
+        
+        "\ta16\n"
+        "\tx16\n"
+        "\trep #$30\n"
+        );
+    #else
+        uint16_t bitplane_row;
+
+        // Bit shifting is needed
+        for (int i = 0; i < 16; i++)
+        {
+            if (!(*glyph_ptr)) // Bitplane row is all 0s
+            {
+                *(write_ptr+16) = 0x00;
+            }
+            else
+            {
+                bitplane_row = (*glyph_ptr * mul);
+
+                *write_ptr |= bitplane_row >> 8;
+                *(write_ptr+16) = bitplane_row;
+            }
+            write_ptr++;
+            glyph_ptr++;
+
+        }
+    #endif
+
+    return;
+}
+
+/*
+    Called for resetting pointers when rendering multi-page text.
+*/
+void VwfEngine_PrintText_StartNewPage()
+{
+    vwf_wram_offset = (uint16_t)((uint32_t)vwf_tiledata_ptr_start & 0xffff);
+    vwf_vram_offset = 0x0008;
+
+    vwf_tiledata_ptr = vwf_tiledata_ptr_start+16;
+    vwf_tilemap_ptr = vwf_tilemap_ptr_start;
+
+    VwfEngine_PrintText_ResetTilemap(vwf_tilemap_ptr, vwf_tilemap_len);
+
+    vwf_tiledata_advance = 0;
+    vwf_tiledata_advance_vram = 0;
+
+    return;
+}
+
+void VwfEngine_PrintText_ResetTilemap(uint16_t * ptr, int len)
+{
+    // Immediately write empty tiles to the tilemap 
+    for (int i = 0; i < len; i++)
+    {
+        *ptr = vwf_tile_id_empty;
+        ptr++;
+    }
+
+    vwf_tile_id = (1 + vwf_tile_id_empty) | 0x2000;
+
+    vwf_tilemap_ptr += (vwf_row_start << 5) + vwf_col_start;
+
+    return;
+}
+
 const uint16_t const_ui_vwf_offsets[] = 
 {
-    5, 2, 4, 8, 6, 8, 6, 2, 4, 4, 6, 6, 2, 4, 2, 5, 
+    4, 2, 4, 8, 6, 8, 6, 2, 4, 4, 6, 6, 2, 4, 2, 5, 
     5, 4, 5, 5, 6, 5, 5, 6, 5, 5, 2, 3, 4, 4, 4, 5, 
     8, 6, 5, 5, 6, 6, 5, 7, 7, 4, 6, 6, 5, 8, 7, 7, 
     5, 8, 6, 6, 6, 6, 6, 8, 7, 6, 7, 3, 5, 3, 5, 7, 
