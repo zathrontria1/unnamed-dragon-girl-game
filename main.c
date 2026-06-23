@@ -33,6 +33,23 @@ int main()
     
     rand_array[0] = 1; // Set the seed here
 
+    // Check region. If it's the wrong type load a warning message
+    if ((REG_STAT78 & 0x10) == 0x10)
+    {
+        // Check if this is the second warm boot
+        uint8_t * string_ptr = (uint8_t *)0x007ffff8;
+
+        for (int i = 0; i < 8; i++)
+        {
+            if (*string_ptr != const_sram_verify_str[i])
+            {
+                ErrorHandler_Region();
+            }
+
+            string_ptr++;
+        }
+    }
+
     // Check controller validty. If it's the wrong type load an error message
     uint16_t controller_id = System_CheckController();
     if ((controller_id != 0x0000) && (controller_id != 0x0004)) // If it's not standard controller or NTT Data Keypad (of which first 12 bits are identical buttons)

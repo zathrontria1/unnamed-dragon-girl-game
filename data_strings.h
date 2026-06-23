@@ -63,3 +63,6 @@ extern const uint8_t STR_LEVELNAME_DEBUG_B2F[];
 extern const uint8_t STR_LEVELNAME_DEBUG_B3F[];
 
 extern const uint8_t STR_ERROR_CONTROLLER[];
+extern const uint8_t STR_ERROR_REGION[];
+
+extern const uint8_t STR_STARTUP[];

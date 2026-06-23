@@ -178,11 +178,51 @@ HUGE const uint8_t STR_ERROR_CONTROLLER[] = "\
 An unsupported peripheral has been\n\
 connected to a controller port.\n\
 \n\
-Remove any Mouse, Super Scope, or other\n\
-unsupported peripheral, and plug in a\n\
-standard controller, then restart the\n\
-SNES.\n\
+Turn off the console, remove any Mouse,\n\
+Super Scope, or other unsupported peripheral,\n\
+plug in a standard controller,\n\
+then turn on the console again.\n\
 \n\
 If using an emulator, check your emulator\n\
-documentation on how to configure input\n\
-devices.";
+documentation on how to configure input devices.";
+
+HUGE const uint8_t STR_ERROR_REGION[] = "\
+\n\
+\n\
+\n\
+\n\
+\n\
+This console appears to be a 50Hz system.\n\
+\n\
+The game will play slower than intended, and\n\
+streamed sampled audio playback may not\n\
+function correctly and may pop.\n\
+\n\
+To play the game anyway, press the following\n\
+button combination:\n\
+\n\
+L + R + START + SELECT\n\
+\n\
+or restart the console with the Reset button.\n\
+\n\
+If using an emulator, check your emulator\n\
+documentation on how to change the console\n\
+refresh rate/region.";
+
+HUGE const uint8_t STR_STARTUP[] = "\
+\n\
+\n\
+\n\
+\n\
+\n\
+\n\
+\n\
+Zathrontria presents\n\
+\n\
+Unnamed Dragon Girl Game (temp.)\n\
+\n\
+WORK IN PROGRESS - NOT FINAL\n\
+\n\
+Find the latest build and source at:\n\
+    https://github.com/zathrontria1/\n\
+    unnamed-dragon-girl-game";

@@ -20,6 +20,38 @@
 
 void ErrorHandler_Controller()
 {
+    ErrorHandler_Internal_Setup();
+
+    ErrorHandler_Internal_Display((uint8_t *)&STR_ERROR_CONTROLLER);
+
+    exit(EXIT_FAILURE);
+}
+
+void ErrorHandler_Region()
+{
+    ErrorHandler_Internal_Setup();
+
+    ErrorHandler_Internal_Display((uint8_t *)&STR_ERROR_REGION);
+
+    uint8_t * string_ptr = (uint8_t *)0x007ffff8;
+    for (int i = 0; i < 8; i++)
+    {
+        *string_ptr = const_sram_verify_str[i];
+        string_ptr++;
+    }
+    
+    while (1)
+    {
+        // Let the player get out of this
+        System_WaitUntilVblank();
+    }
+
+    // Should be unreachable
+    exit(EXIT_FAILURE + 1);
+}
+
+void ErrorHandler_Internal_Setup()
+{
     // Disable interrupts
     System_DisableInterrupts();
 
@@ -36,7 +68,12 @@ void ErrorHandler_Controller()
 
     REG_BG3SC = 0x3800 >> 8; // The image is 14KB. Have the tilemap go to the 28Kth byte.
 
-    uint16_t transfer_length = VwfEngine_PrintText((uint8_t *)&STR_ERROR_CONTROLLER, (uint8_t *)LZ4_BUFFER_ADDR, (uint16_t *)(LZ4_BUFFER_ADDR+0x7000), 1, 1, 0);
+    return;
+}
+
+void ErrorHandler_Internal_Display(uint8_t * string_ptr)
+{
+    uint16_t transfer_length = VwfEngine_PrintText(string_ptr, (uint8_t *)LZ4_BUFFER_ADDR, (uint8_t *)(LZ4_BUFFER_ADDR+0x7000), 1, 1, 0);
     
     // Copy the palette
     DmaSystem_CopyToWram((uint32_t)data_palette_ui, (uint32_t)&shadow_cgram, 32);
@@ -45,11 +82,6 @@ void ErrorHandler_Controller()
     DmaSystem_CopyToVram((uint32_t)LZ4_BUFFER_ADDR, 0x0000, transfer_length); // Copy the entire section including the tilemap.
     DmaSystem_CopyToVram((uint32_t)(LZ4_BUFFER_ADDR+0x7000), 0x3800, 1792); // Copy the entire section including the tilemap.
     DmaSystem_UploadCgram();
-
-    //VwfEngine_PrintText_Gradual_Setup((uint8_t *)&STR_ERROR_CONTROLLER, (uint8_t *)LZ4_BUFFER_ADDR, (uint16_t *)(LZ4_BUFFER_ADDR+0x7000), 1, 1, 0);
-
-    //DmaSystem_AddItemToQueue((uint8_t *)(LZ4_BUFFER_ADDR), 0x0000, 16, VRAM_INCHIGH, 0);
-    //DmaSystem_AddItemToQueue((uint8_t *)(LZ4_BUFFER_ADDR+0x7000), 0x3800, 1792, VRAM_INCHIGH, 0);
 
     DmaSystem_ProcessQueue();
 
@@ -63,44 +95,11 @@ void ErrorHandler_Controller()
 
     shadow_inidisp = 0x00;
 
-    //uint8_t * wram_offset = (uint8_t *)LZ4_BUFFER_ADDR;
-
     HdmaEngine_SetHdmaShadow();
 
     System_EnableInterrupts();
 
     REG_TM = 0x04; // BG3 only
 
-    // Now that tests are done...
-    /*System_WaitUntilVblank();
-
-    uint16_t vram_offset = 0x0008;
-
-    while (1)
-    {
-        
-
-        if (vwf_print_finished)
-        {
-            break;
-        }
-
-        uint8_t * new_data_addr = VwfEngine_PrintText_Gradual(1);
-
-        DmaSystem_AddItemToQueue((uint8_t *)(LZ4_BUFFER_ADDR+0x7000), 0x3800, 1792, VRAM_INCHIGH, 0);
-
-        if (vwf_tiledata_run != 0)
-        {
-            register volatile unsigned int data_len = vwf_tiledata_run;
-            DmaSystem_AddItemToQueue(new_data_addr, vram_offset, data_len, VRAM_INCHIGH, 0);
-
-            wram_offset = wram_offset + vwf_tiledata_advance;
-            vram_offset = vram_offset + vwf_tiledata_advance_vram;
-        }
-
-        System_WaitUntilVblank();
-    }*/
-
-    // Lock up the system
-    exit(EXIT_FAILURE);
+    return;
 }
