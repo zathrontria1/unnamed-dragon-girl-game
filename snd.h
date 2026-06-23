@@ -1,3 +1,5 @@
+extern bool snd_apu_booted;
+
 extern uint8_t snd_current_command_counter;
 
 extern bool snd_defercmd_sfx_enable;

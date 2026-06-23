@@ -5,6 +5,7 @@
 #include "snd.h"
 #include "consts_snd.h"
 
+bool snd_apu_booted;
 uint8_t snd_current_command_counter; // Used to check if the SPC is ready for a new command
 
 // Used to implement a deferred SFX system
@@ -93,6 +94,8 @@ void SoundInterface_StartSoundEngine()
     }
 
     REG_APU00 = 0x00;
+
+    snd_apu_booted = true;
 
     return;
 }

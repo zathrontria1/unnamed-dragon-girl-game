@@ -29,6 +29,10 @@
 #include "snd.h"
 #include "ui.h"
 
+#include "errorhandling.h"
+
+#include "data_strings.h"
+
 uint8_t system_MVNCodeInWRAM[4];
 uint8_t system_JMLCodeInWRAM[4];
 
@@ -156,7 +160,7 @@ void System_DisplayStartupSplash()
     // Set up the PPU regs to what we want.
     System_Init_BgScroll();
 
-    REG_BGMODE = 0x09; // Mode 1, high priority bg3
+    /*REG_BGMODE = 0x09; // Mode 1, high priority bg3
     REG_TM = 0x01; // BG1 only
     REG_BG12NBA = 0 << 4 | 0;
 
@@ -171,7 +175,11 @@ void System_DisplayStartupSplash()
 
     // Upload the splash
     DmaSystem_CopyToVram(0x007f0000, 0x0000, 0x7800); // Copy the entire section including the tilemap.
-    DmaSystem_UploadCgram();
+    DmaSystem_UploadCgram();*/
+
+    ErrorHandler_Internal_Setup();
+
+    ErrorHandler_Internal_Display((uint8_t *)&STR_STARTUP);
 
     // Set up a fade-in. Doing this so that we can actually run the other steps
     // while the game is still setting up.
@@ -846,7 +854,7 @@ void System_Reset()
     return;
 }
 
-FORCE_INLINE void System_CheckSoftReset()
+void System_CheckSoftReset()
 {
     if ((input_pad0 & (KEY_L | KEY_R | KEY_SELECT | KEY_START)) == (KEY_L | KEY_R | KEY_SELECT | KEY_START)) // check soft reset combo
     {
@@ -861,7 +869,11 @@ FORCE_INLINE void System_CheckSoftReset()
 
 void System_SoftReset()
 {
-    SoundInterface_ResetAPU(); // Reset the SPC too
+    if (snd_apu_booted)
+    {
+        SoundInterface_ResetAPU(); // Reset the SPC too
+    }
+    
     System_Reset();
 
     return;

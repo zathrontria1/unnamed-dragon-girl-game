@@ -37,7 +37,7 @@ FORCE_INLINE void System_EnableInterrupts(void);
 FORCE_INLINE void System_DisableInterrupts(void);
 FORCE_INLINE void System_EnableFblankInterrupts(void);
 
-FORCE_INLINE void System_CheckSoftReset(void);
+void System_CheckSoftReset(void);
 void System_SoftReset(void);
 void System_Reset(void);
 
