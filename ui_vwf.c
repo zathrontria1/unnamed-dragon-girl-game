@@ -253,13 +253,9 @@ uint8_t * VwfEngine_PrintText_Gradual(int len)
             }
             else
             {
-                uint8_t * write_ptr_saved = vwf_tiledata_ptr; // Save the write pointer
-
                 uint16_t bitplane_mul = 1 << (8 - vwf_shift);
 
                 VwfEngine_PrintText_Render(glyph_ptr, vwf_tiledata_ptr, bitplane_mul);
-
-                vwf_tiledata_ptr = write_ptr_saved; // Restore the write pointer
 
                 if (run_width < 2)
                 {
@@ -349,7 +345,7 @@ void VwfEngine_PrintText_Render(uint8_t * glyph_ptr, uint8_t * write_ptr, uint16
 
         "\tnop\n"
 
-        "\tlda $804216\n"
+        "\tlda $4216\n"
 
         "\ta8\n"
         "\tsep #$20\n"
