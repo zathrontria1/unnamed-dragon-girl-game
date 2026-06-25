@@ -63,10 +63,9 @@ bool LevelSystem_LoadLevel(const struct level_data * level)
         obj_player_pointer->pos.x.lh.l = 0;
         obj_player_pointer->pos.y.lh.l = 0;
     }
-
     
     // Reset local event flags
-    for (int i = 0; i < 256; i++)
+    for (int i = 0; i < 16; i++)
     {
         event_flags_local[i] = 0;
     }
