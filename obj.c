@@ -885,7 +885,11 @@ uint16_t obj_instantiate_spawners(const struct obj_list_entry_spawners* list)
     if (temp_total_spawns > 0)
     {
         obj_enemies_max_count = temp_total_spawns;
-        obj_enemies_target_count = (uint16_t)((float)(obj_enemies_max_count) * 0.6f);
+
+        // Debug: make this much smaller
+        obj_enemies_target_count = (uint16_t)((float)(obj_enemies_max_count) * 0.3f);
+
+        //obj_enemies_target_count = (uint16_t)((float)(obj_enemies_max_count) * 0.6f);
 
         if (obj_enemies_target_count == 0)
         {
