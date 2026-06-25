@@ -248,8 +248,8 @@ const struct level_data data_level_test_0 = {
 };
 
 const struct level_data data_level_test_1 = {
-    64,
-    960,
+    56,
+    864,
 
     (void *)&data_bg_dungeon_lz4,
     (void *)&data_palette_list_0,
