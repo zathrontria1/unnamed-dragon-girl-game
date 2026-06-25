@@ -69,6 +69,8 @@ int main()
     
     System_Init_TilemapSettings(system_target_routine);
     System_Init_DisplaySettings(system_target_routine);
+
+    hdma_use_gradient = 0x0001;
     
     System_EnableInterrupts();
     

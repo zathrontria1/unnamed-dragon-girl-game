@@ -660,6 +660,8 @@ void Loop_Game_ReloadScene()
 
     system_suppress_odd_transfers = false;
 
+    hdma_use_gradient = 0x0001;
+
     HdmaEngine_EnableHdma(); 
 
     shadow_inidisp = 0x00;
@@ -737,6 +739,13 @@ void Loop_Game_NewLevel()
 
     System_Init_TilemapSettings(system_target_routine);
     System_Init_DisplaySettings(system_target_routine);
+
+    obj_player_pointer->facing = FACING_DOWN;
+    obj_player_pointer->state = STATE_IDLE;
+
+    HdmaEngine_SetupPaletteHdma();
+
+    hdma_use_gradient = 0x0001;
 
     Loop_Game_Partial();
 
