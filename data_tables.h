@@ -181,6 +181,9 @@ const struct obj_list_entry_interactable data_interactables_debug0[] =
 
 const struct obj_list_entry_interactable data_interactables_debug1[] = 
 {
+    {OBJID_INTERACTABLE_SWITCH_WALL, 424, 688-8, 0},
+    {OBJID_INTERACTABLE_BLOCKER_DOOR_NS, 448, 672, 0}, 
+    {OBJID_INTERACTABLE_SIGN_WALL, 496, 688-8, (void *)&STR_MSG_TUTORIAL_BOSS}, 
     {OBJID_NULL, 0, 0, 0}, 
 };
 
@@ -212,6 +215,11 @@ const struct obj_list_entry_spawns data_spawnlist_debug1[] = {
     {OBJID_NULL, 0, 0, 0},
 };
 
+const struct obj_list_entry_spawns data_spawnlist_boss[] = {
+    {OBJID_BOSS_TEST1, 256, 384, 16},
+    {OBJID_NULL, 0, 0, 0},
+};
+
 const struct obj_list_entry_spawners data_spawners_debug0[] = {
     {OBJID_SPAWNER_ENEMY, 400+15, 448+15, 224-31, 176-31, 384, 400, 256, 224, (void *)&data_spawnlist_debug0},
     {OBJID_SPAWNER_ENEMY, 16+15, 448+15, 224-31, 176-31, 0, 400, 256, 224, (void *)&data_spawnlist_debug1},
@@ -223,6 +231,7 @@ const struct obj_list_entry_spawners data_spawners_debug0[] = {
 };
 
 const struct obj_list_entry_spawners data_spawners_debug1[] = {
+    {OBJID_SPAWNER_ENEMY, 224+15, 256+15, 480-31, 400-31, 208, 208, 512, 448, (void *)&data_spawnlist_boss},
     {OBJID_NULL, 0, 0, 1, 1, 0, 0, 0, 0, 0},
 };
 

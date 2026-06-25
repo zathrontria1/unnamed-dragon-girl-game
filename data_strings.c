@@ -22,6 +22,14 @@ text box.\r\
 Final page of a multi-page\n\
 text box.";
 
+HUGE const uint8_t STR_MSG_TUTORIAL_BOSS[] = "\
+You're approaching a boss room.\n\
+Once you enter one,\n\
+there's no going back until\n\
+the boss goes down!\r\
+To proceed, hit the switch\n\
+near the door.";
+
 HUGE const uint8_t STR_MSG_TUTORIAL_MP[] = "\
 Welcome to\n\
 Unnamed Dragon Girl Game!\n\

@@ -3,6 +3,8 @@ extern const uint8_t STR_MSG_TEST_MULTILINE[];
 
 extern const uint8_t STR_MSG_TEST_MULTIPAGE[];
 
+extern const uint8_t STR_MSG_TUTORIAL_BOSS[];
+
 extern const uint8_t STR_MSG_TUTORIAL_MP[];
 
 extern const uint8_t STR_MSG_INCOMBAT[];

@@ -6,6 +6,7 @@
 #include "routines.h"
 #include "routines_player.h"
 #include "routines_enemy.h"
+#include "routines_boss.h"
 #include "obj.h"
 #include "hittest.h"
 
@@ -1091,6 +1092,9 @@ void obj_set_function_pointer(struct game_object * o)
             break;
         case OBJID_LIZARDMAN:
             o->func_ptr = (void *)&routines_lizardman;
+            break;
+        case OBJID_BOSS_TEST1:
+            o->func_ptr = (void *)&Routines_Boss_Test;
             break;
         case OBJID_FX_SMOKE:
             o->func_ptr = (void *)&routines_fx_smoke;

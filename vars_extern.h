@@ -75,6 +75,7 @@ extern const struct obj_list_entry_interactable data_interactables_debug2[];
 extern const struct obj_list_entry_spawns data_spawnlist_debug0[];
 extern const struct obj_list_entry_spawns data_spawnlist_debug1[];
 extern const struct obj_list_entry_spawns data_spawnlist_debug2[];
+extern const struct obj_list_entry_spawns data_spawnlist_boss[];
 
 extern const struct obj_list_entry_spawners data_spawners_debug0[];
 extern const struct obj_list_entry_spawners data_spawners_debug1[];
