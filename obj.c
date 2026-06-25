@@ -359,7 +359,7 @@ void obj_reset(int start_index)
     obj_general[OBJ_GENERAL_MAX_COUNT - 1].next_free = 0xffff;
     obj_general[OBJ_GENERAL_MAX_COUNT - 1].func_ptr = (void *)&routines_dummy;
 
-    obj_first_available = 0;
+    obj_first_available = start_index;
 
     return;
 }
