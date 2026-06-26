@@ -26,6 +26,10 @@ def main():
         action='store_true',
 		help='Use 16x8 slices (dictionary is made of 2-tile pairs; faster to copy, but reduces efficiency)')
     
+    parser.add_argument('--sheetwidth', metavar='sheetwidth', type=int, default=128, help='Tile data sheet width')
+    parser.add_argument('--framewidth', metavar='framewidth', type=int, default=16, help='Sprite frame width')
+    parser.add_argument('--frameheight', metavar='frameheight', type=int, default=16, help='Sprite frame height')
+    
     bitdepth_args = parser.add_mutually_exclusive_group(required=True)
 
     bitdepth_args.add_argument(
@@ -55,8 +59,14 @@ def main():
     elif cmd_args.bpp8:
         tile_size = 64
 
+    sheetwidth_bytes = (cmd_args.sheetwidth >> 3) * tile_size
+    framewidth_bytes = (cmd_args.framewidth >> 3) * tile_size
+
     if cmd_args.wide == True:
         tile_size *= 2
+
+    tile_stride = sheetwidth_bytes - framewidth_bytes
+    tile_rows = cmd_args.frameheight >> 3
 
     dictionary_file = bytearray()
 
@@ -90,70 +100,52 @@ def main():
     output_file_path_str = str(output_file_path).removesuffix(".bin.dd")
     output_file_path = output_file_path_str + "_lut.h"
 
+    read_x = 0
+    read_y = 0
+
     with open(cmd_args.input, 'rb') as input_file:
+
+        current_byte = input_file.tell()
+
         while True:
-            current_byte = input_file.tell()
-
             tile = input_file.read(tile_size)
 
             if len(tile) == 0:
                 break
 
+            # add the current tile
             if tile in dictionary_file:
                 offset = dictionary_file.find(tile)
                 lookup_file += str(offset)
                 lookup_file += ", "
 
-            if cmd_args.wide == False:
-                tile = input_file.read(tile_size)
+            read_x += tile_size
 
-                if len(tile) == 0:
-                    break
+            if (read_x >= framewidth_bytes):
+                # Go down an entire row
+                read_x = 0
+                read_y += 1
+                
+                if (read_y >= tile_rows):
+                    # Go to a new frame
+                    read_y = 0
+                    current_byte += framewidth_bytes
 
-                if tile in dictionary_file:
-                    offset = dictionary_file.find(tile)
-                    lookup_file += str(offset)
-                    lookup_file += ", "
+                    lookup_file += "\n\t"
 
-                input_file.seek((tile_size * 14), os.SEEK_CUR)
-            else:
-                input_file.seek((tile_size * 7), os.SEEK_CUR)
+                    if ((current_byte % sheetwidth_bytes) == 0):
+                        # Edge of the frame overrun, go down
+                        i = 1
+                        
+                        while (i < tile_rows):
+                            current_byte += sheetwidth_bytes
+                            i += 1
 
-            tile = input_file.read(tile_size)
+                    input_file.seek(current_byte, os.SEEK_SET)
 
-            if len(tile) == 0:
-                break
-
-            if tile in dictionary_file:
-                offset = dictionary_file.find(tile)
-                lookup_file += str(offset)
-                lookup_file += ", "
-
-            if cmd_args.wide == False:
-                tile = input_file.read(tile_size)
-
-                if len(tile) == 0:
-                    break
-
-                if tile in dictionary_file:
-                    offset = dictionary_file.find(tile)
-                    lookup_file += str(offset)
-                    lookup_file += ", \n\t"
-
-                current_byte += tile_size * 2
-
-                if current_byte % (tile_size * 16) == 0:
-                    current_byte += (tile_size * 16)
-
-                input_file.seek(current_byte, os.SEEK_SET)
-            else:
-                lookup_file += "\n\t"
-                current_byte += tile_size
-
-                if current_byte % (tile_size * 8) == 0:
-                    current_byte += (tile_size * 8)
-
-                input_file.seek(current_byte, os.SEEK_SET)
+                    current_byte = input_file.tell()
+                else:
+                    input_file.seek(tile_stride, os.SEEK_CUR)
 
     lookup_file += "};\n"
 
