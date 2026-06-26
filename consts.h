@@ -275,4 +275,4 @@
 #define SPR_COUNT_MAX_SORTED 64
 #define SPR_COUNT_MAX_BACK 64
 
-#define LEVEL_INITIAL &data_level_test_0
+#define LEVEL_INITIAL &data_level_test_1
