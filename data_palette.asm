@@ -40,6 +40,11 @@ _data_palette_common_0:
 _data_palette_common_1:
     incbin "palette/palette_spr_common1.bin"
 
+    section "_rodata.far.bindata.palette.maingame.8"
+    global _data_palette_boss_0
+_data_palette_boss_0:
+    incbin "palette/palette_spr_boss_placeholder.bin"
+
     section "_rodata.far.bindata.palette.subscreen.0"
     global _data_palette_player_portrait
 _data_palette_player_portrait:

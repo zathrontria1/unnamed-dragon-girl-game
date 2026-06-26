@@ -20,11 +20,16 @@ _data_spr_drop_coin:
     incbin "sprites/spr_drop_coin.bin"
 
     section "_rodata.far.bindata.sprtiles.1"
+    global _data_spr_boss_placeholder_dd
+_data_spr_boss_placeholder_dd:
+    incbin "sprites/boss/spr_boss_placeholder.bin.dd"
+
+    section "_rodata.far.bindata.sprtiles.2"
     global _data_spr_spawn_placeholder
 _data_spr_spawn_placeholder:
     incbin "sprites/spr_spawn_placeholder.bin"
     
-    section "_rodata.far.bindata.sprtiles.2"
+    section "_rodata.far.bindata.sprtiles.3"
     global _data_spr_fixed_lz4
 _data_spr_fixed_lz4:
     incbin "sprites/spr_fixed.bin.lz4"
