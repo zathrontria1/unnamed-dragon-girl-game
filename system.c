@@ -882,18 +882,62 @@ void System_SoftReset()
 // Call this to align to vblank
 void System_AlignToVblank()
 {
-    while ((REG_HVBJOY & VBL_READY) != VBL_READY)
-    {
-        ;
-    }
-    while ((REG_HVBJOY & VBL_READY) == VBL_READY)
-    {
-        ;
-    }
-    while ((REG_HVBJOY & VBL_READY) != VBL_READY)
-    {
-        ;
-    }
+    #if VBCC_ASM == 1
+        __asm(
+            "\ta8\n"
+            "\tsep #$20\n"
+            "\tbit $4212\n"
+            "\tbpl .phase_2\n" // Not in hblank
+            "\t.phase_1:\n"
+            "\tbit $4212\n"
+            "\tbmi .phase_1\n" // Still in hblank
+            "\t.phase_2:\n"
+            "\tbit $4212\n"
+            "\tbpl .phase_2\n" // Not in hblank
+            "\ta16\n"
+            "\trep #$20\n"
+            );
+    #else
+        while ((REG_HVBJOY & VBL_READY) == VBL_READY)
+        {
+            ;
+        }
+        while ((REG_HVBJOY & VBL_READY) != VBL_READY)
+        {
+            ;
+        }
+    #endif
+
+    return;
+}
+
+void System_AlignToHblank()
+{
+    #if VBCC_ASM == 1
+        __asm(
+            "\ta8\n"
+            "\tsep #$20\n"
+            "\tbit $4212\n"
+            "\tbvc .phase_2\n" // Not in hblank
+            "\t.phase_1:\n"
+            "\tbit $4212\n"
+            "\tbvs .phase_1\n" // Still in hblank
+            "\t.phase_2:\n"
+            "\tbit $4212\n"
+            "\tbvc .phase_2\n" // Not in hblank
+            "\ta16\n"
+            "\trep #$20\n"
+            );
+    #else
+        while ((REG_HVBJOY & HBL_READY) == HBL_READY)
+        {
+            ;
+        }
+        while ((REG_HVBJOY & HBL_READY) != HBL_READY)
+        {
+            ;
+        }
+    #endif
 
     return;
 }
