@@ -19,6 +19,7 @@ extern const uint8_t data_palette_player[];
 extern const uint8_t data_palette_player_portrait[];
 extern const uint8_t data_palette_common_0[];
 extern const uint8_t data_palette_common_1[];
+extern const uint8_t data_palette_boss_0[];
 
 extern const uint8_t data_palette_map_0_8bpp[];
 extern const uint8_t data_palette_map_1_8bpp[];
@@ -57,6 +58,9 @@ extern const uint8_t data_spr_slime[]; // slime
 extern const uint8_t data_spr_lizardman[]; // lizardman
 extern const uint8_t data_spr_spawn_placeholder[]; // spawning placeholder
 extern const uint8_t data_spr_drop_coin[]; // dropped coins
+
+extern const uint8_t data_spr_boss_placeholder_dd[]; // boss
+extern const uint16_t data_spr_boss_placeholder_lut[]; // boss
 
 // Tables
 extern const NEAR int32_t data_sine_1[];
@@ -102,4 +106,7 @@ extern const struct spr_metaspr_definition data_metaspr_door_ns_closed[];
 extern const struct spr_metaspr_definition data_metaspr_door_ew_open[];
 extern const struct spr_metaspr_definition data_metaspr_door_ew_open_flip[];
 extern const struct spr_metaspr_definition data_metaspr_door_ew_closed[];
+
+extern const struct spr_metaspr_definition data_metaspr_boss_generic_64x96[];
+extern const struct spr_metaspr_definition data_metaspr_shadow_64x16[];
 

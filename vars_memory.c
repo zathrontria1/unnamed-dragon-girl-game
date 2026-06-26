@@ -9,6 +9,7 @@
 #include "maps/map_debug1.h"
 
 #include "sprites/spr_player_lut.h"
+#include "sprites/boss/spr_boss_placeholder_lut.h"
 
 #include "data_tables.h"
 #include "data_tables_lut.h"
