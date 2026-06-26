@@ -591,7 +591,6 @@ uint8_t * AniSystem_GetDynamicFrame_Lizardman(struct game_object * o)
 // This will return the index in the lookup table for the purposes of checking prev frames
 uint8_t * AniSystem_GetCompressedFrame(const uint8_t * data, const uint16_t * lookup, uint8_t * buffer, uint16_t frame)
 {
-    //uint16_t lookup_entry_offset = frame << 2; // Each frame is 8 bytes
     uint16_t lookup_entry_offset = frame << 1; // Each frame is 4 bytes
 
     uint8_t * ptr_return_val = (uint8_t *)(lookup + lookup_entry_offset);
@@ -607,8 +606,6 @@ uint8_t * AniSystem_GetCompressedFrame(const uint8_t * data, const uint16_t * lo
 
     uint8_t * ptr_read_0 = (uint8_t *)(data + *data_offset++);
     uint8_t * ptr_read_1 = (uint8_t *)(data + *data_offset++);
-    //uint8_t * ptr_read_2 = (uint8_t *)(data + *data_offset++);
-    //uint8_t * ptr_read_3 = (uint8_t *)(data + *data_offset);
 
     // Use the DMA unit to speed things up. Channel 7 is reserved for active display DMA.
     // Align read
@@ -638,20 +635,9 @@ uint8_t * AniSystem_GetCompressedFrame(const uint8_t * data, const uint16_t * lo
     REG_A1T7LH = (uint16_t)((uint32_t)ptr_read_1);
 
     REG_WMADDLM = (uint16_t)((uint32_t)buffer+512);
-    
-    //REG_DAS7LH = 32;
+
     REG_DAS7LH = 64;
     REG_MDMAEN = 0x80;
-
-    /*REG_A1T7LH = (uint16_t)((uint32_t)ptr_read_2);
-    
-    REG_DAS7LH = 32;
-    REG_MDMAEN = 0x80;
-
-    REG_A1T7LH = (uint16_t)((uint32_t)ptr_read_3);
-    
-    REG_DAS7LH = 32;
-    REG_MDMAEN = 0x80;*/
 
     return ptr_return_val;
 }
