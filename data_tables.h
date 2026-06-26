@@ -17,7 +17,7 @@ const struct level_palette_list data_palette_list_0 =
         (void *)&data_palette_player,
         (void *)&data_palette_common_0,
         (void *)&data_palette_common_1,
-        (void *)&data_palette_blank,
+        (void *)&data_palette_boss_0,
         (void *)&data_palette_blank,
         (void *)&data_palette_blank,
         (void *)&data_palette_blank,
@@ -216,7 +216,7 @@ const struct obj_list_entry_spawns data_spawnlist_debug1[] = {
 };
 
 const struct obj_list_entry_spawns data_spawnlist_boss[] = {
-    {OBJID_BOSS_TEST1, 256, 384, 16},
+    {OBJID_BOSS_TEST1, 256, 256, 16},
     {OBJID_NULL, 0, 0, 0},
 };
 
