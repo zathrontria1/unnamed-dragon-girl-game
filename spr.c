@@ -661,7 +661,6 @@ void SpriteEngine_ProcessSpriteLists()
         __asm(
         "\ta16\n"
         "\tx16\n"
-        "\tbit $4210\n"
         "\tphd\n"
         "\tlda #<_spr_depth_count\n"
         "\tand #$ff00\n"
