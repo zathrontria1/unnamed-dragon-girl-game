@@ -44,6 +44,11 @@ const struct enemy_data data_enemy_stats_lizardman_lilsis =
     // Placeholder; this is supposed to be the alternate player
     350, 1, 1, 0, 0, 16, 16
 };
+const struct enemy_data data_enemy_stats_boss_0 = 
+{
+    // Test boss
+    5000, 10, 10, 5000, 5000, 64, 32
+};
 
 // Stream defs
 const struct sound_stream_data data_stream_table[] = 

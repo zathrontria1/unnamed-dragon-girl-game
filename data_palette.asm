@@ -45,6 +45,11 @@ _data_palette_common_1:
 _data_palette_boss_0:
     incbin "palette/palette_spr_boss_placeholder.bin"
 
+    section "_rodata.far.bindata.palette.maingame.9"
+    global _data_palette_cycle_fire
+_data_palette_cycle_fire:
+    incbin "palette/palette_cycle_fire.bin"
+
     section "_rodata.far.bindata.palette.subscreen.0"
     global _data_palette_player_portrait
 _data_palette_player_portrait:

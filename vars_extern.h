@@ -6,6 +6,7 @@ extern const struct enemy_data data_enemy_stats_slime;
 extern const struct enemy_data data_enemy_stats_lizardman;
 extern const struct enemy_data data_enemy_stats_lizardman_archer;
 extern const struct enemy_data data_enemy_stats_lizardman_lilsis;
+extern const struct enemy_data data_enemy_stats_boss_0;
 
 // Game data (non-audio)
 extern const uint8_t data_palette_blank[];
@@ -20,6 +21,8 @@ extern const uint8_t data_palette_player_portrait[];
 extern const uint8_t data_palette_common_0[];
 extern const uint8_t data_palette_common_1[];
 extern const uint8_t data_palette_boss_0[];
+
+extern const uint8_t data_palette_cycle_fire[];
 
 extern const uint8_t data_palette_map_0_8bpp[];
 extern const uint8_t data_palette_map_1_8bpp[];
@@ -108,5 +111,6 @@ extern const struct spr_metaspr_definition data_metaspr_door_ew_open_flip[];
 extern const struct spr_metaspr_definition data_metaspr_door_ew_closed[];
 
 extern const struct spr_metaspr_definition data_metaspr_boss_generic_64x96[];
+extern const struct spr_metaspr_definition data_metaspr_boss_generic_64x96_hflip[];
 extern const struct spr_metaspr_definition data_metaspr_shadow_64x16[];
 
