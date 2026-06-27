@@ -68,3 +68,22 @@ const struct spr_metaspr_definition data_metaspr_boss_generic_64x96[] = {
     {0x104 | PAL_BOSS_TEST << 9 | 2 << 12, 32, -80, 1},
     {0, 0, 0, 0xffff},
 };
+
+const struct spr_metaspr_definition data_metaspr_boss_generic_64x96_hflip[] = {
+    {0x14e | PAL_BOSS_TEST << 9 | true << 14 | 2 << 12, 0, 0, 0},
+    {0x14c | PAL_BOSS_TEST << 9 | true << 14 | 2 << 12, 16, 0, 0},
+    {0x14a | PAL_BOSS_TEST << 9 | true << 14 | 2 << 12, 32, 0, 0},
+    {0x148 | PAL_BOSS_TEST << 9 | 2 << 12, 48, 0, 0},
+
+    {0x108 | PAL_BOSS_TEST << 9 | true << 14 | 2 << 12, 32, -32, 1},
+    {0x10c | PAL_BOSS_TEST << 9 | true << 14 | 2 << 12, 0, -32, 1},
+
+    {0x146 | PAL_BOSS_TEST << 9 | true << 14 | 2 << 12, 0, -48, 0},
+    {0x144 | PAL_BOSS_TEST << 9 | true << 14 | 2 << 12, 16, -48, 0},
+    {0x142 | PAL_BOSS_TEST << 9 | true << 14 | 2 << 12, 32, -48, 0},
+    {0x140 | PAL_BOSS_TEST << 9 | true << 14 | 2 << 12, 48, -48, 0},
+
+    {0x100 | PAL_BOSS_TEST << 9 | true << 14 | 2 << 12, 32, -80, 1},
+    {0x104 | PAL_BOSS_TEST << 9 | true << 14 | 2 << 12, 0, -80, 1},
+    {0, 0, 0, 0xffff},
+};
