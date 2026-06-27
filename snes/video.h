@@ -314,6 +314,10 @@ The overflow flags are set (regardless of OBJ enable/disable in 212Ch), at follo
 
 #define REG_SETINI (*(vuint8 *)0x2133)
 
+#define REG_SLHV (*(vuint8 *)0x2137)
+#define REG_OPHCT (*(vuint8 *)0x213C)
+#define REG_OPVCT (*(vuint8 *)0x213D)
+
 // macro creates a 15 bit color from 3x5 bit components
 /** \brief  Macro to convert 5 bits or 8 bits r g b components into a single 15 bit RGB triplet */
 #define RGB8(r, g, b) (((r) >> 3) | (((g) >> 3) << 5) | (((b) >> 3) << 10))
