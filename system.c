@@ -584,8 +584,39 @@ void System_Init_TilemapSettings(uint16_t routine)
     return;
 }
 
+/*
+    After processing is finished, waits until vblank
+
+    After vblank routine finishes, polls input and checks for soft reset and RNG validity before exiting
+*/
 FORCE_INLINE void System_WaitUntilVblank()
 {
+    // Check if the current scanline is exactly 224 or not.
+    register volatile temp = REG_SLHV;
+    uint8_t scanline_lo = REG_OPVCT;
+    uint8_t scanline_hi = REG_OPVCT & 0x01;
+    uint16_t scanline = scanline_lo | (scanline_hi << 8);
+
+    uint16_t target_line = 224; // Last line of active display
+
+    if (system_fblank_enabled)
+    {
+        target_line = 208;
+    }
+
+    if (scanline == target_line)
+    {
+        while ((scanline == target_line) || (scanline == (target_line+1)))
+        {
+            temp = REG_STAT78;
+            temp = REG_SLHV;
+            scanline_lo = REG_OPVCT;
+            scanline_hi = REG_OPVCT & 0x01;
+            scanline = scanline_lo | (scanline_hi << 8);
+        }
+    }
+
+    temp = REG_STAT78;
     // A workaround has been done on the ASM code side
     system_in_vblank = 1; // This must be the last value written.
 
