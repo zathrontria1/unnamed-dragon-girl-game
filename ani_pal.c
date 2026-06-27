@@ -112,3 +112,25 @@ void AniSystem_Pal_PrecalcPaletteChanges(void)
 
     return;
 }
+
+/*
+    Cycles a subpalette
+
+    Functionally, basically shifts all palette entries 1 entry to the right
+*/
+void AniSystem_Pal_CycleSubpalette(uint16_t subpal)
+{
+    // Get the last entry of the affected subpalette
+    uint16_t last = shadow_cgram.entry[(subpal << 4) + 15];
+
+    // Then shift everything in that subpalette to the right.
+    for (int i = 15; i > 0; i--)
+    {
+        shadow_cgram.entry[(subpal << 4) + i] = shadow_cgram.entry[(subpal << 4) + i - 1];
+    }
+
+    // Finally put the last entry in the first entry
+    shadow_cgram.entry[subpal << 4] = last;
+
+    return;
+}
