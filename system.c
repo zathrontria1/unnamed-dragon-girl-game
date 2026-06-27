@@ -591,33 +591,8 @@ void System_Init_TilemapSettings(uint16_t routine)
 */
 FORCE_INLINE void System_WaitUntilVblank()
 {
-    // Check if the current scanline is exactly 224 or not.
-    register volatile temp = REG_SLHV;
-    uint8_t scanline_lo = REG_OPVCT;
-    uint8_t scanline_hi = REG_OPVCT & 0x01;
-    uint16_t scanline = scanline_lo | (scanline_hi << 8);
+    System_CheckForActiveDisplayEnd();
 
-    uint16_t target_line = 224; // Last line of active display
-
-    if (system_fblank_enabled)
-    {
-        target_line = 208;
-    }
-
-    if (scanline == target_line)
-    {
-        while ((scanline == target_line) || (scanline == (target_line+1)))
-        {
-            temp = REG_STAT78;
-            temp = REG_SLHV;
-            scanline_lo = REG_OPVCT;
-            scanline_hi = REG_OPVCT & 0x01;
-            scanline = scanline_lo | (scanline_hi << 8);
-        }
-    }
-
-    temp = REG_STAT78;
-    // A workaround has been done on the ASM code side
     system_in_vblank = 1; // This must be the last value written.
 
     while (system_in_vblank)
@@ -968,6 +943,91 @@ void System_AlignToHblank()
         {
             ;
         }
+    #endif
+
+    return;
+}
+
+/*
+    Checks that the current line is NOT the final line of active display; if it is, stall until +2 lines
+*/
+void System_CheckForActiveDisplayEnd()
+{
+    #if VBCC_ASM == 1
+        __asm(
+            "\ta8\n"
+            "\tsep #$20\n"
+            "\tbit $2137\n"
+            
+            "\tlda $213d\n"
+            "\tsta r0\n"
+            "\tbit $213d\n" // We don't really need to check the entire thing, just the low byte. So just read this to make sure both values are read.
+
+            "\tlda _system_fblank_enabled\n"
+            "\tbeq .normal\n" 
+
+            "\tlda r0\n"
+            "\tcmp #208\n"
+            "\tbne .end\n"
+            ".fblank_loop:"  // Line 208
+                "\tbit $213f\n"
+                "\tbit $2137\n"
+                "\tlda $213d\n"
+                "\tbit $213d\n"
+                "\tcmp #208\n"
+                "\tbeq .fblank_loop\n"
+                "\tcmp #209\n"
+                "\tbeq .fblank_loop\n"
+                "\tbra .end\n"
+
+            ".normal:\n" // Line 224
+            "\tlda r0\n"
+            "\tcmp #224\n"
+            "\tbne .end\n"
+
+            ".normal_loop:"
+                "\tbit $213f\n"
+                "\tbit $2137\n"
+                "\tlda $213d\n"
+                "\tbit $213d\n"
+                "\tcmp #224\n"
+                "\tbeq .normal_loop\n"
+                "\tcmp #225\n"
+                "\tbeq .normal_loop\n"
+
+            "\t.end:\n"
+
+            "\tbit $213f\n"
+            "\ta16\n"
+            "\trep #$20\n"
+        );
+    #else
+        // Check if the current scanline is exactly 224 or not.
+        register volatile temp = REG_SLHV;
+        uint8_t scanline_lo = REG_OPVCT;
+        uint8_t scanline_hi = REG_OPVCT & 0x01;
+        uint16_t scanline = scanline_lo | (scanline_hi << 8);
+
+        uint16_t target_line = 224; // Last line of active display
+
+        if (system_fblank_enabled)
+        {
+            target_line = 208;
+        }
+
+        if (scanline == target_line)
+        {
+            while ((scanline == target_line) || (scanline == (target_line+1)))
+            {
+                temp = REG_STAT78;
+                temp = REG_SLHV;
+                scanline_lo = REG_OPVCT;
+                scanline_hi = REG_OPVCT & 0x01;
+                scanline = scanline_lo | (scanline_hi << 8);
+            }
+        }
+
+        temp = REG_STAT78;
     #endif
 
     return;
