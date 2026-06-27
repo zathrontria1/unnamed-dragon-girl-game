@@ -222,9 +222,6 @@ HUGE const uint8_t STR_STARTUP[] = "\
 \n\
 \n\
 \n\
-\n\
-\n\
-\n\
 Zathrontria presents\n\
 \n\
 Unnamed Dragon Girl Game (temp.)\n\
@@ -233,4 +230,13 @@ WORK IN PROGRESS - NOT FINAL\n\
 \n\
 Find the latest build and source at:\n\
     https://github.com/zathrontria1/\n\
-    unnamed-dragon-girl-game";
+    unnamed-dragon-girl-game\n\
+\n\
+[NOTICE]\n\
+This game saves automatically when\n\
+you enter a new level or floor.\n\
+\n\
+Don't turn off the power\n\
+while entering or exiting a staircase,\n\
+or a door that does not have a clear\n\
+destination.";
