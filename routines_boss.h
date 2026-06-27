@@ -1,4 +1,5 @@
 extern uint16_t obj_boss_state;
+extern bool obj_boss_palette_swap;
 
 void Routines_Boss_Test(struct game_object * o);
 
