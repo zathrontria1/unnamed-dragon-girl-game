@@ -623,6 +623,12 @@ int16_t obj_instantiate(
 
         p->state = STATE_SPAWNING;
         p->struct_data.npc_data.status_time = 64 / V_MUL;
+
+        if (id == OBJID_BOSS_TEST1)
+        {
+            obj_boss_palette_swap = false;
+            obj_boss_state = 0;
+        }
     }
     else
     {
@@ -1161,6 +1167,9 @@ bool obj_get_enemy_data(struct game_object * o)
             break;
         case OBJID_LIZARDMAN_LILSIS:
             data_ptr = (struct enemy_data *)&data_enemy_stats_lizardman_lilsis;
+            break;
+        case OBJID_BOSS_TEST1:
+            data_ptr = (struct enemy_data *)&data_enemy_stats_boss_0;
             break;
         default:
             return false;
