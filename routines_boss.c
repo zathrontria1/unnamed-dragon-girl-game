@@ -15,6 +15,7 @@
 #include "obj.h"
 #include "dma.h"
 
+#include "routines.h"
 #include "routines_boss.h"
 
 #include "math_int.h"
@@ -41,8 +42,16 @@ bool obj_boss_palette_swap;
 void Routines_Boss_Test(struct game_object * o)
 {
     struct game_object * p = obj_player_pointer;
-
+    
     bool temp_facing_left = false;
+
+    int z_offset = (system_frames_elapsed & 0x1f) >> 2;
+    if (z_offset > 3)
+    {
+        z_offset = 7-z_offset;
+    }
+
+    o->pos.z.lh.h = z_offset;
 
     if (p->pos.x.lh.h < (o->pos.x.lh.h + (o->w >> 1)))
     {
@@ -136,31 +145,13 @@ void Routines_Boss_Test(struct game_object * o)
                 }
             }
 
-            if (o->struct_data.npc_data.invuln_time)
+            if (Routines_Shared_StatusMaintenance(o))
             {
-                o->struct_data.npc_data.invuln_time--;
+                temp_invalidate_animation_frame = true;
             }
 
-            if (o->struct_data.npc_data.status_time)
-            {
-                o->struct_data.npc_data.status_time--;
-
-                if (o->struct_data.npc_data.status_time == 0)
-                {
-                    o->struct_data.npc_data.status = STATUS_NORMAL;
-
-                    if (o->state == STATE_HURT_BURN_MOVE)
-                    {
-                        o->state = STATE_MOVE_WALK;
-                    }
-                    else
-                    {
-                        o->state = STATE_IDLE;
-                    }
-
-                    temp_invalidate_animation_frame = true;
-                }
-            }
+            // Check if the enemy is dead and set states
+            Routines_Shared_CheckIfDead(o);
         }
         else if (o->state == STATE_DIE)
         {
@@ -196,7 +187,6 @@ void Routines_Boss_Test(struct game_object * o)
     {
         SpriteEngine_AddMetaSprite(o, (const struct spr_metaspr_definition *)&data_metaspr_boss_generic_64x96);
     }
-    
 
     if (system_frames_elapsed & 0x01)
     {
@@ -217,47 +207,12 @@ void Routines_Boss_Test_ReconstructFrame(struct game_object * o)
 
     Routines_Boss_Test_GetCompressedFrame((const uint8_t *)&data_spr_boss_placeholder_dd, (const uint16_t *)&data_spr_boss_placeholder_lut, (uint8_t *)(0x007fe000), frame_offset);
 
-    /*for (int y = 0; y < 6; y++)
-    {
-        for (int x = 0; x < 4; x++)
-        {
-            // a tile is 32 bytes.
-            // A VRAM tile row is 512 bytes.
-            // y = 96 pixels in height = 6 * 16px = 12 * 8px
-            // x = 64 pixels in width = 4 * 16px = 8 * 8px
-            // frame offsets: 0, 4, 24, 28
-            // place lower half in right side to keep things linear for DMA
-
-            uint16_t wram_offset;
-            if (y >= 3)
-            {
-                wram_offset = 256 + (x << 6) + ((y - 3) << 10);
-            }
-            else
-            {
-                wram_offset = (x << 6) + (y << 10);
-            }
-            uint16_t frame_offset = ((o->struct_data.npc_data.ani.frame & 0x01) << 2) + ((o->struct_data.npc_data.ani.frame & 0x06) * 24);
-            AniSystem_GetCompressedFrame((const uint8_t *)&data_spr_boss_placeholder_dd, (const uint16_t *)&data_spr_boss_placeholder_lut, (uint8_t *)(0x007fe000+wram_offset), (y << 3) + x + frame_offset);
-        }
-    }*/
-
     return;
 }
 
 void Routines_Boss_Test_DmaFrame(struct game_object * o)
 {
-    // a tile is 32 bytes.
-    // A VRAM tile row is 512 bytes.
-    // y = 96 pixels in height = 6 * 16px = 12 * 8px
-    // x = 64 pixels in width = 4 * 16px = 8 * 8px
-
     DmaSystem_AddItemToQueue((uint8_t *)(0x007fe000), 0x7000, 3072, VRAM_INCHIGH, 0);
-    /*for (int y = 0; y < 12; y++)
-    {
-        uint16_t wram_offset = y << 9;
-        DmaSystem_AddItemToQueue((uint8_t *)(0x007fe000+wram_offset), 0x7000+(wram_offset >> 1), 256, VRAM_INCHIGH, 0);
-    }*/
 
     return;
 }
@@ -270,8 +225,6 @@ uint8_t * Routines_Boss_Test_GetCompressedFrame(const uint8_t * data, const uint
     uint8_t * ptr_return_val = (uint8_t *)(lookup + lookup_entry_offset);
 
     uint16_t * data_offset = (uint16_t *)ptr_return_val;
-
-    //uint8_t * ptr_read = (uint8_t *)(data + *data_offset++);
 
     uint16_t ptr_array[48];
 
@@ -309,33 +262,6 @@ uint8_t * Routines_Boss_Test_GetCompressedFrame(const uint8_t * data, const uint
             }
         }
     }
-
-    /*int x = 1;
-    int y = 0;
-
-    for (int i = 1; i < 48; i++)
-    {
-        
-
-        x++;
-
-        if (x > 3)
-        {
-            x = 0;
-            y++;
-
-            if (y >= 6)
-            {
-                REG_WMADDLM = (uint16_t)((uint32_t)buffer + 256 + ((y - 6) << 9));
-            }   
-            else
-            {
-                REG_WMADDLM = (uint16_t)((uint32_t)buffer + (y << 9));
-            }
-
-            
-        }
-    }*/
 
     return ptr_return_val;
 }
