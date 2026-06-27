@@ -15,3 +15,6 @@ void routines_drop_money(struct game_object * o);
 void routines_drop_rec_meat(struct game_object * o);
 
 void routines_dummy(struct game_object * o);
+
+bool Routines_Shared_StatusMaintenance(struct game_object * o);
+void Routines_Shared_CheckIfDead(struct game_object * o);

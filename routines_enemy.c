@@ -180,81 +180,19 @@ void routines_slime(struct game_object * o)
                 }
 
                 // burning objects produce vfx
+                
                 if (o->struct_data.npc_data.status == STATUS_BURNING)
                 {
-                    if (snd_firecrackle_timeout == 0)
-                    {
-                        int temp_snd_pan = o->pos.x.lh.h - 128 - bg_scroll_x.full.high.a;
-                        if (temp_snd_pan < -127)
-                        {
-                            temp_snd_pan = -127;
-                        }
-                        else if (temp_snd_pan > 127)
-                        {
-                            temp_snd_pan = 127;
-                        }
-
-                        SoundInterface_PlaySfx(SFX_ATK_FIRE_CRACKLE, temp_snd_pan);
-
-                        snd_firecrackle_timeout = (8 / V_MUL);
-                    }
-
-                    // Only spawn objects every 8 frames...
-                    if (
-                        (((uint16_t)(system_frames_elapsed) & FX_SMOKE_INTERVAL) == FX_SMOKE_INTERVAL)
-                    )
-                    {
-                        int16_t temp_x = o->pos.x.lh.h;
-                        int16_t temp_y = o->pos.y.lh.h;
-                        int16_t k = obj_instantiate(OBJID_FX_SMOKE, temp_x, temp_y, 0);
-                        
-                        if (k >= 0)
-                        {
-                            struct game_object * q = &obj_general[k];
-
-                            int32_t temp = ((int32_t)Math_GetRandom_u16() - 16384);
-
-                            q->delta.x.a = temp;
-                            q->delta.y.a = -(V_S_ONE / 2);
-
-                            q->struct_data.npc_data.ttl = FX_SMOKE_TTL;
-                        }
-                    }
+                    Gfx_EmitSmoke(o);
                 }
 
-                if (o->struct_data.npc_data.status_time > 0)
+                if (Routines_Shared_StatusMaintenance(o))
                 {
-                    o->struct_data.npc_data.status_time--;
-
-                    if (o->struct_data.npc_data.status_time == 0)
-                    {
-                        o->struct_data.npc_data.status = STATUS_NORMAL;
-
-                        if (o->state == STATE_HURT_BURN_MOVE)
-                        {
-                            o->state = STATE_MOVE_WALK;
-                        }
-                        else
-                        {
-                            o->state = STATE_IDLE;
-                        }
-
-                        temp_invalidate_animation_frame = 1;
-                    }
+                    temp_invalidate_animation_frame = true;
                 }
 
-                if (o->struct_data.npc_data.invuln_time > 0)
-                {
-                    o->struct_data.npc_data.invuln_time--;
-                }
-
-                // Check if the slime is dead
-                if ((o->struct_data.npc_data.hp <= 0) && (o->state != STATE_DIE))
-                {
-                    o->state = STATE_DIE;
-                    o->struct_data.npc_data.ani.frame = 0;
-                    o->struct_data.npc_data.status_time = 64 / V_MUL;
-                }
+                // Check if the enemy is dead and set states
+                Routines_Shared_CheckIfDead(o);
             }
         }
         else if (o->state == STATE_DIE)
@@ -559,79 +497,16 @@ void routines_lizardman(struct game_object * o)
                 // burning objects produce vfx
                 if (o->struct_data.npc_data.status == STATUS_BURNING)
                 {
-                    if (snd_firecrackle_timeout == 0)
-                    {
-                        int temp_snd_pan = o->pos.x.lh.h - 128 - bg_scroll_x.full.high.a;
-                        if (temp_snd_pan < -127)
-                        {
-                            temp_snd_pan = -127;
-                        }
-                        else if (temp_snd_pan > 127)
-                        {
-                            temp_snd_pan = 127;
-                        }
-
-                        SoundInterface_PlaySfx(SFX_ATK_FIRE_CRACKLE, temp_snd_pan);
-
-                        snd_firecrackle_timeout = (8 / V_MUL);
-                    }
-
-                    // Only spawn objects every 8 frames...
-                    if (
-                        (((uint16_t)(system_frames_elapsed) & FX_SMOKE_INTERVAL) == FX_SMOKE_INTERVAL)
-                    )
-                    {
-                        int16_t temp_x = o->pos.x.lh.h;
-                        int16_t temp_y = o->pos.y.lh.h;
-                        int16_t k = obj_instantiate(OBJID_FX_SMOKE, temp_x, temp_y, 0);
-                        
-                        if (k >= 0)
-                        {
-                            struct game_object * q = &obj_general[k];
-
-                            int32_t temp = ((int32_t)Math_GetRandom_u16() - 16384);
-
-                            q->delta.x.a = temp;
-                            q->delta.y.a = -(V_S_ONE / 2);
-
-                            q->struct_data.npc_data.ttl = FX_SMOKE_TTL;
-                        }
-                    }
+                    Gfx_EmitSmoke(o);
                 }
 
-                if (o->struct_data.npc_data.status_time > 0)
+                if (Routines_Shared_StatusMaintenance(o))
                 {
-                    o->struct_data.npc_data.status_time--;
-
-                    if (o->struct_data.npc_data.status_time == 0)
-                    {
-                        o->struct_data.npc_data.status = STATUS_NORMAL;
-
-                        if (o->state == STATE_HURT_BURN_MOVE)
-                        {
-                            o->state = STATE_MOVE_WALK;
-                        }
-                        else
-                        {
-                            o->state = STATE_IDLE;
-                        }
-
-                        temp_invalidate_animation_frame = 1;
-                    }
+                    temp_invalidate_animation_frame = true;
                 }
 
-                if (o->struct_data.npc_data.invuln_time > 0)
-                {
-                    o->struct_data.npc_data.invuln_time--;
-                }
-
-                // Check if the slime is dead
-                if ((o->struct_data.npc_data.hp <= 0) && (o->state != STATE_DIE))
-                {
-                    o->state = STATE_DIE;
-                    o->struct_data.npc_data.ani.frame = 0;
-                    o->struct_data.npc_data.status_time = 64 / V_MUL;
-                }
+                // Check if the enemy is dead and set states
+                Routines_Shared_CheckIfDead(o);
             }
         }
         else if (o->state == STATE_DIE)

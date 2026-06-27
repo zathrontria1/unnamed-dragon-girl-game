@@ -588,3 +588,57 @@ void routines_dummy(struct game_object * o)
 {
     return;
 }
+
+/*
+    Called to decrement the same things used by many objects
+
+    Returns true if frame needs invalidation
+*/
+bool Routines_Shared_StatusMaintenance(struct game_object * o)
+{
+    bool invalidate = false;
+
+    if (o->struct_data.npc_data.invuln_time > 0)
+    {
+        o->struct_data.npc_data.invuln_time--;
+    }
+
+    if (o->struct_data.npc_data.status_time > 0)
+    {
+        o->struct_data.npc_data.status_time--;
+
+        if (o->struct_data.npc_data.status_time == 0)
+        {
+            o->struct_data.npc_data.status = STATUS_NORMAL;
+
+            if (o->state == STATE_HURT_BURN_MOVE)
+            {
+                o->state = STATE_MOVE_WALK;
+            }
+            else
+            {
+                o->state = STATE_IDLE;
+            }
+
+            invalidate = 1;
+        }
+    }
+
+    return invalidate;
+}
+
+/*
+    Called to check if object has died and if it has automatically set
+    variables
+*/
+void Routines_Shared_CheckIfDead(struct game_object * o)
+{
+    if ((o->struct_data.npc_data.hp <= 0) && (o->state != STATE_DIE))
+    {
+        o->state = STATE_DIE;
+        o->struct_data.npc_data.ani.frame = 0;
+        o->struct_data.npc_data.status_time = 64 / V_MUL;
+    }
+
+    return;
+}

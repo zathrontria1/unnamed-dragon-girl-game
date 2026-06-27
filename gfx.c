@@ -6,6 +6,14 @@
 #include "vars.h"
 
 #include "gfx.h"
+#include "obj.h"
+#include "map.h"
+
+#include "math_int.h"
+
+#include "snd.h"
+
+#include "consts_snd.h"
 
 uint16_t gfx_mosaic_layers;
 int16_t gfx_mosaic_intensity;
@@ -116,6 +124,53 @@ FORCE_INLINE void Gfx_SetColorMath(int16_t r, int16_t g, int16_t b)
     gfx_cmath_r = r << 8;
     gfx_cmath_g = g << 8;
     gfx_cmath_b = b << 8;
+
+    return;
+}
+
+/*
+    Call to emit smoke effects.
+*/
+void Gfx_EmitSmoke(struct game_object * o)
+{
+    if (snd_firecrackle_timeout == 0)
+    {
+        int temp_snd_pan = o->pos.x.lh.h - 128 - bg_scroll_x.full.high.a;
+        if (temp_snd_pan < -127)
+        {
+            temp_snd_pan = -127;
+        }
+        else if (temp_snd_pan > 127)
+        {
+            temp_snd_pan = 127;
+        }
+
+        SoundInterface_PlaySfx(SFX_ATK_FIRE_CRACKLE, temp_snd_pan);
+
+        snd_firecrackle_timeout = (8 / V_MUL);
+    }
+
+    // Only spawn objects every 8 frames...
+    if (
+        (((uint16_t)(system_frames_elapsed) & FX_SMOKE_INTERVAL) == FX_SMOKE_INTERVAL)
+    )
+    {
+        int16_t temp_x = o->pos.x.lh.h;
+        int16_t temp_y = o->pos.y.lh.h;
+        int16_t k = obj_instantiate(OBJID_FX_SMOKE, temp_x, temp_y, 0);
+        
+        if (k >= 0)
+        {
+            struct game_object * q = &obj_general[k];
+
+            int32_t temp = ((int32_t)Math_GetRandom_u16() - 16384);
+
+            q->delta.x.a = temp;
+            q->delta.y.a = -(V_S_ONE / 2);
+
+            q->struct_data.npc_data.ttl = FX_SMOKE_TTL;
+        }
+    }
 
     return;
 }
