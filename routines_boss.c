@@ -190,7 +190,7 @@ void Routines_Boss_Test(struct game_object * o)
 
     if (system_frames_elapsed & 0x01)
     {
-        SpriteEngine_AddMetaSprite_Back(o, (const struct spr_metaspr_definition *)&data_metaspr_shadow_64x16);
+        Routines_Boss_Test_DrawShadow(o);
     }
 
     return;
@@ -264,4 +264,19 @@ uint8_t * Routines_Boss_Test_GetCompressedFrame(const uint8_t * data, const uint
     }
 
     return ptr_return_val;
+}
+
+/*
+    Draws a very large shadow
+*/
+void Routines_Boss_Test_DrawShadow(struct game_object * o)
+{
+    struct game_object temp;
+    temp.pos.x.a = o->pos.x.a;
+    temp.pos.y.a = o->pos.y.a;
+    temp.pos.z.a = 0;
+
+    SpriteEngine_AddMetaSprite_Back(&temp, (const struct spr_metaspr_definition *)&data_metaspr_shadow_64x16);
+
+    return;
 }
