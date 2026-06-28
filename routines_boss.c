@@ -218,9 +218,11 @@ uint8_t * Routines_Boss_Test_GetCompressedFrame(const uint8_t * data, const uint
 
     uint16_t ptr_array[48];
 
+    uint16_t data_addr_lo = (uint16_t)((uint32_t)(data));
+
     for (int i = 0; i < 48; i++)
     {
-        ptr_array[i] = (uint16_t)((uint32_t)(data + *data_offset++) & 0xffff);
+        ptr_array[i] = data_addr_lo + *data_offset++;
     }
 
     // Use the DMA unit to speed things up. Channel 7 is reserved for active display DMA.
