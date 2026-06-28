@@ -77,6 +77,8 @@ uint16_t DmaSystem_AddItemToQueue(
 
 uint16_t DmaSystem_SetClear(uint16_t dest, uint16_t length);
 
+void DmaSystem_ResetQueue();
+
 #if VBCC_ASM == 1
     NO_INLINE void DmaSystem_ProcessQueue(void);
 #else

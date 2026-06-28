@@ -520,6 +520,9 @@ NEAR const uint16_t const_lut_dma_split_lookup[6] = {
     (1 << 5) * DMA_QUEUE_OVERHEAD, 
 };
 
+/*
+    Split is 1 << split count
+*/
 uint16_t DmaSystem_AddItemToQueue(
     uint8_t * src, 
     uint16_t dest, 
@@ -529,7 +532,8 @@ uint16_t DmaSystem_AddItemToQueue(
 {
     // Check for capacity (count, length) issues
     uint16_t temp_length = length + const_lut_dma_split_lookup[split] + dma_queue_length;
-    uint16_t temp_queue_count = dma_queue_count + 1 + split;
+
+    uint16_t temp_queue_count = dma_queue_count + (1 << split);
 
     if (temp_queue_count > DMA_QUEUE_MAX_ENTRIES)
     {
@@ -589,6 +593,20 @@ uint16_t DmaSystem_AddItemToQueue(
     return 0;
 }
 
+/*
+    Call to reset the queue (throw away everything inside).
+
+    Useful when changing from a major loop to another to prevent VRAM corruption.
+*/
+void DmaSystem_ResetQueue()
+{
+    dma_queue_count = 0;
+    dma_queue_length = 0;
+    dma_filler_enable = false;
+
+    return;
+}
+
 uint16_t DmaSystem_SetClear(uint16_t dest, uint16_t length)
 {
     // Check for capacity (count, length) issues
@@ -638,7 +656,7 @@ void DmaSystem_ProcessQueue()
             "\tldx _dma_queue+8,y\n"
             "\tstx $05\n"
             "\tlda #1\n"
-            "\tsta 16907\n"
+            "\tsta $420b\n"
             "\ta16\n"
             "\trep #$21\n"
             "\ttya\n"
