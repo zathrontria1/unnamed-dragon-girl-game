@@ -9,27 +9,28 @@ Game features are otherwise not yet set in stone.
 **Don't expect too much quality in either code or assets as I'm still figuring out how things work for the most part.**
 
 ## Technical
-- Built targetting NTSC systems, which should cover the majority of owned hardware as well as all modern emulation purposes.
+- Built targetting NTSC systems, which should cover the majority of owned hardware as well as all modern emulation purposes
+- The game functions on PAL systems too, but is not speed, display, nor audio optimized
 - Frame rate target of 30 FPS maximum (to minimize intrusive slowdown in heavier processing, especially with current compilers)
-- Targeting SNES HiROM memory map. 
+- Targeting SNES HiROM memory map 
 - SRAM is configured to be 32KB but currently not actually read from. There is a functional SRAM check and possibly saving on level change, though.
 - Load-once assets (e.g. static background tiles, static UI tiles, and fixed sprites) are compressed in LZ4
 - Load-frequent assets (anything that can be DMA'd live) are uncompressed
+- Tile deduplication used for player and placeholder boss sprites (the boss would have taken 66KB, but actually takes only 20KB)
 - Most object sprites are dynamically allocated
 - A DMA queue system for updating most smaller tiles and tilemap sections
 - A secondary hard-coded DMA system for known fixed animated background sections
 
 ### To-do
-- More levels, and a way to swap them
 - Title screen
 - Game over screen
 - A proper game end condition
 
 ### Sound engine technical
-A bare bones sound engine is also included, as a programming test of sorts. Source code is currently not provided for it, I might do so later.
+A bare bones sound engine is also included, as a programming test of sorts.
 
 You might want to mute the audio some other way for now if you don't want to hear the music.
-- Very small footprint (2KB executable binary)
+- Very small footprint (2.5KB executable binary)
 - Only the sound engine program needs to be uploaded for the initial load
 - All data upload (samples, sequences, and music tempo) uploaded individually from the main CPU side
 - Automatic sample voice channel allocation for both music and SFX
@@ -40,6 +41,8 @@ You might want to mute the audio some other way for now if you don't want to hea
 - Up to 8 tracks for music sequences
 - Music sequences are not hard locked to any single voice or sample
 - Loop and restart point support
+- Audio sample streaming support at 7680Hz (up to 128KB length, looping supported)
+- Audio data is permitted to cross memory banks
 
 ## Assets
 Assets are included only in binary form (i.e. ready to be placed in the ROM image as is).
@@ -60,7 +63,7 @@ This project uses the definition of bool as defined in the C standard. PVSnesLib
 
 If you get compilation errors with the tolower function, change the compiler flag to favour size.
 
-A work-in-progress Makefile and SCM is also provided for [Calypsi](https://www.calypsi.cc/) but is currently still not fully functional - namely, everything with regard to map display and map collision is broken.
+A work-in-progress Makefile and SCM is also provided for [Calypsi](https://www.calypsi.cc/) but is currently still not fully functional.
 
 Other C compilers are not tested at all, and may or may not result in a functional binary.
 
