@@ -14,7 +14,7 @@ REM uncomment if the source code is changed, then comment it back after editing 
 REM vc +vlink-config -O4 -speed -msfp4 -lms4 --DFASTROM=1 -S %cmd_asm1% 
 
 REM the below uses the custom startup code, which should let the game start faster
-vc +vlink-config -O4 -size -msfp4 -lms4 --Mmapfile --DFASTROM=1 "--symfile main.sym" %cmd_code% %cmd_data% -o %sfc_name%_temp.sfc
+vc +vlink-config -O4 -size -msfp4 -lms4 --Mmapfile --DFASTROM=1 "--symfmt %%06x:%%s" "--symfile %sfc_name%.sym" %cmd_code% %cmd_data% -o %sfc_name%_temp.sfc
 
 REM the below uses the stock startup code provided by VBCC
 REM vc +vlink-config-stockstartup -O4 -size -msfp4 -lms4 -no-inline-peephole %cmd_code% %cmd_data% -o %sfc_name%_temp.sfc
@@ -27,5 +27,8 @@ REM make
 
 REM compute and patch the checksum
 python .\checksum.py --hirom %sfc_name%_temp.sfc -o %sfc_name%.sfc
+
+REM fix symbols
+python .\reprocess_symbols.py %sfc_name%.sym
 
 pause
