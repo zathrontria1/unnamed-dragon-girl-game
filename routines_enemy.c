@@ -60,7 +60,7 @@ void routines_slime(struct game_object * o)
             {
                 event_in_combat = 1;
                 
-                temp_invalidate_animation_frame = ai_run(o, temp_dist, temp_x, temp_y, DIST_MELEE, true, 15 / V_MUL);
+                temp_invalidate_animation_frame = Routines_Enemy_Ai_Process(o, temp_dist, temp_x, temp_y, DIST_MELEE, true, 15 / V_MUL);
 
                 // Move the object based on the stored delta
                 if ((o->delta.x.a || o->delta.y.a) != 0)
@@ -72,21 +72,11 @@ void routines_slime(struct game_object * o)
                 if (o->struct_data.npc_data.ai_makeattack)
                 {
                     // Spawn a hit object
-                    int16_t j = obj_instantiate_hitbox_enemy(OBJID_BUBBLE_E, o->pos.x.lh.h, o->pos.y.lh.h);
+                    int16_t j = ObjectSystem_InstantiateEnemyHitbox(OBJID_BUBBLE_E, o->pos.x.lh.h, o->pos.y.lh.h);
 
                     if (j >= 0)
                     {
-                        int temp_snd_pan = o->pos.x.lh.h - 128 - bg_scroll_x.full.high.a;
-                        if (temp_snd_pan < -127)
-                        {
-                            temp_snd_pan = -127;
-                        }
-                        else if (temp_snd_pan > 127)
-                        {
-                            temp_snd_pan = 127;
-                        }
-
-                        SoundInterface_PlaySfx(SFX_ATK_SPLASH,temp_snd_pan);
+                        SoundInterface_PlaySfx_Pre(o, SFX_ATK_SPLASH);
 
                         struct game_object * p = &obj_hitbox_enemy[j];
                         p->struct_data.npc_data.attack = o->struct_data.npc_data.attack * ENEMY_ATTACK_MULT_RANGED;
@@ -96,7 +86,7 @@ void routines_slime(struct game_object * o)
                         uint8_t temp_angle = Math_GetAtan2_u8(temp_y, temp_x) + (temp_rand & 0x0f) - 8;
 
                         o->angle = temp_angle;
-                        o->facing = ai_get_facing(o);
+                        o->facing = Routines_Enemy_GetFacing(o);
                         
                         p->delta.x.a = data_cosine_1[temp_angle] * V_MUL;
                         p->delta.y.a = data_sine_1[temp_angle] * V_MUL;
@@ -120,7 +110,7 @@ void routines_slime(struct game_object * o)
                             int16_t k = -1;
                             int16_t temp_x = o->pos.x.lh.h;
                             int16_t temp_y = o->pos.y.lh.h;
-                            k = obj_instantiate(OBJID_SYS_IMPACT, temp_x, temp_y, 0);
+                            k = ObjectSystem_InstantiateObject(OBJID_SYS_IMPACT, temp_x, temp_y, 0);
                             
                             if (k >= 0)
                             {
@@ -152,17 +142,7 @@ void routines_slime(struct game_object * o)
                                 // Single frame damage
                                 o->struct_data.npc_data.invuln_time = 10 / V_MUL;
 
-                                int temp_snd_pan = o->pos.x.lh.h - 128 - bg_scroll_x.full.high.a;
-                                if (temp_snd_pan < -127)
-                                {
-                                    temp_snd_pan = -127;
-                                }
-                                else if (temp_snd_pan > 127)
-                                {
-                                    temp_snd_pan = 127;
-                                }
-
-                                SoundInterface_PlaySfx(SFX_ATK_PUNCH, temp_snd_pan);
+                                SoundInterface_PlaySfx_Pre(o, SFX_ATK_PUNCH);
                             }
 
                             long temp_dmg = (p->struct_data.npc_data.attack - o->struct_data.npc_data.defense);
@@ -208,7 +188,7 @@ void routines_slime(struct game_object * o)
                 {
                     obj_player_recovery_drop_pity--;
 
-                    k = obj_instantiate(OBJID_DROP_MONEY, temp_x, temp_y, 0);
+                    k = ObjectSystem_InstantiateObject(OBJID_DROP_MONEY, temp_x, temp_y, 0);
 
                     if (k >= 0)
                     {
@@ -223,7 +203,7 @@ void routines_slime(struct game_object * o)
                 else
                 {   
                     obj_player_recovery_drop_pity = ENEMY_DROP_REC_PITY;
-                    k = obj_instantiate(OBJID_DROP_REC_MEAT, temp_x, temp_y, 0);
+                    k = ObjectSystem_InstantiateObject(OBJID_DROP_REC_MEAT, temp_x, temp_y, 0);
 
                     if (k >= 0)
                     {
@@ -237,7 +217,7 @@ void routines_slime(struct game_object * o)
                 }
 
                 obj_enemies_defeated++;
-                obj_destroy(o->array_index);
+                ObjectSystem_DestroyStandardObject(o->array_index);
                 return;
             }
         }
@@ -371,7 +351,7 @@ void routines_lizardman(struct game_object * o)
             {
                 event_in_combat = 1;
                 
-                temp_invalidate_animation_frame = ai_run(o, temp_dist, temp_x, temp_y, DIST_TARGET_RANGE, false, 60 / V_MUL);
+                temp_invalidate_animation_frame = Routines_Enemy_Ai_Process(o, temp_dist, temp_x, temp_y, DIST_TARGET_RANGE, false, 60 / V_MUL);
 
                 // Move the object based on the stored delta
                 if ((o->delta.x.a || o->delta.y.a) != 0)
@@ -385,21 +365,11 @@ void routines_lizardman(struct game_object * o)
                     SoundInterface_PlayClip(STREAM_HISS);
 
                     // Spawn a hit object
-                    int16_t j = obj_instantiate_hitbox_enemy(OBJID_ARROW_E, o->pos.x.lh.h, o->pos.y.lh.h);
+                    int16_t j = ObjectSystem_InstantiateEnemyHitbox(OBJID_ARROW_E, o->pos.x.lh.h, o->pos.y.lh.h);
 
                     if (j >= 0)
                     {
-                        int temp_snd_pan = o->pos.x.lh.h - 128 - bg_scroll_x.full.high.a;
-                        if (temp_snd_pan < -127)
-                        {
-                            temp_snd_pan = -127;
-                        }
-                        else if (temp_snd_pan > 127)
-                        {
-                            temp_snd_pan = 127;
-                        }
-
-                        SoundInterface_PlaySfx(SFX_ATK_SWING, temp_snd_pan);
+                        SoundInterface_PlaySfx_Pre(o, SFX_ATK_SWING);
 
                         struct game_object * p = &obj_hitbox_enemy[j];
                         p->struct_data.npc_data.attack = o->struct_data.npc_data.attack * ENEMY_ATTACK_MULT_RANGED;
@@ -409,7 +379,7 @@ void routines_lizardman(struct game_object * o)
                         uint8_t temp_angle = Math_GetAtan2_u8(temp_y, temp_x) + (temp_rand & 0x0f) - 8;
 
                         o->angle = temp_angle;
-                        o->facing = ai_get_facing(o);
+                        o->facing = Routines_Enemy_GetFacing(o);
 
                         p->angle = temp_angle;
                         
@@ -435,7 +405,7 @@ void routines_lizardman(struct game_object * o)
                             int16_t k = -1;
                             int16_t temp_x = o->pos.x.lh.h;
                             int16_t temp_y = o->pos.y.lh.h;
-                            k = obj_instantiate(OBJID_SYS_IMPACT, temp_x, temp_y, 0);
+                            k = ObjectSystem_InstantiateObject(OBJID_SYS_IMPACT, temp_x, temp_y, 0);
                             
                             if (k >= 0)
                             {
@@ -467,17 +437,7 @@ void routines_lizardman(struct game_object * o)
                                 // Single frame damage
                                 o->struct_data.npc_data.invuln_time = 10 / V_MUL;
 
-                                int temp_snd_pan = o->pos.x.lh.h - 128 - bg_scroll_x.full.high.a;
-                                if (temp_snd_pan < -127)
-                                {
-                                    temp_snd_pan = -127;
-                                }
-                                else if (temp_snd_pan > 127)
-                                {
-                                    temp_snd_pan = 127;
-                                }
-
-                                SoundInterface_PlaySfx(SFX_ATK_PUNCH, temp_snd_pan);
+                                SoundInterface_PlaySfx_Pre(o, SFX_ATK_PUNCH);
                             }
 
                             long temp_dmg = (p->struct_data.npc_data.attack - o->struct_data.npc_data.defense);
@@ -522,7 +482,7 @@ void routines_lizardman(struct game_object * o)
                 {
                     obj_player_recovery_drop_pity--;
 
-                    k = obj_instantiate(OBJID_DROP_MONEY, temp_x, temp_y, 0);
+                    k = ObjectSystem_InstantiateObject(OBJID_DROP_MONEY, temp_x, temp_y, 0);
 
                     if (k >= 0)
                     {
@@ -537,7 +497,7 @@ void routines_lizardman(struct game_object * o)
                 else
                 {   
                     obj_player_recovery_drop_pity = ENEMY_DROP_REC_PITY;
-                    k = obj_instantiate(OBJID_DROP_REC_MEAT, temp_x, temp_y, 0);
+                    k = ObjectSystem_InstantiateObject(OBJID_DROP_REC_MEAT, temp_x, temp_y, 0);
 
                     if (k >= 0)
                     {
@@ -551,7 +511,7 @@ void routines_lizardman(struct game_object * o)
                 }
 
                 obj_enemies_defeated++;
-                obj_destroy(o->array_index);
+                ObjectSystem_DestroyStandardObject(o->array_index);
                 return;
             }
         }
@@ -675,7 +635,7 @@ void routines_bubble_e(struct game_object * o)
         // Check if the object is to be destroyed
         if (o->struct_data.npc_data.ttl == 0)
         {
-            obj_destroy_hitbox_enemy(o->array_index);
+            ObjectSystem_DestroyEnemyHitbox(o->array_index);
         }
         else
         {
@@ -732,7 +692,7 @@ void routines_arrow_e(struct game_object * o)
         // Check if the object is to be destroyed
         if (o->struct_data.npc_data.ttl == 0)
         {
-            obj_destroy_hitbox_enemy(o->array_index);
+            ObjectSystem_DestroyEnemyHitbox(o->array_index);
         }
         else
         {
@@ -814,7 +774,7 @@ void routines_hitbox_invis_e(struct game_object * o)
     // Check if the object is to be destroyed
     if (o->struct_data.npc_data.ttl == 0)
     {
-        obj_destroy_hitbox_enemy(o->array_index);
+        ObjectSystem_DestroyEnemyHitbox(o->array_index);
     }
     else
     {
@@ -823,4 +783,33 @@ void routines_hitbox_invis_e(struct game_object * o)
     }
 
     return;
+}
+
+/*
+    Adjust the caller's (usually enemy) facing based on angle.
+
+    Player object uses its own way of determining facing
+*/
+uint16_t Routines_Enemy_GetFacing(struct game_object * o)
+{
+    if (o->angle < 32)
+    {
+        return FACING_RIGHT;
+    }
+    else if (o->angle < 96)
+    {
+        return FACING_DOWN;
+    }
+    else if (o->angle < 160)
+    {
+        return FACING_LEFT;
+    }
+    else if (o->angle < 224)
+    {
+        return FACING_UP;
+    }
+    else
+    {
+        return FACING_RIGHT;
+    }
 }

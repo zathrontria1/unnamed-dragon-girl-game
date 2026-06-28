@@ -96,17 +96,7 @@ void Routines_Boss_Test(struct game_object * o)
                             // Single frame damage
                             o->struct_data.npc_data.invuln_time = 10 / V_MUL;
 
-                            int temp_snd_pan = o->pos.x.lh.h - 128 - bg_scroll_x.full.high.a;
-                            if (temp_snd_pan < -127)
-                            {
-                                temp_snd_pan = -127;
-                            }
-                            else if (temp_snd_pan > 127)
-                            {
-                                temp_snd_pan = 127;
-                            }
-
-                            SoundInterface_PlaySfx(SFX_ATK_PUNCH, temp_snd_pan);
+                            SoundInterface_PlaySfx_Pre(o, SFX_ATK_PUNCH);
                         }
 
                         long temp_dmg = (p->struct_data.npc_data.attack - o->struct_data.npc_data.defense);

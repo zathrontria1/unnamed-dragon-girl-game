@@ -38,7 +38,7 @@ bool LevelSystem_LoadLevel(const struct level_data * level)
     // Suspect: pointer errors
     if (obj_player_index == -1)
     {
-        obj_player_index = obj_instantiate(
+        obj_player_index = ObjectSystem_InstantiateObject(
             OBJID_PLAYER, 
             level->player_start_x, 
             level->player_start_y, 
@@ -71,9 +71,9 @@ bool LevelSystem_LoadLevel(const struct level_data * level)
     }
 
     // Instantiate enemies
-    obj_instantiate_spawners((const struct obj_list_entry_spawners*)level->spawner_ptr);
+    ObjectSystem_List_InstantiateSpawners((const struct obj_list_entry_spawners*)level->spawner_ptr);
 
-    obj_instantiate_interactables((const struct obj_list_entry_interactable*)level->interactable_ptr);
+    ObjectSystem_List_InstantiateInteractables((const struct obj_list_entry_interactable*)level->interactable_ptr);
 
     // initialize coin DMA tile animation
     ani_bg_addr_coin = (uint8_t *)&data_spr_drop_coin;

@@ -35,7 +35,7 @@
     if ((system_in_vblank && (system_nmis_counted >= NMI_WAIT_COUNT)) || (system_current_routine == ROUTINE_FADEIN))
     {
         // Game has finished processing
-        system_in_vblank = 0; // Clear the vblank flag now to prevent problems later.
+        system_in_vblank = false; // Clear the vblank flag now to prevent problems later.
         system_nmis_counted = 0;
 
         // Repoint the HDMA table
@@ -49,7 +49,7 @@
         // Write background values
         bg_scroll_y_mod.full.high.a = bg_scroll_y.full.high.a - 1;
 
-        if (ui_in_bg2 == 0)
+        if (!ui_in_bg2)
         {
             REG_BG2HOFS = bg_scroll_x.full.high.lh.l;
             REG_BG2HOFS = bg_scroll_x.full.high.lh.h;
@@ -127,7 +127,7 @@
     REG_INIDISP = shadow_inidisp;
 
     // Always reset them if an alternate NMI is used
-    system_in_vblank = 0; // Clear the vblank flag now to prevent problems later.
+    system_in_vblank = false; // Clear the vblank flag now to prevent problems later.
     system_nmis_counted = 0;
 
     // Adjust the INIDISP value based on the change
@@ -186,10 +186,7 @@
     if (system_in_vblank)
     {
         // Game has finished processing
-        system_in_vblank = 0; // Clear the vblank flag now to prevent problems later.
-
-        // Repoint the HDMA table
-        //REG_A1T3LH = hdma_scroll_ptr;
+        system_in_vblank = false; // Clear the vblank flag now to prevent problems later.
         
         DmaSystem_UploadOam();
         DmaSystem_UploadCgram();
@@ -197,33 +194,9 @@
         DmaSystem_ProcessQueue();
 
         // Write background values
-        /*bg_scroll_y_mod.full.high.a = bg_scroll_y.full.high.a - 1;
-
-        if (ui_in_bg2 == 0)
-        {
-            REG_BG2HOFS = bg_scroll_x.full.high.lh.l;
-            REG_BG2HOFS = bg_scroll_x.full.high.lh.h;
-            REG_BG2VOFS = bg_scroll_y_mod.full.high.lh.l;
-            REG_BG2VOFS = bg_scroll_y_mod.full.high.lh.h;
-        }
-        else
-        {
-            REG_BG1HOFS = bg_scroll_x.full.high.lh.l;
-            REG_BG1HOFS = bg_scroll_x.full.high.lh.h;
-            REG_BG1VOFS = bg_scroll_y_mod.full.high.lh.l;
-            REG_BG1VOFS = bg_scroll_y_mod.full.high.lh.h;
-        }*/
 
         // Write the current MOSAIC value
         REG_MOSAIC = shadow_mosaic;
-
-        // Write the current colour math values
-        //REG_CGWSEL = shadow_cgwsub;
-        //REG_CGADSUB = shadow_cgadsub;
-        //REG_COLDATA = shadow_coldata_r;
-        //REG_COLDATA = shadow_coldata_g;
-        //REG_COLDATA = shadow_coldata_b;
-
         if (system_nmis_counted >= 2)
         {
             // A bit of a hack to ensure that this ticks at 30FPS, not 60

@@ -119,7 +119,7 @@ void Gfx_ProcessColorMath()
     return;
 }
 
-FORCE_INLINE void Gfx_SetColorMath(int16_t r, int16_t g, int16_t b)
+void Gfx_SetColorMath(int16_t r, int16_t g, int16_t b)
 {
     gfx_cmath_r = r << 8;
     gfx_cmath_g = g << 8;
@@ -135,17 +135,7 @@ void Gfx_EmitSmoke(struct game_object * o)
 {
     if (snd_firecrackle_timeout == 0)
     {
-        int temp_snd_pan = o->pos.x.lh.h - 128 - bg_scroll_x.full.high.a;
-        if (temp_snd_pan < -127)
-        {
-            temp_snd_pan = -127;
-        }
-        else if (temp_snd_pan > 127)
-        {
-            temp_snd_pan = 127;
-        }
-
-        SoundInterface_PlaySfx(SFX_ATK_FIRE_CRACKLE, temp_snd_pan);
+        SoundInterface_PlaySfx_Pre(o, SFX_ATK_FIRE_CRACKLE);
 
         snd_firecrackle_timeout = (8 / V_MUL);
     }
@@ -157,7 +147,7 @@ void Gfx_EmitSmoke(struct game_object * o)
     {
         int16_t temp_x = o->pos.x.lh.h;
         int16_t temp_y = o->pos.y.lh.h;
-        int16_t k = obj_instantiate(OBJID_FX_SMOKE, temp_x, temp_y, 0);
+        int16_t k = ObjectSystem_InstantiateObject(OBJID_FX_SMOKE, temp_x, temp_y, 0);
         
         if (k >= 0)
         {

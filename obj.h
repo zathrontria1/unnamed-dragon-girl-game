@@ -51,44 +51,44 @@ extern uint16_t obj_hitbox_enemy_delete_queue[OBJ_ENEMYHITBOX_MAX_COUNT];
 extern uint16_t obj_hitbox_enemy_delete_queue_count;
 extern uint16_t obj_hitbox_count_enemy;
 
-void obj_run(void);
+void ObjectSystem_ProcessObjects();
 
-void obj_reset(int start_index);
-void obj_reset_hitbox_player();
-void obj_reset_hitbox_enemy();
+void ObjectSystem_ResetStandardObjects(int start_index);
+void ObjectSystem_ResetPlayerHitboxes();
+void ObjectSystem_ResetEnemyHitboxes();
 
-int16_t obj_instantiate(
+int16_t ObjectSystem_InstantiateObject(
     uint16_t id,
     int16_t x,
     int16_t y, 
     uint16_t local_event_flag
 );
 
-int16_t obj_instantiate_hitbox_player(
+int16_t ObjectSystem_InstantiatePlayerHitbox(
     uint16_t id,
     int16_t x,
     int16_t y
 ); 
 
-int16_t obj_instantiate_hitbox_enemy(
+int16_t ObjectSystem_InstantiateEnemyHitbox(
     uint16_t id,
     int16_t x,
     int16_t y
 ); 
 
-void obj_set_function_pointer(struct game_object * o);
+void ObjectSystem_SetFunctionPointer(struct game_object * o);
 
-uint16_t obj_instantiate_npcs(const struct obj_list_entry_spawns* list, int16_t offset_x, int16_t offset_y);
-uint16_t obj_instantiate_spawners(const struct obj_list_entry_spawners* list);
-uint16_t obj_instantiate_interactables(const struct obj_list_entry_interactable* list);
-FORCE_INLINE uint16_t obj_get_uid(void);
+uint16_t ObjectSystem_List_InstantiateNpcs(const struct obj_list_entry_spawns* list, int16_t offset_x, int16_t offset_y);
+uint16_t ObjectSystem_List_InstantiateSpawners(const struct obj_list_entry_spawners* list);
+uint16_t ObjectSystem_List_InstantiateInteractables(const struct obj_list_entry_interactable* list);
+uint16_t ObjectSystem_GetUid(void);
 
-FORCE_INLINE void obj_destroy(uint16_t i);
-FORCE_INLINE void obj_destroy_hitbox_player(uint16_t i);
-FORCE_INLINE void obj_destroy_hitbox_enemy(uint16_t i);
+void ObjectSystem_DestroyStandardObject(uint16_t i);
+void ObjectSystem_DestroyPlayerHitbox(uint16_t i);
+void ObjectSystem_DestroyEnemyHitbox(uint16_t i);
 
-void obj_cleanup(void);
-void obj_cleanup_hitbox_player(void);
-void obj_cleanup_hitbox_enemy(void);
+void ObjectSystem_CleanupStandardObjects(void);
+void ObjectSystem_CleanupPlayerHitboxes(void);
+void ObjectSystem_CleanupEnemyHitboxes(void);
 
-bool obj_get_enemy_data(struct game_object * o);
+bool ObjectSystem_GetEnemyData(struct game_object * o);

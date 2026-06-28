@@ -42,17 +42,15 @@ ___irq_vblank:
 	pei	(r14)
 	pei	(r15)
 	lda	_system_use_alternate_nmi
+	and #$00ff
 	bne	l4
 	jsl	>_Nmi_Primary
 	bra	l5
 l4:
 	jsl	>_Nmi_Alternate
 l5:
-	sep	#32
-	a8
 	lda	_snd_stream_enable
-	a16
-	rep	#32
+	and #$00ff
 	beq	l7
 	jsl	>_SoundInterface_NmiAudioUpload
 l7:
@@ -154,11 +152,8 @@ ___irq_ext:
 	pei	(r14)
 	pei	(r15)
 	jsl	>_Nmi_Cutscene
-	sep	#32
-	a8
 	lda	_snd_stream_enable
-	a16
-	rep	#32
+	and #$00ff
 	beq	l11
 	jsl	>_SoundInterface_NmiAudioUpload
 l11:

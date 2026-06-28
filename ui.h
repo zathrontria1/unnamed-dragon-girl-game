@@ -1,16 +1,16 @@
-ZP extern uint16_t ui_in_subscreen;
-extern uint16_t ui_in_bg2;
+ZP extern bool ui_in_subscreen;
+extern bool ui_in_bg2;
 
 // UI cache invalidation stuff
-extern uint16_t ui_force_update;
+extern bool ui_force_update;
 extern int32_t ui_cached_hp;
 extern int32_t ui_cached_hp_max;
 extern uint32_t ui_cached_money;
 extern uint16_t ui_cached_enemy_counter;
 
 // TODO: Handle UI windows and texts generically
-extern uint16_t ui_window_background[32][32]; // BG1. Call functions to draw a window here.
-extern uint16_t ui_window_text[32][32]; // BG3. Call functions to draw text here.
+extern uint16_t ui_window_background[(SCREEN_HEIGHT >> 3)][32]; // BG1. Call functions to draw a window here.
+extern uint16_t ui_window_text[(SCREEN_HEIGHT >> 3)][32]; // BG3. Call functions to draw text here.
 
 extern uint8_t ui_show_message_string[31]; // 30 characters + null terminator
 
@@ -25,10 +25,7 @@ extern uint32_t ui_display_money;
 
 // UI status and timers
 extern uint16_t ui_show_message_ttl;
-extern uint16_t ui_show_message_cleared;
-extern uint16_t ui_show_message_page;
-extern uint8_t * ui_show_message_page_ptr_init;
-extern uint8_t * ui_show_message_page_ptr;
+extern bool ui_show_message_cleared;
 
 void UserInterface_Process(void);
 void UserInterface_UpdateHealthCounters(void);

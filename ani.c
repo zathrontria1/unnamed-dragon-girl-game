@@ -198,7 +198,7 @@ uint8_t * AniSystem_GetDynamicFrame_Stateless(struct game_object * o)
 // Return offset to a fixed sprite tilenum based on given information
 // object ID and frame only
 // shorter version for light objects
-FORCE_INLINE uint16_t AniSystem_GetFixedFrame_Fast(struct game_object * o)
+uint16_t AniSystem_GetFixedFrame_Fast(struct game_object * o)
 {
     switch (o->id)
     {

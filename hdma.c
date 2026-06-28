@@ -13,10 +13,10 @@
 #include "ui.h"
 
 struct hdma_indirect_table_entry hdma_bgpalette_tables[3];
-uint16_t hdma_bgpalette_data[448];
+uint16_t hdma_bgpalette_data[SCREEN_HEIGHT << 1];
 
 struct hdma_indirect_table_entry hdma_windowbackground_tables[2][4];
-uint16_t hdma_windowbackground_data[2][448];
+uint16_t hdma_windowbackground_data[2][SCREEN_HEIGHT << 1];
 uint16_t hdma_windowbackground_select;
 
 uint16_t hdma_scroll_data[2][32];
@@ -128,37 +128,16 @@ void HdmaEngine_SetupBgScrollHdma()
 
     REG_DASB3 = (uint8_t)((uint32_t)&hdma_scroll_data[0] >> 16);
 
-    hdma_scroll_tables[0][0].count = 0x80 | 32;
-    hdma_scroll_tables[0][0].addr = (uint16_t)((uint32_t)&hdma_scroll_data[0]);
-    hdma_scroll_tables[0][1].count = 0x80 | 32;
-    hdma_scroll_tables[0][1].addr = (uint16_t)((uint32_t)&hdma_scroll_data[0]);
-    hdma_scroll_tables[0][2].count = 0x80 | 32;
-    hdma_scroll_tables[0][2].addr = (uint16_t)((uint32_t)&hdma_scroll_data[0]);
-    hdma_scroll_tables[0][3].count = 0x80 | 32;
-    hdma_scroll_tables[0][3].addr = (uint16_t)((uint32_t)&hdma_scroll_data[0]);
-    hdma_scroll_tables[0][4].count = 0x80 | 32;
-    hdma_scroll_tables[0][4].addr = (uint16_t)((uint32_t)&hdma_scroll_data[0]);
-    hdma_scroll_tables[0][5].count = 0x80 | 32;
-    hdma_scroll_tables[0][5].addr = (uint16_t)((uint32_t)&hdma_scroll_data[0]);
-    hdma_scroll_tables[0][6].count = 0x80 | 32;
-    hdma_scroll_tables[0][6].addr = (uint16_t)((uint32_t)&hdma_scroll_data[0]);
-    hdma_scroll_tables[0][7].count = 0;
+    for (int i = 0; i < 2; i++)
+    {
+        for (int j = 0; j < 7; j++)
+        {
+            hdma_scroll_tables[i][j].count = 0x80 | 32;
+            hdma_scroll_tables[i][j].addr = (uint16_t)((uint32_t)&hdma_scroll_data[i]);
+        }
 
-    hdma_scroll_tables[1][0].count = 0x80 | 32;
-    hdma_scroll_tables[1][0].addr = (uint16_t)((uint32_t)&hdma_scroll_data[1]);
-    hdma_scroll_tables[1][1].count = 0x80 | 32;
-    hdma_scroll_tables[1][1].addr = (uint16_t)((uint32_t)&hdma_scroll_data[1]);
-    hdma_scroll_tables[1][2].count = 0x80 | 32;
-    hdma_scroll_tables[1][2].addr = (uint16_t)((uint32_t)&hdma_scroll_data[1]);
-    hdma_scroll_tables[1][3].count = 0x80 | 32;
-    hdma_scroll_tables[1][3].addr = (uint16_t)((uint32_t)&hdma_scroll_data[1]);
-    hdma_scroll_tables[1][4].count = 0x80 | 32;
-    hdma_scroll_tables[1][4].addr = (uint16_t)((uint32_t)&hdma_scroll_data[1]);
-    hdma_scroll_tables[1][5].count = 0x80 | 32;
-    hdma_scroll_tables[1][5].addr = (uint16_t)((uint32_t)&hdma_scroll_data[1]);
-    hdma_scroll_tables[1][6].count = 0x80 | 32;
-    hdma_scroll_tables[1][6].addr = (uint16_t)((uint32_t)&hdma_scroll_data[1]);
-    hdma_scroll_tables[1][7].count = 0;
+        hdma_scroll_tables[i][7].count = 0;
+    }
 
     return;
 }

@@ -49,25 +49,25 @@ const uint16_t const_ui_textadvance_tilemapentries[] =
 };
 
 // System general shadows and variables
-ZP uint16_t system_in_vblank;
+ZP bool system_in_vblank;
 
 ZP uint16_t system_current_routine;
 ZP uint16_t system_target_routine;
 
 ZP uint32_t system_frames_elapsed;
 ZP uint32_t system_frames_lag;
-uint16_t system_dont_count_lag; // set to 1 to not increment the lag counter during e.g. creating a text box
+bool system_dont_count_lag; // set to 1 to not increment the lag counter during e.g. creating a text box
 
 ZP uint16_t system_nmis_counted;
-ZP uint16_t system_use_alternate_nmi;
+ZP bool system_use_alternate_nmi;
 
-ZP uint16_t system_fblank_enabled;
+ZP bool system_fblank_enabled;
 
-ZP uint16_t system_game_paused;
+ZP bool system_game_paused;
 
 ZP void * system_loop_func_ptr;
 
-ZP uint8_t system_suppress_odd_transfers;
+ZP bool system_suppress_odd_transfers;
 
 // Shadow buffers
 ZP uint8_t shadow_inidisp;

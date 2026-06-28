@@ -56,7 +56,7 @@ void routines_fx_smoke(struct game_object * o)
         // Check if the object is to be destroyed
         if (o->struct_data.npc_data.ttl == 0)
         {
-            obj_destroy(o->array_index);
+            ObjectSystem_DestroyStandardObject(o->array_index);
         }
         else
         {
@@ -88,7 +88,7 @@ void routines_fx_impact(struct game_object * o)
     // Check if the object is to be destroyed
     if (o->struct_data.npc_data.ttl == 0)
     {
-        obj_destroy(o->array_index);
+        ObjectSystem_DestroyStandardObject(o->array_index);
     }
     else
     {
@@ -113,17 +113,7 @@ void routines_interactable_switch(struct game_object * o)
             {
                 if (!event_in_combat_shadow)
                 {
-                    int temp_snd_pan = o->pos.x.lh.h - 128 - bg_scroll_x.full.high.a;
-                    if (temp_snd_pan < -127)
-                    {
-                        temp_snd_pan = -127;
-                    }
-                    else if (temp_snd_pan > 127)
-                    {
-                        temp_snd_pan = 127;
-                    }
-
-                    SoundInterface_PlaySfx(SFX_INTERACT_SWITCH,temp_snd_pan);
+                    SoundInterface_PlaySfx_Pre(o, SFX_INTERACT_SWITCH);
                     
                     o->state ^= STATE_SWITCH_ON;
                     event_flags_local[o->struct_data.interactable_data.event_flag] = o->state;
@@ -133,7 +123,7 @@ void routines_interactable_switch(struct game_object * o)
                     int16_t k = -1;
                     int16_t temp_x = o->pos.x.lh.h;
                     int16_t temp_y = o->pos.y.lh.h;
-                    k = obj_instantiate(OBJID_SYS_IMPACT, temp_x, temp_y, 0);
+                    k = ObjectSystem_InstantiateObject(OBJID_SYS_IMPACT, temp_x, temp_y, 0);
                     
                     if (k >= 0)
                     {
@@ -238,7 +228,7 @@ void routines_interactable_treasurechest(struct game_object * o)
             // Check if the object is to be destroyed
             if (o->struct_data.interactable_data.ttl == 0)
             {
-                obj_destroy(o->array_index);
+                ObjectSystem_DestroyStandardObject(o->array_index);
             }
             else
             {
@@ -438,7 +428,7 @@ void routines_spawner(struct game_object * o)
         // Check if the player is within the designated box
         if (CollisionCheck_Aabb_Direct_Rectangle(x1, o->struct_data.interactable_data.spawn_area_x, y1, o->struct_data.interactable_data.spawn_area_y, 16, o->struct_data.interactable_data.spawn_area_w, 16, o->struct_data.interactable_data.spawn_area_h) == 0)
         {
-            obj_instantiate_npcs((struct obj_list_entry_spawns *)o->data_ptr, o->pos.x.lh.h, o->pos.y.lh.h);
+            ObjectSystem_List_InstantiateNpcs((struct obj_list_entry_spawns *)o->data_ptr, o->pos.x.lh.h, o->pos.y.lh.h);
 
             // Set the camera bounds
             bg_scroll_x_bounds_min.full.high.a = o->struct_data.interactable_data.screen_x;
@@ -456,10 +446,10 @@ void routines_spawner(struct game_object * o)
                 bg_scroll_y_bounds_max.full.high.a = bg_scroll_y_bounds_min.full.high.a;
             }
 
-            bg_scroll_use_interpolation = 1;
-            bg_scroll_suppress_interpolation_state_change = 2;
+            bg_scroll_use_interpolation = true;
+            bg_scroll_suppress_interpolation_state_change = 2; // intentional
 
-            obj_destroy(o->array_index);
+            ObjectSystem_DestroyStandardObject(o->array_index);
         }
     }
 
@@ -472,17 +462,7 @@ void routines_drop_money(struct game_object * o)
     {
         if (AniSystem_AnimateDropGravity(o))
         {
-            int temp_snd_pan = o->pos.x.lh.h - 128 - bg_scroll_x.full.high.a;
-            if (temp_snd_pan < -127)
-            {
-                temp_snd_pan = -127;
-            }
-            else if (temp_snd_pan > 127)
-            {
-                temp_snd_pan = 127;
-            }
-
-            SoundInterface_PlaySfx(SFX_DROP_COIN, temp_snd_pan);
+            SoundInterface_PlaySfx_Pre(o, SFX_DROP_COIN);
         }
 
         if (o->pos.z.a == 0) // If item is on floor
@@ -492,21 +472,11 @@ void routines_drop_money(struct game_object * o)
             // Check if the player is within the designated box
             if (CollisionCheck_Aabb_BetweenObjects(p, o) == 0)
             {
-                int temp_snd_pan = o->pos.x.lh.h - 128 - bg_scroll_x.full.high.a;
-                if (temp_snd_pan < -127)
-                {
-                    temp_snd_pan = -127;
-                }
-                else if (temp_snd_pan > 127)
-                {
-                    temp_snd_pan = 127;
-                }
-
-                SoundInterface_PlaySfx(SFX_DROP_COIN, temp_snd_pan);
+                SoundInterface_PlaySfx_Pre(o, SFX_DROP_COIN);
 
                 p->struct_data.npc_data.money += o->struct_data.npc_data.money;
 
-                obj_destroy(o->array_index);
+                ObjectSystem_DestroyStandardObject(o->array_index);
             }
         }
     }
@@ -525,17 +495,7 @@ void routines_drop_rec_meat(struct game_object * o)
     {
         if (AniSystem_AnimateDropGravity(o))
         {
-            int temp_snd_pan = o->pos.x.lh.h - 128 - bg_scroll_x.full.high.a;
-            if (temp_snd_pan < -127)
-            {
-                temp_snd_pan = -127;
-            }
-            else if (temp_snd_pan > 127)
-            {
-                temp_snd_pan = 127;
-            }
-
-            SoundInterface_PlaySfx(SFX_DROP_BOUNCE,temp_snd_pan);
+            SoundInterface_PlaySfx_Pre(o, SFX_DROP_BOUNCE);
         }
 
         if (o->pos.z.a == 0) // If item is on floor
@@ -545,17 +505,7 @@ void routines_drop_rec_meat(struct game_object * o)
             // Check if the player is within the designated box
             if (CollisionCheck_Aabb_BetweenObjects(p, o) == 0)
             {
-                int temp_snd_pan = o->pos.x.lh.h - 128 - bg_scroll_x.full.high.a;
-                if (temp_snd_pan < -127)
-                {
-                    temp_snd_pan = -127;
-                }
-                else if (temp_snd_pan > 127)
-                {
-                    temp_snd_pan = 127;
-                }
-
-                SoundInterface_PlaySfx(SFX_DROP_BOUNCE, temp_snd_pan);
+                SoundInterface_PlaySfx_Pre(o, SFX_DROP_BOUNCE);
                 
                 if (p->struct_data.npc_data.hp + o->struct_data.npc_data.hp >= p->struct_data.npc_data.hp_max)
                 {
@@ -571,7 +521,7 @@ void routines_drop_rec_meat(struct game_object * o)
                 shadow_cgwsub = 0x00;
                 shadow_cgadsub = 0x32;
                 
-                obj_destroy(o->array_index);
+                ObjectSystem_DestroyStandardObject(o->array_index);
             }
         }
     }

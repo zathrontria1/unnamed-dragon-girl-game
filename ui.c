@@ -18,19 +18,19 @@
 #include "ui_messagebox.h"
 #include "spr.h"
 
-ZP uint16_t ui_in_subscreen;
-uint16_t ui_in_bg2;
+ZP bool ui_in_subscreen;
+bool ui_in_bg2;
 
 // UI cache invalidation stuff
-uint16_t ui_force_update;
+bool ui_force_update;
 int32_t ui_cached_hp;
 int32_t ui_cached_hp_max;
 uint32_t ui_cached_money;
 uint16_t ui_cached_enemy_counter;
 
 // TODO: Handle UI windows and texts generically
-uint16_t ui_window_background[32][32]; // BG1. Call functions to draw a window here.
-uint16_t ui_window_text[32][32]; // BG3. Call functions to draw text here.
+uint16_t ui_window_background[(SCREEN_HEIGHT >> 3)][32]; // BG1. Call functions to draw a window here.
+uint16_t ui_window_text[(SCREEN_HEIGHT >> 3)][32]; // BG3. Call functions to draw text here.
 
 uint8_t ui_show_message_string[31]; // 30 characters + null terminator
 
@@ -45,33 +45,40 @@ uint32_t ui_display_money;
 
 // UI status and timers
 uint16_t ui_show_message_ttl;
-uint16_t ui_show_message_cleared;
-uint16_t ui_show_message_page;
-uint8_t * ui_show_message_page_ptr_init;
-uint8_t * ui_show_message_page_ptr;
+bool ui_show_message_cleared;
 
 void UserInterface_Process()
 {
-    if ((ui_cached_hp != obj_player_pointer->struct_data.npc_data.hp) ||
-        (ui_cached_hp_max != obj_player_pointer->struct_data.npc_data.hp_max) || (ui_force_update != 0))
+    if (ui_force_update)
     {
-        // HP changed
+        // Update is forced and just do everything
         UserInterface_UpdateHealthCounters();
-    }
-
-    if ((ui_cached_money != obj_player_pointer->struct_data.npc_data.money) || (ui_force_update != 0))
-    {
-        // Amount of money held changed
         UserInterface_UpdateMoneyCounters();
-    }
-
-    if ((ui_cached_enemy_counter != obj_enemies_defeated) || (ui_force_update != 0))
-    {
-        // Enemies defeated changed
         UserInterface_UpdateEnemyCounters();
-    }
 
-    ui_force_update = 0;
+        ui_force_update = false;
+    }
+    else
+    {
+        if ((ui_cached_hp != obj_player_pointer->struct_data.npc_data.hp) ||
+        (ui_cached_hp_max != obj_player_pointer->struct_data.npc_data.hp_max))
+        {
+            // HP changed
+            UserInterface_UpdateHealthCounters();
+        }
+
+        if (ui_cached_money != obj_player_pointer->struct_data.npc_data.money)
+        {
+            // Amount of money held changed
+            UserInterface_UpdateMoneyCounters();
+        }
+
+        if (ui_cached_enemy_counter != obj_enemies_defeated)
+        {
+            // Enemies defeated changed
+            UserInterface_UpdateEnemyCounters();
+        }
+    }
 
     return;
 }
@@ -540,7 +547,7 @@ void UserInterface_PrintText(uint8_t * string_ptr, uint16_t row, uint16_t col)
         0
         ) == 0)
     {
-        ui_show_message_cleared = 0;
+        ui_show_message_cleared = false;
         ui_show_message_ttl = 60 / V_MUL;
     }
     return;
@@ -583,7 +590,7 @@ void UserInterface_PrintText_Mode3(uint8_t * string_ptr, uint16_t row, uint16_t 
         0
         ) == 0)
     {
-        ui_show_message_cleared = 0;
+        ui_show_message_cleared = false;
         ui_show_message_ttl = 60 / V_MUL;
     }
     return;
@@ -597,7 +604,7 @@ void UserInterface_ClearWindowBuffer(bool use_clear_tile)
 {
     for (int x = 0; x < 32; x++)
     {
-        for (int y = 0; y < 32; y++)
+        for (int y = 0; y < (SCREEN_HEIGHT >> 3); y++)
         {
             if (use_clear_tile)
             {
@@ -621,7 +628,7 @@ void UserInterface_ClearTextBuffer()
 {
     for (int x = 0; x < 32; x++)
     {
-        for (int y = 0; y < 32; y++)
+        for (int y = 0; y < (SCREEN_HEIGHT >> 3); y++)
         {
             ui_window_text[y][x] = 0x0000 | 0x2000 | (PAL_UI_TEXT_WHITE << 10);
         }
@@ -657,7 +664,7 @@ void UserInterface_DrawWindowBackground(uint16_t x, uint16_t y, uint16_t w, uint
     // First column
     for (int i = y; i < y+h; i++)
     {
-        if (i >= 32)
+        if (i >= (SCREEN_HEIGHT >> 3))
         {
             // Over last row
             break;
@@ -710,7 +717,7 @@ void UserInterface_DrawWindowBackground(uint16_t x, uint16_t y, uint16_t w, uint
     {
         for (int i = y; i < y+h; i++)
         {
-            if (i >= 32)
+            if (i >= (SCREEN_HEIGHT >> 3))
             {
                 // Over last row
                 break;
@@ -795,7 +802,7 @@ void UserInterface_DrawWindowBackground(uint16_t x, uint16_t y, uint16_t w, uint
     // Rightmost column
     for (int i = y; i < y+h; i++)
     {
-        if (i >= 32)
+        if (i >= (SCREEN_HEIGHT >> 3))
         {
             // Over last row
             break;
@@ -901,7 +908,7 @@ void UserInterface_DrawWindowBox(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
         // Size is 0
         return;
     }
-    if ((x >= 32) || (y >= 32))
+    if ((x >= 32) || (y >= (SCREEN_HEIGHT >> 3)))
     {
         // Start of window is outside the screen
         return;
@@ -910,7 +917,7 @@ void UserInterface_DrawWindowBox(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
     // First column
     for (int i = y; i < y+h; i++)
     {
-        if (i >= 32)
+        if (i >= (SCREEN_HEIGHT >> 3))
         {
             // Over last row
             break;
@@ -937,7 +944,7 @@ void UserInterface_DrawWindowBox(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
     {
         for (int i = y; i < y+h; i++)
         {
-            if (i >= 32)
+            if (i >= (SCREEN_HEIGHT >> 3))
             {
                 // Over last row
                 break;
@@ -972,7 +979,7 @@ void UserInterface_DrawWindowBox(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
     // Rightmost column
     for (int i = y; i < y+h; i++)
     {
-        if (i >= 32)
+        if (i >= (SCREEN_HEIGHT >> 3))
         {
             // Over last row
             break;
@@ -1007,7 +1014,7 @@ void UserInterface_DrawWindowBox(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 void UserInterface_DrawWindowText(char * string_ptr, uint16_t x, uint16_t y)
 {
     // Sanity check
-    if ((x >= 32) || (y >= 32))
+    if ((x >= 32) || (y >= (SCREEN_HEIGHT >> 3)))
     {
         // Start of text is offscreen
         return;
@@ -1031,7 +1038,7 @@ void UserInterface_DrawWindowText(char * string_ptr, uint16_t x, uint16_t y)
             col = x;
         }
         
-        if (row >= 32)
+        if (row >= (SCREEN_HEIGHT >> 3))
         {
             break;
         }

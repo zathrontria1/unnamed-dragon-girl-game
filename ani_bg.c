@@ -29,7 +29,7 @@ ZP uint16_t ani_bg_tallbg_dma_ready;
 */
 void AniSystem_BgTile_UpdateStrip()
 {
-    if (((uint16_t)system_frames_elapsed & ANI_INTERVAL_2) == ANI_INTERVAL_2)
+    if (!((uint16_t)system_frames_elapsed & ANI_INTERVAL_2))
     {
         ani_bg_row_water++;
         if (ani_bg_row_water > 3)
@@ -66,7 +66,7 @@ void AniSystem_BgTile_UpdateStrip()
 */
 void AniSystem_BgTile_UpdateFrame()
 {
-    if (((uint16_t)system_frames_elapsed & ANI_INTERVAL_4) == ANI_INTERVAL_4)
+    if (!((uint16_t)system_frames_elapsed & ANI_INTERVAL_4))
     {
         ani_bg_frame_tallbg++;
 

@@ -50,13 +50,13 @@ void loop_subscreen_top()
     subscreen_cgadsub_copy = shadow_cgadsub;
     shadow_cgadsub = 0x00; // Disable colour math
 
-    system_game_paused = 1;
-    system_dont_count_lag = 1;
+    system_game_paused = true;
+    system_dont_count_lag = true;
 
     hdma_use_gradient = 0xffff;
     hdma_gradient_ptr = (uint16_t)((uint32_t)&hdma_windowbackground_tables[1][0]);
 
-    ui_in_subscreen = 1;
+    ui_in_subscreen = true;
 
     // Silence the fire noise
     if (snd_flame_playing == 1)
@@ -199,7 +199,7 @@ void loop_subscreen_top()
                 SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
 
                 shadow_inidisp = 0x0f;
-                system_use_alternate_nmi = 1;
+                system_use_alternate_nmi = true;
                 shadow_inidisp_change = -1;
 
                 system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_MAPDISPLAY_INIT);
@@ -242,15 +242,15 @@ void loop_subscreen_top()
 
             AniSystem_Pal_LoadSubpalette((uint8_t *)&data_palette_player, 8);
                 
-            system_game_paused = 0;
+            system_game_paused = false;
 
             UserInterface_ClearWindowBuffer(true);
             UserInterface_ClearTextBuffer();
             UserInterface_CopyUiBuffers(); // Perform a total clear
 
-            ui_force_update = 1; // Then perform a wipe of the UI
+            ui_force_update = true; // Then perform a wipe of the UI
 
-            ui_in_subscreen = 0;
+            ui_in_subscreen = false;
 
             system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_GAMELOOP);
             system_target_routine = ROUTINE_GAMELOOP;
@@ -262,13 +262,13 @@ void loop_subscreen_top()
 
 void loop_subscreen_profile()
 {
-    system_game_paused = 1;
-    system_dont_count_lag = 1;
+    system_game_paused = true;
+    system_dont_count_lag = true;
 
     hdma_use_gradient = 0xffff;
     hdma_gradient_ptr = (uint16_t)((uint32_t)&hdma_windowbackground_tables[1][0]);
 
-    ui_in_subscreen = 1;
+    ui_in_subscreen = true;
 
     if (!subscreen_rendered)
     {
@@ -657,13 +657,13 @@ void loop_subscreen_profile_upgrade_def()
 
 void loop_subscreen_help()
 {
-    system_game_paused = 1;
-    system_dont_count_lag = 1;
+    system_game_paused = true;
+    system_dont_count_lag = true;
 
     hdma_use_gradient = 0xffff;
     hdma_gradient_ptr = (uint16_t)((uint32_t)&hdma_windowbackground_tables[1][0]);
 
-    ui_in_subscreen = 1;
+    ui_in_subscreen = true;
 
     if (!subscreen_rendered)
     {
@@ -800,13 +800,13 @@ void loop_subscreen_top_drawtime()
 
 void loop_subscreen_resetconfirm()
 {
-    system_game_paused = 1;
-    system_dont_count_lag = 1;
+    system_game_paused = true;
+    system_dont_count_lag = true;
 
     hdma_use_gradient = 0xffff;
     hdma_gradient_ptr = (uint16_t)((uint32_t)&hdma_windowbackground_tables[1][0]);
 
-    ui_in_subscreen = 1;
+    ui_in_subscreen = true;
 
     if (!subscreen_rendered)
     {

@@ -15,7 +15,7 @@ bool ani_coin_flip; // Used by the coin function to enable H flip.
 */
 void AniSystem_Spr_UpdateFixedTiles()
 {
-    if ((((uint16_t)system_frames_elapsed) & ANI_INTERVAL_8) == ANI_INTERVAL_8)
+    if (!((uint16_t)system_frames_elapsed & ANI_INTERVAL_8))
     {
         ani_bg_frame_coin++;
     }
@@ -44,7 +44,7 @@ void AniSystem_Spr_UpdateFixedTiles()
 
     if (temp_src != ani_bg_addr_coin)
     {
-        if (DmaSystem_AddItemToQueue(temp_src, temp_dest, 128, VRAM_INCHIGH, 1) != 1)
+        if (!DmaSystem_AddItemToQueue(temp_src, temp_dest, 128, VRAM_INCHIGH, 1))
         {
             ani_bg_addr_coin = temp_src;
         }

@@ -423,7 +423,7 @@ void VwfEngine_PrintText_ResetTilemap(uint16_t * ptr, int len)
     return;
 }
 
-const uint16_t const_ui_vwf_offsets[] = 
+const uint8_t const_ui_vwf_offsets[] = 
 {
     4, 2, 4, 8, 6, 8, 6, 2, 4, 4, 6, 6, 2, 4, 2, 5, 
     5, 4, 5, 5, 6, 5, 5, 6, 5, 5, 2, 3, 4, 4, 4, 5, 

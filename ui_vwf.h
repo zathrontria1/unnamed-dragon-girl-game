@@ -1,4 +1,4 @@
-extern const uint16_t const_ui_vwf_offsets[];
+extern const uint8_t const_ui_vwf_offsets[];
 
 extern uint16_t vwf_shift;
 

@@ -45,10 +45,10 @@ union pos_bgscroll bg_scroll_y_bounds_min;
 union pos_bgscroll bg_scroll_x_bounds_max;
 union pos_bgscroll bg_scroll_y_bounds_max;
 
-uint16_t bg_scroll_use_interpolation;
-uint16_t bg_scroll_x_at_final;
-uint16_t bg_scroll_y_at_final;
-uint16_t bg_scroll_suppress_interpolation_state_change;
+bool bg_scroll_use_interpolation;
+bool bg_scroll_x_at_final;
+bool bg_scroll_y_at_final;
+bool bg_scroll_suppress_interpolation_state_change;
 
 /*
     Sets the map and metatile LUT pointers,
@@ -180,14 +180,12 @@ void MapSystem_Tilemap_RegenerateTilemap()
     the camera crosses a metatile boundary. This should be suppressed only during 
     initial map load.
 */
-void MapSystem_UpdateCameraPosition(uint16_t suppress_map_gen)
+void MapSystem_UpdateCameraPosition(bool suppress_map_gen)
 {
-    struct game_object * ptr = obj_player_pointer;
-
-    if (bg_scroll_use_interpolation == 0)
+    if (!bg_scroll_use_interpolation)
     {
-        bg_scroll_x.full.high.a = (*ptr).pos.x.lh.h - 120;
-        bg_scroll_y.full.high.a = (*ptr).pos.y.lh.h - 104;
+        bg_scroll_x.full.high.a = obj_player_pointer->pos.x.lh.h - 120;
+        bg_scroll_y.full.high.a = obj_player_pointer->pos.y.lh.h - 104;
     }
     else
     {
@@ -197,14 +195,14 @@ void MapSystem_UpdateCameraPosition(uint16_t suppress_map_gen)
         if (bg_scroll_x_bounds_min.full.high.a != -32768)
         {
             if (
-                (((*ptr).pos.x.lh.h - 120) > bg_scroll_x_bounds_min.full.high.a) &&
-                (((*ptr).pos.x.lh.h - 120) < bg_scroll_x_bounds_max.full.high.a))
+                ((obj_player_pointer->pos.x.lh.h - 120) > bg_scroll_x_bounds_min.full.high.a) &&
+                ((obj_player_pointer->pos.x.lh.h - 120) < bg_scroll_x_bounds_max.full.high.a))
             {
-                temp_x_camadjust = (*ptr).pos.x.lh.h - 120;
+                temp_x_camadjust = obj_player_pointer->pos.x.lh.h - 120;
             }
             else
             {
-                if (((*ptr).pos.x.lh.h - 120) < bg_scroll_x_bounds_min.full.high.a)
+                if ((obj_player_pointer->pos.x.lh.h - 120) < bg_scroll_x_bounds_min.full.high.a)
                 {
                     temp_x_camadjust = bg_scroll_x_bounds_min.full.high.a;
                 }
@@ -215,14 +213,14 @@ void MapSystem_UpdateCameraPosition(uint16_t suppress_map_gen)
             }
 
             if (
-                (((*ptr).pos.y.lh.h - 104) > bg_scroll_y_bounds_min.full.high.a) &&
-                (((*ptr).pos.y.lh.h - 104) < bg_scroll_y_bounds_max.full.high.a))
+                ((obj_player_pointer->pos.y.lh.h - 104) > bg_scroll_y_bounds_min.full.high.a) &&
+                ((obj_player_pointer->pos.y.lh.h - 104) < bg_scroll_y_bounds_max.full.high.a))
             {
-                temp_y_camadjust = (*ptr).pos.y.lh.h - 104;
+                temp_y_camadjust = obj_player_pointer->pos.y.lh.h - 104;
             }
             else
             {
-                if (((*ptr).pos.y.lh.h - 104) < bg_scroll_y_bounds_min.full.high.a)
+                if ((obj_player_pointer->pos.y.lh.h - 104) < bg_scroll_y_bounds_min.full.high.a)
                 {
                     temp_y_camadjust = bg_scroll_y_bounds_min.full.high.a;
                 }
@@ -234,8 +232,8 @@ void MapSystem_UpdateCameraPosition(uint16_t suppress_map_gen)
         }
         else
         {
-            temp_x_camadjust = (*ptr).pos.x.lh.h - 120;
-            temp_y_camadjust = (*ptr).pos.y.lh.h - 104;
+            temp_x_camadjust = obj_player_pointer->pos.x.lh.h - 120;
+            temp_y_camadjust = obj_player_pointer->pos.y.lh.h - 104;
         }
 
         if (temp_x_camadjust < 0)
@@ -258,8 +256,8 @@ void MapSystem_UpdateCameraPosition(uint16_t suppress_map_gen)
 
         // Get the angle between the intended scroll position and the current scroll position.
         // The values if no adjustment were done like normal cases
-        int16_t unadjusted_bg_scroll_x = (*ptr).pos.x.lh.h - 120;
-        int16_t unadjusted_bg_scroll_y = (*ptr).pos.y.lh.h - 104;
+        int16_t unadjusted_bg_scroll_x = obj_player_pointer->pos.x.lh.h - 120;
+        int16_t unadjusted_bg_scroll_y = obj_player_pointer->pos.y.lh.h - 104;
 
         int16_t temp_x;
         int16_t temp_y;
@@ -288,8 +286,8 @@ void MapSystem_UpdateCameraPosition(uint16_t suppress_map_gen)
         // Depends on if a screen lock area is set or not.
         if (bg_scroll_x_bounds_min.full.high.a != -32768)
         {
-            bg_scroll_x_at_final = 0;
-            bg_scroll_y_at_final = 0;
+            bg_scroll_x_at_final = false;
+            bg_scroll_y_at_final = false;
 
             if (data_sine_1[angle] >= 0)
             {
@@ -298,7 +296,7 @@ void MapSystem_UpdateCameraPosition(uint16_t suppress_map_gen)
                     bg_scroll_x.full.high.a = temp_x_camadjust;
                     bg_scroll_x.full.sub = 0;
 
-                    bg_scroll_x_at_final = 1;
+                    bg_scroll_x_at_final = true;
                 }
             }
             else
@@ -308,7 +306,7 @@ void MapSystem_UpdateCameraPosition(uint16_t suppress_map_gen)
                     bg_scroll_x.full.high.a = temp_x_camadjust;
                     bg_scroll_x.full.sub = 0;
 
-                    bg_scroll_x_at_final = 1;
+                    bg_scroll_x_at_final = true;
                 }
             }
 
@@ -319,7 +317,7 @@ void MapSystem_UpdateCameraPosition(uint16_t suppress_map_gen)
                     bg_scroll_y.full.high.a = temp_y_camadjust;
                     bg_scroll_y.full.sub = 0;
 
-                    bg_scroll_y_at_final = 1;
+                    bg_scroll_y_at_final = true;
                 }
             }
             else
@@ -329,19 +327,19 @@ void MapSystem_UpdateCameraPosition(uint16_t suppress_map_gen)
                     bg_scroll_y.full.high.a = temp_y_camadjust;
                     bg_scroll_y.full.sub = 0;
 
-                    bg_scroll_y_at_final = 1;
+                    bg_scroll_y_at_final = true;
                 }
             }
 
-            if ((bg_scroll_x_at_final + bg_scroll_y_at_final) >= 2)
+            if ((bg_scroll_x_at_final + bg_scroll_y_at_final) >= 2) // Intentional
             {
-                bg_scroll_use_interpolation = 0;
+                bg_scroll_use_interpolation = false;
             }
         }
         else
         {
-            bg_scroll_x_at_final = 0;
-            bg_scroll_y_at_final = 0;
+            bg_scroll_x_at_final = false;
+            bg_scroll_y_at_final = false;
 
             if (data_sine_1[angle] >= 0)
             {
@@ -350,7 +348,7 @@ void MapSystem_UpdateCameraPosition(uint16_t suppress_map_gen)
                     bg_scroll_x.full.high.a = temp_x_camadjust;
                     bg_scroll_x.full.sub = 0;
 
-                    bg_scroll_x_at_final = 1;
+                    bg_scroll_x_at_final = true;
                 }
             }
             else
@@ -360,7 +358,7 @@ void MapSystem_UpdateCameraPosition(uint16_t suppress_map_gen)
                     bg_scroll_x.full.high.a = temp_x_camadjust;
                     bg_scroll_x.full.sub = 0;
 
-                    bg_scroll_x_at_final = 1;
+                    bg_scroll_x_at_final = true;
                 }
             }
 
@@ -371,7 +369,7 @@ void MapSystem_UpdateCameraPosition(uint16_t suppress_map_gen)
                     bg_scroll_y.full.high.a = temp_y_camadjust;
                     bg_scroll_y.full.sub = 0;
 
-                    bg_scroll_y_at_final = 1;
+                    bg_scroll_y_at_final = true;
                 }
             }
             else
@@ -381,20 +379,20 @@ void MapSystem_UpdateCameraPosition(uint16_t suppress_map_gen)
                     bg_scroll_y.full.high.a = temp_y_camadjust;
                     bg_scroll_y.full.sub = 0;
 
-                    bg_scroll_y_at_final = 1;
+                    bg_scroll_y_at_final = true;
                 }
             }
 
-            if ((bg_scroll_x_at_final + bg_scroll_y_at_final) >= 2)
+            if ((bg_scroll_x_at_final + bg_scroll_y_at_final) >= 2) // Intentional
             {
-                bg_scroll_use_interpolation = 0;
+                bg_scroll_use_interpolation = false;
             }
         }
     }
 
     // Limit the bounds
     // Combat extent bounds check
-    if ((bg_scroll_x_bounds_min.full.high.a != -32768) && (bg_scroll_use_interpolation == 0))
+    if ((bg_scroll_x_bounds_min.full.high.a != -32768) && (!bg_scroll_use_interpolation))
     {
         if (bg_scroll_x.full.high.a > bg_scroll_x_bounds_max.full.high.a)
         {
@@ -438,7 +436,7 @@ void MapSystem_UpdateCameraPosition(uint16_t suppress_map_gen)
         bg_scroll_y.full.high.a = (map_extent_y - 224);
     }
 
-    if (suppress_map_gen == 0)
+    if (!suppress_map_gen)
     {
         MapSystem_CheckCrossedTilemapEdge();
 
@@ -455,10 +453,10 @@ void MapSystem_UpdateCameraPosition(uint16_t suppress_map_gen)
 // Split into its own function to make code neater
 void MapSystem_CheckCrossedTilemapEdge()
 {
-    const uint8_t * p = map_current;
+    const uint8_t * p = map_current; // Make a copy of the pointer to prevent clobbers
     p += 2;
 
-    uint16_t temp_x_odd = ((uint16_t)bg_scroll_x.full.high.a >> 3) & 0x0001;
+    bool temp_x_odd = ((uint16_t)bg_scroll_x.full.high.a >> 3) & 0x0001;
     int16_t temp_x_tile_offset_8 = (uint16_t)bg_scroll_x.full.high.a >> 3;
     int16_t temp_x_tile_offset = (uint16_t)bg_scroll_x.full.high.a >> 4;
     int16_t temp_x_tile_offset_prev_8 = (uint16_t)bg_scroll_x_prev.full.high.a >> 3;
@@ -472,7 +470,7 @@ void MapSystem_CheckCrossedTilemapEdge()
 
             uint16_t temp_x_wrap = (((temp_x_tile_offset+24) & 0x1f) << 1) & 0x1f;
 
-            if (temp_x_odd == 0x0000)
+            if (!temp_x_odd)
             {
                 DmaSystem_AddItemToQueue((uint8_t *)&map_column[0], (TILEMAP_ADDR_GAME_MAP+(temp_section * 1024)+temp_x_wrap), 64, (VRAM_INCHIGH|VRAM_ADRSTINC_32), 0);
             }
@@ -490,7 +488,7 @@ void MapSystem_CheckCrossedTilemapEdge()
 
             uint16_t temp_x_wrap = (((temp_x_tile_offset+25) & 0x1f) << 1) & 0x1f;
 
-            if (temp_x_odd == 0x0000)
+            if (!temp_x_odd)
             {
                 DmaSystem_AddItemToQueue((uint8_t *)&map_column[0], (TILEMAP_ADDR_GAME_MAP+(temp_section * 1024)+temp_x_wrap), 64, (VRAM_INCHIGH|VRAM_ADRSTINC_32), 0);
             }
@@ -504,7 +502,7 @@ void MapSystem_CheckCrossedTilemapEdge()
     bg_scroll_x_prev.full.high.a = bg_scroll_x.full.high.a;
 
     // Now to test the Y axis
-    uint16_t temp_y_odd = ((uint16_t)bg_scroll_y.full.high.a >> 3) & 0x0001;
+    bool temp_y_odd = ((uint16_t)bg_scroll_y.full.high.a >> 3) & 0x0001;
 
     int16_t temp_y_tile_offset_8 = (uint16_t)bg_scroll_y.full.high.a >> 3;
     temp_y_tile_offset = (uint16_t)bg_scroll_y.full.high.a >> 4;
@@ -518,7 +516,7 @@ void MapSystem_CheckCrossedTilemapEdge()
         uint16_t temp_y_wrap = ((((temp_y_tile_offset+14) & 0x0f) << 1) & 0x1f) << 5;
 
         // Sections are not important for rows as both maps will be updated.
-        if (temp_y_odd == 0x0000)
+        if (!temp_y_odd)
         {
             DmaSystem_AddItemToQueue((uint8_t *)&map_row[0][0], (TILEMAP_ADDR_GAME_MAP+temp_y_wrap), 64, VRAM_INCHIGH, 0);
             DmaSystem_AddItemToQueue((uint8_t *)&map_row[1][0], (TILEMAP_ADDR_GAME_MAP+1024+temp_y_wrap), 64, VRAM_INCHIGH, 0);
@@ -536,7 +534,7 @@ void MapSystem_CheckCrossedTilemapEdge()
         uint16_t temp_y_wrap = ((((temp_y_tile_offset+15) & 0x0f) << 1) & 0x1f) << 5;
 
         // Sections are not important for rows as both maps will be updated.
-        if (temp_y_odd == 0x0000)
+        if (!temp_y_odd)
         {
             DmaSystem_AddItemToQueue((uint8_t *)&map_row[0][0], (TILEMAP_ADDR_GAME_MAP+temp_y_wrap), 64, VRAM_INCHIGH, 0);
             DmaSystem_AddItemToQueue((uint8_t *)&map_row[1][0], (TILEMAP_ADDR_GAME_MAP+1024+temp_y_wrap), 64, VRAM_INCHIGH, 0);
@@ -558,12 +556,12 @@ void MapSystem_CheckCrossedTilemapEdge()
 
     Can also be invoked to force a full refresh during fblank if needed
 */
-uint16_t MapSystem_Tilemap_BuildColumn(const uint8_t * p, const uint16_t * lut, int16_t tile_x, int16_t tile_y, uint16_t odd)
+bool MapSystem_Tilemap_BuildColumn(const uint8_t * p, const uint16_t * lut, int16_t tile_x, int16_t tile_y, bool odd)
 {
     // tile_x to determine if it's on the odd or even section of the tilemap.
     // if x = 0:  0 + 16 = 16, 16 >> 4 = 1, 1-1 = 0, 0 & 0x01 = 0
     // if x = 17: 17+ 16 = 33, 33 >> 4 = 2, 2-1 = 1, 1 & 0x01 = 1
-    uint16_t temp_section = ((((tile_x + 16) >> 4) - 1 )& 0x0001); // Offset it by 16 so that the values are always positive, then shift right by 4 and take just the lowest bit.
+    bool temp_section = ((((tile_x + 16) >> 4) - 1 )& 0x0001); // Offset it by 16 so that the values are always positive, then shift right by 4 and take just the lowest bit.
     
     // values here pertain to the buffer
     uint16_t j = ((tile_y + 16) & 0x0f); // the offset on Y axis
@@ -616,7 +614,7 @@ uint16_t MapSystem_Tilemap_BuildColumn(const uint8_t * p, const uint16_t * lut, 
         {
             int16_t l = j << 1;
             int16_t q = (*p) << 2;
-            if (odd == 0)
+            if (!odd)
             {
                 map_column[l] = lut[q];
                 map_column[l+1] = lut[q+2];
@@ -648,7 +646,7 @@ uint16_t MapSystem_Tilemap_BuildColumn(const uint8_t * p, const uint16_t * lut, 
 }
 
 // ditto but for rows
-void MapSystem_Tilemap_BuildRow(const uint8_t * p, const uint16_t * lut, int16_t tile_x, int16_t tile_y, uint16_t odd)
+void MapSystem_Tilemap_BuildRow(const uint8_t * p, const uint16_t * lut, int16_t tile_x, int16_t tile_y, bool odd)
 {
     // tile_x to determine if it's on the odd or even section of the tilemap.
     
@@ -710,7 +708,7 @@ void MapSystem_Tilemap_BuildRow(const uint8_t * p, const uint16_t * lut, int16_t
             // [0][i] is for the left 2 rows
             // [1][i] is for the right 2 rows.
             // Change the map selection after crossing a boundary.
-            if (odd == 0)
+            if (!odd)
             {
                 map_row[temp_internal_section][(l << 1)] = lut[((*p) << 2)]; // Top left
                 map_row[temp_internal_section][(l << 1)+1] = lut[((*p) << 2) + 1]; // Top right

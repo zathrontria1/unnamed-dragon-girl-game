@@ -15,7 +15,7 @@
     NEAR INTERRUPT void __irq_vblank(void)
 #endif
 {
-    if (system_use_alternate_nmi == 0)
+    if (!system_use_alternate_nmi)
     {
         Nmi_Primary();
     }

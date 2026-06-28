@@ -1,8 +1,8 @@
 extern struct hdma_indirect_table_entry hdma_bgpalette_tables[3];
-extern uint16_t hdma_bgpalette_data[448];
+extern uint16_t hdma_bgpalette_data[SCREEN_HEIGHT << 1];
 
 extern struct hdma_indirect_table_entry hdma_windowbackground_tables[2][4];
-extern uint16_t hdma_windowbackground_data[2][448];
+extern uint16_t hdma_windowbackground_data[2][SCREEN_HEIGHT << 1];
 extern uint16_t hdma_windowbackground_select;
 
 extern uint16_t hdma_scroll_data[2][32];

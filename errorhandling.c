@@ -91,7 +91,7 @@ void ErrorHandler_Internal_Display(uint8_t * string_ptr)
     gfx_mosaic_change = 0;
     gfx_mosaic_layers = 0; // Off
     gfx_mosaic_intensity = 0; // Off
-    system_use_alternate_nmi = 1;
+    system_use_alternate_nmi = true;
 
     shadow_inidisp = 0x00;
 

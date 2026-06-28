@@ -76,7 +76,7 @@ uint16_t obj_hitbox_enemy_delete_queue[OBJ_ENEMYHITBOX_MAX_COUNT];
 uint16_t obj_hitbox_enemy_delete_queue_count;
 uint16_t obj_hitbox_count_enemy;
 
-void obj_run() 
+void ObjectSystem_ProcessObjects() 
 {
     event_in_combat = 0;
 
@@ -273,16 +273,16 @@ void obj_run()
     (bg_scroll_x_bounds_min.full.high.a != -32768) &&
     (bg_scroll_y_bounds_min.full.high.a != -32768))
     {
-        if (bg_scroll_suppress_interpolation_state_change != 0)
+        if (bg_scroll_suppress_interpolation_state_change)
         {
             bg_scroll_suppress_interpolation_state_change--;
         }
 
-        if (bg_scroll_suppress_interpolation_state_change == 0)
+        if (!bg_scroll_suppress_interpolation_state_change)
         {
             bg_scroll_x_bounds_min.full.high.a = -32768;
             bg_scroll_y_bounds_min.full.high.a = -32768;
-            bg_scroll_use_interpolation = 1;
+            bg_scroll_use_interpolation = true;
         }
     }
 
@@ -301,7 +301,7 @@ void obj_run()
 /*
     Reset object memory thoroughly (completely wipe)
 */
-void obj_reset(int start_index)
+void ObjectSystem_ResetStandardObjects(int start_index)
 {
     #if VBCC_ASM == 1 // Write the first byte as zero, then use MVN to copy the rest.
         __asm(
@@ -368,7 +368,7 @@ void obj_reset(int start_index)
 /*
     Player hitboxes (e.g. fireballs) reset too, in a separate list for performance reasons
 */
-void obj_reset_hitbox_player()
+void ObjectSystem_ResetPlayerHitboxes()
 {
     #if VBCC_ASM == 1 // Write the first byte as zero, then use MVN to copy the rest.
         __asm(
@@ -431,7 +431,7 @@ void obj_reset_hitbox_player()
 /*
     Do the same for enemy hitboxes too
 */
-void obj_reset_hitbox_enemy()
+void ObjectSystem_ResetEnemyHitboxes()
 {
     #if VBCC_ASM == 1 // Write the first byte as zero, then use MVN to copy the rest.
         __asm(
@@ -492,11 +492,11 @@ void obj_reset_hitbox_enemy()
     return;
 }
 
-/*! \def obj_instantiate
+/*! \def ObjectSystem_InstantiateObject
 
     \brief Creates a new object with the object ID passed at pixel level location X and Y.
 */
-int16_t obj_instantiate(
+int16_t ObjectSystem_InstantiateObject(
     uint16_t id,
     int16_t x,
     int16_t y,
@@ -542,7 +542,7 @@ int16_t obj_instantiate(
     struct game_object * p = &obj_general[i];
 
     p->id = id;
-    p->uid = obj_get_uid();
+    p->uid = ObjectSystem_GetUid();
     p->array_index = i;
     
     p->pos.x.a = ((int32_t)x) << 16;
@@ -614,7 +614,7 @@ int16_t obj_instantiate(
     // Send the ID to a helper function to set the correct data.
     // If the function returns false, this is not an 
     // enemy and set things
-    if (obj_get_enemy_data(p))
+    if (ObjectSystem_GetEnemyData(p))
     {
         p->struct_data.npc_data.ani.last_address = 0;
         p->struct_data.npc_data.ani.last_dmafailed = 0;
@@ -668,7 +668,7 @@ int16_t obj_instantiate(
 
     obj_active_count++;
 
-    obj_set_function_pointer(p);
+    ObjectSystem_SetFunctionPointer(p);
 
     p->r = p->pos.x.lh.h + p->w;
     p->b = p->pos.y.lh.h + p->h;
@@ -679,7 +679,7 @@ int16_t obj_instantiate(
 /*
     Player hitboxes should call this instead
 */
-int16_t obj_instantiate_hitbox_player(
+int16_t ObjectSystem_InstantiatePlayerHitbox(
     uint16_t id,
     int16_t x,
     int16_t y
@@ -698,7 +698,7 @@ int16_t obj_instantiate_hitbox_player(
     struct game_object * p = &obj_hitbox_player[i];
 
     p->id = id;
-    p->uid = obj_get_uid(); 
+    p->uid = ObjectSystem_GetUid(); 
     p->array_index = i;
     
     p->pos.x.a = ((int32_t)x) << 16;
@@ -722,7 +722,7 @@ int16_t obj_instantiate_hitbox_player(
     p->w = 16;
     p->h = 16;
 
-    obj_set_function_pointer(p);
+    ObjectSystem_SetFunctionPointer(p);
 
     p->r = p->pos.x.lh.h + p->w;
     p->b = p->pos.y.lh.h + p->h;
@@ -733,7 +733,7 @@ int16_t obj_instantiate_hitbox_player(
 /*
     And use this for enemy hitboxes
 */
-int16_t obj_instantiate_hitbox_enemy(
+int16_t ObjectSystem_InstantiateEnemyHitbox(
     uint16_t id,
     int16_t x,
     int16_t y
@@ -775,7 +775,7 @@ int16_t obj_instantiate_hitbox_enemy(
     struct game_object * p = &obj_hitbox_enemy[i];
 
     p->id = id;
-    p->uid = obj_get_uid(); 
+    p->uid = ObjectSystem_GetUid(); 
     p->array_index = i;
     
     p->pos.x.a = ((int32_t)x) << 16;
@@ -800,7 +800,7 @@ int16_t obj_instantiate_hitbox_enemy(
     p->w = 16;
     p->h = 16;
 
-    obj_set_function_pointer(p);
+    ObjectSystem_SetFunctionPointer(p);
 
     p->r = p->pos.x.lh.h + p->w;
     p->b = p->pos.y.lh.h + p->h;
@@ -808,7 +808,7 @@ int16_t obj_instantiate_hitbox_enemy(
     return i;
 }
 
-uint16_t obj_instantiate_npcs(const struct obj_list_entry_spawns* list, int16_t offset_x, int16_t offset_y)
+uint16_t ObjectSystem_List_InstantiateNpcs(const struct obj_list_entry_spawns* list, int16_t offset_x, int16_t offset_y)
 {
     while (list->id != OBJID_NULL)
     {
@@ -834,7 +834,7 @@ uint16_t obj_instantiate_npcs(const struct obj_list_entry_spawns* list, int16_t 
             temp_y = list->y + offset_y;
         }
 
-        if (obj_instantiate(temp_objid, temp_x, temp_y, 0) == -1)
+        if (ObjectSystem_InstantiateObject(temp_objid, temp_x, temp_y, 0) == -1)
         {
             return 1;
         }
@@ -845,7 +845,7 @@ uint16_t obj_instantiate_npcs(const struct obj_list_entry_spawns* list, int16_t 
     return 0;
 }
 
-uint16_t obj_instantiate_spawners(const struct obj_list_entry_spawners* list)
+uint16_t ObjectSystem_List_InstantiateSpawners(const struct obj_list_entry_spawners* list)
 {
     uint16_t temp_total_spawns = 0;
     
@@ -860,7 +860,7 @@ uint16_t obj_instantiate_spawners(const struct obj_list_entry_spawners* list)
         int16_t temp_x = list->x;
         int16_t temp_y = list->y;
 
-        int16_t index = obj_instantiate(temp_objid, temp_x, temp_y, 0);
+        int16_t index = ObjectSystem_InstantiateObject(temp_objid, temp_x, temp_y, 0);
 
         if (index == -1)
         {
@@ -912,7 +912,7 @@ uint16_t obj_instantiate_spawners(const struct obj_list_entry_spawners* list)
     return 0;
 }
 
-uint16_t obj_instantiate_interactables(const struct obj_list_entry_interactable* list)
+uint16_t ObjectSystem_List_InstantiateInteractables(const struct obj_list_entry_interactable* list)
 {
     while (list->id != OBJID_NULL)
     {
@@ -926,7 +926,7 @@ uint16_t obj_instantiate_interactables(const struct obj_list_entry_interactable*
             return 1;
         }
 
-        uint16_t index = obj_instantiate(temp_objid, temp_x, temp_y, temp_flag);
+        uint16_t index = ObjectSystem_InstantiateObject(temp_objid, temp_x, temp_y, temp_flag);
         if (index == -1)
         {
             return 1;
@@ -953,11 +953,11 @@ uint16_t obj_instantiate_interactables(const struct obj_list_entry_interactable*
     return 0;
 }
 
-/*! \def obj_destroy
+/*! \def ObjectSystem_DestroyStandardObject
 
     \brief Adds the object whose slot i into the deletion queue.
 */
-FORCE_INLINE void obj_destroy(uint16_t i)
+void ObjectSystem_DestroyStandardObject(uint16_t i)
 {
     obj_delete_queue[obj_delete_queue_count] = i;
 
@@ -967,7 +967,7 @@ FORCE_INLINE void obj_destroy(uint16_t i)
 }
 
 // Ditto for player hitboxes
-FORCE_INLINE void obj_destroy_hitbox_player(uint16_t i)
+void ObjectSystem_DestroyPlayerHitbox(uint16_t i)
 {
     obj_hitbox_player_delete_queue[obj_hitbox_player_delete_queue_count] = i;
 
@@ -977,7 +977,7 @@ FORCE_INLINE void obj_destroy_hitbox_player(uint16_t i)
 }
 
 // Lastly for enemy hitboxes
-FORCE_INLINE void obj_destroy_hitbox_enemy(uint16_t i)
+void ObjectSystem_DestroyEnemyHitbox(uint16_t i)
 {
     obj_hitbox_enemy_delete_queue[obj_hitbox_enemy_delete_queue_count] = i;
 
@@ -986,11 +986,11 @@ FORCE_INLINE void obj_destroy_hitbox_enemy(uint16_t i)
     return;
 }
 
-/*! \def obj_cleanup
+/*! \def ObjectSystem_CleanupStandardObjects
 
     \brief Deletes all objects whose slot i is within the deletion queue.
 */
-void obj_cleanup()
+void ObjectSystem_CleanupStandardObjects()
 {
     for (int i = 0; i < obj_delete_queue_count; i++)
     {
@@ -1016,7 +1016,7 @@ void obj_cleanup()
     return;
 }
 
-void obj_cleanup_hitbox_player()
+void ObjectSystem_CleanupPlayerHitboxes()
 {
     for (int i = 0; i < obj_hitbox_player_delete_queue_count; i++)
     {
@@ -1036,7 +1036,7 @@ void obj_cleanup_hitbox_player()
     return;
 }
 
-void obj_cleanup_hitbox_enemy()
+void ObjectSystem_CleanupEnemyHitboxes()
 {
     for (int i = 0; i < obj_hitbox_enemy_delete_queue_count; i++)
     {
@@ -1061,7 +1061,7 @@ void obj_cleanup_hitbox_enemy()
     return;
 }
 
-FORCE_INLINE uint16_t obj_get_uid()
+uint16_t ObjectSystem_GetUid()
 {
     uint16_t temp_uid = obj_next_uid;
     obj_next_uid++;
@@ -1074,7 +1074,7 @@ FORCE_INLINE uint16_t obj_get_uid()
     return temp_uid;
 }
 
-void obj_set_function_pointer(struct game_object * o)
+void ObjectSystem_SetFunctionPointer(struct game_object * o)
 {
     switch (o->id)
     {
@@ -1150,7 +1150,7 @@ void obj_set_function_pointer(struct game_object * o)
     return;
 }
 
-bool obj_get_enemy_data(struct game_object * o)
+bool ObjectSystem_GetEnemyData(struct game_object * o)
 {
     struct enemy_data * data_ptr;
 

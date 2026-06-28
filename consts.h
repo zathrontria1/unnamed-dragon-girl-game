@@ -7,7 +7,6 @@
     #define HUGE __huge
     #define ZP __zpage
     #define NO_INLINE __noinline
-    #define FORCE_INLINE inline
     #define INTERRUPT __interrupt
     #define CPU_65816 1
     #define VBCC_ASM INLINE_ASM
@@ -18,7 +17,6 @@
     #define HUGE 
     #define ZP 
     #define NO_INLINE 
-    #define FORCE_INLINE 
     #define INTERRUPT
     #define CPU_65816 1
     #define CALYPSI_ASM INLINE_ASM
@@ -29,7 +27,6 @@
     #define HUGE 
     #define ZP
     #define NO_INLINE 
-    #define FORCE_INLINE 
     #define INTERRUPT
 #endif
 

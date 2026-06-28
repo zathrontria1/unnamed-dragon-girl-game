@@ -1,11 +1,19 @@
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdbool.h>
+
 #include <snes/console.h>
 
 #include "vars.h"
+
+#include "map.h"
 
 #include "snd.h"
 #include "consts_snd.h"
 
 bool snd_apu_booted;
+bool snd_settings_mono;
+
 uint8_t snd_current_command_counter; // Used to check if the SPC is ready for a new command
 
 // Used to implement a deferred SFX system
@@ -321,7 +329,7 @@ void SoundInterface_StartSoundEngine()
     return;
 }
 
-FORCE_INLINE void SoundInterface_AcknowledgeBusy(bool ignore_busy)
+void SoundInterface_AcknowledgeBusy(bool ignore_busy)
 {
     if (!ignore_busy)
     {
@@ -348,9 +356,41 @@ FORCE_INLINE void SoundInterface_AcknowledgeBusy(bool ignore_busy)
     return;
 }
 
-FORCE_INLINE void SoundInterface_AcknowledgeNop()
+void SoundInterface_AcknowledgeNop()
 {
     REG_APU01 = SND_CMD_NOP;
+}
+
+/*
+    Called to handle positional audio automatically without duplicating code.
+
+    If an SFX is intended to always be played centre, this doesn't need to be used.
+    Use SoundInterface_PlaySfx below instead in that case.
+*/
+void SoundInterface_PlaySfx_Pre(struct game_object * o, uint8_t sfx_id)
+{        
+    int temp_snd_pan;
+
+    if (!snd_settings_mono)
+    {
+        temp_snd_pan = o->pos.x.lh.h - 128 - bg_scroll_x.full.high.a;
+        if (temp_snd_pan < -127)
+        {
+            temp_snd_pan = -127;
+        }
+        else if (temp_snd_pan > 127)
+        {
+            temp_snd_pan = 127;
+        }
+    }
+    else
+    {
+        temp_snd_pan = 0;
+    }
+
+    SoundInterface_PlaySfx(sfx_id, temp_snd_pan);
+
+    return;
 }
 
 void SoundInterface_PlaySfx(uint8_t sfx_id, int8_t pan)

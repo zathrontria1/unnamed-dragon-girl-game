@@ -203,22 +203,12 @@ void routines_player(struct game_object * o)
                 {
                     if (snd_punch_timeout == 0)
                     {
-                        int temp_snd_pan = o->pos.x.lh.h - 128 - bg_scroll_x.full.high.a;
-                        if (temp_snd_pan < -127)
-                        {
-                            temp_snd_pan = -127;
-                        }
-                        else if (temp_snd_pan > 127)
-                        {
-                            temp_snd_pan = 127;
-                        }
-
-                        SoundInterface_PlaySfx(SFX_ATK_SWING, temp_snd_pan);
+                        SoundInterface_PlaySfx_Pre(o, SFX_ATK_SWING);
 
                         snd_punch_timeout = (8 / V_MUL);
                     }
                     
-                    int16_t j = obj_instantiate_hitbox_player(OBJID_HITBOX_INVISIBLE, o->pos.x.lh.h, o->pos.y.lh.h);
+                    int16_t j = ObjectSystem_InstantiatePlayerHitbox(OBJID_HITBOX_INVISIBLE, o->pos.x.lh.h, o->pos.y.lh.h);
                     if (j >= 0)
                     {
                         struct game_object * p = &obj_hitbox_player[j];
@@ -299,14 +289,14 @@ void routines_player(struct game_object * o)
                 }
 
                 // Slow down the player
-                o->delta.x.a /= 4;
-                o->delta.y.a /= 4;
+                o->delta.x.a >>= 2;
+                o->delta.y.a >>= 2;
 
                 temp_is_dashing = 0;
 
                 if (obj_player_attack_interval == 0)
                 {
-                    int16_t j = obj_instantiate_hitbox_player(OBJID_FIREBALL, o->pos.x.lh.h, o->pos.y.lh.h);
+                    int16_t j = ObjectSystem_InstantiatePlayerHitbox(OBJID_FIREBALL, o->pos.x.lh.h, o->pos.y.lh.h);
                     if (j >= 0)
                     {
                         struct game_object * p = &obj_hitbox_player[j];
@@ -406,17 +396,7 @@ void routines_player(struct game_object * o)
 
                 if (snd_footstep_timeout == 0)
                 {
-                    int temp_snd_pan = o->pos.x.lh.h - 128 - bg_scroll_x.full.high.a;
-                    if (temp_snd_pan < -127)
-                    {
-                        temp_snd_pan = -127;
-                    }
-                    else if (temp_snd_pan > 127)
-                    {
-                        temp_snd_pan = 127;
-                    }
-
-                    SoundInterface_PlaySfx(SFX_MOV_FOOTSTEP, temp_snd_pan);
+                    SoundInterface_PlaySfx_Pre(o, SFX_MOV_FOOTSTEP);
                     
                     if (temp_is_dashing == 1)
                     {
@@ -438,24 +418,14 @@ void routines_player(struct game_object * o)
                 struct game_object * p = CollisionCheck_PlayerTestEnemy(o);
                 if (p != NULL)
                 {
-                    int temp_snd_pan = o->pos.x.lh.h - 128 - bg_scroll_x.full.high.a;
-                    if (temp_snd_pan < -127)
-                    {
-                        temp_snd_pan = -127;
-                    }
-                    else if (temp_snd_pan > 127)
-                    {
-                        temp_snd_pan = 127;
-                    }
-
-                    SoundInterface_PlaySfx(SFX_ATK_SPLAT_HIT, temp_snd_pan);
+                    SoundInterface_PlaySfx_Pre(o, SFX_ATK_SPLAT_HIT);
 
                     // spawn an impact FX object
                     int16_t k = -1;
                     int16_t temp_x = o->pos.x.lh.h;
                     int16_t temp_y = o->pos.y.lh.h;
 
-                    k = obj_instantiate(OBJID_SYS_IMPACT, temp_x, temp_y, 0);
+                    k = ObjectSystem_InstantiateObject(OBJID_SYS_IMPACT, temp_x, temp_y, 0);
                     
                     if (k >= 0)
                     {
@@ -549,7 +519,7 @@ void routines_player(struct game_object * o)
             o->struct_data.npc_data.status_time--;
             if (o->struct_data.npc_data.status_time == 0)
             {
-                obj_destroy(o->array_index);
+                ObjectSystem_DestroyStandardObject(o->array_index);
 
                 // Initiate the soft reset handler
                 // TODO: game over?
@@ -672,7 +642,7 @@ void routines_fireball(struct game_object * o)
         // Check if the object is to be destroyed
         if (o->struct_data.npc_data.ttl == 0)
         {
-            obj_destroy_hitbox_player(o->array_index);
+            ObjectSystem_DestroyPlayerHitbox(o->array_index);
         }
     }
 
@@ -701,7 +671,7 @@ void routines_hitbox_invis(struct game_object * o)
     // Check if the object is to be destroyed
     if (o->struct_data.npc_data.ttl == 0)
     {
-        obj_destroy_hitbox_player(o->array_index);
+        ObjectSystem_DestroyPlayerHitbox(o->array_index);
     }
 
     return;

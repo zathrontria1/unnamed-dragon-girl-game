@@ -26,9 +26,9 @@
 /*
     Gameplay AI for non-player entities
 */
-uint16_t ai_run(struct game_object * o, uint32_t dist, int16_t x, int16_t y, uint32_t dist_min, bool allow_flipflop, uint16_t attack_delay)
+bool Routines_Enemy_Ai_Process(struct game_object * o, uint32_t dist, int16_t x, int16_t y, uint32_t dist_min, bool allow_flipflop, uint16_t attack_delay)
 {
-    uint16_t temp_invalidate_animation_frame = 0;
+    bool temp_invalidate_animation_frame = false;
     uint16_t temp_interrupted = 0;
 
     // Do some AI interruption given some conditions
@@ -89,9 +89,9 @@ uint16_t ai_run(struct game_object * o, uint32_t dist, int16_t x, int16_t y, uin
                     o->state = STATE_MOVE_WALK;
                 }
 
-                o->facing = ai_get_facing(o);
+                o->facing = Routines_Enemy_GetFacing(o);
 
-                temp_invalidate_animation_frame = 1;
+                temp_invalidate_animation_frame = true;
             }
             else if (o->struct_data.npc_data.ai_state != AI_STATE_MOVE_AWAY) // don't recalc for anything already moving away.
             {
@@ -114,9 +114,9 @@ uint16_t ai_run(struct game_object * o, uint32_t dist, int16_t x, int16_t y, uin
                     o->state = STATE_MOVE_WALK;
                 }
 
-                o->facing = ai_get_facing(o);
+                o->facing = Routines_Enemy_GetFacing(o);
 
-                temp_invalidate_animation_frame = 1;
+                temp_invalidate_animation_frame = true;
             }
 
             o->struct_data.npc_data.ai_timer = (30 + (temp_rand & 0x1f)) / V_MUL;
@@ -130,7 +130,7 @@ uint16_t ai_run(struct game_object * o, uint32_t dist, int16_t x, int16_t y, uin
             if (o->struct_data.npc_data.ai_state == AI_STATE_MOVE_AWAY)
             {
                 o->angle = (o->angle) + 128;
-                o->facing = ai_get_facing(o);
+                o->facing = Routines_Enemy_GetFacing(o);
             }
 
             // Now to decide if the AI is going to attack or not.
@@ -180,7 +180,7 @@ uint16_t ai_run(struct game_object * o, uint32_t dist, int16_t x, int16_t y, uin
                 o->struct_data.npc_data.ai_timer = (30 + (temp_rand & 0x1f)) / V_MUL;
             } 
 
-            temp_invalidate_animation_frame = 1;
+            temp_invalidate_animation_frame = true;
         }
         else if (o->struct_data.npc_data.ai_state == AI_STATE_ATTACK)
         {
@@ -198,43 +198,21 @@ uint16_t ai_run(struct game_object * o, uint32_t dist, int16_t x, int16_t y, uin
 
             o->struct_data.npc_data.ai_timer = (30 + (temp_rand & 0x1f)) / V_MUL;
 
-            temp_invalidate_animation_frame = 1;
+            temp_invalidate_animation_frame = true;
         }
     }
 
-    ai_idle(o); // tick down the timer
+    Routines_Enemy_Ai_Idle(o); // tick down the timer
 
     return temp_invalidate_animation_frame;
 }
 
-FORCE_INLINE void ai_idle(struct game_object * o)
+/*
+    Simple function that only reduces AI delay timer
+*/
+void Routines_Enemy_Ai_Idle(struct game_object * o)
 {
     o->struct_data.npc_data.ai_timer--;
 
     return;
-}
-
-FORCE_INLINE uint16_t ai_get_facing(struct game_object * o)
-{
-    // Adjust the facing based on angle.
-    if (o->angle < 32)
-    {
-        return FACING_RIGHT;
-    }
-    else if (o->angle < 96)
-    {
-        return FACING_DOWN;
-    }
-    else if (o->angle < 160)
-    {
-        return FACING_LEFT;
-    }
-    else if (o->angle < 224)
-    {
-        return FACING_UP;
-    }
-    else
-    {
-        return FACING_RIGHT;
-    }
 }

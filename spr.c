@@ -1012,11 +1012,7 @@ void SpriteEngine_PackOamHighTable()
 /* 
     Clears all unused sprites from OAM
 */
-#if VBCC_ASM == 1
 void SpriteEngine_ResetOam(void)
-#else
-void SpriteEngine_ResetOam(void)
-#endif
 {
     #if VBCC_ASM == 1
         __asm(

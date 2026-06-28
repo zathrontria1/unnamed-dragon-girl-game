@@ -15,7 +15,7 @@
 
     Also used to determine if there is any SRAM, and if yes, how many banks are there.
     */
-void sram_check()
+void Sram_Check()
 {
     uint8_t * p = (uint8_t *)SRAM_ADDR;
 
@@ -27,7 +27,7 @@ void sram_check()
     {
         if (*str_bank0 != const_sram_verify_str[i])
         {
-            sram_clear(0);
+            Sram_ClearSlot(0);
 
             // Check if it's possible to write the new string
             // so immediately check the string again
@@ -69,7 +69,7 @@ void sram_check()
         {
             if (*str_bankother != const_sram_verify_str[i])
             {
-                sram_clear(slot);
+                Sram_ClearSlot(slot);
                 break;
             }
 
@@ -102,7 +102,7 @@ void sram_check()
     return;
 }
 
-void sram_clear(uint16_t slot)
+void Sram_ClearSlot(uint16_t slot)
 {
     if (slot >= SRAM_BANKS)
     {
@@ -127,7 +127,7 @@ void sram_clear(uint16_t slot)
     return;
 }
 
-void sram_save(uint16_t slot)
+void Sram_SaveToSlot(uint16_t slot)
 {
     if (slot >= SRAM_BANKS)
     {

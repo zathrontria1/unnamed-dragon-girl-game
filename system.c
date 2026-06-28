@@ -187,7 +187,7 @@ void System_DisplayStartupSplash()
     gfx_mosaic_change = -1;
     gfx_mosaic_layers = 0x01; // BG1
     gfx_mosaic_intensity = 16; // Max intensity
-    system_use_alternate_nmi = 1;
+    system_use_alternate_nmi = true;
 
     shadow_inidisp = 0x00;
 
@@ -196,7 +196,7 @@ void System_DisplayStartupSplash()
     // The SPC takes a while to init itself, so do something else in the meantime.
 
     // Check the SRAM contents
-    sram_check();
+    Sram_Check();
     
     System_Init(); // Do the init here too
     
@@ -234,7 +234,7 @@ void System_DisplayStartupSplash()
 
     shadow_inidisp_change = 0;
     gfx_mosaic_change = 0;
-    system_use_alternate_nmi = 0;
+    system_use_alternate_nmi = false;
 
     while (shadow_inidisp != 0x00)
     {
@@ -425,16 +425,16 @@ void System_Init()
     SpriteEngine_PackOamHighTable();
 
     // Reset object system
-    obj_reset(0); // The first time this is done, reset all objects
-    obj_reset_hitbox_player(); // also reset hitbox list
-    obj_reset_hitbox_enemy();
+    ObjectSystem_ResetStandardObjects(0); // The first time this is done, reset all objects
+    ObjectSystem_ResetPlayerHitboxes(); // also reset hitbox list
+    ObjectSystem_ResetEnemyHitboxes();
     
     obj_player_index = -1;
 
     // Initialize BG scroll systems. Must be done before the map is loaded.
     bg_scroll_x_bounds_min.full.high.a = -32768;
     bg_scroll_y_bounds_min.full.high.a = -32768;
-    bg_scroll_use_interpolation = 0;
+    bg_scroll_use_interpolation = false;
 
     bg_scroll_x.a = 0;
     bg_scroll_y.a = 0;
@@ -465,14 +465,14 @@ void System_Init_Partial()
     SpriteEngine_PackOamHighTable();
 
     // Reset object system
-    obj_reset(1); // Reset all except player
-    obj_reset_hitbox_player(); // also reset hitbox list
-    obj_reset_hitbox_enemy();
+    ObjectSystem_ResetStandardObjects(1); // Reset all except player
+    ObjectSystem_ResetPlayerHitboxes(); // also reset hitbox list
+    ObjectSystem_ResetEnemyHitboxes();
     
     // Initialize BG scroll systems. Must be done before the map is loaded.
     bg_scroll_x_bounds_min.full.high.a = -32768;
     bg_scroll_y_bounds_min.full.high.a = -32768;
-    bg_scroll_use_interpolation = 0;
+    bg_scroll_use_interpolation = false;
 
     bg_scroll_x.a = 0;
     bg_scroll_y.a = 0;
@@ -589,11 +589,11 @@ void System_Init_TilemapSettings(uint16_t routine)
 
     After vblank routine finishes, polls input and checks for soft reset and RNG validity before exiting
 */
-FORCE_INLINE void System_WaitUntilVblank()
+void System_WaitUntilVblank()
 {
     System_CheckForActiveDisplayEnd();
 
-    system_in_vblank = 1; // This must be the last value written.
+    system_in_vblank = true; // This must be the last value written.
 
     while (system_in_vblank)
     {
@@ -763,7 +763,7 @@ uint16_t System_CheckController(void)
     return (input_pad0 & 0x0f);
 }
 
-FORCE_INLINE uint16_t System_CheckKey(enum KEYPAD_BITS k)
+uint16_t System_CheckKey(enum KEYPAD_BITS k)
 {
     if ((input_pad0_new & k) == k)
     {
@@ -773,7 +773,7 @@ FORCE_INLINE uint16_t System_CheckKey(enum KEYPAD_BITS k)
     return 0;
 }
 
-FORCE_INLINE uint16_t System_CheckKeyAny()
+uint16_t System_CheckKeyAny()
 {
     if (input_pad0_new != 0x0000)
     {
@@ -783,7 +783,7 @@ FORCE_INLINE uint16_t System_CheckKeyAny()
     return 0;
 }
 
-FORCE_INLINE uint16_t System_CheckKeyHeld(enum KEYPAD_BITS k)
+uint16_t System_CheckKeyHeld(enum KEYPAD_BITS k)
 {
     if ((input_pad0 & k) == k)
     {
@@ -793,7 +793,7 @@ FORCE_INLINE uint16_t System_CheckKeyHeld(enum KEYPAD_BITS k)
     return 0;
 }
 
-FORCE_INLINE void System_EnableInterrupts()
+void System_EnableInterrupts()
 {
     system_fblank_enabled = false;
 
@@ -809,7 +809,7 @@ FORCE_INLINE void System_EnableInterrupts()
     return;
 }
 
-FORCE_INLINE void System_DisableInterrupts()
+void System_DisableInterrupts()
 {
     system_fblank_enabled = false;
 
@@ -825,7 +825,7 @@ FORCE_INLINE void System_DisableInterrupts()
     return;
 }
 
-FORCE_INLINE void System_EnableFblankInterrupts()
+void System_EnableFblankInterrupts()
 {
     system_fblank_enabled = true;
 
@@ -1041,7 +1041,7 @@ void System_CheckForActiveDisplayEnd()
 #if VBCC_ASM == 1
 NO_INLINE void System_CopyBlock(__reg("r0/r1") uint8_t * src, __reg("r2/r3") uint8_t * dest, __reg("a") uint16_t len)
 #else
-FORCE_INLINE void System_CopyBlock(uint8_t * src, uint8_t * dest, uint16_t len)
+void System_CopyBlock(uint8_t * src, uint8_t * dest, uint16_t len)
 #endif
 {
     // r0 contains source

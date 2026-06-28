@@ -13,7 +13,7 @@
 #if VBCC_ASM == 1
     NO_INLINE struct game_object * CollisionCheck_EnemyTestPlayer(__reg("r0/r1") struct game_object * o)
 #else
-    FORCE_INLINE struct game_object * CollisionCheck_EnemyTestPlayer(struct game_object * o)
+    struct game_object * CollisionCheck_EnemyTestPlayer(struct game_object * o)
 #endif
 {
     #if VBCC_ASM == 1 // place addresses at r0 and r2
@@ -68,7 +68,7 @@
     return NULL;
 }
 
-FORCE_INLINE uint16_t CollisionCheck_InteractableTestPlayerAction(struct game_object * o)
+uint16_t CollisionCheck_InteractableTestPlayerAction(struct game_object * o)
 {
     int16_t x1 = o->pos.x.lh.h;
     int16_t y1 = o->pos.y.lh.h;
@@ -82,7 +82,7 @@ FORCE_INLINE uint16_t CollisionCheck_InteractableTestPlayerAction(struct game_ob
 }
 
 // Call from player to hit test
-FORCE_INLINE struct game_object * CollisionCheck_PlayerTestEnemy(struct game_object * o)
+struct game_object * CollisionCheck_PlayerTestEnemy(struct game_object * o)
 {
     // shrink the player's hitbox
     // for this we'll make a copy
@@ -128,7 +128,7 @@ FORCE_INLINE struct game_object * CollisionCheck_PlayerTestEnemy(struct game_obj
 #if VBCC_ASM == 1
     NO_INLINE uint16_t CollisionCheck_Aabb_BetweenObjects(__reg("r0/r1") struct game_object * a, __reg("r2/r3") struct game_object * b)
 #else
-    FORCE_INLINE uint16_t CollisionCheck_Aabb_BetweenObjects(struct game_object * a, struct game_object * b)
+    uint16_t CollisionCheck_Aabb_BetweenObjects(struct game_object * a, struct game_object * b)
 #endif
 {
     // a.x < b.x + b.w && b.x < a.x + a.w
@@ -158,7 +158,7 @@ FORCE_INLINE struct game_object * CollisionCheck_PlayerTestEnemy(struct game_obj
 
     Slower, but enables not using game objects
 */
-FORCE_INLINE uint16_t CollisionCheck_Aabb_Direct_Square(int16_t x1, int16_t x2, int16_t y1, int16_t y2, int16_t s1, int16_t s2)
+uint16_t CollisionCheck_Aabb_Direct_Square(int16_t x1, int16_t x2, int16_t y1, int16_t y2, int16_t s1, int16_t s2)
 {
     // a.x < b.x + b.w && b.x < a.x + a.w
     if ((x2 + s2) < x1)
@@ -187,7 +187,7 @@ FORCE_INLINE uint16_t CollisionCheck_Aabb_Direct_Square(int16_t x1, int16_t x2, 
 
     Slowest (most stack pushes), but allows any size tests
 */
-FORCE_INLINE uint16_t CollisionCheck_Aabb_Direct_Rectangle(int16_t x1, int16_t x2, int16_t y1, int16_t y2, int16_t w1, int16_t w2, int16_t h1, int16_t h2)
+uint16_t CollisionCheck_Aabb_Direct_Rectangle(int16_t x1, int16_t x2, int16_t y1, int16_t y2, int16_t w1, int16_t w2, int16_t h1, int16_t h2)
 {
     // a.x < b.x + b.w && b.x < a.x + a.w
     if ((x2 + w2) < x1)

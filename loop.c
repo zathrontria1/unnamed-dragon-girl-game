@@ -59,7 +59,6 @@ void Loop_Fade_In()
     if (shadow_inidisp >= 15)
     {
         system_loop_func_ptr = main_GetFunctionPointer(system_target_routine);
-        //system_current_routine = system_target_routine;
     }
 
     return;
@@ -85,10 +84,9 @@ void Loop_Fade_Out()
 
     shadow_inidisp -= 1;
 
-    if (shadow_inidisp == 0)
+    if (!shadow_inidisp)
     {
         system_loop_func_ptr = main_GetFunctionPointer(system_target_routine);
-        //system_current_routine = system_target_routine;
     }
 
     return;
@@ -96,13 +94,13 @@ void Loop_Fade_Out()
 
 void Loop_Game_Messagebox()
 {
-    system_game_paused = 1;
-    system_dont_count_lag = 1;
+    system_game_paused = true;
+    system_dont_count_lag = true;
 
     hdma_use_gradient = 0xffff;
     hdma_gradient_ptr = (uint16_t)((uint32_t)&hdma_windowbackground_tables[0][0]);
 
-    obj_run();
+    ObjectSystem_ProcessObjects();
 
     UserInterface_CopyUiGraphicsToVram();
     
@@ -115,17 +113,14 @@ void Loop_Game_Messagebox()
 
     // Check if the current page has finished printing.
     if (vwf_print_ongoing)
-    //if (!ui_show_message_finished)
     {
         // It hasn't, print the next character or the entire contents depending on the button pressed.
         if (System_CheckKey(KEY_A))
         {
-            //UserInterface_PrintText_All();
             new_data_addr = VwfEngine_PrintText_Gradual(32767);
         }
         else
         {
-            //UserInterface_PrintText_PerChar();
             new_data_addr = VwfEngine_PrintText_Gradual(1 * V_MUL);
         }
 
@@ -165,19 +160,14 @@ void Loop_Game_Messagebox()
             SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
             
             ui_show_message_ttl = 0;
-            ui_show_message_cleared = 1;
+            ui_show_message_cleared = true;
 
             if (vwf_print_finished)
             {
                 // Clear the textbox
                 UserInterface_ClearTextbox(UI_MSGBOX_ML_START, UI_MSGBOX_HEIGHT);
-
-                if (ui_show_message_page_ptr_init == (uint8_t *)&STR_MSG_TUTORIAL_MP)
-                {
-                    event_tutorial_shown = 1;
-                }
                 
-                system_game_paused = 0;
+                system_game_paused = false;
 
                 system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_GAMELOOP);
                 system_target_routine = ROUTINE_GAMELOOP;
@@ -198,7 +188,6 @@ void Loop_Game_Messagebox()
                 VRAM_INCHIGH, 
                 0
                 );
-                //UserInterface_PrintText_MultiLine(ui_show_message_page_ptr_init, UI_MSGBOX_ML_START, UI_MARGIN_LEFT);
 
                 VwfEngine_PrintText_StartNewPage();
 
@@ -206,7 +195,7 @@ void Loop_Game_Messagebox()
 
                 DmaSystem_AddItemToQueue((uint8_t *)(LZ4_BUFFER_ADDR+0x8800), TILEMAP_ADDR_GAME_UI_2BPP+((UI_MSGBOX_ML_START + 1) << 5), 256, VRAM_INCHIGH, 0);
 
-                register volatile unsigned int data_len = vwf_tiledata_run;
+                volatile unsigned int data_len = vwf_tiledata_run;
                 DmaSystem_AddItemToQueue(new_data_addr, 0x4400+vwf_vram_offset, data_len, VRAM_INCHIGH, 0);
 
                 vwf_wram_offset = vwf_wram_offset + vwf_tiledata_advance;
@@ -220,7 +209,7 @@ void Loop_Game_Messagebox()
 
 void Loop_Game()
 {
-    system_dont_count_lag = 0;
+    system_dont_count_lag = false;
 
     hdma_use_gradient = 0x0001;
 
@@ -228,7 +217,7 @@ void Loop_Game()
 
     if (!event_tutorial_shown)
     {
-        system_dont_count_lag = 1;
+        system_dont_count_lag = true;
 
         SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
 
@@ -242,10 +231,7 @@ void Loop_Game()
 
         event_tutorial_shown = true;
 
-        //UserInterface_PrintText_MultiLine((uint8_t *)&STR_MSG_TUTORIAL_MP, UI_MSGBOX_ML_START, UI_MARGIN_LEFT);
-
         system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_MSGBOX);
-        //system_current_routine = ROUTINE_MSGBOX;
         system_target_routine = ROUTINE_MSGBOX;
 
         return;
@@ -253,11 +239,10 @@ void Loop_Game()
 
     if (System_CheckKey(KEY_X))
     {
-        system_dont_count_lag = 1;
+        system_dont_count_lag = true;
 
         SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
-        
-        //UserInterface_PrintSpecialText((uint8_t *)&STR_UI_PLAYERINFO_ML);
+
         subscreen_rendered = 0; // Clear subscreen state so it re-renders
 
         system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_SUBSCREEN);
@@ -280,15 +265,15 @@ void Loop_Game()
     AniSystem_Spr_UpdateFixedTiles();
     AniSystem_Pal_UpdatePalettes();
 
-    obj_run();
+    ObjectSystem_ProcessObjects();
 
     SpriteEngine_ProcessSpriteLists();
     SpriteEngine_ResetOam();
     SpriteEngine_PackOamHighTable();
 
-    obj_cleanup();
-    obj_cleanup_hitbox_player();
-    obj_cleanup_hitbox_enemy();
+    ObjectSystem_CleanupStandardObjects();
+    ObjectSystem_CleanupPlayerHitboxes();
+    ObjectSystem_CleanupEnemyHitboxes();
 
     // Don't bother checking for input if the player is dying
     if (obj_player_pointer->state != STATE_DIE)
@@ -297,7 +282,7 @@ void Loop_Game()
         {
             // Let's try using the new alternate NMI part
             shadow_inidisp = 0x0f;
-            system_use_alternate_nmi = 1;
+            system_use_alternate_nmi = true;
             shadow_inidisp_change = -1;
 
             system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_MAPDISPLAY_INIT);
@@ -315,7 +300,7 @@ void Loop_Game()
         {
             // Switch to new level
             shadow_inidisp = 0x0f;
-            system_use_alternate_nmi = 1;
+            system_use_alternate_nmi = true;
             shadow_inidisp_change = -1;
 
             level_data_ptr = level_data_ptr_next;
@@ -348,7 +333,6 @@ void Loop_Game_Pause()
     if (System_CheckKey(KEY_START))
     {
         system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_GAMELOOP);
-        //system_current_routine = ROUTINE_GAMELOOP;
         system_target_routine = ROUTINE_GAMELOOP;
         
         shadow_inidisp = 0x0f;
@@ -359,7 +343,9 @@ void Loop_Game_Pause()
 
 void Loop_Subscreen_MapDisplay_Init()
 {
-    system_dont_count_lag = 1;
+    DmaSystem_ResetQueue();
+    
+    system_dont_count_lag = true;
 
     hdma_use_gradient = 0x0000;
     
@@ -392,7 +378,7 @@ void Loop_Subscreen_MapDisplay_Init()
 
     DmaSystem_AddItemToQueue((uint8_t *)(LZ4_BUFFER_ADDR+0xc000), 0x6000, 128, VRAM_INCHIGH, 1);
     
-    ui_in_bg2 = 1;
+    ui_in_bg2 = true;
 
     LZ4_UnpackToWRAM(level_data_ptr->map_overview_tiles_lz4, 0x007f0000);
 
@@ -414,8 +400,6 @@ void Loop_Subscreen_MapDisplay_Init()
 
     // Copy the ROM palette into shadow
     DmaSystem_CopyToWram((unsigned long int)level_data_ptr->map_overview_palette, (unsigned long int)&shadow_cgram, 512);
-
-    //AniSystem_Pal_LoadSubpalette((uint8_t *)&data_palette_player, 15);
     
     // Copy the background graphics into VRAM
     DmaSystem_CopyToVram(0x007f0000, 0x0000, 0x9000);
@@ -515,14 +499,13 @@ void Loop_Subscreen_MapDisplay_Init()
     system_target_routine = ROUTINE_MAPDISPLAY;
 
     system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_FADEIN);
-    //system_current_routine = ROUTINE_FADEIN;
     
     System_Init_TilemapSettings(system_target_routine);
     System_Init_DisplaySettings(system_target_routine);
 
     shadow_inidisp = 0x00;
 
-    system_use_alternate_nmi = 0;
+    system_use_alternate_nmi = false;
     shadow_inidisp_change = 0;
 
     shadow_hdmaen = 0x00;
@@ -597,7 +580,7 @@ void Loop_Subscreen_MapDisplay()
     if (System_CheckKeyAny())
     {
         shadow_inidisp = 0x0f;
-        system_use_alternate_nmi = 1;
+        system_use_alternate_nmi = true;
         shadow_inidisp_change = -1;
 
         system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_GAMELOOP_RELOAD);
@@ -613,14 +596,16 @@ void Loop_Subscreen_MapDisplay()
 
 void Loop_Game_ReloadScene()
 {
+    DmaSystem_ResetQueue();
+
     hdma_use_gradient = 0x0000;
 
     // Perform a partial load
     LevelSystem_LoadLevelTileset(level_data_ptr);
     LevelSystem_LoadLevelPalette(level_data_ptr);
 
-    ui_in_bg2 = 0;
-    ui_force_update = 1;
+    ui_in_bg2 = false;
+    ui_force_update = true;
 
     bg_scroll_x = bg_scroll_x_saved;
     bg_scroll_y = bg_scroll_y_saved;
@@ -646,7 +631,6 @@ void Loop_Game_ReloadScene()
     AniSystem_BgTile_Setup((uint8_t *)&data_bg_dungeon_anim_water_lz4, (uint8_t *)&data_bg_dungeon_anim_torch_lz4);
 
     system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_FADEIN);
-    //system_current_routine = ROUTINE_FADEIN;
     system_target_routine = ROUTINE_GAMELOOP;
 
     System_Init_TilemapSettings(system_target_routine);
@@ -666,10 +650,10 @@ void Loop_Game_ReloadScene()
 
     shadow_inidisp = 0x00;
 
-    system_use_alternate_nmi = 0;
+    system_use_alternate_nmi = false;
     shadow_inidisp_change = 0;
 
-    system_game_paused = 0;
+    system_game_paused = false;
     
     System_EnableInterrupts();
 
@@ -682,11 +666,11 @@ void Loop_Game_ReloadScene()
 void Loop_Game_Partial(void)
 {
     // Make a copy of the current paused state
-    uint16_t temp_game_paused_copy = system_game_paused;
+    bool temp_game_paused_copy = system_game_paused;
 
-    system_game_paused = 1;
+    system_game_paused = true;
     UserInterface_Process();
-    obj_run();
+    ObjectSystem_ProcessObjects();
 
     SpriteEngine_ProcessSpriteLists();
     SpriteEngine_ResetOam();
@@ -702,14 +686,16 @@ void Loop_Game_Partial(void)
 
 void Loop_Game_NewLevel()
 {
+    DmaSystem_ResetQueue();
+
     hdma_use_gradient = 0x0000;
     
     System_Init_Partial();
     
     bool temp_level_reuses_vram_contents = LevelSystem_LoadLevel(level_data_ptr);
 
-    ui_in_bg2 = 0;
-    ui_force_update = 1;
+    ui_in_bg2 = false;
+    ui_force_update = true;
 
     while (shadow_inidisp != 0x00)
     {
@@ -755,10 +741,10 @@ void Loop_Game_NewLevel()
 
     shadow_inidisp = 0x00;
 
-    system_use_alternate_nmi = 0;
+    system_use_alternate_nmi = false;
     shadow_inidisp_change = 0;
 
-    sram_save(0);
+    Sram_SaveToSlot(0);
 
     System_EnableInterrupts();
 

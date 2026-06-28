@@ -18,25 +18,25 @@ extern const uint8_t const_hdma_tm_msgbox[];
 extern const uint16_t const_ui_textadvance_tilemapentries[];
 
 // System general shadows and variables
-ZP extern uint16_t system_in_vblank;
+ZP extern bool system_in_vblank;
 
 ZP extern uint16_t system_current_routine;
 ZP extern uint16_t system_target_routine;
 
 ZP extern uint32_t system_frames_elapsed;
 ZP extern uint32_t system_frames_lag;
-extern uint16_t system_dont_count_lag; // set to 1 to not increment the lag counter during e.g. creating a text box
+extern bool system_dont_count_lag; // set to 1 to not increment the lag counter during e.g. creating a text box
 
 ZP extern uint16_t system_nmis_counted;
-ZP extern uint16_t system_use_alternate_nmi;
+ZP extern bool system_use_alternate_nmi;
 
-ZP extern uint16_t system_fblank_enabled;
+ZP extern bool system_fblank_enabled;
 
-ZP extern uint16_t system_game_paused;
+ZP extern bool system_game_paused;
 
 ZP extern void * system_loop_func_ptr;
 
-ZP extern uint8_t system_suppress_odd_transfers;
+ZP extern bool system_suppress_odd_transfers;
 
 // Shadow buffers
 ZP extern uint8_t shadow_inidisp;

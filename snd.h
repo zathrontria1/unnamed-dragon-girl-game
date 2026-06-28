@@ -1,4 +1,5 @@
 extern bool snd_apu_booted;
+extern bool snd_settings_mono;
 
 extern uint8_t snd_current_command_counter;
 
@@ -46,6 +47,8 @@ void SoundInterface_StartSoundEngine();
     void SoundInterface_UploadData_2byte_StreamLoopBlock(uint8_t * data_ptr, uint16_t chunk_len);
 #endif
 
+void SoundInterface_PlaySfx_Pre(struct game_object * o, uint8_t sfx_id);
+
 void SoundInterface_PlaySfx(uint8_t sfx_id, int8_t pan);
 void SoundInterface_PlaySfx_Internal(uint8_t sfx_id, int8_t pan);
 void SoundInterface_PlaySfx_Ex(uint8_t sfx_id, int8_t vol_l, int8_t vol_r, int8_t pitch);
@@ -79,7 +82,7 @@ void SoundInterface_StopStream();
 
 void SoundInterface_NmiAudioUpload();
 
-FORCE_INLINE void SoundInterface_AcknowledgeBusy(bool ignore_busy);
-FORCE_INLINE void SoundInterface_AcknowledgeNop();
+void SoundInterface_AcknowledgeBusy(bool ignore_busy);
+void SoundInterface_AcknowledgeNop();
 
 bool SoundInterface_IsHigherPriority(uint8_t sfx_id);

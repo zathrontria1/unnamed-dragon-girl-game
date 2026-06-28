@@ -110,7 +110,7 @@ void CsEngine_Loop()
 
             shadow_inidisp_change = 0;
             gfx_mosaic_change = 0;
-            system_use_alternate_nmi = 0;
+            system_use_alternate_nmi = false;
 
             while (shadow_inidisp != 0x00)
             {
