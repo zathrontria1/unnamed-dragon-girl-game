@@ -169,24 +169,85 @@ void HdmaEngine_SetupBgScrollHdma()
 */
 void HdmaEngine_UpdateBgScrollValues()
 {
-    uint16_t temp_table_to_write = (hdma_scroll_select + 1) & 0x01;
+    #if VBCC_ASM == 1
+        __asm(
+            "\ta16\n"
+            "\tx16\n"
 
-    uint16_t temp_sine_select = obj_player_active_fireballs >> 2;
-    if (temp_sine_select >= 16)
-    {
-        temp_sine_select = 15;
-    }
+            "\tlda _hdma_scroll_select\n"
+            "\tinc\n"
+            "\tand #$0001\n"
+            "\tsta r0\n"
+            "\txba\n"
+            "\tlsr\n"
+            "\tlsr\n" // Carry is cleared
+            "\tadc #<_hdma_scroll_data\n"
+            "\tsta r3\n"
+            "\tlda #^_hdma_scroll_data\n"
+            "\tsta r4\n"
 
-    int16_t temp_y = bg_scroll_y.full.high.a - 1;
+            "\tlda _obj_player_active_fireballs\n"
+            "\tlsr\n"
+            "\tlsr\n"
+            "\tcmp #16\n"
+            "\tbcc .fireball_in_limit\n"
+                "\tlda #15\n"
+
+            ".fireball_in_limit:\n"
+            "\txba\n"
+            "\tlsr\n"
+            "\tsta r5\n"
+            "\tlda _hdma_scroll_sine_index\n"
+            "\tasl\n" // Carry is cleared
+            "\tadc r5\n" 
+            "\tadc #<_const_hdma_scroll_sine\n" // Carry is still clear
+            "\tsta r5\n" // This table is located in near memory
+
+            "\tlda _bg_scroll_y+2\n"
+            "\tdec\n"
+            "\ttax\n" // Can be saved in X
+
+            "\tldy #$003e\n"
+
+            ".loop:\n"
+            "\ttxa\n"
+            "\tclc\n"
+            "\tadc (r5),y\n" // This table is located in near memory
+            "\tsta [r3],y\n"
+            "\tdey\n"
+            "\tdey\n"
+            "\tbpl .loop\n"
+
+            "\tlda r0\n" 
+            "\tsta _hdma_scroll_select\n"
+            "\tbeq .scroll_no_offset\n"
+                "\tlda #24\n"
+            ".scroll_no_offset:\n"
+
+            "\tclc\n"
+            "\tadc #<_hdma_scroll_tables\n"
+            "\tsta _hdma_scroll_ptr\n" // Must do last to avoid corruption
+        );
+    #else
+        uint16_t temp_table_to_write = (hdma_scroll_select + 1) & 0x01;
+
+        uint16_t temp_sine_select = obj_player_active_fireballs >> 2;
+        if (temp_sine_select >= 16)
+        {
+            temp_sine_select = 15;
+        }
+
+        int16_t temp_y = bg_scroll_y.full.high.a - 1;
+        
+        for (int i = 0; i < 32; i++)
+        {
+            hdma_scroll_data[temp_table_to_write][i] = temp_y + const_hdma_scroll_sine[temp_sine_select][hdma_scroll_sine_index+i];
+        }
+
+        hdma_scroll_select = temp_table_to_write;
+        hdma_scroll_ptr = (uint16_t)((uint32_t)&hdma_scroll_tables[hdma_scroll_select]);
+    #endif
     
-    for (int i = 0; i < 32; i++)
-    {
-        hdma_scroll_data[temp_table_to_write][i] = temp_y + const_hdma_scroll_sine[temp_sine_select][hdma_scroll_sine_index+i];
-    }
-
-    hdma_scroll_select = temp_table_to_write;
-    hdma_scroll_ptr = (uint16_t)((uint32_t)&hdma_scroll_tables[hdma_scroll_select]);
-
     hdma_scroll_sine_index += (1 * V_MUL) >> 1;
 
     while (hdma_scroll_sine_index >= 32)
