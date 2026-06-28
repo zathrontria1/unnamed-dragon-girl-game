@@ -87,7 +87,7 @@ void VwfEngine_PrintText_Gradual_Setup(uint8_t * string, uint8_t * dest, uint8_t
     vwf_tiledata_ptr_start = dest;
     vwf_text_rendered = false;
 
-    vwf_wram_offset = (uint16_t)((uint32_t)vwf_tiledata_ptr_start & 0xffff);
+    vwf_wram_offset = (uint16_t)((uint32_t)vwf_tiledata_ptr_start);
     vwf_vram_offset = 0x0008;
 
     vwf_tiledata_run = 16;
@@ -393,7 +393,7 @@ void VwfEngine_PrintText_Render(uint8_t * glyph_ptr, uint8_t * write_ptr, uint16
 */
 void VwfEngine_PrintText_StartNewPage()
 {
-    vwf_wram_offset = (uint16_t)((uint32_t)vwf_tiledata_ptr_start & 0xffff);
+    vwf_wram_offset = (uint16_t)((uint32_t)vwf_tiledata_ptr_start);
     vwf_vram_offset = 0x0008;
 
     vwf_tiledata_ptr = vwf_tiledata_ptr_start+16;
@@ -409,12 +409,40 @@ void VwfEngine_PrintText_StartNewPage()
 
 void VwfEngine_PrintText_ResetTilemap(uint16_t * ptr, int len)
 {
-    // Immediately write empty tiles to the tilemap 
-    for (int i = 0; i < len; i++)
-    {
-        *ptr = vwf_tile_id_empty;
-        ptr++;
-    }
+    #if VBCC_ASM == 1
+        __asm(
+            "\ta16\n"
+            "\tx16\n"
+
+            "\tsta r0\n"
+            "\tstx r1\n"
+
+            "\tlda 4,s\n"
+            "\tbeq .end\n"
+
+            "\tdec\n"
+            "\tasl\n"
+            "\ttay\n"
+
+            "\tlda _vwf_tile_id_empty\n"
+            
+            ".loop:\n"
+            
+            "\tsta [r0],y\n"
+            "\tdey\n"
+            "\tdey\n"
+            "\tbpl .loop\n"
+
+            ".end:\n"
+        );
+    #else
+        // Immediately write empty tiles to the tilemap 
+        for (int i = 0; i < len; i++)
+        {
+            *ptr = vwf_tile_id_empty;
+            ptr++;
+        }
+    #endif
 
     vwf_tile_id = (1 + vwf_tile_id_empty) | 0x2000;
 
