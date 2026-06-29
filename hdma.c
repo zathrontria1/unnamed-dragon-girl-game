@@ -376,6 +376,16 @@ void HdmaEngine_SetHdmaShadow()
     return;
 }
 
+const uint8_t const_hdma_tm_msgbox[] = 
+{
+    UI_MSGBOX_ML_START * 4, TM_MODE1, 
+    UI_MSGBOX_ML_START * 4, TM_MODE1, 
+    UI_MSGBOX_HEIGHT * 8, TM_MODE1_MSGBOX, 
+    1, TM_MODE1, 
+    0, 
+};
+
+
 // sine offsets, intensity 0-15, 2 cycles each
 NEAR const int16_t const_hdma_scroll_sine[16][64] = 
 {

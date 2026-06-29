@@ -592,3 +592,129 @@ void Routines_Shared_CheckIfDead(struct game_object * o)
 
     return;
 }
+
+
+/*
+    Used to draw an entity after getting the appropriate attributes and pointers.
+*/
+void Routines_Shared_Draw(struct game_object * o, uint8_t * spr_addr, int pal, int layer, bool always_flicker, bool is_player)
+{
+    if ((spr_addr != o->struct_data.npc_data.ani.last_address))
+    {
+        if (is_player)
+        {
+            if (DmaSystem_AddItemToQueue((uint8_t *)(LZ4_BUFFER_ADDR+0xc000), 0x6000, 128, VRAM_INCHIGH, 1))
+            {
+                o->struct_data.npc_data.ani.last_dmafailed = 1;
+            }
+            else
+            {
+                o->struct_data.npc_data.ani.last_dmafailed = 0;
+            }
+        }
+        else
+        {
+            if (DmaSystem_AddItemToQueue(spr_addr, 0x6000+(o->struct_data.npc_data.vram_addr), 128, VRAM_INCHIGH, 1))
+            {
+                o->struct_data.npc_data.ani.last_dmafailed = 1;
+            }
+            else
+            {
+                o->struct_data.npc_data.ani.last_dmafailed = 0;
+            }
+        }
+        // Save the requested frame into object's data
+        // for comparison and in case it fails
+        o->struct_data.npc_data.ani.last_address = spr_addr; 
+    }
+    else if ((o->struct_data.npc_data.ani.last_dmafailed))
+    {
+        // The previous DMA failed. Attempt it again.
+        if (is_player)
+        {
+            if (!(DmaSystem_AddItemToQueue((uint8_t *)(LZ4_BUFFER_ADDR+0xc000), 0x6000, 128, VRAM_INCHIGH, 1)))
+            {
+                o->struct_data.npc_data.ani.last_dmafailed = 0;
+            }   
+        }
+        else
+        {
+            if (!DmaSystem_AddItemToQueue(o->struct_data.npc_data.ani.last_address, 0x6000+(o->struct_data.npc_data.vram_addr), 128, VRAM_INCHIGH, 1))
+            {
+                o->struct_data.npc_data.ani.last_dmafailed = 0;
+            }   
+        } 
+    }
+
+    // DMA variant
+    uint16_t temp_tileattrib;
+
+    if (((uint32_t)spr_addr & 0x80000000) == 0x80000000) // sign bit is used for flip
+    {
+        temp_tileattrib = (o->struct_data.npc_data.tilenum | pal << 9 | 2 << 12 | 0x4000);
+    }
+    else
+    {
+        temp_tileattrib = (o->struct_data.npc_data.tilenum | pal << 9 | 2 << 12);
+    }
+
+    if (always_flicker)
+    {
+        if (layer == 0)
+        {
+            if ((o->uid & 0x0001) == ((uint16_t)system_frames_elapsed & 0x0001))
+            {
+                uint16_t temp_tileattrib;
+                temp_tileattrib = (o->struct_data.npc_data.tilenum | PAL_BUBBLE_E << 9 | 3 << 12);
+
+                SpriteEngine_AddToFrontLayer(o, temp_tileattrib);
+            }
+        }
+        else
+        {
+            if ((o->uid & 0x0001) == ((uint16_t)system_frames_elapsed & 0x0001))
+            {
+                SpriteEngine_AddToSortedLayer(o, temp_tileattrib);
+            }
+        }
+    }
+    else
+    {
+        if (layer == 0)
+        {
+            // Check if STAT77 is overflow
+            if ((shadow_stat77 & 0x80) == 0x80)
+            {
+                // Do not perform a draw every other frame
+                if ((o->uid & 0x0001) == ((uint16_t)system_frames_elapsed & 0x0001))
+                {
+                    SpriteEngine_AddToFrontLayer(o, temp_tileattrib);
+                }
+            }
+            else
+            {
+                SpriteEngine_AddToFrontLayer(o, temp_tileattrib);
+            }
+        }
+        else
+        {
+            // Check if STAT77 is overflow
+            if ((shadow_stat77 & 0x80) == 0x80)
+            {
+                // Do not perform a draw every other frame
+                if ((o->uid & 0x0001) == ((uint16_t)system_frames_elapsed & 0x0001))
+                {
+                    SpriteEngine_AddToSortedLayer(o, temp_tileattrib);
+                }
+            }
+            else
+            {
+                SpriteEngine_AddToSortedLayer(o, temp_tileattrib);
+            }
+        }
+    }
+
+
+
+    return;
+}

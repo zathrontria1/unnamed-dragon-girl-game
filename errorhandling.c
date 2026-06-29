@@ -18,6 +18,8 @@
 
 #include "errorhandling.h"
 
+#include "sram_management.h"
+
 void ErrorHandler_Controller()
 {
     ErrorHandler_Internal_Setup();
@@ -76,11 +78,11 @@ void ErrorHandler_Internal_Display(uint8_t * string_ptr)
     uint16_t transfer_length = VwfEngine_PrintText(string_ptr, (uint8_t *)LZ4_BUFFER_ADDR, (uint8_t *)(LZ4_BUFFER_ADDR+0x7000), 1, 1, 0);
     
     // Copy the palette
-    DmaSystem_CopyToWram((uint32_t)data_palette_ui, (uint32_t)&shadow_cgram, 32);
+    DmaSystem_CopyToWram((uint8_t *)&data_palette_ui, (uint8_t *)&shadow_cgram, 32);
 
     // Upload the error message
-    DmaSystem_CopyToVram((uint32_t)LZ4_BUFFER_ADDR, 0x0000, transfer_length); // Copy the entire section including the tilemap.
-    DmaSystem_CopyToVram((uint32_t)(LZ4_BUFFER_ADDR+0x7000), 0x3800, 1792); // Copy the entire section including the tilemap.
+    DmaSystem_CopyToVram((uint8_t *)LZ4_BUFFER_ADDR, 0x0000, transfer_length); // Copy the entire section including the tilemap.
+    DmaSystem_CopyToVram((uint8_t *)(LZ4_BUFFER_ADDR+0x7000), 0x3800, 1792); // Copy the entire section including the tilemap.
     DmaSystem_UploadCgram();
 
     DmaSystem_ProcessQueue();

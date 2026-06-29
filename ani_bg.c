@@ -118,8 +118,8 @@ void AniSystem_BgTile_SetFramePointer(uint8_t * ptr)
 // Call to decompress and set up background tiles
 void AniSystem_BgTile_Setup(uint8_t * ptr_strip, uint8_t * ptr_frame)
 {
-    LZ4_UnpackToWRAM(ptr_strip, ANI_BG_STRIP_ADDR);
-    LZ4_UnpackToWRAM(ptr_frame, ANI_BG_FRAME_ADDR);
+    LZ4_UnpackToWRAM(ptr_strip, (void *)ANI_BG_STRIP_ADDR);
+    LZ4_UnpackToWRAM(ptr_frame, (void *)ANI_BG_FRAME_ADDR);
 
     AniSystem_BgTile_SetStripPointer((uint8_t *)ANI_BG_STRIP_ADDR);
     AniSystem_BgTile_SetFramePointer((uint8_t *)ANI_BG_FRAME_ADDR);

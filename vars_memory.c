@@ -20,33 +20,11 @@
 #include "consts_snd.h"
 #include "sound/seq/seq_test.h"
 
-// For SRAM management
-const uint8_t const_sram_verify_str[] = "EIEIMUN!"; // Can use any 8 character string that isn't all 0x00 or 0xff. Will occupy 9 bytes in ROM
-uint8_t sram_available_slots;
-
-// For DMA/HDMA copies
 const uint32_t const_zero[] = 
 {
     0, 0, 0, 0, 0, 0, 0, 0
 };
 const uint8_t const_sprite_offscreen = 0xf0;
-
-const uint8_t const_hdma_tm_msgbox[] = 
-{
-    UI_MSGBOX_ML_START * 4, TM_MODE1, 
-    UI_MSGBOX_ML_START * 4, TM_MODE1, 
-    UI_MSGBOX_HEIGHT * 8, TM_MODE1_MSGBOX, 
-    1, TM_MODE1, 
-    0, 
-};
-
-const uint16_t const_ui_textadvance_tilemapentries[] =
-{
-    0x0060 | 0x2000 | (PAL_UI_TEXT_WHITE << 10),
-    0x0061 | 0x2000 | (PAL_UI_TEXT_WHITE << 10),
-    0x0070 | 0x2000 | (PAL_UI_TEXT_WHITE << 10),
-    0x0071 | 0x2000 | (PAL_UI_TEXT_WHITE << 10),
-};
 
 // System general shadows and variables
 ZP bool system_in_vblank;
@@ -99,7 +77,3 @@ uint16_t event_in_combat;
 uint16_t event_in_combat_shadow;
 
 uint16_t event_tutorial_shown;
-
-// Fixed sprite tile anims
-uint16_t ani_bg_frame_coin;
-uint8_t * ani_bg_addr_coin;

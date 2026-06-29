@@ -18,3 +18,5 @@ void routines_dummy(struct game_object * o);
 
 bool Routines_Shared_StatusMaintenance(struct game_object * o);
 void Routines_Shared_CheckIfDead(struct game_object * o);
+
+void Routines_Shared_Draw(struct game_object * o, uint8_t * spr_addr, int pal, int layer, bool always_flicker, bool is_player);

@@ -10,6 +10,7 @@
 #include "obj.h"
 #include "ani_bg.h"
 #include "ani_pal.h"
+#include "ani_fixedspr.h"
 #include "hdma.h"
 
 #include "dma.h"
@@ -146,14 +147,14 @@ void LevelSystem_LoadLevelGraphics(const struct level_data * level)
 void LevelSystem_LoadLevelTileset(const struct level_data * level)
 {
     // Copy fixed sprite graphics
-    LZ4_UnpackToWRAM((void *)&data_spr_fixed_lz4, ((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_SPRITES << 1))); 
+    LZ4_UnpackToWRAM((void *)&data_spr_fixed_lz4, (void *)(0x007f0000 | ((uint32_t)TILEDATA_ADDR_SPRITES << 1))); 
 
     // Copy the background graphics into WRAM
-    LZ4_UnpackToWRAM(level->tileset_tiles_lz4, ((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_MAP << 1))); 
+    LZ4_UnpackToWRAM(level->tileset_tiles_lz4, (void *)(0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_MAP << 1))); 
 
     // Copy the UI graphics into WRAM
-    LZ4_UnpackToWRAM((void *)&data_ui_fixed_4bpp_lz4, ((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_UI_4BPP << 1))); 
-    LZ4_UnpackToWRAM((void *)&data_ui_fixed_2bpp_lz4, ((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_UI_2BPP << 1))); 
+    LZ4_UnpackToWRAM((void *)&data_ui_fixed_4bpp_lz4, (void *)(0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_UI_4BPP << 1))); 
+    LZ4_UnpackToWRAM((void *)&data_ui_fixed_2bpp_lz4, (void *)(0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_UI_2BPP << 1))); 
 
     return;
 }

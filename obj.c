@@ -1082,22 +1082,22 @@ void ObjectSystem_SetFunctionPointer(struct game_object * o)
             o->func_ptr = (void *)&routines_dummy;
             break;
         case OBJID_PLAYER:
-            o->func_ptr = (void *)&routines_player;
+            o->func_ptr = (void *)&Routines_Player;
             break;
         case OBJID_FIREBALL:
-            o->func_ptr = (void *)&routines_fireball;
+            o->func_ptr = (void *)&Routines_Player_Fireball;
             break;
         case OBJID_SLIME:
-            o->func_ptr = (void *)&routines_slime;
+            o->func_ptr = (void *)&Routines_Enemy_Slime;
             break;
         case OBJID_BUBBLE_E:
-            o->func_ptr = (void *)&routines_bubble_e;
+            o->func_ptr = (void *)&Routines_Enemy_Slime_Bubble;
             break;
         case OBJID_ARROW_E:
-            o->func_ptr = (void *)&routines_arrow_e;
+            o->func_ptr = (void *)&Routines_Enemy_Lizardman_Arrow;
             break;
         case OBJID_LIZARDMAN:
-            o->func_ptr = (void *)&routines_lizardman;
+            o->func_ptr = (void *)&Routines_Enemy_Lizardman;
             break;
         case OBJID_BOSS_TEST1:
             o->func_ptr = (void *)&Routines_Boss_Test;
@@ -1112,10 +1112,10 @@ void ObjectSystem_SetFunctionPointer(struct game_object * o)
             o->func_ptr = (void *)&routines_drop_money;
             break;
         case OBJID_HITBOX_INVISIBLE:
-            o->func_ptr = (void *)&routines_hitbox_invis;
+            o->func_ptr = (void *)&Routines_Player_InvisibleHit;
             break;
         case OBJID_HITBOX_INVISIBLE_E:
-            o->func_ptr = (void *)&routines_hitbox_invis_e;
+            o->func_ptr = (void *)&Routines_Enemy_InvisibleHit;
             break;
         case OBJID_SYS_IMPACT:
             o->func_ptr = (void *)&routines_fx_impact;

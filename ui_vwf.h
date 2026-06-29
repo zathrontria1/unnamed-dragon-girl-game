@@ -22,6 +22,9 @@ extern uint16_t vwf_tiledata_run;
 extern uint16_t vwf_tiledata_advance;
 extern uint16_t vwf_tiledata_advance_vram;
 
+extern uint16_t vwf_run_width;
+extern uint16_t vwf_advance_width;
+
 extern uint16_t vwf_wram_offset;
 extern uint16_t vwf_vram_offset;
 
@@ -33,6 +36,7 @@ extern bool vwf_print_finished;
 uint16_t VwfEngine_PrintText(uint8_t * string, uint8_t * dest, uint8_t * tilemap_dest, int col_ext, int row_ext, int id_offset);
 void VwfEngine_PrintText_Gradual_Setup(uint8_t * string, uint8_t * dest, uint8_t * tilemap_dest, int col_ext, int row_ext, int id_offset, int tilemap_len);
 uint8_t * VwfEngine_PrintText_Gradual(int len);
+void VwfEngine_PrintText_Internal_AlignPointers();
 
 #if VBCC_ASM == 1
 NO_INLINE void VwfEngine_PrintText_Render(__reg("r4/r5") uint8_t * glyph_ptr, __reg("r6/r7")uint8_t * write_ptr, __reg("a")uint16_t mul);

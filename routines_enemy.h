@@ -1,7 +1,7 @@
-void routines_slime(struct game_object * o);
-void routines_lizardman(struct game_object * o);
-void routines_bubble_e(struct game_object * o);
-void routines_arrow_e(struct game_object * o);
-void routines_hitbox_invis_e(struct game_object * o);
+void Routines_Enemy_Slime(struct game_object * o);
+void Routines_Enemy_Lizardman(struct game_object * o);
+void Routines_Enemy_Slime_Bubble(struct game_object * o);
+void Routines_Enemy_Lizardman_Arrow(struct game_object * o);
+void Routines_Enemy_InvisibleHit(struct game_object * o);
 
 uint16_t Routines_Enemy_GetFacing(struct game_object * o);

@@ -227,8 +227,6 @@ void Loop_Game()
         DmaSystem_AddItemToQueue((uint8_t *)(LZ4_BUFFER_ADDR+0x8000), 0x4400, 16, VRAM_INCHIGH, 0);
         DmaSystem_AddItemToQueue((uint8_t *)(LZ4_BUFFER_ADDR+0x8800), 0x4800, 256, VRAM_INCHIGH, 0);
 
-        SoundInterface_PlayClip(STREAM_TYPEWRITER);
-
         event_tutorial_shown = true;
 
         system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_MSGBOX);
@@ -380,7 +378,7 @@ void Loop_Subscreen_MapDisplay_Init()
     
     ui_in_bg2 = true;
 
-    LZ4_UnpackToWRAM(level_data_ptr->map_overview_tiles_lz4, 0x007f0000);
+    LZ4_UnpackToWRAM(level_data_ptr->map_overview_tiles_lz4, (void *)0x007f0000);
 
     while (shadow_inidisp != 0x00)
     {
@@ -399,10 +397,10 @@ void Loop_Subscreen_MapDisplay_Init()
     REG_BG2VOFS = 0xff;
 
     // Copy the ROM palette into shadow
-    DmaSystem_CopyToWram((unsigned long int)level_data_ptr->map_overview_palette, (unsigned long int)&shadow_cgram, 512);
+    DmaSystem_CopyToWram((uint8_t *)level_data_ptr->map_overview_palette, (uint8_t *)&shadow_cgram, 512);
     
     // Copy the background graphics into VRAM
-    DmaSystem_CopyToVram(0x007f0000, 0x0000, 0x9000);
+    DmaSystem_CopyToVram((uint8_t *)0x007f0000, 0x0000, 0x9000);
 
     int i = 0;
     REG_VMAIN = VRAM_INCHIGH;
@@ -622,8 +620,8 @@ void Loop_Game_ReloadScene()
     System_Init_BgScroll();
 
     // DMA just the background and BG3 tiles
-    DmaSystem_CopyToVram(((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_MAP << 1)), TILEDATA_ADDR_GAME_MAP, 24576);
-    DmaSystem_CopyToVram(((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_UI_2BPP << 1)), TILEDATA_ADDR_GAME_UI_2BPP, 8192);
+    DmaSystem_CopyToVram(((uint8_t *)(0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_MAP << 1))), TILEDATA_ADDR_GAME_MAP, 24576);
+    DmaSystem_CopyToVram(((uint8_t *)(0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_UI_2BPP << 1))), TILEDATA_ADDR_GAME_UI_2BPP, 8192);
     MapSystem_Tilemap_RegenerateTilemap();
     System_Init_UiTilemap();
 
@@ -711,8 +709,8 @@ void Loop_Game_NewLevel()
     // DMA just the background and BG3 tiles, IF there was a need to
     if (!temp_level_reuses_vram_contents)
     {
-        DmaSystem_CopyToVram(((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_MAP << 1)), TILEDATA_ADDR_GAME_MAP, 24576);
-        DmaSystem_CopyToVram(((uint32_t)0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_UI_2BPP << 1)), TILEDATA_ADDR_GAME_UI_2BPP, 8192);
+        DmaSystem_CopyToVram(((uint8_t *)(0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_MAP << 1))), TILEDATA_ADDR_GAME_MAP, 24576);
+        DmaSystem_CopyToVram(((uint8_t *)(0x007f0000 | ((uint32_t)TILEDATA_ADDR_GAME_UI_2BPP << 1))), TILEDATA_ADDR_GAME_UI_2BPP, 8192);
 
         // Re-copy the animated background tiles
         AniSystem_BgTile_Setup((uint8_t *)&data_bg_dungeon_anim_water_lz4, (uint8_t *)&data_bg_dungeon_anim_torch_lz4);

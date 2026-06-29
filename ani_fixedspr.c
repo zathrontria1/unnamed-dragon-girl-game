@@ -8,6 +8,9 @@
 #include "ani_fixedspr.h"
 #include "dma.h"
 
+uint16_t ani_bg_frame_coin;
+uint8_t * ani_bg_addr_coin;
+
 bool ani_coin_flip; // Used by the coin function to enable H flip.
 
 /*

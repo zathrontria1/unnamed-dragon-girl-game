@@ -452,7 +452,7 @@ void loop_subscreen_profile_save_last_sprite_page()
         {
             System_AlignToVblank();
 
-            DmaSystem_CopyFromVramToWram(0x7000 + (i * 0x200), 0x007fe000 + (i * 0x0400), 1024);
+            DmaSystem_CopyFromVramToWram(0x7000 + (i << 9), (uint8_t *)0x007fe000 + (i << 10), 1024);
         }
     }
     else
@@ -461,7 +461,7 @@ void loop_subscreen_profile_save_last_sprite_page()
         {
             System_AlignToVblank();
 
-            DmaSystem_CopyFromVramToWram(0x7000 + (i * 0x800), 0x007fe000 + (i * 0x1000), 4096);
+            DmaSystem_CopyFromVramToWram(0x7000 + (i << 11), (uint8_t *)0x007fe000 + (i << 12), 4096);
         }
     }
 
@@ -474,7 +474,7 @@ void loop_subscreen_profile_save_last_sprite_page()
 void loop_subscreen_profile_upload_profile_picture()
 {
     // First decompress the image
-    LZ4_UnpackToWRAM(&data_spr_player_portrait_lz4, LZ4_BUFFER_ADDR+0x6000);
+    LZ4_UnpackToWRAM(&data_spr_player_portrait_lz4, (void *)(LZ4_BUFFER_ADDR+0x6000));
 
     // TODO: This is very hacky. Consider making a third NMI routine for this so APU playback isn't a factor.
     if (snd_stream_enable)
@@ -483,7 +483,7 @@ void loop_subscreen_profile_upload_profile_picture()
         {
             System_AlignToVblank();
 
-            DmaSystem_CopyToVram((uint32_t)LZ4_BUFFER_ADDR+0x6000 + (i * 0x0400), 0x7000+(i * 0x200), 1024);
+            DmaSystem_CopyToVram((uint8_t *)LZ4_BUFFER_ADDR+0x6000 + (i * 0x0400), 0x7000+(i * 0x200), 1024);
         }
     }
     else
@@ -492,7 +492,7 @@ void loop_subscreen_profile_upload_profile_picture()
         {
             System_AlignToVblank();
 
-            DmaSystem_CopyToVram((uint32_t)LZ4_BUFFER_ADDR+0x6000 + (i * 0x1000), 0x7000+(i * 0x800), 4096);
+            DmaSystem_CopyToVram((uint8_t *)LZ4_BUFFER_ADDR+0x6000 + (i * 0x1000), 0x7000+(i * 0x800), 4096);
         }
     }
 
@@ -511,7 +511,7 @@ void loop_subscreen_profile_restore_last_sprite_page()
         {
             System_AlignToVblank();
 
-            DmaSystem_CopyToVram(0x007fe000 + (i * 0x0400), 0x7000 + (i * 0x200), 1024);
+            DmaSystem_CopyToVram((uint8_t *)0x007fe000 + (i * 0x0400), 0x7000 + (i * 0x200), 1024);
         }
     }
     else
@@ -520,7 +520,7 @@ void loop_subscreen_profile_restore_last_sprite_page()
         {
             System_AlignToVblank();
 
-            DmaSystem_CopyToVram(0x007fe000 + (i * 0x1000), 0x7000 + (i * 0x800), 4096);
+            DmaSystem_CopyToVram((uint8_t *)0x007fe000 + (i * 0x1000), 0x7000 + (i * 0x800), 4096);
         }
     }
 

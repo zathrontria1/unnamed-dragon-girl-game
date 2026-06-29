@@ -32,7 +32,7 @@
 
 #include "main.h"
 
-void routines_slime(struct game_object * o)
+void Routines_Enemy_Slime(struct game_object * o)
 {
     if (!system_game_paused)
     {
@@ -270,60 +270,12 @@ void routines_slime(struct game_object * o)
     // Testing DMA on demand
     uint8_t * temp_addr = AniSystem_GetDynamicFrame_Slime(o);
 
-    if ((temp_addr != o->struct_data.npc_data.ani.last_address))
-    {
-        // Save the requested frame into object's data
-        // for comparison and in case it fails
-        o->struct_data.npc_data.ani.last_address = temp_addr;
-
-        if (DmaSystem_AddItemToQueue(temp_addr, 0x6000+(o->struct_data.npc_data.vram_addr), 128, VRAM_INCHIGH, 1))
-        {
-            o->struct_data.npc_data.ani.last_dmafailed = 1;
-        }
-        else
-        {
-            o->struct_data.npc_data.ani.last_dmafailed = 0;
-        }        
-    }
-    else if ((o->struct_data.npc_data.ani.last_dmafailed))
-    {
-        // The previous DMA failed. Attempt it again.
-        if (!DmaSystem_AddItemToQueue(o->struct_data.npc_data.ani.last_address, 0x6000+(o->struct_data.npc_data.vram_addr), 128, VRAM_INCHIGH, 1))
-        {
-            o->struct_data.npc_data.ani.last_dmafailed = 0;
-        }     
-    }
-
-    // DMA variant
-    uint16_t temp_tileattrib;
-
-    if (((uint32_t)temp_addr & 0x80000000) == 0x80000000) // sign bit is used for flip
-    {
-        temp_tileattrib = (o->struct_data.npc_data.tilenum | PAL_SLIME << 9 | 2 << 12 | 0x4000);
-    }
-    else
-    {
-        temp_tileattrib = (o->struct_data.npc_data.tilenum | PAL_SLIME << 9 | 2 << 12);
-    }
-
-    // Check if STAT77 is overflow
-    if ((shadow_stat77 & 0x80) == 0x80)
-    {
-        // Do not perform a draw every other frame
-        if ((o->uid & 0x0001) == ((uint16_t)system_frames_elapsed & 0x0001))
-        {
-            SpriteEngine_AddToSortedLayer(o, temp_tileattrib);
-        }
-    }
-    else
-    {
-        SpriteEngine_AddToSortedLayer(o, temp_tileattrib);
-    }
+    Routines_Shared_Draw(o, temp_addr, PAL_SLIME, 1, false, false);
 
     return;
 }
 
-void routines_lizardman(struct game_object * o)
+void Routines_Enemy_Lizardman(struct game_object * o)
 {
     if (!system_game_paused)
     {
@@ -566,60 +518,12 @@ void routines_lizardman(struct game_object * o)
     // Testing DMA on demand
     uint8_t * temp_addr = AniSystem_GetDynamicFrame_Lizardman(o);
 
-    if ((temp_addr != o->struct_data.npc_data.ani.last_address))
-    {
-        // Save the requested frame into object's data
-        // for comparison and in case it fails
-        o->struct_data.npc_data.ani.last_address = temp_addr;
-
-        if (DmaSystem_AddItemToQueue(temp_addr, 0x6000+(o->struct_data.npc_data.vram_addr), 128, VRAM_INCHIGH, 1))
-        {
-            o->struct_data.npc_data.ani.last_dmafailed = 1;
-        }
-        else
-        {
-            o->struct_data.npc_data.ani.last_dmafailed = 0;
-        }        
-    }
-    else if ((o->struct_data.npc_data.ani.last_dmafailed))
-    {
-        // The previous DMA failed. Attempt it again.
-        if (!DmaSystem_AddItemToQueue(o->struct_data.npc_data.ani.last_address, 0x6000+(o->struct_data.npc_data.vram_addr), 128, VRAM_INCHIGH, 1))
-        {
-            o->struct_data.npc_data.ani.last_dmafailed = 0;
-        }     
-    }
-
-    // DMA variant
-    uint16_t temp_tileattrib;
-
-    if (((uint32_t)temp_addr & 0x80000000) == 0x80000000) // sign bit is used for flip
-    {
-        temp_tileattrib = (o->struct_data.npc_data.tilenum | PAL_LIZARDMAN << 9 | 2 << 12 | 0x4000);
-    }
-    else
-    {
-        temp_tileattrib = (o->struct_data.npc_data.tilenum | PAL_LIZARDMAN << 9 | 2 << 12);
-    }
-
-    // Check if STAT77 is overflow
-    if ((shadow_stat77 & 0x80) == 0x80)
-    {
-        // Do not perform a draw every other frame
-        if ((o->uid & 0x0001) == ((uint16_t)system_frames_elapsed & 0x0001))
-        {
-            SpriteEngine_AddToSortedLayer(o, temp_tileattrib);
-        }
-    }
-    else
-    {
-        SpriteEngine_AddToSortedLayer(o, temp_tileattrib);
-    }
+    Routines_Shared_Draw(o, temp_addr, PAL_LIZARDMAN, 1, false, false);
 
     return;
 }
 
-void routines_bubble_e(struct game_object * o)
+void Routines_Enemy_Slime_Bubble(struct game_object * o)
 {
     if (!system_game_paused)
     {
@@ -646,43 +550,12 @@ void routines_bubble_e(struct game_object * o)
 
     uint8_t * temp_addr = AniSystem_GetDynamicFrame_Bubble(o);
 
-    if ((temp_addr != o->struct_data.npc_data.ani.last_address))
-    {
-        // Save the requested frame into object's data
-        // for comparison and in case it fails
-        o->struct_data.npc_data.ani.last_address = temp_addr;
-
-        if (DmaSystem_AddItemToQueue(temp_addr, 0x6000+(o->struct_data.npc_data.vram_addr), 128, VRAM_INCHIGH, 1))
-        {
-            o->struct_data.npc_data.ani.last_dmafailed = 1;
-        }
-        else
-        {
-            o->struct_data.npc_data.ani.last_dmafailed = 0;
-        }        
-    }
-    else if ((o->struct_data.npc_data.ani.last_dmafailed))
-    {
-        // The previous DMA failed. Attempt it again.
-        if (!DmaSystem_AddItemToQueue(o->struct_data.npc_data.ani.last_address, 0x6000+(o->struct_data.npc_data.vram_addr), 128, VRAM_INCHIGH, 1))
-        {
-            o->struct_data.npc_data.ani.last_dmafailed = 0;
-        }     
-    }
-
-    // Only draw every other frame for both visibility and performance
-    if ((o->uid & 0x0001) == ((uint16_t)system_frames_elapsed & 0x0001))
-    {
-        uint16_t temp_tileattrib;
-        temp_tileattrib = (o->struct_data.npc_data.tilenum | PAL_BUBBLE_E << 9 | 3 << 12);
-
-        SpriteEngine_AddToFrontLayer(o, temp_tileattrib);
-    }
+    Routines_Shared_Draw(o, temp_addr, PAL_BUBBLE_E, 0, true, false);
 
     return;
 }
 
-void routines_arrow_e(struct game_object * o)
+void Routines_Enemy_Lizardman_Arrow(struct game_object * o)
 {
     if (!system_game_paused)
     {
@@ -764,7 +637,7 @@ void routines_arrow_e(struct game_object * o)
     return;
 }
 
-void routines_hitbox_invis_e(struct game_object * o)
+void Routines_Enemy_InvisibleHit(struct game_object * o)
 {
     if (system_game_paused)
     {

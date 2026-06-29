@@ -254,7 +254,7 @@ uint8_t * AniSystem_GetDynamicFrame_Bubble(struct game_object * o)
         temp_tilenum += o->struct_data.npc_data.ani.frame;
 
         // Calculate the address
-        return (uint8_t *)((uint32_t)&data_spr_slime + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
+        return ((uint8_t *)&data_spr_slime + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
     #endif
 
     return 0;
@@ -365,7 +365,7 @@ uint8_t * AniSystem_GetDynamicFrame_Arrow(struct game_object * o)
         temp_addr |= 0x80000000; // Set highest bit
     }
 
-    temp_addr |= ((uint32_t)temp_tilenum - 32l) << 24; // use 6 bits of the highest bytes to store the tile number minus 32
+    temp_addr |= ((uint32_t)temp_tilenum - 32) << 24; // use 6 bits of the highest bytes to store the tile number minus 32
 
     // Calculate the address
     return (uint8_t *)temp_addr;
@@ -456,8 +456,7 @@ uint8_t * AniSystem_GetDynamicFrame_Slime(struct game_object * o)
 
         if (o->state == STATE_SPAWNING)
         {
-            return (uint8_t *)((uint32_t)&data_spr_spawn_placeholder + const_ani_lut_frame_byteoffsets_16[temp_tilenum]);
-            //return (uint8_t *)((uint32_t)&data_spr_spawn_placeholder + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
+            return (uint8_t *)&data_spr_spawn_placeholder + const_ani_lut_frame_byteoffsets_16[temp_tilenum];
         }
         else
         {
@@ -465,14 +464,12 @@ uint8_t * AniSystem_GetDynamicFrame_Slime(struct game_object * o)
 
             if ((o->facing == FACING_LEFT) && (o->state != STATE_DIE))
             {
-                return (uint8_t *)(((uint32_t)&data_spr_slime + const_ani_lut_frame_byteoffsets_16[temp_tilenum]) | 0x80000000); // set the negative flag
-                //return (uint8_t *)(((uint32_t)&data_spr_slime + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10)) | 0x80000000); // set the negative flag
+                return (uint8_t *)((uint32_t)&data_spr_slime + const_ani_lut_frame_byteoffsets_16[temp_tilenum] | 0x80000000); // set the negative flag
             }
             else
             {
                 // Calculate the address
-                return (uint8_t *)((uint32_t)&data_spr_slime + const_ani_lut_frame_byteoffsets_16[temp_tilenum]);
-                //return (uint8_t *)((uint32_t)&data_spr_slime + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
+                return (uint8_t *)&data_spr_slime + const_ani_lut_frame_byteoffsets_16[temp_tilenum];
             }
         }
     #endif
@@ -566,7 +563,7 @@ uint8_t * AniSystem_GetDynamicFrame_Lizardman(struct game_object * o)
 
         if (o->state == STATE_SPAWNING)
         {
-            return (uint8_t *)((uint32_t)&data_spr_spawn_placeholder + const_ani_lut_frame_byteoffsets_16[temp_tilenum]);
+            return (uint8_t *)&data_spr_spawn_placeholder + const_ani_lut_frame_byteoffsets_16[temp_tilenum];
         }
         else
         {
@@ -574,12 +571,12 @@ uint8_t * AniSystem_GetDynamicFrame_Lizardman(struct game_object * o)
 
             if ((o->facing == FACING_LEFT) && (o->state != STATE_DIE))
             {
-                return (uint8_t *)(((uint32_t)&data_spr_lizardman + const_ani_lut_frame_byteoffsets_16[temp_tilenum]) | 0x80000000); // set the negative flag
+                return (uint8_t *)((uint32_t)&data_spr_lizardman + const_ani_lut_frame_byteoffsets_16[temp_tilenum] | 0x80000000); // set the negative flag
             }
             else
             {
                 // Calculate the address
-                return (uint8_t *)((uint32_t)&data_spr_lizardman + const_ani_lut_frame_byteoffsets_16[temp_tilenum]);
+                return (uint8_t *)&data_spr_lizardman + const_ani_lut_frame_byteoffsets_16[temp_tilenum];
             }
         }
     #endif
@@ -618,7 +615,6 @@ uint8_t * AniSystem_GetCompressedFrame(const uint8_t * data, const uint16_t * lo
     REG_A1T7LH = (uint16_t)((uint32_t)ptr_read_0);
     REG_A1B7 = (uint8_t)((uint32_t)ptr_read_0 >> 16);
     
-    //REG_DAS7LH = 32;
     REG_DAS7LH = 64;
 
     while ((REG_HVBJOY & HBL_READY) == HBL_READY)

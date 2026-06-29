@@ -7,15 +7,9 @@
 
 #include "vars_extern.h"
 
-// For SRAM management
-extern const uint8_t const_sram_verify_str[];
-extern uint8_t sram_available_slots;
-
 // For DMA/HDMA copies
 extern const uint32_t const_zero[8];
 extern const uint8_t const_sprite_offscreen;
-extern const uint8_t const_hdma_tm_msgbox[];
-extern const uint16_t const_ui_textadvance_tilemapentries[];
 
 // System general shadows and variables
 ZP extern bool system_in_vblank;
@@ -68,7 +62,3 @@ extern uint16_t event_in_combat;
 extern uint16_t event_in_combat_shadow;
 
 extern uint16_t event_tutorial_shown;
-
-// Fixed sprite tile anims
-extern uint16_t ani_bg_frame_coin;
-extern uint8_t * ani_bg_addr_coin;

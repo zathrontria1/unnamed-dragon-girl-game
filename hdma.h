@@ -13,6 +13,7 @@ extern uint16_t hdma_scroll_sine_index;
 extern ZP uint16_t hdma_use_gradient;
 extern ZP uint16_t hdma_gradient_ptr;
 
+extern const uint8_t const_hdma_tm_msgbox[];
 extern NEAR const int16_t const_hdma_scroll_sine[16][64];
 extern struct hdma_indirect_table_entry hdma_scroll_tables[2][8];
 

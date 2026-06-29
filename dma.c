@@ -17,9 +17,11 @@ uint16_t dma_filler_length;
 
 /*
     Clears a block of WRAM.
+
+    Length 0 = 65,536 bytes
 */
 void DmaSystem_ClearWram(
-    uint32_t dest, 
+    uint8_t * dest, 
     uint16_t length)
 {
     REG_DMAP7 = 0x08; // byte reg write, fixed
@@ -29,7 +31,7 @@ void DmaSystem_ClearWram(
 
     REG_BBAD7 = 0x80; // WMDATA
 
-    REG_WMADDLM = (uint16_t)dest;
+    REG_WMADDLM = (uint16_t)((uint32_t)dest);
     REG_WMADDH = (uint8_t)((uint32_t)dest >> 16);
     
     REG_DAS7LH = length;
@@ -52,17 +54,16 @@ void DmaSystem_ClearWram(
 */
 #if VBCC_ASM == 1
     NO_INLINE void DmaSystem_CopyToWram(
-    __reg("r0/r1") uint32_t src, 
-    __reg("r2/r3") uint32_t dest, 
+    __reg("r0/r1") uint8_t * src, 
+    __reg("r2/r3") uint8_t * dest, 
     __reg("a") uint16_t length)
 #else
 void DmaSystem_CopyToWram(
-    uint32_t src, 
-    uint32_t dest, 
+    uint8_t * src, 
+    uint8_t * dest, 
     uint16_t length)
 #endif
 {
-
     #if VBCC_ASM == 1
         __asm(
             "\ta16\n"
@@ -98,12 +99,12 @@ void DmaSystem_CopyToWram(
         // Copies A-bus address to WRAM
         REG_DMAP7 = 0x00; // byte reg write
 
-        REG_A1T7LH = (uint16_t)src;
+        REG_A1T7LH = (uint16_t)((uint32_t)src);
         REG_A1B7 = (uint8_t)((uint32_t)src >> 16);
 
         REG_BBAD7 = 0x80; // WMDATA
 
-        REG_WMADDLM = (uint16_t)dest;
+        REG_WMADDLM = (uint16_t)((uint32_t)dest);
         REG_WMADDH = (uint8_t)((uint32_t)dest >> 16);
         
         REG_DAS7LH = length;
@@ -182,7 +183,7 @@ void DmaSystem_CopyToWram_ShortRun(
 }
 
 void DmaSystem_CopyToVram(
-    uint32_t src, 
+    uint8_t * src, 
     uint16_t dest, 
     uint16_t length)
 {
@@ -192,7 +193,7 @@ void DmaSystem_CopyToVram(
 
     REG_DMAP0 = 0x01; // word reg write
 
-    REG_A1T0LH = (uint16_t)src;
+    REG_A1T0LH = (uint16_t)((uint32_t)src);
     REG_A1B0 = (uint8_t)((uint32_t)src >> 16);
 
     REG_VMAIN = VRAM_INCHIGH;
@@ -210,7 +211,7 @@ void DmaSystem_CopyToVram(
 
 void DmaSystem_CopyFromVramToWram(
     uint16_t src, 
-    uint32_t dest, 
+    uint8_t * dest, 
     uint16_t length)
 {
     // Copies VRAM to A-bus address
@@ -219,7 +220,7 @@ void DmaSystem_CopyFromVramToWram(
 
     REG_DMAP0 = 0x81; // word reg write, reverse
 
-    REG_A1T0LH = (uint16_t)dest;
+    REG_A1T0LH = (uint16_t)((uint32_t)dest);
     REG_A1B0 = (uint8_t)((uint32_t)dest >> 16);
 
     REG_VMAIN = VRAM_INCHIGH;
@@ -232,7 +233,7 @@ void DmaSystem_CopyFromVramToWram(
 
     // Perform a dummy read first
     register volatile uint16_t temp = REG_VMDATAREADLH;
-
+    
     REG_MDMAEN = 0x01;
 
     return;

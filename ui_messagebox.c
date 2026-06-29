@@ -129,3 +129,12 @@ void UserInterface_CopyTextboxToVram(uint16_t row, uint16_t h)
     
     return;
 }
+
+// Used to display the textbox advance indicator.
+const uint16_t const_ui_textadvance_tilemapentries[] =
+{
+    0x0060 | 0x2000 | (PAL_UI_TEXT_WHITE << 10),
+    0x0061 | 0x2000 | (PAL_UI_TEXT_WHITE << 10),
+    0x0070 | 0x2000 | (PAL_UI_TEXT_WHITE << 10),
+    0x0071 | 0x2000 | (PAL_UI_TEXT_WHITE << 10),
+};

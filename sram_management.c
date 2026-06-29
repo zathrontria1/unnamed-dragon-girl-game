@@ -179,3 +179,6 @@ void Sram_SaveToSlot(uint16_t slot)
 
     return;
 }
+
+const uint8_t const_sram_verify_str[] = "EIEIMUN!"; // Can use any 8 character string that isn't all 0x00 or 0xff. Will occupy 9 bytes in ROM
+uint8_t sram_available_slots;

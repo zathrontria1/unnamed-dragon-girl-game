@@ -40,6 +40,9 @@ uint16_t vwf_tiledata_run;
 uint16_t vwf_tiledata_advance; // And how much to advance the tile pointer, which is separate/cannot be inferred
 uint16_t vwf_tiledata_advance_vram;
 
+uint16_t vwf_run_width;
+uint16_t vwf_advance_width;
+
 // Is VWF engine mid-run?
 // This should be checked before starting a single-character print command.
 // Starting a new command will reset state.
@@ -120,12 +123,12 @@ uint8_t * VwfEngine_PrintText_Gradual(int len)
 {
     uint8_t * write_ptr_start = vwf_tiledata_ptr;
 
-    int run_width = 0;
-    int advance_width = 0;
+    vwf_run_width = 0;
+    vwf_advance_width = 0;
 
     bool shift_overflow = false;
 
-    if (!vwf_print_ongoing)
+    if (!vwf_print_ongoing || (len != 32767)) // 32767 is instant
     {
         SoundInterface_PlayClip(STREAM_TYPEWRITER);
     }
@@ -139,73 +142,17 @@ uint8_t * VwfEngine_PrintText_Gradual(int len)
             // Efficient implementation
             if (*vwf_string_ptr == '\n')
             {
-                int i;
-                if (vwf_shift == 0)
-                {
-                    i = 0;
-                }
-                else
-                {
-                    i = 1;
-                    *vwf_tilemap_ptr = vwf_tile_id;
-                    vwf_tilemap_ptr++;
-                }
+                VwfEngine_PrintText_Internal_AlignPointers();
 
-                int remaining = (32-vwf_col)+vwf_col_start;
-                for (; i < remaining; i++)
-                {
-                    *vwf_tilemap_ptr = 0x0000;
-                    vwf_tilemap_ptr++;
-                }
-                
                 vwf_row++;
-                vwf_col = vwf_col_start;
-                vwf_shift = 0;
-                vwf_string_ptr++;
-
-                if (vwf_text_rendered)
-                {
-                    run_width++;
-                    advance_width++;
-                    vwf_tile_id++;
-                    vwf_tiledata_ptr += 16;
-                }
                 
                 continue;
             }
             else if (*vwf_string_ptr == '\r')
             {
-                int i;
-                if (vwf_shift == 0)
-                {
-                    i = 0;
-                }
-                else
-                {
-                    i = 1;
-                    *vwf_tilemap_ptr = vwf_tile_id;
-                    vwf_tilemap_ptr++;
-                }
+                VwfEngine_PrintText_Internal_AlignPointers();
 
-                int remaining = (32-vwf_col)+vwf_col_start;
-                for (; i < remaining; i++)
-                {
-                    *vwf_tilemap_ptr = 0x0000;
-                    vwf_tilemap_ptr++;
-                }
-                
                 vwf_row = vwf_row_start;
-                vwf_col = vwf_col_start;
-                vwf_shift = 0;
-                vwf_string_ptr++;
-
-                if (vwf_text_rendered)
-                {
-                    run_width++;
-                    advance_width++;
-                    vwf_tile_id++;
-                    vwf_tiledata_ptr += 16;
-                }
 
                 vwf_print_ongoing = false;
 
@@ -234,11 +181,11 @@ uint8_t * VwfEngine_PrintText_Gradual(int len)
 
             int width = const_ui_vwf_offsets[glyph_sel];
 
-            uint8_t * glyph_ptr = (uint8_t *)((uint32_t)&data_ui_vwf + (glyph_sel << 4));
+            uint8_t * glyph_ptr = (uint8_t *)&data_ui_vwf + (glyph_sel << 4);
 
             if (shift_overflow)
             {
-                run_width++;
+                vwf_run_width++;
                 shift_overflow = false;
             }
 
@@ -246,9 +193,9 @@ uint8_t * VwfEngine_PrintText_Gradual(int len)
             {
                 // Copy the tile as is
                 System_CopyBlock(glyph_ptr, vwf_tiledata_ptr, 16);
-                if (run_width == 0)
+                if (vwf_run_width == 0)
                 {
-                    run_width = 1;
+                    vwf_run_width = 1;
                 }
             }
             else
@@ -257,9 +204,9 @@ uint8_t * VwfEngine_PrintText_Gradual(int len)
 
                 VwfEngine_PrintText_Render(glyph_ptr, vwf_tiledata_ptr, bitplane_mul);
 
-                if (run_width < 2)
+                if (vwf_run_width < 2)
                 {
-                    run_width = 2;
+                    vwf_run_width = 2;
                 }
             }
 
@@ -280,7 +227,7 @@ uint8_t * VwfEngine_PrintText_Gradual(int len)
                 vwf_col++;
 
                 shift_overflow = true;
-                advance_width++;
+                vwf_advance_width++;
             }
 
             vwf_string_ptr++;
@@ -294,16 +241,58 @@ uint8_t * VwfEngine_PrintText_Gradual(int len)
         }
     }
 
-    if (!vwf_print_ongoing)
+    if (!vwf_print_ongoing) // Same rationale as the beginning one
     {
         SoundInterface_StopStream();
     }
 
-    vwf_tiledata_run = run_width << 4;
-    vwf_tiledata_advance = advance_width << 4;
-    vwf_tiledata_advance_vram = advance_width << 3;
+    vwf_tiledata_run = vwf_run_width << 4;
+    vwf_tiledata_advance = vwf_advance_width << 4;
+    vwf_tiledata_advance_vram = vwf_advance_width << 3;
 
     return write_ptr_start;
+}
+
+/*
+    Called when something happens that require pointer resets
+
+    e.g. new lines or new pages
+*/
+void VwfEngine_PrintText_Internal_AlignPointers()
+{
+    int i;
+
+    if (vwf_shift == 0)
+    {
+        i = 0;
+    }
+    else
+    {
+        i = 1;
+        *vwf_tilemap_ptr = vwf_tile_id;
+        vwf_tilemap_ptr++;
+    }
+
+    int remaining = (32-vwf_col)+vwf_col_start;
+    for (; i < remaining; i++)
+    {
+        *vwf_tilemap_ptr = 0x0000;
+        vwf_tilemap_ptr++;
+    }
+    
+    vwf_col = vwf_col_start;
+    vwf_shift = 0;
+    vwf_string_ptr++;
+
+    if (vwf_text_rendered)
+    {
+        vwf_run_width++;
+        vwf_advance_width++;
+        vwf_tile_id++;
+        vwf_tiledata_ptr += 16;
+    }
+
+    return;
 }
 
 #if VBCC_ASM == 1

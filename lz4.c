@@ -10,7 +10,7 @@
 /*
     Unpacks LZ4 compressed data to WRAM area
 */
-uint32_t LZ4_UnpackToWRAM(void * src, uint32_t dest)
+uint32_t LZ4_UnpackToWRAM(void * src, void * dest)
 {
     int32_t temp_length = LZ4_GetLength(src);
 
@@ -21,9 +21,7 @@ uint32_t LZ4_UnpackToWRAM(void * src, uint32_t dest)
             temp_length += 1; // pad to nearest even number
         }
 
-        LZ4_DecompressFrame(src, (void *)dest);
-
-        //DmaSystem_CopyToWram((uint32_t)LZ4_BUFFER_ADDR, dest, temp_length);
+        LZ4_DecompressFrame(src, dest);
     }
 
     return temp_length;
@@ -45,7 +43,7 @@ uint32_t LZ4_UnpackToVRAM(void * src, uint16_t dest)
         
         LZ4_DecompressFrame(src, (void *)LZ4_BUFFER_ADDR);
 
-        DmaSystem_CopyToVram((uint32_t)LZ4_BUFFER_ADDR, dest, temp_length);
+        DmaSystem_CopyToVram((uint8_t *)LZ4_BUFFER_ADDR, dest, temp_length);
     }
 
     return temp_length;

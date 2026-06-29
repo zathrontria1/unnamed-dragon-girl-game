@@ -31,21 +31,21 @@
 
 #include "main.h"
 
-void routines_player(struct game_object * o)
+void Routines_Player(struct game_object * o)
 {
     if (!system_game_paused)
     {
-        if (snd_punch_timeout != 0)
+        if (snd_punch_timeout)
         {
             snd_punch_timeout--;
         }
 
-        if (snd_footstep_timeout != 0)
+        if (snd_footstep_timeout)
         {
             snd_footstep_timeout--;
         }
 
-        uint16_t temp_nomove = 0;
+        bool temp_nomove = false;
 
         // Set event interaction to the most negative value
         event_interaction_x = -32728;
@@ -137,7 +137,7 @@ void routines_player(struct game_object * o)
                 case 5:
                     o->delta.x.a = 0;
                     o->delta.y.a = 0;
-                    temp_nomove = 1;
+                    temp_nomove = true;
                     break;
                 case 6:
                     o->delta.x.a = V_S_ONE;
@@ -190,7 +190,7 @@ void routines_player(struct game_object * o)
             {
                 // Punching
                 // Update the animation state
-                if (temp_nomove == 0)
+                if (!temp_nomove)
                 {
                     o->state = STATE_ATTACK_BASIC_MOVE;
                 }
@@ -199,9 +199,9 @@ void routines_player(struct game_object * o)
                     o->state = STATE_ATTACK_BASIC;
                 }
                 
-                if (obj_player_attack_interval == 0)
+                if (!obj_player_attack_interval)
                 {
-                    if (snd_punch_timeout == 0)
+                    if (!snd_punch_timeout)
                     {
                         SoundInterface_PlaySfx_Pre(o, SFX_ATK_SWING);
 
@@ -279,7 +279,7 @@ void routines_player(struct game_object * o)
             {
                 // Fire breath
                 // Update the animation state
-                if (temp_nomove == 0)
+                if (!temp_nomove)
                 {
                     o->state = STATE_ATTACK_SPECIAL_MOVE;
                 }
@@ -573,45 +573,19 @@ void routines_player(struct game_object * o)
 
     uint8_t * temp_addr = AniSystem_GetPlayerFrame(o); // This will cause a compressed frame fetch
     
-    if ((temp_addr != o->struct_data.npc_data.ani.last_address))
-    {
-        // Save the requested frame into object's data
-        // for comparison and in case it fails
-        o->struct_data.npc_data.ani.last_address = temp_addr;
-
-        if (DmaSystem_AddItemToQueue((uint8_t *)(LZ4_BUFFER_ADDR+0xc000), 0x6000, 128, VRAM_INCHIGH, 1))
-        {
-            o->struct_data.npc_data.ani.last_dmafailed = 1;
-        }
-        else
-        {
-            o->struct_data.npc_data.ani.last_dmafailed = 0;
-        }        
-    }
-    else if ((o->struct_data.npc_data.ani.last_dmafailed))
-    {
-        // The previous DMA failed. Attempt it again.
-        if (DmaSystem_AddItemToQueue((uint8_t *)(LZ4_BUFFER_ADDR+0xc000), 0x6000, 128, VRAM_INCHIGH, 1) == 0)
-        {
-            o->struct_data.npc_data.ani.last_dmafailed = 0;
-        }     
-    }
-    
-    uint16_t temp_tileattrib = (o->struct_data.npc_data.ani.display | PAL_PLAYER << 9 | 2 << 12);
-
     if ((o->struct_data.npc_data.invuln_time != 0) && (((uint16_t)system_frames_elapsed & 0x01) == 0x01))
     {
         ;
     }
     else
     {
-        SpriteEngine_AddToSortedLayer(o, temp_tileattrib);
+        Routines_Shared_Draw(o, temp_addr, PAL_PLAYER, 1, false, true);
     }
 
     return;
 }
 
-void routines_fireball(struct game_object * o)
+void Routines_Player_Fireball(struct game_object * o)
 {
     snd_flame_active = 1;
 
@@ -658,7 +632,7 @@ void routines_fireball(struct game_object * o)
 }
 
 
-void routines_hitbox_invis(struct game_object * o)
+void Routines_Player_InvisibleHit(struct game_object * o)
 {
     if (system_game_paused)
     {

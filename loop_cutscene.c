@@ -103,6 +103,8 @@ void CsEngine_Loop()
         if (((uint32_t)(cs_current->frame) == 0xffffffff) || skip)
         {
             // Cutscene has ended.
+            DmaSystem_ResetQueue();
+
             System_DisableInterrupts();
 
             // Perform level load stuff
@@ -143,7 +145,7 @@ void CsEngine_Loop()
 
             // For now don't touch anything here
             // DMA graphics in its entirety
-            DmaSystem_CopyToVram(0x007f0000, 0x0000, 0);
+            DmaSystem_CopyToVram((uint8_t *)0x007f0000, 0x0000, 0);
 
             // Initialize global DMA tile animation
             // TODO: currently hardcoded. In the future, pointers may be part of map data.
@@ -199,13 +201,13 @@ void CsEngine_StartCutscene()
         System_DisableInterrupts();
 
         // Write an empty tile at the 20KB boundary of both frames.
-        DmaSystem_CopyToVram((uint32_t)const_zero, 0x2800, 32);
-        DmaSystem_CopyToVram((uint32_t)const_zero, 0x5800, 32);
+        DmaSystem_CopyToVram((uint8_t *)const_zero, 0x2800, 32);
+        DmaSystem_CopyToVram((uint8_t *)const_zero, 0x5800, 32);
 
         // Write the frame data.
-        DmaSystem_CopyToVram((uint32_t)cs_current->frame, 0x0000, 20480);
-        DmaSystem_CopyToVram((uint32_t)cs_current->tilemap, TILEMAP_ADDR_CS_FRAME_A, 1280);
-        DmaSystem_CopyToWram((uint32_t)cs_current->palette, (uint32_t)&shadow_cgram, 256);
+        DmaSystem_CopyToVram((uint8_t *)cs_current->frame, 0x0000, 20480);
+        DmaSystem_CopyToVram((uint8_t *)cs_current->tilemap, TILEMAP_ADDR_CS_FRAME_A, 1280);
+        DmaSystem_CopyToWram((uint8_t *)cs_current->palette, (uint8_t *)&shadow_cgram, 256);
 
         // Stub out the tilemap data past entry 640 (byte 1280)
         REG_VMAIN = VRAM_INCHIGH;
@@ -229,7 +231,7 @@ void CsEngine_StartCutscene()
     {
         cs_use_second_frame ^= true;
 
-        DmaSystem_CopyToWram((uint32_t)cs_current->palette, (uint32_t)&shadow_cgram, 256);
+        DmaSystem_CopyToWram((uint8_t *)cs_current->palette, (uint8_t *)&shadow_cgram, 256);
     }
 
     cs_timer = cs_current->time;
