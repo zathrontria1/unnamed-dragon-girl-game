@@ -909,9 +909,9 @@ void System_AlignToVblank()
     This will suppress all interrupts!
 */
 #if VBCC_ASM == 1
-NO_INLINE void System_AlignToHblank(uint16_t dot)
+NO_INLINE void System_Hsync(uint16_t dot)
 #else 
-void System_AlignToHblank(uint16_t dot)
+void System_Hsync(uint16_t dot)
 #endif
 {
     #if VBCC_ASM == 1
