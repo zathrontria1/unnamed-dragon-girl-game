@@ -66,23 +66,23 @@ void ErrorHandler_Internal_Setup()
 
     REG_BGMODE = 0x09; // Mode 1, high priority bg3
     REG_TM = 0x04; // BG3 only
-    REG_BG34NBA = 0 << 4 | 0;
+    REG_BG34NBA = 0 << 4 | 4;
 
-    REG_BG3SC = 0x3800 >> 8; // The image is 14KB. Have the tilemap go to the 28Kth byte.
+    REG_BG3SC = 0x3c00 >> 8;
 
     return;
 }
 
 void ErrorHandler_Internal_Display(uint8_t * string_ptr)
 {
-    uint16_t transfer_length = VwfEngine_PrintText(string_ptr, (uint8_t *)LZ4_BUFFER_ADDR, (uint8_t *)(LZ4_BUFFER_ADDR+0x7000), 1, 1, 0);
+    uint16_t transfer_length = VwfEngine_PrintText(string_ptr, (uint8_t *)(LZ4_BUFFER_ADDR+0x8000), (uint8_t *)(LZ4_BUFFER_ADDR+0xc000), 1, 1, 0);
     
     // Copy the palette
     DmaSystem_CopyToWram((uint8_t *)&data_palette_ui, (uint8_t *)&shadow_cgram, 32);
 
     // Upload the error message
-    DmaSystem_CopyToVram((uint8_t *)LZ4_BUFFER_ADDR, 0x0000, transfer_length); // Copy the entire section including the tilemap.
-    DmaSystem_CopyToVram((uint8_t *)(LZ4_BUFFER_ADDR+0x7000), 0x3800, 1792); // Copy the entire section including the tilemap.
+    DmaSystem_CopyToVram((uint8_t *)(LZ4_BUFFER_ADDR+0x8000), 0x4000, transfer_length); // Copy the entire section including the tilemap.
+    DmaSystem_CopyToVram((uint8_t *)(LZ4_BUFFER_ADDR+0xc000), 0x3c00, 1792); // Copy the entire section including the tilemap.
     DmaSystem_UploadCgram();
 
     DmaSystem_ProcessQueue();
