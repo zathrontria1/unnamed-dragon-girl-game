@@ -207,7 +207,6 @@ void Routines_Boss_Test_DmaFrame(struct game_object * o)
     return;
 }
 
-// Optimize this so that it builds the entire thing at once
 uint8_t * Routines_Boss_Test_GetCompressedFrame(const uint8_t * data, const uint16_t * lookup, uint8_t * buffer, uint16_t frame)
 {
     uint16_t lookup_entry_offset = frame * 48; // Each frame is 96 bytes. Use halved values
@@ -216,9 +215,9 @@ uint8_t * Routines_Boss_Test_GetCompressedFrame(const uint8_t * data, const uint
 
     uint16_t * data_offset = (uint16_t *)ptr_return_val;
 
-    uint16_t ptr_array[48];
-
     uint16_t data_addr_lo = (uint16_t)((uint32_t)(data));
+
+    uint16_t ptr_array[48];
 
     for (int i = 0; i < 48; i++)
     {
@@ -238,11 +237,10 @@ uint8_t * Routines_Boss_Test_GetCompressedFrame(const uint8_t * data, const uint
 
     for (int s = 0; s < 2; s++)
     {
+        System_AlignToHblank(156); // This is enough
         for (int y = 0; y < 6; y++)
         {
             REG_WMADDLM = (uint16_t)((uint32_t)buffer + (s << 8) + (y << 9));
-
-            System_AlignToHblank();
 
             for (int x = 0; x < 4; x++)
             {
