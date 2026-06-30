@@ -33,6 +33,7 @@ ZP extern void * system_loop_func_ptr;
 ZP extern bool system_suppress_odd_transfers;
 
 // Shadow buffers
+ZP extern uint8_t shadow_nmitimen;
 ZP extern uint8_t shadow_inidisp;
 ZP extern int8_t shadow_inidisp_change;
 
