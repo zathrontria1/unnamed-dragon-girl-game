@@ -59,6 +59,8 @@ void System_Init_CpuRegs(void)
     REG_INIDISP = 0x8f; // Disable the screen - stdio might turn it on
 
     REG_MEMSEL = 0x01; // Enable fastROM
+
+    shadow_nmitimen = 0x00;
     REG_WRIO = 0xff;
 
     REG_OBSEL = 0x00;
@@ -784,8 +786,8 @@ void System_EnableInterrupts()
     register volatile uint8_t temp1 = REG_RDNMI;
     register volatile uint8_t temp2 = REG_TIMEUP;
 
-    // Compiler bug has been worked around from ASM side.
-    REG_NMITIMEN = (INT_VBLENABLE|INT_JOYPAD_ENABLE);
+    shadow_nmitimen = INT_VBLENABLE | INT_JOYPAD_ENABLE;
+    REG_NMITIMEN = INT_VBLENABLE | INT_JOYPAD_ENABLE;
     
     emitCLI();
 
@@ -800,7 +802,7 @@ void System_DisableInterrupts()
     register volatile uint8_t temp1 = REG_RDNMI;
     register volatile uint8_t temp2 = REG_TIMEUP;
 
-    // Compiler bug has been worked around from ASM side.
+    shadow_nmitimen = 0x00;
     REG_NMITIMEN = 0x00;
     
     emitSEI();
@@ -819,7 +821,8 @@ void System_EnableFblankInterrupts()
     REG_VTIMELH = 209; // Fblank at line 209
 
     // Compiler bug has been worked around from ASM side.
-    REG_NMITIMEN = (INT_HVIRQ_V);
+    shadow_nmitimen = INT_HVIRQ_V;
+    REG_NMITIMEN = INT_HVIRQ_V;
     
     emitCLI();
 
@@ -900,32 +903,53 @@ void System_AlignToVblank()
     return;
 }
 
-void System_AlignToHblank()
+/*
+    Sets Htimer to specified dot on scanline and waits
+
+    This will suppress all interrupts!
+*/
+#if VBCC_ASM == 1
+NO_INLINE void System_AlignToHblank(uint16_t dot)
+#else 
+void System_AlignToHblank(uint16_t dot)
+#endif
 {
     #if VBCC_ASM == 1
         __asm(
-            "\ta8\n"
-            "\tsep #$20\n"
-            "\tbit $4212\n"
-            "\tbvc .phase_2\n" // Not in hblank
-            "\t.phase_1:\n"
-            "\tbit $4212\n"
-            "\tbvs .phase_1\n" // Still in hblank
-            "\t.phase_2:\n"
-            "\tbit $4212\n"
-            "\tbvc .phase_2\n" // Not in hblank
             "\ta16\n"
-            "\trep #$20\n"
+            "\tsta $4207\n"
+            
+            "\ta8\n"
+            "\tsep #$24\n"
+
+            "\tlda _shadow_nmitimen\n"
+            "\tora #$10\n"
+            "\tsta $4200\n"
+
+            "\twai\n"
+
+            "\tbit $4211\n"
+            
+            "\tlda _shadow_nmitimen\n"
+            "\tsta $4200\n"
+
+            "\ta16\n"
+            "\trep #$24\n"
             );
     #else
-        while ((REG_HVBJOY & HBL_READY) == HBL_READY)
-        {
-            ;
-        }
-        while ((REG_HVBJOY & HBL_READY) != HBL_READY)
-        {
-            ;
-        }
+        emitSEI();
+        REG_HTIMELH = dot;
+        register volatile uint8_t temp = REG_RDNMI;
+        temp = REG_TIMEUP;
+
+        REG_NMITIMEN = shadow_nmitimen | INT_HVIRQ_H;
+        
+        emitWAI();
+        temp = REG_RDNMI;
+        temp = REG_TIMEUP;
+
+        REG_NMITIMEN = shadow_nmitimen;
+        emitCLI();
     #endif
 
     return;

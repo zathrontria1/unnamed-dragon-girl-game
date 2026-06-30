@@ -42,7 +42,11 @@ void System_SoftReset(void);
 void System_Reset(void);
 
 void System_AlignToVblank();
-void System_AlignToHblank();
+#if VBCC_ASM == 1
+NO_INLINE void System_AlignToHblank(uint16_t dot);
+#else 
+void System_AlignToHblank(uint16_t dot);
+#endif
 void System_CheckForActiveDisplayEnd();
 
 #if VBCC_ASM == 1
