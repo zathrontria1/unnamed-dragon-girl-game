@@ -65,9 +65,11 @@ void ErrorHandler_Internal_Setup()
     System_Init_BgScroll();
 
     REG_BGMODE = 0x09; // Mode 1, high priority bg3
-    REG_TM = 0x04; // BG3 only
-    REG_BG34NBA = 0 << 4 | 4;
+    REG_TM = 0x05; // BG1/3 only
+    REG_BG12NBA = 0 << 4 | 0;
+    REG_BG34NBA = 4 << 4 | 4;
 
+    REG_BG1SC = 0x3800 >> 8;
     REG_BG3SC = 0x3c00 >> 8;
 
     return;
@@ -75,14 +77,20 @@ void ErrorHandler_Internal_Setup()
 
 void ErrorHandler_Internal_Display(uint8_t * string_ptr)
 {
-    uint16_t transfer_length = VwfEngine_PrintText(string_ptr, (uint8_t *)(LZ4_BUFFER_ADDR+0x8000), (uint8_t *)(LZ4_BUFFER_ADDR+0xc000), 1, 1, 0);
+    uint16_t transfer_length_1 = LZ4_UnpackToWRAM(&data_bg_error_back_lz4, (uint8_t *)LZ4_BUFFER_ADDR);
+    LZ4_UnpackToWRAM(&data_tilemap_error_back_lz4, (uint8_t *)(LZ4_BUFFER_ADDR+0xc800));
+    uint16_t transfer_length_2 = VwfEngine_PrintText(string_ptr, (uint8_t *)(LZ4_BUFFER_ADDR+0x8000), (uint8_t *)(LZ4_BUFFER_ADDR+0xc000), 1, 1, 0);
     
     // Copy the palette
     DmaSystem_CopyToWram((uint8_t *)&data_palette_ui, (uint8_t *)&shadow_cgram, 32);
+    DmaSystem_CopyToWram((uint8_t *)&data_palette_error, (uint8_t *)((uint32_t)&shadow_cgram+32), 224);
 
     // Upload the error message
-    DmaSystem_CopyToVram((uint8_t *)(LZ4_BUFFER_ADDR+0x8000), 0x4000, transfer_length); // Copy the entire section including the tilemap.
-    DmaSystem_CopyToVram((uint8_t *)(LZ4_BUFFER_ADDR+0xc000), 0x3c00, 1792); // Copy the entire section including the tilemap.
+    DmaSystem_CopyToVram((uint8_t *)(LZ4_BUFFER_ADDR), 0x0000, transfer_length_1);
+    DmaSystem_CopyToVram((uint8_t *)(LZ4_BUFFER_ADDR+0xc800), 0x3800, 1792);
+
+    DmaSystem_CopyToVram((uint8_t *)(LZ4_BUFFER_ADDR+0x8000), 0x4000, transfer_length_2);
+    DmaSystem_CopyToVram((uint8_t *)(LZ4_BUFFER_ADDR+0xc000), 0x3c00, 1792);
     DmaSystem_UploadCgram();
 
     DmaSystem_ProcessQueue();
@@ -100,8 +108,6 @@ void ErrorHandler_Internal_Display(uint8_t * string_ptr)
     HdmaEngine_SetHdmaShadow();
 
     System_EnableInterrupts();
-
-    REG_TM = 0x04; // BG3 only
 
     return;
 }

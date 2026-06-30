@@ -69,3 +69,8 @@ _data_palette_map_1_8bpp:
     global _data_palette_splash
 _data_palette_splash:
     incbin "splash/palette_splash.bin"
+
+    section "_rodata.far.bindata.palette.error.0"
+    global _data_palette_error
+_data_palette_error:
+    incbin "palette/palette_error_background.bin"
