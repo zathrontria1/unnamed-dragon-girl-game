@@ -42,8 +42,11 @@ bool obj_boss_palette_swap;
 int obj_boss_phase;
 int obj_boss_subphase;
 
-int obj_boss_timer;
+int obj_boss_timer_movement;
 bool obj_boss_moving;
+
+int obj_boss_timer_attack;
+
 uint16_t obj_boss_prev_frame;
 bool obj_boss_vram_stale;
 
@@ -314,11 +317,13 @@ bool Routines_Boss_Test_RunPhase(struct game_object * o)
 {
     bool temp_invalidate_animation_frame = false;
 
-    if (obj_boss_timer != 0)
-    {
-        obj_boss_timer--;
+    // Movement logic.
 
-        if (!obj_boss_timer)
+    if (obj_boss_timer_movement != 0)
+    {
+        obj_boss_timer_movement--;
+
+        if (!obj_boss_timer_movement)
         {
             obj_boss_moving = false;
         }
@@ -329,19 +334,54 @@ bool Routines_Boss_Test_RunPhase(struct game_object * o)
         // Pick a spot to move to.
         uint16_t select = (Math_GetRandom_u16() % 9) << 1;
 
-        int32_t dest_x = (int32_t)obj_boss_positions[select] << 16;
-        int32_t dest_y = (int32_t)obj_boss_positions[select+1] << 16;
+        int32_t dest_x = (int32_t)const_boss_positions_0[select] << 16;
+        int32_t dest_y = (int32_t)const_boss_positions_0[select+1] << 16;
 
-        Routines_Boss_Test_Movement(o, dest_x, dest_y);
+        temp_invalidate_animation_frame |= Routines_Boss_Test_Movement(o, dest_x, dest_y);
 
         obj_boss_moving = true;
     }
 
-    move(o);
+    // Attack logic.
+    if (obj_boss_timer_attack != 0)
+    {
+        obj_boss_timer_attack--;
+    }
+
+    if (!obj_boss_timer_attack)
+    {
+        // Pick a spot to attack.
+        uint16_t select = (Math_GetRandom_u16() % 9) << 1;
+
+        int32_t dest_x = (int32_t)const_boss_positions_0[select] << 16;
+        int32_t dest_y = (int32_t)const_boss_positions_0[select+1] << 16;
+
+        temp_invalidate_animation_frame |= Routines_Boss_Test_Attack_Pattern1(o, dest_x, dest_y);
+    }
+
+    // Finalize the movement.
+    ObjectSystem_Move(o);
 
     return temp_invalidate_animation_frame;
 }
 
+/*
+    Called to perform an attack pattern
+
+    TODO: relevant graphics and supporting subroutine for the attack objects.
+*/
+bool Routines_Boss_Test_Attack_Pattern1(struct game_object * o, int32_t x, int32_t y)
+{
+    bool temp_invalidate_animation_frame = false;
+
+    obj_boss_timer_attack = 5 * FPS; // Delay the next attack for 5 seconds.
+
+    return temp_invalidate_animation_frame;
+}
+
+/*
+    Called to calculate the correct movement delta to finish moving to target position
+*/
 bool Routines_Boss_Test_Movement(struct game_object * o, int32_t x, int32_t y)
 {
     bool temp_invalidate_animation_frame = false;
@@ -358,12 +398,17 @@ bool Routines_Boss_Test_Movement(struct game_object * o, int32_t x, int32_t y)
     o->delta.x.a = delta_x;
     o->delta.y.a = delta_y;
 
-    obj_boss_timer = 5 * FPS; // Move for 5 seconds.
+    obj_boss_timer_movement = 5 * FPS; // Move for 5 seconds.
 
     return temp_invalidate_animation_frame;
 }
 
-const int16_t obj_boss_positions[] = 
+/*
+    Table of coordinates that the boss can move to
+    in X/Y order, 16-bits
+    game uses 32 bits so must expand with << 16
+*/
+const int16_t const_boss_positions_0[] = 
 {
     384, 384,
     456, 384,
