@@ -22,7 +22,10 @@
 
 #include "gfx.h"
 
-uint16_t move(struct game_object * o)
+/*
+    Moves an object in the game world respecting all collision
+*/
+uint16_t ObjectSystem_Move(struct game_object * o)
 {
     // one axis needs to be tested at a time
     // if a collision check fails on an axis,
@@ -123,15 +126,18 @@ uint16_t move(struct game_object * o)
     return 0;
 }
 
+/*
+    Move an object ignoring everything
+    Useful for light objects that do not need to test anything.
+    optionally also ignoring map edge
+*/
 #if VBCC_ASM == 1
-    NO_INLINE void move_nocol_fast(__reg("a/x") struct game_object * o)
+    NO_INLINE void ObjectSystem_MoveWithoutCollision(__reg("a/x") struct game_object * o)
 #else
-    void move_nocol_fast(struct game_object * o)
+    void ObjectSystem_MoveWithoutCollision(struct game_object * o)
 #endif
 {
-    // Move an object ignoring everything
-    // Useful for light objects that do not need to test anything.
-    // optionally also ignoring map edge
+    
 
     #if VBCC_ASM == 1
         __asm(
@@ -174,18 +180,19 @@ uint16_t move(struct game_object * o)
     return;
 }
 
+/*
+    Move an object ignoring everything
+    Useful for light objects that do not need to test anything.
+    optionally also ignoring map edge
+
+    This version will not update edges, so should be used for no-collision checking objects only
+*/
 #if VBCC_ASM == 1
-    NO_INLINE void move_nocol_veryfast(__reg("a/x") struct game_object * o)
+    NO_INLINE void ObjectSystem_MoveWithoutCollision_Fast(__reg("a/x") struct game_object * o)
 #else
-    void move_nocol_veryfast(struct game_object * o)
+    void ObjectSystem_MoveWithoutCollision_Fast(struct game_object * o)
 #endif
 {
-    // Move an object ignoring everything
-    // Useful for light objects that do not need to test anything.
-    // optionally also ignoring map edge
-
-    // This version will not update edges, so should be used for no-collision checking objects only
-
     #if VBCC_ASM == 1
         __asm(
             "\ta16\n"

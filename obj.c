@@ -631,7 +631,8 @@ int16_t ObjectSystem_InstantiateObject(
 
             obj_boss_phase = 0;
             obj_boss_subphase = 0;
-            obj_boss_timer = 0;
+            obj_boss_timer_movement = 0;
+            obj_boss_timer_attack = 0;
             obj_boss_moving = false;
 
             obj_boss_prev_frame = 0xffff;

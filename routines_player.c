@@ -265,7 +265,7 @@ void Routines_Player(struct game_object * o)
                                 break;
                         }
 
-                        move_nocol_fast(p);
+                        ObjectSystem_MoveWithoutCollision(p);
 
                         event_interaction_x = p->pos.x.lh.h;
                         event_interaction_y = p->pos.y.lh.h;
@@ -392,7 +392,7 @@ void Routines_Player(struct game_object * o)
 
             if ((o->delta.x.a || o->delta.y.a) != 0)
             {
-                move(o);
+                ObjectSystem_Move(o);
 
                 if (snd_footstep_timeout == 0)
                 {
@@ -600,7 +600,7 @@ void Routines_Player_Fireball(struct game_object * o)
         }
 
         // Move the object based on the stored delta
-        move_nocol_fast(o);
+        ObjectSystem_MoveWithoutCollision(o);
 
         // Update every 8 frames
         if (((uint16_t)system_frames_elapsed & ANI_INTERVAL_8) == ANI_INTERVAL_8)

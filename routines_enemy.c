@@ -65,7 +65,7 @@ void Routines_Enemy_Slime(struct game_object * o)
                 // Move the object based on the stored delta
                 if ((o->delta.x.a || o->delta.y.a) != 0)
                 {
-                    move(o);
+                    ObjectSystem_Move(o);
                 }
 
                 // If the object is attacking:
@@ -308,7 +308,7 @@ void Routines_Enemy_Lizardman(struct game_object * o)
                 // Move the object based on the stored delta
                 if ((o->delta.x.a || o->delta.y.a) != 0)
                 {
-                    move(o);
+                    ObjectSystem_Move(o);
                 }
 
                 // If the object is attacking:
@@ -528,7 +528,7 @@ void Routines_Enemy_Slime_Bubble(struct game_object * o)
     if (!system_game_paused)
     {
         // Move the object based on the stored delta
-        move_nocol_fast(o);
+        ObjectSystem_MoveWithoutCollision(o);
 
         // Update every 8 frames
         if (((uint16_t)system_frames_elapsed & ANI_INTERVAL_8) == ANI_INTERVAL_8)
@@ -560,7 +560,7 @@ void Routines_Enemy_Lizardman_Arrow(struct game_object * o)
     if (!system_game_paused)
     {
         // Move the object based on the stored delta
-        move_nocol_fast(o);
+        ObjectSystem_MoveWithoutCollision(o);
 
         // Check if the object is to be destroyed
         if (o->struct_data.npc_data.ttl == 0)
