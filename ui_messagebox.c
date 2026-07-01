@@ -12,6 +12,7 @@
 
 #include "ui.h"
 #include "ui_messagebox.h"
+#include "ui_vwf.h"
 #include "spr.h"
 
 #include "snd.h"
@@ -38,27 +39,10 @@ void UserInterface_ClearTextBuffer_Subset(uint16_t row, uint16_t col, uint16_t l
         return;
     }
 
-    int i = 0;
-    bool overflow = false;
-    for (int y = row; y < (SCREEN_HEIGHT >> 3); y++)
-    {
-        for (int x = col; x < 32; x++)
-        {
-            ui_window_text[y][x] = 0x0000 | 0x2000 | (PAL_UI_TEXT_WHITE << 10);
-            i++;
-
-            if (i >= len)
-            {
-                overflow = true;
-                break;
-            }
-        }
-
-        if (overflow == true)
-        {
-            break;
-        }
-    }
+    volatile uint16_t vwf_tile_id_copy = vwf_tile_id_empty;
+    vwf_tile_id_empty = 0x0000;
+    VwfEngine_PrintText_ResetTilemap((uint16_t *)&ui_window_text[row][col], len);
+    vwf_tile_id_empty = vwf_tile_id_copy;
     
     if (DmaSystem_AddItemToQueue(
         (uint8_t *)(&ui_window_text[row][col]), 
@@ -95,13 +79,10 @@ void UserInterface_DrawTextbox(uint16_t row, uint16_t h)
 
 void UserInterface_ClearTextbox(uint16_t row, uint16_t h)
 {
-    for (int i = 0; i < 6; i++)
-    {
-        for (int j = 0; j < 32; j++)
-        {
-            ui_window_background[i][j] = 0x0100; // Empty tile for 4bpp
-        }
-    }
+    volatile uint16_t vwf_tile_id_copy = vwf_tile_id_empty;
+    vwf_tile_id_empty = 0x0100;
+    VwfEngine_PrintText_ResetTilemap((uint16_t *)&ui_window_background, 192);
+    vwf_tile_id_empty = vwf_tile_id_copy;
 
     // Only one memclear DMA can be done per logical frame, so this workaround is needed.
     UserInterface_CopyTextboxToVram(row, h);
@@ -112,7 +93,7 @@ void UserInterface_ClearTextbox(uint16_t row, uint16_t h)
 
 void UserInterface_ClearTextboxText(uint16_t row, uint16_t h)
 {
-    DmaSystem_SetClear(0x3400 + ((row + 1) << 5), (h - 1) << 6);
+    DmaSystem_SetClear(0x3400 + ((row + 1) << 5), h << 6); // Add one extra row for the indicator overhang
 
     return;
 }
