@@ -39,6 +39,12 @@
 uint16_t obj_boss_state; // Boss state machine variable
 bool obj_boss_palette_swap;
 
+int obj_boss_phase;
+int obj_boss_subphase;
+
+int obj_boss_timer;
+bool obj_boss_moving;
+
 void Routines_Boss_Test(struct game_object * o)
 {
     struct game_object * p = obj_player_pointer;
@@ -67,51 +73,8 @@ void Routines_Boss_Test(struct game_object * o)
             // Place boss logic here
             event_in_combat = 1;
 
-            if (o->struct_data.npc_data.invuln_time == 0)
-            {
-                if ((o->uid & 0x0001) == ((unsigned int)system_frames_elapsed & 0x0001))
-                {
-                    struct game_object * p = CollisionCheck_EnemyTestPlayer(o);
-                    if (p != NULL)
-                    {
-                        // What triggered the hit?
-                        if (p->id == OBJID_FIREBALL)
-                        {
-                            // DOT damage
-                            o->struct_data.npc_data.status = STATUS_BURNING;
-                            o->struct_data.npc_data.status_time = 60 / V_MUL;
-                            o->struct_data.npc_data.invuln_time = 60 / V_MUL;
-
-                            if (o->state == STATE_IDLE)
-                            {
-                                o->state = STATE_HURT_BURN;
-                            }
-                            else
-                            {
-                                o->state = STATE_HURT_BURN_MOVE;
-                            }
-                        }
-                        else
-                        {
-                            // Single frame damage
-                            o->struct_data.npc_data.invuln_time = 10 / V_MUL;
-
-                            SoundInterface_PlaySfx_Pre(o, SFX_ATK_PUNCH);
-                        }
-
-                        long temp_dmg = (p->struct_data.npc_data.attack - o->struct_data.npc_data.defense);
-                        if (temp_dmg <= 0)
-                        {
-                            temp_dmg = 1;
-                        }
-                        o->struct_data.npc_data.hp -= temp_dmg;
-
-                        temp_invalidate_animation_frame = true;
-
-                        o->struct_data.npc_data.hp_display_time = 60 / V_MUL;
-                    }
-                }
-            }
+            temp_invalidate_animation_frame |= Routines_Boss_Test_RunPhase(o);
+            temp_invalidate_animation_frame |= Routines_Boss_Test_TestAgainstHits(o);
 
             if (o->struct_data.npc_data.status == STATUS_BURNING)
             {
@@ -270,3 +233,129 @@ void Routines_Boss_Test_DrawShadow(struct game_object * o)
 
     return;
 }
+
+bool Routines_Boss_Test_TestAgainstHits(struct game_object * o)
+{
+    bool temp_invalidate_animation_frame = false;
+
+    if (o->struct_data.npc_data.invuln_time == 0)
+    {
+        if ((o->uid & 0x0001) == ((unsigned int)system_frames_elapsed & 0x0001))
+        {
+            struct game_object * p = CollisionCheck_EnemyTestPlayer(o);
+            if (p != NULL)
+            {
+                // What triggered the hit?
+                if (p->id == OBJID_FIREBALL)
+                {
+                    // DOT damage
+                    o->struct_data.npc_data.status = STATUS_BURNING;
+                    o->struct_data.npc_data.status_time = 60 / V_MUL;
+                    o->struct_data.npc_data.invuln_time = 60 / V_MUL;
+
+                    if (o->state == STATE_IDLE)
+                    {
+                        o->state = STATE_HURT_BURN;
+                    }
+                    else
+                    {
+                        o->state = STATE_HURT_BURN_MOVE;
+                    }
+                }
+                else
+                {
+                    // Single frame damage
+                    o->struct_data.npc_data.invuln_time = 10 / V_MUL;
+
+                    SoundInterface_PlaySfx_Pre(o, SFX_ATK_PUNCH);
+                }
+
+                long temp_dmg = (p->struct_data.npc_data.attack - o->struct_data.npc_data.defense);
+                if (temp_dmg <= 0)
+                {
+                    temp_dmg = 1;
+                }
+                o->struct_data.npc_data.hp -= temp_dmg;
+
+                temp_invalidate_animation_frame = true;
+
+                o->struct_data.npc_data.hp_display_time = 60 / V_MUL;
+            }
+        }
+    }
+
+    return temp_invalidate_animation_frame;
+}
+
+/*
+    Phase based processing
+
+    For now there's only one phase
+*/
+bool Routines_Boss_Test_RunPhase(struct game_object * o)
+{
+    bool temp_invalidate_animation_frame = false;
+
+    if (obj_boss_timer != 0)
+    {
+        obj_boss_timer--;
+
+        if (!obj_boss_timer)
+        {
+            obj_boss_moving = false;
+        }
+    }
+
+    if (!obj_boss_moving)
+    {
+        // Pick a spot to move to.
+        uint16_t select = (Math_GetRandom_u16() % 9) << 1;
+
+        int32_t dest_x = (int32_t)obj_boss_positions[select] << 16;
+        int32_t dest_y = (int32_t)obj_boss_positions[select+1] << 16;
+
+        Routines_Boss_Test_Movement(o, dest_x, dest_y);
+
+        obj_boss_moving = true;
+    }
+
+    move(o);
+
+    return temp_invalidate_animation_frame;
+}
+
+bool Routines_Boss_Test_Movement(struct game_object * o, int32_t x, int32_t y)
+{
+    bool temp_invalidate_animation_frame = false;
+
+    // Get difference between target location and current position
+    int32_t diff_x = x - o->pos.x.a;
+    int32_t diff_y = y - o->pos.y.a;
+
+    // Now calculate the correct object delta
+    int32_t delta_x = diff_x / (5 * FPS);
+    int32_t delta_y = diff_y / (5 * FPS);
+
+    // Set the delta
+    o->delta.x.a = delta_x;
+    o->delta.y.a = delta_y;
+
+    obj_boss_timer = 5 * FPS; // Move for 5 seconds.
+
+    return temp_invalidate_animation_frame;
+}
+
+const int16_t obj_boss_positions[] = 
+{
+    384, 384,
+    456, 384,
+    528, 384,
+
+    384, 456,
+    456, 456,
+    528, 456,
+
+    384, 528,
+    456, 528,
+    528, 528,
+};
