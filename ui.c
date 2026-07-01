@@ -16,6 +16,7 @@
 
 #include "ui.h"
 #include "ui_messagebox.h"
+#include "ui_vwf.h"
 #include "spr.h"
 
 ZP bool ui_in_subscreen;
@@ -626,21 +627,20 @@ void UserInterface_ClearWindowBuffer(bool use_clear_tile)
 */
 void UserInterface_ClearTextBuffer()
 {
-    for (int x = 0; x < 32; x++)
-    {
-        for (int y = 0; y < (SCREEN_HEIGHT >> 3); y++)
-        {
-            ui_window_text[y][x] = 0x0000 | 0x2000 | (PAL_UI_TEXT_WHITE << 10);
-        }
-    }
+    volatile uint16_t vwf_tile_id_copy = vwf_tile_id_empty;
+    vwf_tile_id_empty = 0x0000;
+    VwfEngine_PrintText_ResetTilemap((uint16_t *)&ui_window_text[0][0], 32 * (SCREEN_HEIGHT >> 3));
+    vwf_tile_id_empty = vwf_tile_id_copy;
+
     return;
 }
 void UserInterface_ClearTextBuffer_Line(uint16_t y)
 {
-    for (int x = 0; x < 32; x++)
-    {
-        ui_window_text[y][x] = 0x0000 | 0x2000 | (PAL_UI_TEXT_WHITE << 10);
-    }
+    volatile uint16_t vwf_tile_id_copy = vwf_tile_id_empty;
+    vwf_tile_id_empty = 0x0000;
+    VwfEngine_PrintText_ResetTilemap((uint16_t *)&ui_window_text[y][0], 32);
+    vwf_tile_id_empty = vwf_tile_id_copy;
+
     return;
 }
 
