@@ -633,6 +633,9 @@ int16_t ObjectSystem_InstantiateObject(
             obj_boss_subphase = 0;
             obj_boss_timer = 0;
             obj_boss_moving = false;
+
+            obj_boss_prev_frame = 0xffff;
+            obj_boss_vram_stale = true;
         }
     }
     else

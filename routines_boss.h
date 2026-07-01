@@ -7,6 +7,9 @@ extern int obj_boss_subphase;
 extern int obj_boss_timer;
 extern bool obj_boss_moving;
 
+extern uint16_t obj_boss_prev_frame;
+extern bool obj_boss_vram_stale;
+
 extern const int16_t obj_boss_positions[];
 
 void Routines_Boss_Test(struct game_object * o);

@@ -44,6 +44,8 @@ int obj_boss_subphase;
 
 int obj_boss_timer;
 bool obj_boss_moving;
+uint16_t obj_boss_prev_frame;
+bool obj_boss_vram_stale;
 
 void Routines_Boss_Test(struct game_object * o)
 {
@@ -165,16 +167,30 @@ void Routines_Boss_Test_ReconstructFrame(struct game_object * o)
 
 void Routines_Boss_Test_DmaFrame(struct game_object * o)
 {
-    DmaSystem_AddItemToQueue((uint8_t *)(0x007fe000), 0x7000, 3072, VRAM_INCHIGH, 0);
+    if (obj_boss_vram_stale)
+    {
+        DmaSystem_AddItemToQueue((uint8_t *)(0x007fe000), 0x7000, 3072, VRAM_INCHIGH, 0);
+        obj_boss_vram_stale = false;
+    }
 
     return;
 }
 
+/*
+    Routine to rebuild boss graphics data from 48 DMA runs
+*/
 uint8_t * Routines_Boss_Test_GetCompressedFrame(const uint8_t * data, const uint16_t * lookup, uint8_t * buffer, uint16_t frame)
 {
     uint16_t lookup_entry_offset = frame * 48; // Each frame is 96 bytes. Use halved values
 
     uint8_t * ptr_return_val = (uint8_t *)(lookup + lookup_entry_offset);
+
+    if (frame == obj_boss_prev_frame)
+    {
+        return ptr_return_val;
+    }
+
+    obj_boss_prev_frame = frame;
 
     uint16_t * data_offset = (uint16_t *)ptr_return_val;
 
@@ -215,6 +231,8 @@ uint8_t * Routines_Boss_Test_GetCompressedFrame(const uint8_t * data, const uint
             }
         }
     }
+
+    obj_boss_vram_stale = true;
 
     return ptr_return_val;
 }
