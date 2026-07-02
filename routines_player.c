@@ -437,12 +437,16 @@ void Routines_Player(struct game_object * o)
                     if (o->struct_data.npc_data.invuln_time == 0)
                     {
                         // If player is currently not invulnerable, trigger the damage
-                        int32_t temp_dmg = (p->struct_data.npc_data.attack - o->struct_data.npc_data.defense);
+                        //int32_t temp_dmg = (p->struct_data.npc_data.attack - o->struct_data.npc_data.defense);
+                        // debugging: make player invuln but still do the reads.
+                        volatile int32_t temp_dmg = (p->struct_data.npc_data.attack - o->struct_data.npc_data.defense);
                         
                         if (temp_dmg <= 0)
                         {
                             temp_dmg = 1;
                         }
+
+                        temp_dmg = 0; // debug
 
                         o->struct_data.npc_data.hp -= temp_dmg;
 

@@ -19,6 +19,7 @@ void Routines_Boss_Test(struct game_object * o);
 bool Routines_Boss_Test_RunPhase(struct game_object * o);
 
 bool Routines_Boss_Test_Attack_Pattern1(struct game_object * o, int32_t x, int32_t y);
+void Routines_Boss_Test_Attack_Particle(struct game_object * o); // Subroutine for particle object
 
 bool Routines_Boss_Test_Movement(struct game_object * o, int32_t x, int32_t y);
 

@@ -665,7 +665,7 @@ void Routines_Shared_Draw(struct game_object * o, uint8_t * spr_addr, int pal, i
             if ((o->uid & 0x0001) == ((uint16_t)system_frames_elapsed & 0x0001))
             {
                 uint16_t temp_tileattrib;
-                temp_tileattrib = (o->struct_data.npc_data.tilenum | PAL_BUBBLE_E << 9 | 3 << 12);
+                temp_tileattrib = (o->struct_data.npc_data.tilenum | pal << 9 | 3 << 12);
 
                 SpriteEngine_AddToFrontLayer(o, temp_tileattrib);
             }

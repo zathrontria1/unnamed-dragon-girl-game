@@ -35,22 +35,33 @@ uint16_t AniSystem_AnimateDropGravity(struct game_object * o)
 
     if (o->pos.z.a != 0)
     {
-        // also draw a shadow if relevant
-        if ((o->uid & 0x0001) == ((uint16_t)system_frames_elapsed & 0x0001))
-        {
-            struct game_object temp;
-            temp.pos.x.a = o->pos.x.a;
-            temp.pos.y.a = o->pos.y.a;
-            temp.pos.z.a = 0;
-
-            uint16_t temp_tileattrib;
-            temp_tileattrib = 0xa2 | PAL_FX_SHADOW << 9 | 2 << 12;
-
-            SpriteEngine_AddToBackLayer(&temp, temp_tileattrib);
-        }
+        AniSystem_DrawDropShadow(o);
+        
     }
 
     return grounded;
+}
+
+/*
+    Callable function to draw a 16px shadow.
+*/
+void AniSystem_DrawDropShadow(struct game_object * o)
+{
+    // also draw a shadow if relevant
+    if ((o->uid & 0x0001) == ((uint16_t)system_frames_elapsed & 0x0001))
+    {
+        struct game_object temp;
+        temp.pos.x.a = o->pos.x.a;
+        temp.pos.y.a = o->pos.y.a;
+        temp.pos.z.a = 0;
+
+        uint16_t temp_tileattrib;
+        temp_tileattrib = 0xa2 | PAL_FX_SHADOW << 9 | 2 << 12;
+
+        SpriteEngine_AddToBackLayer(&temp, temp_tileattrib);
+    }
+
+    return;
 }
 
 uint8_t * AniSystem_GetPlayerFrame(struct game_object * o)
@@ -190,6 +201,8 @@ uint8_t * AniSystem_GetDynamicFrame_Stateless(struct game_object * o)
             return AniSystem_GetDynamicFrame_Bubble(o);
         case OBJID_ARROW_E:
             return AniSystem_GetDynamicFrame_Arrow(o);
+        case OBJID_BOSS_TEST1_ATTACK1:
+            return AniSystem_GetDynamicFrame_EnemyBossParticle(o);
         default:
             return 0;
     }
@@ -369,6 +382,12 @@ uint8_t * AniSystem_GetDynamicFrame_Arrow(struct game_object * o)
 
     // Calculate the address
     return (uint8_t *)temp_addr;
+}
+
+uint8_t * AniSystem_GetDynamicFrame_EnemyBossParticle(struct game_object * o)
+{
+    uint16_t temp_tilenum = o->struct_data.npc_data.ani.frame;
+    return ((uint8_t *)&data_spr_boss_placeholder_addon_attack1 + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
 }
 
 #if VBCC_ASM == 1

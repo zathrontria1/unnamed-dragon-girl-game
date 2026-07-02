@@ -350,13 +350,39 @@ bool Routines_Boss_Test_RunPhase(struct game_object * o)
 
     if (!obj_boss_timer_attack)
     {
-        // Pick a spot to attack.
-        uint16_t select = (Math_GetRandom_u16() % 9) << 1;
+        int32_t dest_x;
+        int32_t dest_y;
 
-        int32_t dest_x = (int32_t)const_boss_positions_0[select] << 16;
-        int32_t dest_y = (int32_t)const_boss_positions_0[select+1] << 16;
+        // Pick a spot to attack.
+        switch (obj_boss_phase)
+        {
+            case 0:
+                dest_x = 400;
+                dest_y = 368;
+                break;
+
+            case 1:
+                dest_x = 528;
+                dest_y = 368;
+                break;
+
+            case 2:
+                dest_x = 528;
+                dest_y = 496;
+                break;
+
+            case 3:
+                dest_x = 400;
+                dest_y = 496;
+                break;
+        }
 
         temp_invalidate_animation_frame |= Routines_Boss_Test_Attack_Pattern1(o, dest_x, dest_y);
+
+        if (!obj_boss_subphase)
+        {
+            obj_boss_phase = (obj_boss_phase + 1) & 0x03;
+        }
     }
 
     // Finalize the movement.
@@ -374,9 +400,103 @@ bool Routines_Boss_Test_Attack_Pattern1(struct game_object * o, int32_t x, int32
 {
     bool temp_invalidate_animation_frame = false;
 
-    obj_boss_timer_attack = 5 * FPS; // Delay the next attack for 5 seconds.
+    switch (obj_boss_phase)
+    {
+        case 0:
+            x = x + (obj_boss_subphase << 4);
+            break;
+        case 1:
+            y = y + (obj_boss_subphase << 4);
+            break;
+        case 2:
+            x = x - (obj_boss_subphase << 4);
+            break;
+        case 3:
+            y = y - (obj_boss_subphase << 4);
+            break;
+    }
+
+    int j = ObjectSystem_InstantiateEnemyHitbox(OBJID_BOSS_TEST1_ATTACK1, x, y);
+
+    if (j >= 0)
+    {
+        struct game_object * p = &obj_hitbox_enemy[j];
+        //p->struct_data.npc_data.attack = o->struct_data.npc_data.attack * ENEMY_ATTACK_MULT_RANGED;
+        p->struct_data.npc_data.attack = 1;
+        
+        switch (obj_boss_phase)
+        {
+            case 0:
+                p->delta.x.a = 0;
+                p->delta.y.a = V_S_ONE;
+                break;
+            case 1:
+                p->delta.x.a = -V_S_ONE;
+                p->delta.y.a = 0;
+                break;
+            case 2:
+                p->delta.x.a = 0;
+                p->delta.y.a = -V_S_ONE;
+                break;
+            case 3:
+                p->delta.x.a = V_S_ONE;
+                p->delta.y.a = 0;
+                break;
+        }
+
+        p->struct_data.npc_data.ttl = (5 * FPS) - 1;
+    }
+
+    obj_boss_timer_attack = (5 * FPS) / 8;
+
+    obj_boss_subphase = (obj_boss_subphase + 1) & 0x07;
 
     return temp_invalidate_animation_frame;
+}
+
+/*
+    Subroutine for the object
+*/
+void Routines_Boss_Test_Attack_Particle(struct game_object * o)
+{
+    if (!system_game_paused)
+    {
+        int z_offset = (system_frames_elapsed & 0x1f) >> 2;
+        if (z_offset > 3)
+        {
+            z_offset = 7-z_offset;
+        }
+        
+        o->pos.z.lh.h = z_offset + 4;
+
+        // Move the object based on the stored delta
+        ObjectSystem_MoveWithoutCollision(o);
+
+        // Update every 8 frames
+        if (((uint16_t)system_frames_elapsed & ANI_INTERVAL_8) == ANI_INTERVAL_8)
+        {
+            o->struct_data.npc_data.ani.frame ^= 0x0001;
+        }
+
+        // Check if the object is to be destroyed
+        if (o->struct_data.npc_data.ttl == 0)
+        {
+            ObjectSystem_DestroyEnemyHitbox(o->array_index);
+        }
+        else
+        {
+            // Decrement time to live
+            o->struct_data.npc_data.ttl--;
+        }
+    }
+
+    uint8_t * temp_addr = AniSystem_GetDynamicFrame_EnemyBossParticle(o);
+
+    Routines_Shared_Draw(o, temp_addr, PAL_BOSS_TEST, 0, false, false);
+
+    AniSystem_DrawDropShadow(o);
+
+    return;
 }
 
 /*

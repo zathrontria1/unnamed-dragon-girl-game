@@ -9,6 +9,8 @@ extern uint16_t buf_player_prev_frame;
 
 uint16_t AniSystem_AnimateDropGravity(struct game_object * o);
 
+void AniSystem_DrawDropShadow(struct game_object * o);
+
 uint8_t * AniSystem_GetPlayerFrame(struct game_object * o);
 
 uint16_t AniSystem_GetFixedFrame_Fast(struct game_object * o);
@@ -34,6 +36,8 @@ NO_INLINE uint8_t * AniSystem_GetDynamicFrame_Bubble(struct game_object * o);
 #else
 uint8_t * AniSystem_GetDynamicFrame_Bubble(struct game_object * o);
 #endif
+
+uint8_t * AniSystem_GetDynamicFrame_EnemyBossParticle(struct game_object * o);
 
 uint8_t * AniSystem_GetDynamicFrame_Arrow(struct game_object * o);
 
