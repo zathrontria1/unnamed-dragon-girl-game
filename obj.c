@@ -626,6 +626,8 @@ int16_t ObjectSystem_InstantiateObject(
 
         if (id == OBJID_BOSS_TEST1)
         {
+            SpriteEngine_GetVramForBoss();
+            
             obj_boss_palette_swap = false;
             obj_boss_state = 0;
 

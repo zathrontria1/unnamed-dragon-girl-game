@@ -444,7 +444,6 @@ void SpriteEngine_InitVramSlot()
 {
     for (int i = 0; i < 128; i++)
     {
-        // Occupied slots are $ff
         // Slots are in the order of i, i+2, i+32, i+34, etc...
         if (i < 48)
         {
@@ -525,6 +524,31 @@ void SpriteEngine_ReleaseVramSlot(uint16_t i, uint16_t slot_count)
     return;
 }
 
+/*
+    Boss sprites take entire second page.
+
+    This should prevent anything from attempting to use the reserved VRAM
+
+    Boss-reserved slots are 0xfffe (compare with 0xffff, which is free)
+*/
+void SpriteEngine_GetVramForBoss()
+{
+    for (int i = 64; i < 128; i++)
+    {
+        spr_vram_slots[i] = 0xfffe;
+    }
+
+    return;
+}
+void SpriteEngine_ReleaseVramForBoss()
+{
+    for (int i = 64; i < 128; i++)
+    {
+        spr_vram_slots[i] = 0xffff;
+    }
+
+    return;
+}
 /*
     Processes sprite lists and writes to OAM shadow buffer.
 
