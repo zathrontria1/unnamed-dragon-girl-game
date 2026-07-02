@@ -246,7 +246,7 @@ void ObjectSystem_ProcessObjects()
             "\tclc\n"
             "\tadc #128\n"
             "\ttax\n"
-            "\tcpx #<_obj_hitbox_enemy+1024\n"
+            "\tcpx #<_obj_hitbox_enemy+2048\n"
             "\tbcc .hitbox_enemy_process_loop\n"
 
         ".hitbox_enemy_break_loop:\n"
@@ -799,7 +799,7 @@ int16_t ObjectSystem_InstantiateEnemyHitbox(
 
     p->state = STATE_IDLE;
     p->facing = FACING_DOWN;
-    p->struct_data.npc_data.ani.display = (uint16_t)((uint32_t)AniSystem_GetDynamicFrame(p));
+    p->struct_data.npc_data.ani.display = (uint16_t)((uint32_t)AniSystem_GetDynamicFrame_Stateless(p));
     p->struct_data.npc_data.ani.last_address = 0; // make this invalid
 
     obj_hitbox_count_enemy++;
@@ -1049,7 +1049,9 @@ void ObjectSystem_CleanupEnemyHitboxes()
 {
     for (int i = 0; i < obj_hitbox_enemy_delete_queue_count; i++)
     {
-        if ((obj_hitbox_enemy[obj_hitbox_enemy_delete_queue[i]].id == OBJID_BUBBLE_E) || (obj_hitbox_enemy[obj_hitbox_enemy_delete_queue[i]].id == OBJID_ARROW_E))
+        if ((obj_hitbox_enemy[obj_hitbox_enemy_delete_queue[i]].id == OBJID_BUBBLE_E) || 
+        (obj_hitbox_enemy[obj_hitbox_enemy_delete_queue[i]].id == OBJID_ARROW_E) || 
+        (obj_hitbox_enemy[obj_hitbox_enemy_delete_queue[i]].id == OBJID_BOSS_TEST1_ATTACK1))
         {
             SpriteEngine_ReleaseVramSlot(OBJ_GENERAL_MAX_COUNT + obj_hitbox_enemy_delete_queue[i], 1);
         }
@@ -1110,6 +1112,9 @@ void ObjectSystem_SetFunctionPointer(struct game_object * o)
             break;
         case OBJID_BOSS_TEST1:
             o->func_ptr = (void *)&Routines_Boss_Test;
+            break;
+        case OBJID_BOSS_TEST1_ATTACK1:
+            o->func_ptr = (void *)&Routines_Boss_Test_Attack_Particle;
             break;
         case OBJID_FX_SMOKE:
             o->func_ptr = (void *)&routines_fx_smoke;
