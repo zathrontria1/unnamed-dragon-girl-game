@@ -60,6 +60,8 @@ dkms.conf
 # listing
 *.lst
 mapfile
+rommap.svg
+rammap.svg
 *~
 
 # vscode stuff
