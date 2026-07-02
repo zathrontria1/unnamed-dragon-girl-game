@@ -513,7 +513,7 @@ int16_t ObjectSystem_InstantiateObject(
     uint16_t j = 0;
     // perform additional checks for sprite slots
 
-    if (id != OBJID_PLAYER)
+    if ((id != OBJID_PLAYER) && (id != OBJID_BOSS_TEST1))
     {
         if (((id >= OBJID_START_OF_DMA_SPRITES) && (id <= OBJID_END_OF_DMA_SPRITES)) ||
             ((id >= OBJID_START_OF_DMA_LIGHT_SPRITES) && (id <= OBJID_END_OF_DMA_LIGHT_SPRITES)) )
