@@ -50,6 +50,8 @@ int obj_boss_timer_attack;
 uint16_t obj_boss_prev_frame;
 bool obj_boss_vram_stale;
 
+#define BOSS_ATTACK_BASETIME_1 ((5 * FPS) >> 1) - 1
+
 void Routines_Boss_Test(struct game_object * o)
 {
     struct game_object * p = obj_player_pointer;
@@ -83,15 +85,20 @@ void Routines_Boss_Test(struct game_object * o)
 
             if (o->struct_data.npc_data.status == STATUS_BURNING)
             {
+                // Burning boss produce vfx
+                Gfx_EmitSmoke(o, 64);
+
+                // Burning boss palette cycles
                 if (!obj_boss_palette_swap)
                 {
-                    AniSystem_Pal_LoadSubpalette((uint8_t *)&data_palette_cycle_fire, PAL_BOSS_TEST+8);
+                    AniSystem_Pal_LoadCycleSubpalette((uint8_t *)&data_palette_cycle_fire, 0);
                     obj_boss_palette_swap = true;
                 }
 
                 if (system_frames_elapsed & 0x01)
                 {
-                    AniSystem_Pal_CycleSubpalette(PAL_BOSS_TEST+8);
+                    AniSystem_Pal_CycleSubpalette(0);
+                    AniSystem_Pal_CopyCycledSubpaletteToMainSubpalette(0, PAL_BOSS_TEST+8, 0, 8);
                 }
             }
             else if (o->struct_data.npc_data.status == STATUS_NORMAL)
@@ -403,16 +410,16 @@ bool Routines_Boss_Test_Attack_Pattern1(struct game_object * o, int32_t x, int32
     switch (obj_boss_phase)
     {
         case 0:
-            x = x + (obj_boss_subphase << 4);
+            x = x + (obj_boss_subphase << 3);
             break;
         case 1:
-            y = y + (obj_boss_subphase << 4);
+            y = y + (obj_boss_subphase << 3);
             break;
         case 2:
-            x = x - (obj_boss_subphase << 4);
+            x = x - (obj_boss_subphase << 3);
             break;
         case 3:
-            y = y - (obj_boss_subphase << 4);
+            y = y - (obj_boss_subphase << 3);
             break;
     }
 
@@ -444,12 +451,12 @@ bool Routines_Boss_Test_Attack_Pattern1(struct game_object * o, int32_t x, int32
                 break;
         }
 
-        p->struct_data.npc_data.ttl = (5 * FPS) - 1;
+        p->struct_data.npc_data.ttl = BOSS_ATTACK_BASETIME_1;
     }
 
-    obj_boss_timer_attack = (5 * FPS) / 8;
+    obj_boss_timer_attack = (5 * FPS) >> 4;
 
-    obj_boss_subphase = (obj_boss_subphase + 1) & 0x07;
+    obj_boss_subphase = (obj_boss_subphase + 1) & 0x0f;
 
     return temp_invalidate_animation_frame;
 }
@@ -472,10 +479,21 @@ void Routines_Boss_Test_Attack_Particle(struct game_object * o)
         // Move the object based on the stored delta
         ObjectSystem_MoveWithoutCollision(o);
 
-        // Update every 8 frames
-        if (((uint16_t)system_frames_elapsed & ANI_INTERVAL_8) == ANI_INTERVAL_8)
+        if (o->struct_data.npc_data.ttl > BOSS_ATTACK_BASETIME_1 - 6)
         {
-            o->struct_data.npc_data.ani.frame ^= 0x0001;
+            o->struct_data.npc_data.ani.frame = 7 - (BOSS_ATTACK_BASETIME_1 - o->struct_data.npc_data.ttl);
+        }
+        else if (o->struct_data.npc_data.ttl > 6)
+        {
+            // Update every 8 frames
+            if (!((uint16_t)system_frames_elapsed & ANI_INTERVAL_8))
+            {
+                o->struct_data.npc_data.ani.frame = (o->struct_data.npc_data.ani.frame ^ 0x0001) & 0x0001;
+            }
+        }   
+        else
+        {
+            o->struct_data.npc_data.ani.frame = 7 - o->struct_data.npc_data.ttl;
         }
 
         // Check if the object is to be destroyed
@@ -492,7 +510,7 @@ void Routines_Boss_Test_Attack_Particle(struct game_object * o)
 
     uint8_t * temp_addr = AniSystem_GetDynamicFrame_EnemyBossParticle(o);
 
-    Routines_Shared_Draw(o, temp_addr, PAL_BOSS_TEST, 0, false, false);
+    Routines_Shared_Draw(o, temp_addr, PAL_BOSS_TEST, 1, false, false);
 
     AniSystem_DrawDropShadow(o);
 
