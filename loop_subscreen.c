@@ -777,13 +777,18 @@ void loop_subscreen_help_drawtext(bool copy_result)
 */
 void loop_subscreen_top_drawtime()
 {
-    UserInterface_ClearTextBuffer_Line(26);
+    //UserInterface_ClearTextBuffer_Line(26);
     char temp_time_string[32] = "          ";
-    uint16_t temp_h = (system_frames_elapsed / FPS) / (3600l);
+    /*uint16_t temp_h = (system_frames_elapsed / FPS) / (3600l);
     uint16_t temp_m = ((system_frames_elapsed / FPS) % 3600l) / 60;
-    uint16_t temp_s = (system_frames_elapsed / FPS) % 60;
+    uint16_t temp_s = (system_frames_elapsed / FPS) % 60;*/
 
-    if ((system_frames_elapsed % (60 / V_MUL)) >= (FPS / 2))
+    uint16_t temp_h = system_time_h;
+    uint16_t temp_m = system_time_m;
+    uint16_t temp_s = system_time_s;
+
+    //if ((system_frames_elapsed % (60 / V_MUL)) >= (FPS / 2))
+    if (system_time_subframe >= (FPS / 2))
     {
         snprintf((char *)&temp_time_string, 32, (char *)&STR_UI_SUBSCREEN_PLAYTIME_NOCOLON, temp_h, temp_m, temp_s);
     }
