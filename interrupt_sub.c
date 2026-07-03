@@ -15,6 +15,8 @@
 
 #include "ani_bg.h"
 
+#include "system.h"
+
 #if VBCC_ASM == 1
     NO_INLINE void Nmi_Primary()
 #else
@@ -74,7 +76,7 @@
         REG_COLDATA = shadow_coldata_g;
         REG_COLDATA = shadow_coldata_b;
 
-        system_frames_elapsed++;
+        System_UpdateFrameCounters();
     }
     else 
     {
@@ -200,7 +202,7 @@
         if (system_nmis_counted >= 2)
         {
             // A bit of a hack to ensure that this ticks at 30FPS, not 60
-            system_frames_elapsed++;
+            System_UpdateFrameCounters();
             system_nmis_counted = 0;
         }
     }

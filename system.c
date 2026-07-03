@@ -904,6 +904,35 @@ void System_AlignToVblank()
 }
 
 /*
+    Adds all relevant time counters
+*/
+void System_UpdateFrameCounters()
+{
+    system_frames_elapsed++;
+
+    system_time_subframe++;
+    if (system_time_subframe >= FPS)
+    {
+        system_time_subframe = 0;
+        system_time_s++;
+
+        if (system_time_s >= 60)
+        {
+            system_time_s = 0;
+            system_time_m++;
+
+            if (system_time_m >= 60)
+            {
+                system_time_m = 0;
+                system_time_h++;
+            }
+        }
+    }
+
+    return;
+}
+
+/*
     Sets Htimer to specified dot on scanline and waits
 
     This will suppress all interrupts!

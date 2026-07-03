@@ -43,6 +43,8 @@ void System_Reset(void);
 
 void System_AlignToVblank();
 
+void System_UpdateFrameCounters();
+
 #if VBCC_ASM == 1
 NO_INLINE void System_Hsync(uint16_t dot);
 #else 
