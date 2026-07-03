@@ -18,6 +18,12 @@ ZP extern uint16_t system_current_routine;
 ZP extern uint16_t system_target_routine;
 
 ZP extern uint32_t system_frames_elapsed;
+
+ZP extern uint16_t system_time_h;
+ZP extern uint8_t system_time_m;
+ZP extern uint8_t system_time_s;
+ZP extern uint8_t system_time_subframe;
+
 ZP extern uint32_t system_frames_lag;
 extern bool system_dont_count_lag; // set to 1 to not increment the lag counter during e.g. creating a text box
 
