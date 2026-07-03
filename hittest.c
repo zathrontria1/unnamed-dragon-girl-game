@@ -109,7 +109,14 @@ struct game_object * CollisionCheck_PlayerTestEnemy(struct game_object * o)
                         hit = p;
                     }
 
-                    p->struct_data.npc_data.ttl = 1;
+                    if (hit->id != OBJID_BOSS_TEST1_ATTACK1)
+                    {
+                        p->struct_data.npc_data.ttl = 1;
+                    }
+                    else
+                    {
+                        p->struct_data.npc_data.ttl = 6; // Give 6 frames buffer
+                    }
                 }
             }
         }
