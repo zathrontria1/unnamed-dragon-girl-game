@@ -160,10 +160,9 @@ void Routines_Enemy_Slime(struct game_object * o)
                 }
 
                 // burning objects produce vfx
-                
                 if (o->struct_data.npc_data.status == STATUS_BURNING)
                 {
-                    Gfx_EmitSmoke(o);
+                    Gfx_EmitSmoke(o, 12);
                 }
 
                 if (Routines_Shared_StatusMaintenance(o))
@@ -409,7 +408,7 @@ void Routines_Enemy_Lizardman(struct game_object * o)
                 // burning objects produce vfx
                 if (o->struct_data.npc_data.status == STATUS_BURNING)
                 {
-                    Gfx_EmitSmoke(o);
+                    Gfx_EmitSmoke(o, 12);
                 }
 
                 if (Routines_Shared_StatusMaintenance(o))
