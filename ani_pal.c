@@ -8,8 +8,10 @@
 #include "ani_pal.h"
 #include "system.h"
 
-NEAR uint16_t pal_ani_entries[8][2]; // Just enough for the magic circle
+uint16_t pal_ani_entries[8][2]; // Just enough for the magic circle
 uint16_t pal_ani_sel;
+
+uint16_t pal_cycle_entries[16][16]; // Covers 16 subpalettes as a back buffer for copying later.
 
 /*
     Copy a subpalette (16 entries/32 bytes) to the shadow
@@ -20,6 +22,20 @@ uint16_t pal_ani_sel;
 void AniSystem_Pal_LoadSubpalette(uint8_t * ptr, uint16_t subpal)
 {
     uint8_t * dest_ptr = (uint8_t *)&shadow_cgram + (subpal << 5);
+    System_CopyBlock(ptr, dest_ptr, 32);
+
+    return;
+}
+
+/*
+    This one copies to a cycle entry subpalette instead
+
+    This will avoid clobbering the main shadow in case some entries need to be used
+    without being touched
+*/
+void AniSystem_Pal_LoadCycleSubpalette(uint8_t * ptr, uint16_t subpal)
+{
+    uint8_t * dest_ptr = (uint8_t *)&pal_cycle_entries + (subpal << 5);
     System_CopyBlock(ptr, dest_ptr, 32);
 
     return;
@@ -114,23 +130,40 @@ void AniSystem_Pal_PrecalcPaletteChanges(void)
 }
 
 /*
-    Cycles a subpalette
+    Cycles a back-buffered subpalette
 
     Functionally, basically shifts all palette entries 1 entry to the right
 */
 void AniSystem_Pal_CycleSubpalette(uint16_t subpal)
 {
     // Get the last entry of the affected subpalette
-    uint16_t last = shadow_cgram.entry[(subpal << 4) + 15];
+    uint16_t last = pal_cycle_entries[subpal][15];
 
     // Then shift everything in that subpalette to the right.
     for (int i = 15; i > 0; i--)
     {
-        shadow_cgram.entry[(subpal << 4) + i] = shadow_cgram.entry[(subpal << 4) + i - 1];
+        pal_cycle_entries[subpal][i] = pal_cycle_entries[subpal][i-1];
     }
 
     // Finally put the last entry in the first entry
-    shadow_cgram.entry[subpal << 4] = last;
+    pal_cycle_entries[subpal][0] = last;
 
+    return;
+}
+
+/*
+    Finally, this copies from cycled to main shadow cgram, and a length can be specified.
+
+    Offsets are in 16-bit wide entry terms
+
+    start = first entry
+    len = entry count
+*/
+void AniSystem_Pal_CopyCycledSubpaletteToMainSubpalette(uint16_t src_subpal, uint16_t dest_subpal, uint16_t start, uint16_t len)
+{
+    uint8_t * src_ptr = (uint8_t *)&pal_cycle_entries + (src_subpal << 5) + start;
+    uint8_t * dest_ptr = (uint8_t *)&shadow_cgram + (dest_subpal << 5) + start;
+    System_CopyBlock(src_ptr, dest_ptr, len << 1);
+    
     return;
 }
