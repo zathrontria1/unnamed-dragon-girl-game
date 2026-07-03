@@ -131,7 +131,7 @@ void Gfx_SetColorMath(int16_t r, int16_t g, int16_t b)
 /*
     Call to emit smoke effects.
 */
-void Gfx_EmitSmoke(struct game_object * o)
+void Gfx_EmitSmoke(struct game_object * o, int offset)
 {
     if (snd_firecrackle_timeout == 0)
     {
@@ -140,13 +140,28 @@ void Gfx_EmitSmoke(struct game_object * o)
         snd_firecrackle_timeout = (8 / V_MUL);
     }
 
-    // Only spawn objects every 8 frames...
-    if (
-        (((uint16_t)(system_frames_elapsed) & FX_SMOKE_INTERVAL) == FX_SMOKE_INTERVAL)
-    )
+    bool emit_smoke = false;
+
+    if (o->id == OBJID_BOSS_TEST1)
     {
-        int16_t temp_x = o->pos.x.lh.h;
-        int16_t temp_y = o->pos.y.lh.h;
+        // Increase density
+        if (!((uint16_t)(system_frames_elapsed) & ANI_INTERVAL_4))
+        {
+            emit_smoke = true;
+        }
+    }
+    else
+    {
+        if (!((uint16_t)(system_frames_elapsed) & FX_SMOKE_INTERVAL))
+        {
+            emit_smoke = true;
+        }
+    }
+
+    if (emit_smoke)
+    {
+        int16_t temp_x = o->pos.x.lh.h + (o->w >> 1) - 8 + (((int)Math_GetRandom_u16() - 16384) % 16);
+        int16_t temp_y = o->pos.y.lh.h - offset;
         int16_t k = ObjectSystem_InstantiateObject(OBJID_FX_SMOKE, temp_x, temp_y, 0);
         
         if (k >= 0)
@@ -156,7 +171,7 @@ void Gfx_EmitSmoke(struct game_object * o)
             int32_t temp = ((int32_t)Math_GetRandom_u16() - 16384);
 
             q->delta.x.a = temp;
-            q->delta.y.a = -(V_S_ONE / 2);
+            q->delta.y.a = -V_S_ONE;
 
             q->struct_data.npc_data.ttl = FX_SMOKE_TTL;
         }
