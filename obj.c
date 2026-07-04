@@ -354,11 +354,11 @@ void ObjectSystem_ResetStandardObjects(int start_index)
     for (int i = start_index; i < (OBJ_GENERAL_MAX_COUNT - 1); i++)
     {
         obj_general[i].next_free = i+1;
-        obj_general[i].func_ptr = (void *)&routines_dummy;
+        obj_general[i].func_ptr = (void *)&Routines_Dummy;
     }
 
     obj_general[OBJ_GENERAL_MAX_COUNT - 1].next_free = 0xffff;
-    obj_general[OBJ_GENERAL_MAX_COUNT - 1].func_ptr = (void *)&routines_dummy;
+    obj_general[OBJ_GENERAL_MAX_COUNT - 1].func_ptr = (void *)&Routines_Dummy;
 
     obj_first_available = start_index;
 
@@ -417,11 +417,11 @@ void ObjectSystem_ResetPlayerHitboxes()
     for (int i = 0; i < (OBJ_PLAYERHITBOX_MAX_COUNT - 1); i++)
     {
         obj_hitbox_player[i].next_free = i+1;
-        obj_hitbox_player[i].func_ptr = (void *)&routines_dummy;
+        obj_hitbox_player[i].func_ptr = (void *)&Routines_Dummy;
     }
 
     obj_hitbox_player[OBJ_PLAYERHITBOX_MAX_COUNT - 1].next_free = 0xffff;
-    obj_hitbox_player[OBJ_PLAYERHITBOX_MAX_COUNT - 1].func_ptr = (void *)&routines_dummy;
+    obj_hitbox_player[OBJ_PLAYERHITBOX_MAX_COUNT - 1].func_ptr = (void *)&Routines_Dummy;
 
     obj_hitbox_player_first_available = 0;
 
@@ -481,11 +481,11 @@ void ObjectSystem_ResetEnemyHitboxes()
     for (int i = 0; i < (OBJ_ENEMYHITBOX_MAX_COUNT - 1); i++)
     {
         obj_hitbox_enemy[i].next_free = i+1;
-        obj_hitbox_enemy[i].func_ptr = (void *)&routines_dummy;
+        obj_hitbox_enemy[i].func_ptr = (void *)&Routines_Dummy;
     }
 
     obj_hitbox_enemy[OBJ_ENEMYHITBOX_MAX_COUNT - 1].next_free = 0xffff;
-    obj_hitbox_enemy[OBJ_ENEMYHITBOX_MAX_COUNT - 1].func_ptr = (void *)&routines_dummy;
+    obj_hitbox_enemy[OBJ_ENEMYHITBOX_MAX_COUNT - 1].func_ptr = (void *)&Routines_Dummy;
 
     obj_hitbox_enemy_first_available = 0;
 
@@ -1018,7 +1018,7 @@ void ObjectSystem_CleanupStandardObjects()
         obj_first_available = obj_delete_queue[i];
 
         // Fix the object function to dummy
-        obj_general[obj_delete_queue[i]].func_ptr = (void *)&routines_dummy;
+        obj_general[obj_delete_queue[i]].func_ptr = (void *)&Routines_Dummy;
     }
     
     obj_active_count -= obj_delete_queue_count;
@@ -1038,7 +1038,7 @@ void ObjectSystem_CleanupPlayerHitboxes()
         obj_hitbox_player_first_available = obj_hitbox_player_delete_queue[i];
 
         // Fix the object function to dummy
-        obj_hitbox_player[obj_hitbox_player_delete_queue[i]].func_ptr = (void *)&routines_dummy;
+        obj_hitbox_player[obj_hitbox_player_delete_queue[i]].func_ptr = (void *)&Routines_Dummy;
     }
     
     obj_hitbox_count_player -= obj_hitbox_player_delete_queue_count;
@@ -1065,7 +1065,7 @@ void ObjectSystem_CleanupEnemyHitboxes()
         obj_hitbox_enemy_first_available = obj_hitbox_enemy_delete_queue[i];
 
         // Fix the object function to dummy
-        obj_hitbox_enemy[obj_hitbox_enemy_delete_queue[i]].func_ptr = (void *)&routines_dummy;
+        obj_hitbox_enemy[obj_hitbox_enemy_delete_queue[i]].func_ptr = (void *)&Routines_Dummy;
     }
     
     obj_hitbox_count_enemy -= obj_hitbox_enemy_delete_queue_count;
@@ -1092,7 +1092,7 @@ void ObjectSystem_SetFunctionPointer(struct game_object * o)
     switch (o->id)
     {
         case OBJID_NULL:
-            o->func_ptr = (void *)&routines_dummy;
+            o->func_ptr = (void *)&Routines_Dummy;
             break;
         case OBJID_PLAYER:
             o->func_ptr = (void *)&Routines_Player;
@@ -1119,13 +1119,13 @@ void ObjectSystem_SetFunctionPointer(struct game_object * o)
             o->func_ptr = (void *)&Routines_Boss_Test_Attack_Particle;
             break;
         case OBJID_FX_SMOKE:
-            o->func_ptr = (void *)&routines_fx_smoke;
+            o->func_ptr = (void *)&Routines_Fx_Smoke;
             break;
         case OBJID_DROP_REC_MEAT:
-            o->func_ptr = (void *)&routines_drop_rec_meat;
+            o->func_ptr = (void *)&Routines_Drops_Recovery_Meat;
             break;
         case OBJID_DROP_MONEY:
-            o->func_ptr = (void *)&routines_drop_money;
+            o->func_ptr = (void *)&Routines_Drops_Money;
             break;
         case OBJID_HITBOX_INVISIBLE:
             o->func_ptr = (void *)&Routines_Player_InvisibleHit;
@@ -1134,32 +1134,32 @@ void ObjectSystem_SetFunctionPointer(struct game_object * o)
             o->func_ptr = (void *)&Routines_Enemy_InvisibleHit;
             break;
         case OBJID_SYS_IMPACT:
-            o->func_ptr = (void *)&routines_fx_impact;
+            o->func_ptr = (void *)&Routines_Fx_Impact;
             break;
         case OBJID_INTERACTABLE_SWITCH_WALL:
         case OBJID_INTERACTABLE_SWITCH_FLOOR:
-            o->func_ptr = (void *)&routines_interactable_switch;
+            o->func_ptr = (void *)&Routines_Interactables_Switch;
             break;
         case OBJID_INTERACTABLE_BLOCKER_FLOOR:
         case OBJID_INTERACTABLE_BLOCKER_DOOR_NS:
         case OBJID_INTERACTABLE_BLOCKER_DOOR_EW:
-            o->func_ptr = (void *)&routines_interactable_blocker;
+            o->func_ptr = (void *)&Routines_Interactable_Blocker;
             break;
         case OBJID_INTERACTABLE_LEVEL_WARP:
-            o->func_ptr = (void *)&routines_interactable_level_warp;
+            o->func_ptr = (void *)&Routines_LevelWarp;
             break;
         case OBJID_INTERACTABLE_SIGN_WALL:
-            o->func_ptr = (void *)&routines_interactable_sign;
+            o->func_ptr = (void *)&Routines_Interactable_Sign;
             break;
         case OBJID_SPAWNER_ENEMY:
-            o->func_ptr = (void *)&routines_spawner;
+            o->func_ptr = (void *)&Routines_EnemySpawner;
             break;
         case OBJID_INTERACTABLE_TREASURECHEST:
-            o->func_ptr = (void *)&routines_interactable_treasurechest;
+            o->func_ptr = (void *)&Routines_TreasureChest;
             break;
         default:
             // Unimplemented object
-            o->func_ptr = (void *)&routines_dummy;
+            o->func_ptr = (void *)&Routines_Dummy;
             break;
     }
 
