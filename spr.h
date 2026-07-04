@@ -25,11 +25,13 @@ void SpriteEngine_AddToSortedLayer(struct game_object * o, uint16_t tileattrib);
 void SpriteEngine_AddToBackLayer(struct game_object * o, uint16_t tileattrib);
 #endif
 
-#ifdef __VBCC__
-NO_INLINE void SpriteEngine_ProcessSpriteLists(void);
-#else
-void SpriteEngine_ProcessSpriteLists(void);
-#endif
+void SpriteEngine_ProcessSpriteLists();
+void SpriteEngine_ProcessSpriteLists_WriteFrontSprites();
+void SpriteEngine_ProcessSpriteLists_ClearDepthBuffer();
+void SpriteEngine_ProcessSpriteLists_TallySprites();
+void SpriteEngine_ProcessSpriteLists_CalculateOffsets();
+void SpriteEngine_ProcessSpriteLists_WriteSortedSprites();
+void SpriteEngine_ProcessSpriteLists_WriteBackSprites();
 
 #if VBCC_ASM == 1
     NO_INLINE void SpriteEngine_DrawSprite(__reg("r0/r1") struct spr_queue_entry * s);
@@ -45,5 +47,5 @@ void SpriteEngine_ReleaseVramSlot(uint16_t i, uint16_t slot_count);
 void SpriteEngine_GetVramForBoss();
 void SpriteEngine_ReleaseVramForBoss();
 
-void SpriteEngine_PackOamHighTable(void);
-void SpriteEngine_ResetOam(void);
+void SpriteEngine_PackOamHighTable();
+void SpriteEngine_ResetOam();

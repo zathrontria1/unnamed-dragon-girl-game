@@ -550,11 +550,26 @@ void SpriteEngine_ReleaseVramForBoss()
     return;
 }
 /*
-    Processes sprite lists and writes to OAM shadow buffer.
-
-    TODO: C code compiler doesn't match ASM and is actually broken. Investigate.
-*/
+    Processes sprite lists and writes to OAM shadow buffer*/
 void SpriteEngine_ProcessSpriteLists()
+{
+    SpriteEngine_ProcessSpriteLists_WriteFrontSprites();
+
+    SpriteEngine_ProcessSpriteLists_ClearDepthBuffer();
+    SpriteEngine_ProcessSpriteLists_TallySprites();
+    SpriteEngine_ProcessSpriteLists_CalculateOffsets();
+    SpriteEngine_ProcessSpriteLists_WriteSortedSprites();
+
+    SpriteEngine_ProcessSpriteLists_WriteBackSprites();
+
+    SpriteEngine_ResetOam();
+    SpriteEngine_PackOamHighTable();
+
+    return;
+}
+
+// Frontmost sprites
+void SpriteEngine_ProcessSpriteLists_WriteFrontSprites()
 {
     #if VBCC_ASM == 1
         __asm(
@@ -590,7 +605,12 @@ void SpriteEngine_ProcessSpriteLists()
 
     spr_front_count = 0;
 
-    // Clear the depth buffer
+    return;
+}
+
+// Clear the depth buffer
+void SpriteEngine_ProcessSpriteLists_ClearDepthBuffer()
+{
     #if VBCC_ASM == 1
         __asm(
         "\ta16\n"
@@ -627,8 +647,13 @@ void SpriteEngine_ProcessSpriteLists()
             spr_depth_count[i] = 0;
         }
     #endif
-    
-    // Tally up sprites on each Y
+
+    return;
+}
+
+// Tally up sprites on each Y
+void SpriteEngine_ProcessSpriteLists_TallySprites()
+{
     #if VBCC_ASM == 1
         __asm(
         "\ta16\n"
@@ -679,8 +704,13 @@ void SpriteEngine_ProcessSpriteLists()
         }
     #endif
 
-    // then calculate the OAM offset for sprites
-    // Correct, but must be assembly optimized
+    return;
+}
+
+// then calculate the OAM offset for sprites
+// Correct, but must be assembly optimized
+void SpriteEngine_ProcessSpriteLists_CalculateOffsets()
+{
     #if VBCC_ASM == 1
         __asm(
         "\ta16\n"
@@ -761,7 +791,12 @@ void SpriteEngine_ProcessSpriteLists()
         }
     #endif
 
-    // write out the sprites
+    return;
+}
+
+// Write out the sprites
+void SpriteEngine_ProcessSpriteLists_WriteSortedSprites()
+{
     #if VBCC_ASM == 1
         __asm(
         "\ta16\n"
@@ -835,10 +870,16 @@ void SpriteEngine_ProcessSpriteLists()
             shadow_oam.entries.shadow_oam_high[spr_depth_count[spr_queue_normal[i].depth]].signsize = spr_queue_normal[i].signsize;
         }
     #endif
-
+    
     spr_sprite_count += spr_normal_count;
     spr_normal_count = 0;
 
+    return;
+}
+
+// For backmost sprites
+void SpriteEngine_ProcessSpriteLists_WriteBackSprites()
+{
     #if VBCC_ASM == 1
         __asm(
         "\ta16\n"
@@ -1036,7 +1077,7 @@ void SpriteEngine_PackOamHighTable()
 /* 
     Clears all unused sprites from OAM
 */
-void SpriteEngine_ResetOam(void)
+void SpriteEngine_ResetOam()
 {
     #if VBCC_ASM == 1
         __asm(
