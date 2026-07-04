@@ -10,8 +10,9 @@
 #include "system.h"
 #include "level.h"
 #include "loop.h"
+#include "loop_title.h"
+#include "loop_gameover.h"
 #include "loop_subscreen.h"
-
 #include "loop_cutscene.h"
 
 #include "hdma.h"
@@ -112,10 +113,10 @@ void * main_GetFunctionPointer(uint16_t routine)
             return (void *)&Loop_Subscreen_MapDisplay_Init;
             break;
         case ROUTINE_CUTSCENE:
-            return (void *)&CsEngine_Loop;
+            return (void *)&Cs_Loop;
             break;
         case ROUTINE_CUTSCENE_INIT:
-            return (void *)&CsEngine_StartCutscene;
+            return (void *)&Cs_StartCutscene;
             break;
         case ROUTINE_MSGBOX:
             return (void *)&Loop_Game_Messagebox;
@@ -127,10 +128,16 @@ void * main_GetFunctionPointer(uint16_t routine)
             return (void *)&Loop_Fade_Out;
             break;
         case ROUTINE_SUBSCREEN:
-            return (void *)&loop_subscreen_top;
+            return (void *)&Subscreen_Top;
             break;
         case ROUTINE_SUBSCREEN_HELP:
-            return (void *)&loop_subscreen_help;
+            return (void *)&Subscreen_Help;
+            break;
+        case ROUTINE_TITLE:
+            return (void *)&Title_Loop;
+            break;
+        case ROUTINE_GAMEOVER:
+            return (void *)&GameOver_Loop;
             break;
         case ROUTINE_RESET: // Special cased to immediately reset
             return (void *)&main_Reset;

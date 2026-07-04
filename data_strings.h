@@ -68,3 +68,6 @@ extern const uint8_t STR_ERROR_CONTROLLER[];
 extern const uint8_t STR_ERROR_REGION[];
 
 extern const uint8_t STR_STARTUP[];
+
+extern const uint8_t STR_TITLE_START[];
+extern const uint8_t STR_GAME_OVER[];

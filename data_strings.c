@@ -240,3 +240,6 @@ Don't turn off the power\n\
 while entering or exiting a staircase,\n\
 or a door that does not have a clear\n\
 destination.";
+
+HUGE const uint8_t STR_TITLE_START[] = "PRESS START BUTTON";
+HUGE const uint8_t STR_GAME_OVER[] = "GAME OVER";
