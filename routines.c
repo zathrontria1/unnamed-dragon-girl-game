@@ -72,7 +72,7 @@ void Routines_Fx_Smoke(struct game_object * o)
 
 void Routines_Fx_Impact(struct game_object * o)
 {
-    Routines_Shared_DrawFixed(o, 0x000a | PAL_SYS_IMPACT << 9, 0, true);
+    Routines_Shared_DrawFixed(o, 0x000a | PAL_FX_IMPACT << 9, 0, true);
 
     if (system_game_paused)
     {

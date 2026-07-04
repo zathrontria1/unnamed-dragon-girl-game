@@ -67,11 +67,11 @@
 #define PAL_FIREBALL 0
 #define PAL_SLIME 1
 
-#define PAL_FX_SMOKE 7
-#define PAL_FX_SHADOW 7
+#define PAL_FX_SHADOW 0
+#define PAL_FX_SMOKE 0
 
-#define PAL_SYS_TARGET 2
-#define PAL_SYS_IMPACT 7
+#define PAL_FX_IMPACT 7
+#define PAL_SYS_CURSOR 7
 
 #define PAL_BUBBLE_E 1
 #define PAL_LIZARDMAN 2

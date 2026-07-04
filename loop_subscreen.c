@@ -162,7 +162,7 @@ void Subscreen_Top()
         int16_t x = subscreen_items_toplevel[subscreen_selection].x;
         int16_t y = subscreen_items_toplevel[subscreen_selection].y;
 
-        SpriteEngine_DrawUISprite(x, y, (0xa4 | PAL_SYS_IMPACT << 9 | 3 << 12));
+        SpriteEngine_DrawUISprite(x, y, (0xa4 | PAL_SYS_CURSOR << 9 | 3 << 12));
 
         SpriteEngine_ProcessSpriteLists();
 
@@ -357,7 +357,7 @@ void Subscreen_Upgrade()
         int16_t x = subscreen_items_profile[subscreen_selection].x;
         int16_t y = subscreen_items_profile[subscreen_selection].y;
 
-        SpriteEngine_DrawUISprite(x, y, (0xa4 | PAL_SYS_IMPACT << 9 | 3 << 12));
+        SpriteEngine_DrawUISprite(x, y, (0xa4 | PAL_SYS_CURSOR << 9 | 3 << 12));
 
         for (int py = 0; py < 4; py++)
         {
@@ -716,7 +716,7 @@ void Subscreen_Help()
         int16_t x = subscreen_items_help[subscreen_selection].x;
         int16_t y = subscreen_items_help[subscreen_selection].y;
 
-        SpriteEngine_DrawUISprite(x, y, (0xa4 | PAL_SYS_IMPACT << 9 | 3 << 12));
+        SpriteEngine_DrawUISprite(x, y, (0xa4 | PAL_SYS_CURSOR << 9 | 3 << 12));
 
         SpriteEngine_ProcessSpriteLists();
 
@@ -860,7 +860,7 @@ void Subscreen_ResetConfirmation()
         int16_t x = subscreen_items_resetconfirm[subscreen_selection].x;
         int16_t y = subscreen_items_resetconfirm[subscreen_selection].y;
 
-        SpriteEngine_DrawUISprite(x, y, (0xa4 | PAL_SYS_IMPACT << 9 | 3 << 12));
+        SpriteEngine_DrawUISprite(x, y, (0xa4 | PAL_SYS_CURSOR << 9 | 3 << 12));
 
         SpriteEngine_ProcessSpriteLists();
 
