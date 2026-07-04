@@ -228,49 +228,16 @@ uint16_t AniSystem_GetFixedFrame_Fast(struct game_object * o)
     }
 }
 
-#if VBCC_ASM == 1
-NO_INLINE uint8_t * AniSystem_GetDynamicFrame_Bubble(struct game_object * o)
-#else
 uint8_t * AniSystem_GetDynamicFrame_Bubble(struct game_object * o)
-#endif
 {
-    #if VBCC_ASM == 1
-        __asm(
-            "\ta16\n"
-            "\tx16\n"
+    // use a virtual tilenum system before finalizing.
+    uint16_t temp_tilenum = 30;
 
-            "\ttax\n"
-            // 30 + Frame Number
-            // Current frame is byte 64
-            "\tlda #30\n"
-            "\tclc\n"
-            "\tadc $7e0040,x\n" // current frame. now we have the tile num in virtual space
+    // Now add the frame offset.
+    temp_tilenum += o->struct_data.npc_data.ani.frame;
 
-            "\ttxy\n"
-            "\tasl\n" // This clears the carry
-            "\ttax\n"
-            "\tlda >_const_ani_lut_frame_byteoffsets_16,x\n"
-            "\ttyx\n"
-
-            "\tadc #<_data_spr_slime\n"
-            "\tldx #^_data_spr_slime\n"
-
-            ".finish:\n"
-
-            "\trtl\n"
-        );
-    #else
-        // use a virtual tilenum system before finalizing.
-        uint16_t temp_tilenum = 30;
-
-        // Now add the frame offset.
-        temp_tilenum += o->struct_data.npc_data.ani.frame;
-
-        // Calculate the address
-        return ((uint8_t *)&data_spr_slime + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
-    #endif
-
-    return 0;
+    // Calculate the address
+    return ((uint8_t *)&data_spr_slime + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
 }
 
 uint8_t * AniSystem_GetDynamicFrame_Arrow(struct game_object * o)
@@ -390,217 +357,54 @@ uint8_t * AniSystem_GetDynamicFrame_EnemyBossParticle(struct game_object * o)
     return ((uint8_t *)&data_spr_boss_placeholder_addon_attack1 + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
 }
 
-#if VBCC_ASM == 1
-NO_INLINE uint8_t * AniSystem_GetDynamicFrame_Slime(__reg("a/x") struct game_object * o)
-#else
 uint8_t * AniSystem_GetDynamicFrame_Slime(struct game_object * o)
-#endif
 {
-    #if VBCC_ASM == 1
-        __asm(
-            "\ta16\n"
-            "\tx16\n"
+    // use a virtual tilenum system before finalizing.
+    uint16_t temp_tilenum = o->struct_data.npc_data.ani.frame; // add the frame offset.
 
-            "\ttax\n"
+    if (o->state == STATE_SPAWNING)
+    {
+        return (uint8_t *)&data_spr_spawn_placeholder + const_ani_lut_frame_byteoffsets_16[temp_tilenum];
+    }
+    else
+    {
+        temp_tilenum += const_ani_lut_basic[(o->state << 2) + o->facing];
 
-            "\tlda $7e001e,x\n"
-            "\tcmp #12\n"
-            "\tbne .not_spawning\n"
-
-            ".spawning:\n"
-                // Frame Number
-                // Current frame is byte 64
-                "\tlda $7e0040,x\n" // current frame. now we have the tile num in virtual space
-                "\tasl\n" // This clears the carry
-                "\ttax\n"
-                "\tlda >_const_ani_lut_frame_byteoffsets_16,x\n"
-                "\tadc #<_data_spr_spawn_placeholder\n"
-                "\tldx #^_data_spr_spawn_placeholder\n"
-
-                "\tbra .finish\n"
-
-            ".not_spawning:\n"
-                // (State * 4 + Facing + Frame Number)
-                // state is byte 30, facing is byte 32, current frame is byte 64
-                // The state value is still loaded at this point
-                "\tasl\n"
-                "\tasl\n" // Carry is cleared here
-                "\tadc $7e0020,x\n" // facing
-                
-                "\tasl\n" // Now we have the index to look into the lookup
-                "\ttxy\n"
-                "\ttax\n"
-                "\tlda >_const_ani_lut_basic, x\n"
-
-                // Transform this number
-                // (temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10)
-                "\ttyx\n"
-                "\tadc $7e0040,x\n" // current frame. now we have the tile num in virtual space
-
-                "\ttxy\n"
-                "\tasl\n" // This clears the carry
-                "\ttax\n"
-                "\tlda >_const_ani_lut_frame_byteoffsets_16,x\n"
-                "\ttyx\n"
-                
-                "\tadc #<_data_spr_slime\n" 
-
-                "\ttay\n"
-
-                // Test for sign flip
-                "\tlda $7e001e,x\n" // state
-                "\tcmp #13\n"
-                "\tbeq .no_flip\n"
-                "\tlda $7e0020,x\n" // facing
-                "\tcmp #3\n"
-                "\tbne .no_flip\n"
-                ".flip_x:\n"
-                    "\tlda #$8000\n"
-                    "\tora #^_data_spr_slime\n"
-                    "\ttax\n"
-                    "\tbra .finalize\n"
-                ".no_flip:\n"
-                    "\tldx #^_data_spr_slime\n"
-
-            ".finalize:\n"
-            "\ttya\n"
-
-            ".finish:\n"
-
-            "\trtl\n"
-        );
-    #else
-        // use a virtual tilenum system before finalizing.
-        uint16_t temp_tilenum = o->struct_data.npc_data.ani.frame; // add the frame offset.
-
-        if (o->state == STATE_SPAWNING)
+        if ((o->facing == FACING_LEFT) && (o->state != STATE_DIE))
         {
-            return (uint8_t *)&data_spr_spawn_placeholder + const_ani_lut_frame_byteoffsets_16[temp_tilenum];
+            return (uint8_t *)((uint32_t)&data_spr_slime + const_ani_lut_frame_byteoffsets_16[temp_tilenum] | 0x80000000); // set the negative flag
         }
         else
         {
-            temp_tilenum += const_ani_lut_basic[(o->state << 2) + o->facing];
-
-            if ((o->facing == FACING_LEFT) && (o->state != STATE_DIE))
-            {
-                return (uint8_t *)((uint32_t)&data_spr_slime + const_ani_lut_frame_byteoffsets_16[temp_tilenum] | 0x80000000); // set the negative flag
-            }
-            else
-            {
-                // Calculate the address
-                return (uint8_t *)&data_spr_slime + const_ani_lut_frame_byteoffsets_16[temp_tilenum];
-            }
+            // Calculate the address
+            return (uint8_t *)&data_spr_slime + const_ani_lut_frame_byteoffsets_16[temp_tilenum];
         }
-    #endif
-
-    return 0;
+    }
 }
 
-
-#if VBCC_ASM == 1
-NO_INLINE uint8_t * AniSystem_GetDynamicFrame_Lizardman(__reg("a/x") struct game_object * o)
-#else
 uint8_t * AniSystem_GetDynamicFrame_Lizardman(struct game_object * o)
-#endif
 {
-    #if VBCC_ASM == 1
-        __asm(
-            "\ta16\n"
-            "\tx16\n"
+    // use a virtual tilenum system before finalizing.
+    uint16_t temp_tilenum = o->struct_data.npc_data.ani.frame; // add the frame offset.
 
-            "\ttax\n"
+    if (o->state == STATE_SPAWNING)
+    {
+        return (uint8_t *)&data_spr_spawn_placeholder + const_ani_lut_frame_byteoffsets_16[temp_tilenum];
+    }
+    else
+    {
+        temp_tilenum += const_ani_lut_lizardman[(o->state << 2) + o->facing];
 
-            "\tlda $7e001e,x\n"
-            "\tcmp #12\n"
-            "\tbne .not_spawning\n"
-
-            ".spawning:\n"
-                // Frame Number
-                // Current frame is byte 64
-                "\tlda $7e0040,x\n" // current frame. now we have the tile num in virtual space
-                "\tasl\n" // This clears the carry
-                "\ttax\n"
-                "\tlda >_const_ani_lut_frame_byteoffsets_16,x\n"
-                "\tadc #<_data_spr_spawn_placeholder\n"
-                "\tldx #^_data_spr_spawn_placeholder\n"
-
-                "\tbra .finish\n"
-
-            ".not_spawning:\n"
-                // (State * 4 + Facing + Frame Number)
-                // state is byte 30, facing is byte 32, current frame is byte 64
-                // The state value is still loaded at this point
-                "\tasl\n"
-                "\tasl\n" // Carry is cleared here
-                "\tadc $7e0020,x\n" // facing
-                
-                "\tasl\n" // Now we have the index to look into the lookup
-                "\ttxy\n"
-                "\ttax\n"
-                "\tlda >_const_ani_lut_lizardman, x\n"
-
-                // Transform this number
-                // (temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10)
-                "\ttyx\n"
-                "\tadc $7e0040,x\n" // current frame. now we have the tile num in virtual space
-
-                "\ttxy\n"
-                "\tasl\n" // This clears the carry
-                "\ttax\n"
-                "\tlda >_const_ani_lut_frame_byteoffsets_16,x\n"
-                "\ttyx\n"
-                
-                "\tadc #<_data_spr_lizardman\n" 
-
-                "\ttay\n"
-
-                // Test for sign flip
-                "\tlda $7e001e,x\n" // state
-                "\tcmp #13\n"
-                "\tbeq .no_flip\n"
-                "\tlda $7e0020,x\n" // facing
-                "\tcmp #3\n"
-                "\tbne .no_flip\n"
-                ".flip_x:\n"
-                    "\tlda #$8000\n"
-                    "\tora #^_data_spr_lizardman\n"
-                    "\ttax\n"
-                    "\tbra .finalize\n"
-                ".no_flip:\n"
-                    "\tldx #^_data_spr_lizardman\n"
-
-            ".finalize:\n"
-            "\ttya\n"
-
-            ".finish:\n"
-
-            "\trtl\n"
-        );
-    #else
-        // use a virtual tilenum system before finalizing.
-        uint16_t temp_tilenum = o->struct_data.npc_data.ani.frame; // add the frame offset.
-
-        if (o->state == STATE_SPAWNING)
+        if ((o->facing == FACING_LEFT) && (o->state != STATE_DIE))
         {
-            return (uint8_t *)&data_spr_spawn_placeholder + const_ani_lut_frame_byteoffsets_16[temp_tilenum];
+            return (uint8_t *)((uint32_t)&data_spr_lizardman + const_ani_lut_frame_byteoffsets_16[temp_tilenum] | 0x80000000); // set the negative flag
         }
         else
         {
-            temp_tilenum += const_ani_lut_lizardman[(o->state << 2) + o->facing];
-
-            if ((o->facing == FACING_LEFT) && (o->state != STATE_DIE))
-            {
-                return (uint8_t *)((uint32_t)&data_spr_lizardman + const_ani_lut_frame_byteoffsets_16[temp_tilenum] | 0x80000000); // set the negative flag
-            }
-            else
-            {
-                // Calculate the address
-                return (uint8_t *)&data_spr_lizardman + const_ani_lut_frame_byteoffsets_16[temp_tilenum];
-            }
+            // Calculate the address
+            return (uint8_t *)&data_spr_lizardman + const_ani_lut_frame_byteoffsets_16[temp_tilenum];
         }
-    #endif
-
-    return 0;
+    }
 }
 
 // Fetch and build compressed frame in WRAM

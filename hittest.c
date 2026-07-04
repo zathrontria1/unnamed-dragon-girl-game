@@ -10,52 +10,15 @@
 #include "hittest.h"
 
 // Call from an enemy to hit test
-#if VBCC_ASM == 1
-    NO_INLINE struct game_object * CollisionCheck_EnemyTestPlayer(__reg("r0/r1") struct game_object * o)
-#else
-    struct game_object * CollisionCheck_EnemyTestPlayer(struct game_object * o)
-#endif
+struct game_object * CollisionCheck_EnemyTestPlayer(struct game_object * o)
 {
-    #if VBCC_ASM == 1 // place addresses at r0 and r2
-        __asm(
-        "\ta16\n"
-	    "\tx16\n"
-
-        "\tlda #<_obj_hitbox_player\n"
-        "\tsta r2\n"
-        "\tlda #^_obj_hitbox_player\n"
-        "\tsta r3\n"
-        
-        ".hittest_enemy2player_process_loop:\n"
-        "\tlda [r2]\n" // assumes object memory is in bank 7e
-        "\tbeq .hittest_enemy2player_increment\n"
-        "\tjsl >_CollisionCheck_Aabb_BetweenObjects\n"
-        "\tcmp #0\n"
-        "\tbne .hittest_enemy2player_increment\n"
-
-        "\tldx r3\n"
-        "\tlda r2\n"
-
-        "\trtl\n"
-
-        ".hittest_enemy2player_increment:\n"
-        "\tlda r2\n"
-        "\tclc\n"
-        "\tadc #128\n"
-        "\tsta r2\n"
-        "\tcmp #<_obj_hitbox_player+2048\n"
-        "\tbcc .hittest_enemy2player_process_loop\n"
-
-        ".hittest_enemy2player_break_loop:\n"
-    );
-    #else
     struct game_object * p = &obj_hitbox_player[0];
     
     for (int i = 0; i < OBJ_PLAYERHITBOX_MAX_COUNT; i++)
     {
         if (p->id != OBJID_NULL)
         {
-            if (CollisionCheck_Aabb_BetweenObjects(o, p) == 0)
+            if (!CollisionCheck_Aabb_BetweenObjects(o, p))
             {
                 return p;
             }
@@ -63,7 +26,6 @@
         
         p++;
     }
-    #endif
 
     return NULL;
 }
@@ -132,11 +94,7 @@ struct game_object * CollisionCheck_PlayerTestEnemy(struct game_object * o)
 /*
     Axis-aligned bounding box test between two objects
 */
-#if VBCC_ASM == 1
-    NO_INLINE uint16_t CollisionCheck_Aabb_BetweenObjects(__reg("r0/r1") struct game_object * a, __reg("r2/r3") struct game_object * b)
-#else
-    uint16_t CollisionCheck_Aabb_BetweenObjects(struct game_object * a, struct game_object * b)
-#endif
+uint16_t CollisionCheck_Aabb_BetweenObjects(struct game_object * a, struct game_object * b)
 {
     // a.x < b.x + b.w && b.x < a.x + a.w
     if ((b->r) < a->pos.x.lh.h)
