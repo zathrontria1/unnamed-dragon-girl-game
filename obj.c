@@ -575,7 +575,7 @@ int16_t ObjectSystem_InstantiateObject(
     }
     else
     {
-        p->struct_data.npc_data.ani.display = AniSystem_GetFixedFrame_Fast(p);
+        p->struct_data.npc_data.ani.display = 0x5d; // empty tile in fixed mode
     }
 
     if ((id >= OBJID_START_OF_INTERACTABLES) && (id <= OBJID_END_OF_INTERACTABLES))
@@ -722,7 +722,7 @@ int16_t ObjectSystem_InstantiatePlayerHitbox(
     p->pos.z.a = 0;
     p->delta.z.a = 0;
 
-    p->struct_data.npc_data.ani.display = AniSystem_GetFixedFrame_Fast(p);
+    p->struct_data.npc_data.ani.display = 0x5d; // empty tile in fixed mode
     p->struct_data.npc_data.ani.last_address = 0; // make this invalid
 
     //obj_active_count++;

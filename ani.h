@@ -13,8 +13,6 @@ void AniSystem_DrawDropShadow(struct game_object * o);
 
 uint8_t * AniSystem_GetPlayerFrame(struct game_object * o);
 
-uint16_t AniSystem_GetFixedFrame_Fast(struct game_object * o);
-
 uint8_t * AniSystem_GetDynamicFrame(struct game_object * o);
 uint8_t * AniSystem_GetDynamicFrame_Slime(struct game_object * o);
 uint8_t * AniSystem_GetDynamicFrame_Lizardman(struct game_object * o);

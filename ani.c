@@ -208,26 +208,6 @@ uint8_t * AniSystem_GetDynamicFrame_Stateless(struct game_object * o)
     }
 }
 
-// Return offset to a fixed sprite tilenum based on given information
-// object ID and frame only
-// shorter version for light objects
-uint16_t AniSystem_GetFixedFrame_Fast(struct game_object * o)
-{
-    switch (o->id)
-    {
-        case OBJID_FX_SMOKE:
-            return 6+(o->struct_data.npc_data.ani.frame << 1);
-        case OBJID_FIREBALL:
-            return 2+(o->struct_data.npc_data.ani.frame << 1);
-        case OBJID_SYS_IMPACT:
-            return 10;
-        case OBJID_SYS_TARGET:
-            return 14; 
-        default:
-            return 0;
-    }
-}
-
 uint8_t * AniSystem_GetDynamicFrame_Bubble(struct game_object * o)
 {
     // use a virtual tilenum system before finalizing.
