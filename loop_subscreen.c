@@ -44,7 +44,7 @@ bool subscreen_skip_window_redraw;
 
 uint8_t subscreen_cgadsub_copy;
 
-void loop_subscreen_top()
+void Subscreen_Top()
 {
     // Temporarily make a copy of CGADSUB.
     subscreen_cgadsub_copy = shadow_cgadsub;
@@ -83,9 +83,6 @@ void loop_subscreen_top()
 
         SpriteEngine_ProcessSpriteLists();
 
-        SpriteEngine_ResetOam();
-        SpriteEngine_PackOamHighTable();
-
         UserInterface_ClearWindowBuffer(false);
         UserInterface_ClearTextBuffer();
 
@@ -96,7 +93,7 @@ void loop_subscreen_top()
         
         snprintf((char *)&temp_money_string, 32, (char *)&STR_UI_SUBSCREEN_MONEY, obj_player_pointer->struct_data.npc_data.money);
 
-        loop_subscreen_top_drawtime();
+        Subscreen_Top_DrawTime();
 
         char temp_lag_frames[32] = "          ";
         snprintf((char *)&temp_lag_frames, 32, (char *)&STR_UI_SUBSCREEN_LAGCOUNTER, system_frames_lag);
@@ -124,14 +121,14 @@ void loop_subscreen_top()
             {
                 SoundInterface_PauseStream();
 
-                loop_subscreen_profile_restore_last_sprite_page();
+                Subscreen_Internal_RestoreLastSpritePage();
                 subscreen_restore_sprite_page = false;
 
                 SoundInterface_ResumeStream();
             }
             else
             {
-                loop_subscreen_profile_restore_last_sprite_page();
+                Subscreen_Internal_RestoreLastSpritePage();
                 subscreen_restore_sprite_page = false;
             }
         }
@@ -169,10 +166,7 @@ void loop_subscreen_top()
 
         SpriteEngine_ProcessSpriteLists();
 
-        SpriteEngine_ResetOam();
-        SpriteEngine_PackOamHighTable();
-
-        loop_subscreen_top_drawtime();
+        Subscreen_Top_DrawTime();
 
         bool temp_exit_subscreen = false;
 
@@ -260,7 +254,7 @@ void loop_subscreen_top()
     return;
 }
 
-void loop_subscreen_profile()
+void Subscreen_Upgrade()
 {
     system_game_paused = true;
     system_dont_count_lag = true;
@@ -284,19 +278,19 @@ void loop_subscreen_profile()
             {
                 SoundInterface_PauseStream();
 
-                loop_subscreen_profile_save_last_sprite_page();
+                Subscreen_Internal_SaveLastSpritePage();
 
                 // Then copy the player character's portrait
-                loop_subscreen_profile_upload_profile_picture();
+                Subscreen_Upgrade_UploadProfilePicture();
 
                 SoundInterface_ResumeStream();
             }
             else
             {
-                loop_subscreen_profile_save_last_sprite_page();
+                Subscreen_Internal_SaveLastSpritePage();
 
                 // Then copy the player character's portrait
-                loop_subscreen_profile_upload_profile_picture();
+                Subscreen_Upgrade_UploadProfilePicture();
             }
 
             subscreen_is_in_profile = true;
@@ -324,9 +318,9 @@ void loop_subscreen_profile()
         
         UserInterface_ClearTextBuffer();
 
-        loop_subscreen_profile_calculate_costs();
+        Subscreen_Upgrade_CalculateUpgradeCosts();
 
-        loop_subscreen_profile_drawtext(false);
+        Subscreen_Upgrade_DrawText(false);
         
         UserInterface_CopyUiBuffers();
         
@@ -374,9 +368,6 @@ void loop_subscreen_profile()
         }
 
         SpriteEngine_ProcessSpriteLists();
-
-        SpriteEngine_ResetOam();
-        SpriteEngine_PackOamHighTable();
 
         bool temp_exit_subscreen = false;
 
@@ -443,7 +434,7 @@ void loop_subscreen_profile()
 /*
     Save the original sprite page
 */
-void loop_subscreen_profile_save_last_sprite_page()
+void Subscreen_Internal_SaveLastSpritePage()
 {
     // TODO: This is very hacky. Consider making a third NMI routine for this so APU playback isn't a factor.
     if (snd_stream_enable)
@@ -471,7 +462,7 @@ void loop_subscreen_profile_save_last_sprite_page()
 /*
     Upload the player character's image to VRAM
 */
-void loop_subscreen_profile_upload_profile_picture()
+void Subscreen_Upgrade_UploadProfilePicture()
 {
     // First decompress the image
     LZ4_UnpackToWRAM(&data_spr_player_portrait_lz4, (void *)(LZ4_BUFFER_ADDR+0x6000));
@@ -502,7 +493,7 @@ void loop_subscreen_profile_upload_profile_picture()
 /*
     Restore the original sprite page
 */
-void loop_subscreen_profile_restore_last_sprite_page()
+void Subscreen_Internal_RestoreLastSpritePage()
 {
     // TODO: This is very hacky. Consider making a third NMI routine for this so APU playback isn't a factor.
     if (snd_stream_enable)
@@ -527,7 +518,7 @@ void loop_subscreen_profile_restore_last_sprite_page()
     return;
 }
 
-void loop_subscreen_profile_drawtext(bool copy_result)
+void Subscreen_Upgrade_DrawText(bool copy_result)
 {
     UserInterface_ClearTextBuffer();
 
@@ -576,7 +567,7 @@ void loop_subscreen_profile_drawtext(bool copy_result)
 /*
     Calculate upgrade costs
 */
-void loop_subscreen_profile_calculate_costs()
+void Subscreen_Upgrade_CalculateUpgradeCosts()
 {
     obj_player_upgrades_cost_hp = data_upgrade_costs[obj_player_upgrades_bought_hp];
     obj_player_upgrades_cost_attack = data_upgrade_costs[obj_player_upgrades_bought_attack];
@@ -585,7 +576,7 @@ void loop_subscreen_profile_calculate_costs()
     return;
 }
 
-void loop_subscreen_profile_upgrade_hp()
+void Subscreen_Upgrade_Hp()
 {
     if (obj_player_pointer->struct_data.npc_data.money >= obj_player_upgrades_cost_hp)
     {
@@ -609,7 +600,7 @@ void loop_subscreen_profile_upgrade_hp()
     return;
 }
 
-void loop_subscreen_profile_upgrade_atk()
+void Subscreen_Upgrade_Attack()
 {
     if (obj_player_pointer->struct_data.npc_data.money >= obj_player_upgrades_cost_attack)
     {
@@ -632,7 +623,7 @@ void loop_subscreen_profile_upgrade_atk()
     return;
 }
 
-void loop_subscreen_profile_upgrade_def()
+void Subscreen_Upgrade_Defense()
 {
     if (obj_player_pointer->struct_data.npc_data.money >= obj_player_upgrades_cost_defense)
     {
@@ -655,7 +646,7 @@ void loop_subscreen_profile_upgrade_def()
     return;
 }
 
-void loop_subscreen_help()
+void Subscreen_Help()
 {
     system_game_paused = true;
     system_dont_count_lag = true;
@@ -686,7 +677,7 @@ void loop_subscreen_help()
         UserInterface_DrawWindowBackground(0,3,4,25);
         UserInterface_DrawWindowBackground(4,3,28,25);
 
-        loop_subscreen_help_drawtext(false);
+        Subscreen_Help_DrawText(false);
         
         UserInterface_CopyUiBuffers();
         
@@ -706,7 +697,7 @@ void loop_subscreen_help()
                 subscreen_selection--;
             }
             SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
-            loop_subscreen_help_drawtext(true);
+            Subscreen_Help_DrawText(true);
         }
         else if (System_CheckKey(KEY_DOWN))
         {
@@ -719,7 +710,7 @@ void loop_subscreen_help()
                 subscreen_selection++;
             }
             SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
-            loop_subscreen_help_drawtext(true);
+            Subscreen_Help_DrawText(true);
         }
 
         int16_t x = subscreen_items_help[subscreen_selection].x;
@@ -728,9 +719,6 @@ void loop_subscreen_help()
         SpriteEngine_DrawUISprite(x, y, (0xa4 | PAL_SYS_IMPACT << 9 | 3 << 12));
 
         SpriteEngine_ProcessSpriteLists();
-
-        SpriteEngine_ResetOam();
-        SpriteEngine_PackOamHighTable();
 
         if (System_CheckKey(KEY_B))
         {
@@ -749,7 +737,7 @@ void loop_subscreen_help()
 /*
     Helper function to draw for Help
 */
-void loop_subscreen_help_drawtext(bool copy_result)
+void Subscreen_Help_DrawText(bool copy_result)
 {
     UserInterface_ClearTextBuffer();
 
@@ -775,7 +763,7 @@ void loop_subscreen_help_drawtext(bool copy_result)
 /*
     Helper function to update play time
 */
-void loop_subscreen_top_drawtime()
+void Subscreen_Top_DrawTime()
 {
     //UserInterface_ClearTextBuffer_Line(26);
     char temp_time_string[32] = "          ";
@@ -803,7 +791,7 @@ void loop_subscreen_top_drawtime()
     return;
 }
 
-void loop_subscreen_resetconfirm()
+void Subscreen_ResetConfirmation()
 {
     system_game_paused = true;
     system_dont_count_lag = true;
@@ -876,9 +864,6 @@ void loop_subscreen_resetconfirm()
 
         SpriteEngine_ProcessSpriteLists();
 
-        SpriteEngine_ResetOam();
-        SpriteEngine_PackOamHighTable();
-
         bool temp_exit_subscreen = false;
 
         if (System_CheckKey(KEY_A))
@@ -937,20 +922,20 @@ void loop_subscreen_resetconfirm()
 const struct menu_item subscreen_items_toplevel[7] = {
     {6, 16, MENUACTION_EXITSUBSCREEN, 0}, 
 
-    {6, 24, MENUACTION_OPENSUBSCREEN, (void *)&loop_subscreen_profile}, 
+    {6, 24, MENUACTION_OPENSUBSCREEN, (void *)&Subscreen_Upgrade}, 
     {6, 32, MENUACTION_OPENMAPSCREEN, 0}, 
-    {6, 40, MENUACTION_OPENSUBSCREEN, (void *)&loop_subscreen_help}, 
+    {6, 40, MENUACTION_OPENSUBSCREEN, (void *)&Subscreen_Help}, 
     {6, 48, MENUACTION_OPENSUBSCREEN, 0}, 
     
-    {6, 56, MENUACTION_OPENSUBSCREEN, (void *)&loop_subscreen_resetconfirm}, 
+    {6, 56, MENUACTION_OPENSUBSCREEN, (void *)&Subscreen_ResetConfirmation}, 
 
     {255, 255, 0, 0}, 
 };
 
 const struct menu_item subscreen_items_profile[5] = {
-    {6, 152, MENUACTION_CALLFUNCTION, (void *)&loop_subscreen_profile_upgrade_hp}, 
-    {6, 168, MENUACTION_CALLFUNCTION, (void *)&loop_subscreen_profile_upgrade_atk}, 
-    {6, 184, MENUACTION_CALLFUNCTION, (void *)&loop_subscreen_profile_upgrade_def}, 
+    {6, 152, MENUACTION_CALLFUNCTION, (void *)&Subscreen_Upgrade_Hp}, 
+    {6, 168, MENUACTION_CALLFUNCTION, (void *)&Subscreen_Upgrade_Attack}, 
+    {6, 184, MENUACTION_CALLFUNCTION, (void *)&Subscreen_Upgrade_Defense}, 
 
     {6, 208, MENUACTION_EXITSUBSCREEN, 0}, 
 

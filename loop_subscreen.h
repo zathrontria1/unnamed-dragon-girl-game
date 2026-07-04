@@ -41,20 +41,20 @@ extern const struct menu_item subscreen_items_profile[5];
 extern const struct menu_item subscreen_items_help[7];
 extern const struct menu_item subscreen_items_resetconfirm[3];
 
-void loop_subscreen_top();
-void loop_subscreen_top_drawtime();
+void Subscreen_Top();
+void Subscreen_Top_DrawTime();
 
-void loop_subscreen_profile();
-void loop_subscreen_profile_save_last_sprite_page();
-void loop_subscreen_profile_upload_profile_picture();
-void loop_subscreen_profile_restore_last_sprite_page();
-void loop_subscreen_profile_calculate_costs();
-void loop_subscreen_profile_drawtext();
-void loop_subscreen_profile_upgrade_hp();
-void loop_subscreen_profile_upgrade_atk();
-void loop_subscreen_profile_upgrade_def();
+void Subscreen_Upgrade();
+void Subscreen_Internal_SaveLastSpritePage();
+void Subscreen_Upgrade_UploadProfilePicture();
+void Subscreen_Internal_RestoreLastSpritePage();
+void Subscreen_Upgrade_CalculateUpgradeCosts();
+void Subscreen_Upgrade_DrawText();
+void Subscreen_Upgrade_Hp();
+void Subscreen_Upgrade_Attack();
+void Subscreen_Upgrade_Defense();
 
-void loop_subscreen_help();
-void loop_subscreen_help_drawtext(bool copy_result);
+void Subscreen_Help();
+void Subscreen_Help_DrawText(bool copy_result);
 
-void loop_subscreen_resetconfirm();
+void Subscreen_ResetConfirmation();

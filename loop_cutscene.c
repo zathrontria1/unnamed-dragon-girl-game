@@ -44,7 +44,7 @@ bool cs_use_second_frame; // Whether to use the alternate frame. Also determines
 */
 uint16_t cs_preload_subsection; // Which preload section we're at
 
-void CsEngine_Loop()
+void Cs_Loop()
 {
     System_Init_DisplaySettings(system_target_routine);
     System_Init_TilemapSettings(system_target_routine);
@@ -75,7 +75,7 @@ void CsEngine_Loop()
     {
         if (cs_preload_subsection < 2)
         {
-            CsEngine_PreloadNextFrame();
+            Cs_PreloadNextFrame();
         }
         else if (cs_preload_subsection < 4)
         {
@@ -177,7 +177,7 @@ void CsEngine_Loop()
         }
         else
         {
-            CsEngine_StartCutscene();
+            Cs_StartCutscene();
         }
     }
 
@@ -187,7 +187,7 @@ void CsEngine_Loop()
 /*
     Call to setup a cutscene
 */
-void CsEngine_StartCutscene()
+void Cs_StartCutscene()
 {
     if (system_current_routine == ROUTINE_CUTSCENE_INIT)
     {
@@ -291,7 +291,7 @@ void CsEngine_StartCutscene()
 /*
     Call to preload next frame data
 */
-void CsEngine_PreloadNextFrame()
+void Cs_PreloadNextFrame()
 {
     struct cutscene_data * ptr = cs_current + 1;
 
