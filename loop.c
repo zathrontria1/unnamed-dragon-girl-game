@@ -106,9 +106,6 @@ void Loop_Game_Messagebox()
     
     SpriteEngine_ProcessSpriteLists();
 
-    SpriteEngine_ResetOam();
-    SpriteEngine_PackOamHighTable();
-
     uint8_t * new_data_addr;
 
     // Check if the current page has finished printing.
@@ -266,8 +263,6 @@ void Loop_Game()
     ObjectSystem_ProcessObjects();
 
     SpriteEngine_ProcessSpriteLists();
-    SpriteEngine_ResetOam();
-    SpriteEngine_PackOamHighTable();
 
     ObjectSystem_CleanupStandardObjects();
     ObjectSystem_CleanupPlayerHitboxes();
@@ -361,8 +356,6 @@ void Loop_Subscreen_MapDisplay_Init()
     bg_scroll_y.full.high.a = -8;
 
     SpriteEngine_ProcessSpriteLists();
-    SpriteEngine_ResetOam();
-    SpriteEngine_PackOamHighTable();
 
     struct game_object * o = obj_player_pointer;
     struct game_object temp_icon_object = *obj_player_pointer;
@@ -571,9 +564,6 @@ void Loop_Subscreen_MapDisplay()
 
     SpriteEngine_ProcessSpriteLists();
 
-    SpriteEngine_ResetOam();
-    SpriteEngine_PackOamHighTable();
-
     // Check for *any* key
     if (System_CheckKeyAny())
     {
@@ -671,8 +661,6 @@ void Loop_Game_Partial(void)
     ObjectSystem_ProcessObjects();
 
     SpriteEngine_ProcessSpriteLists();
-    SpriteEngine_ResetOam();
-    SpriteEngine_PackOamHighTable();
     system_game_paused = temp_game_paused_copy;
 
     return;
