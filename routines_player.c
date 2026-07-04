@@ -294,7 +294,7 @@ void Routines_Player(struct game_object * o)
 
                 temp_is_dashing = 0;
 
-                if (obj_player_attack_interval == 0)
+                if (!obj_player_attack_interval)
                 {
                     int16_t j = ObjectSystem_InstantiatePlayerHitbox(OBJID_FIREBALL, o->pos.x.lh.h, o->pos.y.lh.h);
                     if (j >= 0)
@@ -483,9 +483,9 @@ void Routines_Player(struct game_object * o)
 
             // Process health regen if needed
 
-            if (obj_player_health_regen_delay == 0)
+            if (!obj_player_health_regen_delay)
             {
-                if (obj_player_health_regen_interval == 0)
+                if (!obj_player_health_regen_interval)
                 {
                     if (o->struct_data.npc_data.hp < obj_player_health_regen_limit)
                     {
@@ -521,7 +521,7 @@ void Routines_Player(struct game_object * o)
         else
         {
             o->struct_data.npc_data.status_time--;
-            if (o->struct_data.npc_data.status_time == 0)
+            if (!o->struct_data.npc_data.status_time)
             {
                 ObjectSystem_DestroyStandardObject(o->array_index);
 
@@ -529,7 +529,7 @@ void Routines_Player(struct game_object * o)
                 // TODO: game over?
 
                 system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_FADEOUT);
-                system_target_routine = ROUTINE_RESET;
+                system_target_routine = ROUTINE_GAMEOVER;
                 shadow_inidisp = 0x0f;
                 return;
             }
@@ -555,20 +555,20 @@ void Routines_Player(struct game_object * o)
                 break;
             case STATE_MOVE_RUN:
                 // Update every 4 frames
-                if (((uint16_t)system_frames_elapsed & ANI_INTERVAL_4) == ANI_INTERVAL_4)
+                if (!((uint16_t)system_frames_elapsed & ANI_INTERVAL_4))
                 {
                     o->struct_data.npc_data.ani.frame ^= 0x0001;
                 }
                 break;
             case STATE_DIE:
-                if ((((uint16_t)system_frames_elapsed & ANI_INTERVAL_8) == ANI_INTERVAL_8) && (o->struct_data.npc_data.ani.frame < 7))
+                if (!(((uint16_t)system_frames_elapsed & ANI_INTERVAL_8)) && (o->struct_data.npc_data.ani.frame < 7))
                 {
                     o->struct_data.npc_data.ani.frame++;
                 }
                 break;
             default:
                 // Update every 8 frames
-                if (((uint16_t)system_frames_elapsed & ANI_INTERVAL_8) == ANI_INTERVAL_8)
+                if (!((uint16_t)system_frames_elapsed & ANI_INTERVAL_8))
                 {
                     o->struct_data.npc_data.ani.frame ^= 0x0001;
                 }
@@ -577,7 +577,7 @@ void Routines_Player(struct game_object * o)
 
     uint8_t * temp_addr = AniSystem_GetPlayerFrame(o); // This will cause a compressed frame fetch
     
-    if ((o->struct_data.npc_data.invuln_time != 0) && (((uint16_t)system_frames_elapsed & 0x01) == 0x01))
+    if ((o->struct_data.npc_data.invuln_time) && (((uint16_t)system_frames_elapsed & 0x01) == 0x01))
     {
         ;
     }
@@ -596,7 +596,7 @@ void Routines_Player_Fireball(struct game_object * o)
     if (!system_game_paused)
     {
         // The sound effect should only play when not paused
-        if (snd_flame_playing == 0)
+        if (!snd_flame_playing)
         {
             SoundInterface_PlaySfx(SFX_ATK_FIRE_BREATH, 0);
 
@@ -607,28 +607,24 @@ void Routines_Player_Fireball(struct game_object * o)
         ObjectSystem_MoveWithoutCollision(o);
 
         // Update every 8 frames
-        if (((uint16_t)system_frames_elapsed & ANI_INTERVAL_8) == ANI_INTERVAL_8)
+        if (!((uint16_t)system_frames_elapsed & ANI_INTERVAL_8))
         {
             o->struct_data.npc_data.ani.frame ^= 0x0001;
-
-            o->struct_data.npc_data.ani.display = AniSystem_GetFixedFrame_Fast(o);
         }
 
         // Decrement time to live
         o->struct_data.npc_data.ttl--;
 
         // Check if the object is to be destroyed
-        if (o->struct_data.npc_data.ttl == 0)
+        if (!o->struct_data.npc_data.ttl)
         {
             ObjectSystem_DestroyPlayerHitbox(o->array_index);
         }
     }
 
-    // Only draw every other frame for both visibility and performance
-    if ((o->uid & 0x0001) == ((uint16_t)system_frames_elapsed & 0x0001))
-    {
-        SpriteEngine_AddToFrontLayer(o, (o->struct_data.npc_data.ani.display | PAL_FIREBALL << 9 | 3 << 12));
-    }
+    unsigned int offset = o->struct_data.npc_data.ani.frame << 1;
+
+    Routines_Shared_DrawFixed(o, (0x0002 + offset) | PAL_FIREBALL << 9, 0, true); 
 
     obj_player_active_fireballs++;
 
@@ -647,7 +643,7 @@ void Routines_Player_InvisibleHit(struct game_object * o)
     o->struct_data.npc_data.ttl--;
 
     // Check if the object is to be destroyed
-    if (o->struct_data.npc_data.ttl == 0)
+    if (!o->struct_data.npc_data.ttl)
     {
         ObjectSystem_DestroyPlayerHitbox(o->array_index);
     }

@@ -38,7 +38,7 @@
 
 #include "level.h"
 
-void routines_fx_smoke(struct game_object * o)
+void Routines_Fx_Smoke(struct game_object * o)
 {
     if (!system_game_paused)
     {
@@ -46,15 +46,13 @@ void routines_fx_smoke(struct game_object * o)
         ObjectSystem_MoveWithoutCollision_Fast(o);
 
         // Update every 8 frames
-        if (((uint16_t)system_frames_elapsed & ANI_INTERVAL_8) == ANI_INTERVAL_8)
+        if (!((uint16_t)system_frames_elapsed & ANI_INTERVAL_8))
         {
             o->struct_data.npc_data.ani.frame ^= 0x0001;
-
-            o->struct_data.npc_data.ani.display = AniSystem_GetFixedFrame_Fast(o);
         }
 
         // Check if the object is to be destroyed
-        if (o->struct_data.npc_data.ttl == 0)
+        if (!o->struct_data.npc_data.ttl)
         {
             ObjectSystem_DestroyStandardObject(o->array_index);
         }
@@ -65,20 +63,16 @@ void routines_fx_smoke(struct game_object * o)
         }
     }
 
-    uint16_t temp_tileattrib = (o->struct_data.npc_data.ani.display | PAL_FX_SMOKE << 9 | 3 << 12);
+    unsigned int offset = o->struct_data.npc_data.ani.frame << 1;
 
-    // Only draw every other frame for both visibility and performance
-    if ((o->uid & 0x0001) == ((uint16_t)system_frames_elapsed & 0x0001))
-    {
-        SpriteEngine_AddToFrontLayer(o, temp_tileattrib);
-    }   
+    Routines_Shared_DrawFixed(o, (0x0006 + offset) | PAL_FX_SMOKE << 9, 0, true); 
 
     return;
 }
 
-void routines_fx_impact(struct game_object * o)
+void Routines_Fx_Impact(struct game_object * o)
 {
-    SpriteEngine_AddToFrontLayer(o, (AniSystem_GetFixedFrame_Fast(o) | PAL_SYS_IMPACT << 9 | 3 << 12));
+    Routines_Shared_DrawFixed(o, 0x000a | PAL_SYS_IMPACT << 9, 0, true);
 
     if (system_game_paused)
     {
@@ -86,7 +80,7 @@ void routines_fx_impact(struct game_object * o)
     }
 
     // Check if the object is to be destroyed
-    if (o->struct_data.npc_data.ttl == 0)
+    if (!o->struct_data.npc_data.ttl)
     {
         ObjectSystem_DestroyStandardObject(o->array_index);
     }
@@ -99,7 +93,7 @@ void routines_fx_impact(struct game_object * o)
     return;
 }
 
-void routines_interactable_switch(struct game_object * o)
+void Routines_Interactables_Switch(struct game_object * o)
 {
     if (!system_game_paused)
     {
@@ -107,9 +101,9 @@ void routines_interactable_switch(struct game_object * o)
 
         // Only test when the switch can react (i.e. after timeout)
         // And while not in combat
-        if (o->struct_data.interactable_data.delay_time == 0)
+        if (!o->struct_data.interactable_data.delay_time)
         {
-            if (CollisionCheck_InteractableTestPlayerAction(o) != 0)
+            if (CollisionCheck_InteractableTestPlayerAction(o))
             {
                 if (!event_in_combat_shadow)
                 {
@@ -143,12 +137,12 @@ void routines_interactable_switch(struct game_object * o)
         }
     }
 
-    SpriteEngine_AddToBackLayer(o, (0x20 + (o->state << 1)) | PAL_INTERACTABLE_SWITCH_WALL << 9 | 2 << 12);
+    Routines_Shared_DrawFixed(o, 0x20 + (o->state << 1) | PAL_INTERACTABLE_SWITCH_WALL << 9, 2, false);
 
     return;
 }
 
-void routines_interactable_sign(struct game_object * o)
+void Routines_Interactable_Sign(struct game_object * o)
 {
     if (!system_game_paused)
     {
@@ -186,12 +180,12 @@ void routines_interactable_sign(struct game_object * o)
         }
     }
 
-    SpriteEngine_AddToBackLayer(o, 0x28 | PAL_INTERACTABLE_SIGN_WALL << 9 | 2 << 12);
+    Routines_Shared_DrawFixed(o, 0x28 | PAL_INTERACTABLE_SIGN_WALL << 9, 2, false);
 
     return;
 }
 
-void routines_interactable_treasurechest(struct game_object * o)
+void Routines_TreasureChest(struct game_object * o)
 {
     if (!system_game_paused)
     {
@@ -238,19 +232,13 @@ void routines_interactable_treasurechest(struct game_object * o)
         }
     }
 
-    if (!o->struct_data.interactable_data.opened)
-    {
-        SpriteEngine_AddToSortedLayer(o, 0x24 | PAL_INTERACTABLE_TREASURECHEST << 9 | 2 << 12);
-    }
-    else
-    {
-        SpriteEngine_AddToSortedLayer(o, 0x26 | PAL_INTERACTABLE_TREASURECHEST << 9 | 2 << 12);
-    }
+    unsigned int offset = (o->struct_data.interactable_data.opened << 1);
+    Routines_Shared_DrawFixed(o, 0x24+(offset) | PAL_INTERACTABLE_TREASURECHEST << 9, 1, false);
 
     return;
 }
 
-void routines_interactable_blocker(struct game_object * o)
+void Routines_Interactable_Blocker(struct game_object * o)
 {
     if (!system_game_paused) // If game is not paused
     {
@@ -320,9 +308,6 @@ void routines_interactable_blocker(struct game_object * o)
     {
         switch (o->id)
         {
-            case OBJID_INTERACTABLE_BLOCKER_FLOOR:
-                SpriteEngine_AddToBackLayer(o, 0x0e | PAL_INTERACTABLE_BLOCKER_FLOOR << 9 | 2 << 12);
-                break;
             case OBJID_INTERACTABLE_BLOCKER_DOOR_NS:
                 SpriteEngine_AddMetaSprite(o, &data_metaspr_door_ns_closed[0]);
                 break;
@@ -335,9 +320,6 @@ void routines_interactable_blocker(struct game_object * o)
     {
         switch (o->id)
         {
-            case OBJID_INTERACTABLE_BLOCKER_FLOOR:
-                //SpriteEngine_AddToBackLayer(o, 0x0e | PAL_INTERACTABLE_BLOCKER_FLOOR << 9 | 2 << 12);
-                break;
             case OBJID_INTERACTABLE_BLOCKER_DOOR_NS:
                 SpriteEngine_AddMetaSprite(o, &data_metaspr_door_ns_open[0]);
                 break;
@@ -357,7 +339,7 @@ void routines_interactable_blocker(struct game_object * o)
     return;
 }
 
-void routines_interactable_level_warp(struct game_object * o)
+void Routines_LevelWarp(struct game_object * o)
 {
     bool warp_open = false;
     if (!system_game_paused) // If game is not paused
@@ -418,7 +400,7 @@ void routines_interactable_level_warp(struct game_object * o)
     return;
 }
 
-void routines_spawner(struct game_object * o)
+void Routines_EnemySpawner(struct game_object * o)
 {
     if (!system_game_paused)
     {
@@ -456,7 +438,7 @@ void routines_spawner(struct game_object * o)
     return;
 }
 
-void routines_drop_money(struct game_object * o)
+void Routines_Drops_Money(struct game_object * o)
 {
     if (!system_game_paused)
     {
@@ -481,15 +463,12 @@ void routines_drop_money(struct game_object * o)
         }
     }
 
-    uint16_t temp_tileattrib;
-    temp_tileattrib = (0x2a | PAL_DROP_MONEY << 9 | ani_coin_flip << 14 | 2 << 12);
-
-    SpriteEngine_AddToSortedLayer(o, temp_tileattrib);
+    Routines_Shared_DrawFixed(o, 0x2a | PAL_DROP_MONEY << 9, 1, false);
 
     return;
 }
 
-void routines_drop_rec_meat(struct game_object * o)
+void Routines_Drops_Recovery_Meat(struct game_object * o)
 {
     if (!system_game_paused)
     {
@@ -526,15 +505,12 @@ void routines_drop_rec_meat(struct game_object * o)
         }
     }
 
-    uint16_t temp_tileattrib;
-    temp_tileattrib = (0xa0 | PAL_DROP_REC_MEAT << 9 | 2 << 12);
-    
-    SpriteEngine_AddToSortedLayer(o, temp_tileattrib);
+    Routines_Shared_DrawFixed(o, 0xa0 | PAL_DROP_REC_MEAT << 9, 1, false);
 
     return;
 }
 
-void routines_dummy(struct game_object * o)
+void Routines_Dummy(struct game_object * o)
 {
     return;
 }
@@ -596,6 +572,8 @@ void Routines_Shared_CheckIfDead(struct game_object * o)
 
 /*
     Used to draw an entity after getting the appropriate attributes and pointers.
+
+    The sign bit in the sprite address pointer determines horizontal flipping.
 */
 void Routines_Shared_Draw(struct game_object * o, uint8_t * spr_addr, int pal, int layer, bool always_flicker, bool is_player)
 {
@@ -647,74 +625,108 @@ void Routines_Shared_Draw(struct game_object * o, uint8_t * spr_addr, int pal, i
     }
 
     // DMA variant
-    uint16_t temp_tileattrib;
+    uint16_t tileattrib = o->struct_data.npc_data.tilenum | pal << 9;
 
     if (((uint32_t)spr_addr & 0x80000000) == 0x80000000) // sign bit is used for flip
     {
-        temp_tileattrib = (o->struct_data.npc_data.tilenum | pal << 9 | 2 << 12 | 0x4000);
-    }
-    else
-    {
-        temp_tileattrib = (o->struct_data.npc_data.tilenum | pal << 9 | 2 << 12);
+        tileattrib |= true << 14;
     }
 
-    if (always_flicker)
-    {
-        if (layer == 0)
-        {
-            if ((o->uid & 0x0001) == ((uint16_t)system_frames_elapsed & 0x0001))
-            {
-                uint16_t temp_tileattrib;
-                temp_tileattrib = (o->struct_data.npc_data.tilenum | pal << 9 | 3 << 12);
+    bool flicker_pass = false;
 
-                SpriteEngine_AddToFrontLayer(o, temp_tileattrib);
-            }
-        }
-        else
+    if (!always_flicker) 
+    {
+        if (!(shadow_stat77 & 0x80))
         {
-            if ((o->uid & 0x0001) == ((uint16_t)system_frames_elapsed & 0x0001))
-            {
-                SpriteEngine_AddToSortedLayer(o, temp_tileattrib);
-            }
+            // No overflow, always draw
+            flicker_pass = true;
         }
     }
-    else
+
+    if (!flicker_pass)
+    {
+        // Flicker didn't auto-pass. Test against current frame odd/even.
+        if ((o->uid & 0x0001) == ((uint16_t)system_frames_elapsed & 0x0001))
+        {
+            flicker_pass = true;
+        } 
+    }
+
+    // Only draw sprites not flickered away
+    if (flicker_pass)
     {
         if (layer == 0)
         {
-            // Check if STAT77 is overflow
-            if ((shadow_stat77 & 0x80) == 0x80)
-            {
-                // Do not perform a draw every other frame
-                if ((o->uid & 0x0001) == ((uint16_t)system_frames_elapsed & 0x0001))
-                {
-                    SpriteEngine_AddToFrontLayer(o, temp_tileattrib);
-                }
-            }
-            else
-            {
-                SpriteEngine_AddToFrontLayer(o, temp_tileattrib);
-            }
+            tileattrib |= 3 << 12;
+
+            SpriteEngine_AddToFrontLayer(o, tileattrib);
+        }
+        else if (layer == 1)
+        {
+            tileattrib |= 2 << 12;
+
+            SpriteEngine_AddToSortedLayer(o, tileattrib);
         }
         else
         {
-            // Check if STAT77 is overflow
-            if ((shadow_stat77 & 0x80) == 0x80)
-            {
-                // Do not perform a draw every other frame
-                if ((o->uid & 0x0001) == ((uint16_t)system_frames_elapsed & 0x0001))
-                {
-                    SpriteEngine_AddToSortedLayer(o, temp_tileattrib);
-                }
-            }
-            else
-            {
-                SpriteEngine_AddToSortedLayer(o, temp_tileattrib);
-            }
+            tileattrib |= 2 << 12;
+
+            SpriteEngine_AddToBackLayer(o, tileattrib);
         }
     }
 
+    return;
+}
 
+/*
+    Draws a fixed sprite from the sprite pages.
+
+    Tileattrib must contain the tilenum, palette, and h/v flip information. Priority is not needed.
+*/
+void Routines_Shared_DrawFixed(struct game_object * o, uint16_t tileattrib, int layer, bool always_flicker)
+{
+    bool flicker_pass = false;
+
+    if (!always_flicker) 
+    {
+        if (!(shadow_stat77 & 0x80))
+        {
+            // No overflow, always draw
+            flicker_pass = true;
+        }
+    }
+
+    if (!flicker_pass)
+    {
+        // Flicker didn't auto-pass. Test against current frame odd/even.
+        if ((o->uid & 0x0001) == ((uint16_t)system_frames_elapsed & 0x0001))
+        {
+            flicker_pass = true;
+        } 
+    }
+
+    // Only draw sprites not flickered away
+    if (flicker_pass)
+    {
+        if (layer == 0)
+        {
+            tileattrib |= 3 << 12;
+
+            SpriteEngine_AddToFrontLayer(o, tileattrib);
+        }
+        else if (layer == 1)
+        {
+            tileattrib |= 2 << 12;
+
+            SpriteEngine_AddToSortedLayer(o, tileattrib);
+        }
+        else
+        {
+            tileattrib |= 2 << 12;
+
+            SpriteEngine_AddToBackLayer(o, tileattrib);
+        }
+    }
 
     return;
 }
