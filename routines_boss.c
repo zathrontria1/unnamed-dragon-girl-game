@@ -497,7 +497,7 @@ void Routines_Boss_Test_Attack_Particle(struct game_object * o)
         }
 
         // Check if the object is to be destroyed
-        if (o->struct_data.npc_data.ttl == 0)
+        if (!o->struct_data.npc_data.ttl)
         {
             ObjectSystem_DestroyEnemyHitbox(o->array_index);
         }
@@ -510,7 +510,7 @@ void Routines_Boss_Test_Attack_Particle(struct game_object * o)
 
     uint8_t * temp_addr = AniSystem_GetDynamicFrame_EnemyBossParticle(o);
 
-    Routines_Shared_Draw(o, temp_addr, PAL_BOSS_TEST, 1, false, false);
+    Routines_Shared_Draw(o, temp_addr, PAL_BOSS_TEST, 1, false, false); // Don't enable flicker here, it looks really strobey
 
     AniSystem_DrawDropShadow(o);
 
