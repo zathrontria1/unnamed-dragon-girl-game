@@ -177,7 +177,7 @@ uint8_t * VwfEngine_PrintText_Gradual(int len)
 
             vwf_text_rendered = true;
 
-            int glyph_sel = (*vwf_string_ptr)-0x20;
+            int glyph_sel = (*vwf_string_ptr);
 
             int width = const_ui_vwf_offsets[glyph_sel];
 
@@ -240,6 +240,13 @@ uint8_t * VwfEngine_PrintText_Gradual(int len)
             break;
         }
     }
+
+    if (shift_overflow) // One extra catch
+    {
+        vwf_run_width++;
+        shift_overflow = false;
+    }
+
 
     if (!vwf_print_ongoing) // Same rationale as the beginning one
     {
@@ -442,10 +449,15 @@ void VwfEngine_PrintText_ResetTilemap(uint16_t * ptr, int len)
 
 const uint8_t const_ui_vwf_offsets[] = 
 {
+    8, 8, 8, 4, 6, 6, 6, 6, 8, 8, 8, 7, 7, 8, 6, 6,
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+
     4, 2, 4, 8, 6, 8, 6, 2, 4, 4, 6, 6, 2, 4, 2, 5, 
     5, 4, 5, 5, 6, 5, 5, 6, 5, 5, 2, 3, 4, 4, 4, 5, 
+
     8, 6, 5, 5, 6, 6, 5, 7, 7, 4, 6, 6, 5, 8, 7, 7, 
     5, 8, 6, 6, 6, 6, 6, 8, 7, 6, 7, 3, 5, 3, 5, 7, 
+
     3, 5, 5, 5, 5, 5, 5, 5, 5, 2, 4, 5, 2, 6, 5, 5, 
     5, 5, 4, 4, 4, 5, 4, 6, 6, 6, 5, 5, 2, 5, 5, 5, 
 };
