@@ -9,6 +9,8 @@
 
 /*
     Unpacks LZ4 compressed data to WRAM area
+
+    Returns the length of the decompressed data, or 0 if not a valid stream.
 */
 uint32_t LZ4_UnpackToWRAM(void * src, void * dest)
 {
@@ -29,6 +31,8 @@ uint32_t LZ4_UnpackToWRAM(void * src, void * dest)
 
 /*
     Unpacks LZ4 compressed data to VRAM area
+
+    Returns the length of the decompressed data, or 0 if not a valid stream.
 */
 uint32_t LZ4_UnpackToVRAM(void * src, uint16_t dest)
 {
@@ -36,7 +40,7 @@ uint32_t LZ4_UnpackToVRAM(void * src, uint16_t dest)
 
     if (temp_length > 0)
     {
-        if ((temp_length & 0x01) == 0x01)
+        if (temp_length & 0x01)
         {
             temp_length += 1; // pad to nearest even number
         }
@@ -51,6 +55,8 @@ uint32_t LZ4_UnpackToVRAM(void * src, uint16_t dest)
 
 /*
     Get content size of LZ4 frame
+
+    Returns the length of the decompressed data, or -1 (!) if not a valid stream.
 */
 int32_t LZ4_GetLength(void * src)
 {
@@ -78,6 +84,8 @@ int32_t LZ4_GetLength(void * src)
 
 /*
     Decompress an LZ4 frame at address src to destination dest
+
+    Returns the length of the decompressed data, or 0 if not a valid stream.
 */
 uint32_t LZ4_DecompressFrame(void * src, void * dest)
 {
