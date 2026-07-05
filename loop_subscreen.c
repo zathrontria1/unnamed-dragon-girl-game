@@ -134,35 +134,7 @@ void Subscreen_Top()
         }
 
         // Perform menu navigation
-        if (System_CheckKey(KEY_UP))
-        {
-            if (subscreen_selection == 0)
-            {
-                subscreen_selection = subscreen_bottom_entry;
-            }
-            else
-            {
-                subscreen_selection--;
-            }
-            SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
-        }
-        else if (System_CheckKey(KEY_DOWN))
-        {
-            if (subscreen_selection >= subscreen_bottom_entry)
-            {
-                subscreen_selection = 0;
-            }
-            else
-            {
-                subscreen_selection++;
-            }
-            SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
-        }
-
-        int16_t x = subscreen_items_toplevel[subscreen_selection].x;
-        int16_t y = subscreen_items_toplevel[subscreen_selection].y;
-
-        SpriteEngine_DrawUISprite(x, y, (0xa4 | PAL_SYS_CURSOR << 9 | 3 << 12));
+        Subscreen_Internal_UpdateNavigation((const struct menu_item *)&subscreen_items_toplevel);
 
         SpriteEngine_ProcessSpriteLists();
 
@@ -329,35 +301,7 @@ void Subscreen_Upgrade()
     else
     {
         // Perform menu navigation
-        if (System_CheckKey(KEY_UP))
-        {
-            if (subscreen_selection == 0)
-            {
-                subscreen_selection = subscreen_bottom_entry;
-            }
-            else
-            {
-                subscreen_selection--;
-            }
-            SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
-        }
-        else if (System_CheckKey(KEY_DOWN))
-        {
-            if (subscreen_selection >= subscreen_bottom_entry)
-            {
-                subscreen_selection = 0;
-            }
-            else
-            {
-                subscreen_selection++;
-            }
-            SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
-        }
-
-        int16_t x = subscreen_items_profile[subscreen_selection].x;
-        int16_t y = subscreen_items_profile[subscreen_selection].y;
-
-        SpriteEngine_DrawUISprite(x, y, (0xa4 | PAL_SYS_CURSOR << 9 | 3 << 12));
+        Subscreen_Internal_UpdateNavigation((const struct menu_item *)&subscreen_items_profile);
 
         for (int py = 0; py < 4; py++)
         {
@@ -686,37 +630,23 @@ void Subscreen_Help()
     else
     {
         // Perform menu navigation
+        bool update_text = false;
+
+        Subscreen_Internal_UpdateNavigation((const struct menu_item *)&subscreen_items_help);
+
         if (System_CheckKey(KEY_UP))
         {
-            if (subscreen_selection == 0)
-            {
-                subscreen_selection = subscreen_bottom_entry;
-            }
-            else
-            {
-                subscreen_selection--;
-            }
-            SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
-            Subscreen_Help_DrawText(true);
+            update_text = true;
         }
         else if (System_CheckKey(KEY_DOWN))
         {
-            if (subscreen_selection >= subscreen_bottom_entry)
-            {
-                subscreen_selection = 0;
-            }
-            else
-            {
-                subscreen_selection++;
-            }
-            SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
-            Subscreen_Help_DrawText(true);
+            update_text = true;
         }
 
-        int16_t x = subscreen_items_help[subscreen_selection].x;
-        int16_t y = subscreen_items_help[subscreen_selection].y;
-
-        SpriteEngine_DrawUISprite(x, y, (0xa4 | PAL_SYS_CURSOR << 9 | 3 << 12));
+        if (update_text)
+        {
+            Subscreen_Help_DrawText(true);
+        }
 
         SpriteEngine_ProcessSpriteLists();
 
@@ -832,35 +762,7 @@ void Subscreen_ResetConfirmation()
     else
     {
         // Perform menu navigation
-        if (System_CheckKey(KEY_UP))
-        {
-            if (subscreen_selection == 0)
-            {
-                subscreen_selection = subscreen_bottom_entry;
-            }
-            else
-            {
-                subscreen_selection--;
-            }
-            SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
-        }
-        else if (System_CheckKey(KEY_DOWN))
-        {
-            if (subscreen_selection >= subscreen_bottom_entry)
-            {
-                subscreen_selection = 0;
-            }
-            else
-            {
-                subscreen_selection++;
-            }
-            SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
-        }
-
-        int16_t x = subscreen_items_resetconfirm[subscreen_selection].x;
-        int16_t y = subscreen_items_resetconfirm[subscreen_selection].y;
-
-        SpriteEngine_DrawUISprite(x, y, (0xa4 | PAL_SYS_CURSOR << 9 | 3 << 12));
+        Subscreen_Internal_UpdateNavigation((const struct menu_item *)&subscreen_items_resetconfirm);
 
         SpriteEngine_ProcessSpriteLists();
 
@@ -915,6 +817,46 @@ void Subscreen_ResetConfirmation()
             system_target_routine = ROUTINE_SUBSCREEN;
         }
     }
+
+    return;
+}
+
+/*
+    Called to update screen navigation
+*/
+void Subscreen_Internal_UpdateNavigation(const struct menu_item * item_array)
+{
+    if (System_CheckKey(KEY_UP))
+    {
+        if (subscreen_selection == 0)
+        {
+            subscreen_selection = subscreen_bottom_entry;
+        }
+        else
+        {
+            subscreen_selection--;
+        }
+        SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
+    }
+    else if (System_CheckKey(KEY_DOWN))
+    {
+        if (subscreen_selection >= subscreen_bottom_entry)
+        {
+            subscreen_selection = 0;
+        }
+        else
+        {
+            subscreen_selection++;
+        }
+        SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
+    }
+
+    item_array += subscreen_selection;
+
+    int16_t x = item_array->x;
+    int16_t y = item_array->y;
+
+    SpriteEngine_DrawUISprite(x, y, (0xa4 | PAL_SYS_CURSOR << 9 | 3 << 12));
 
     return;
 }

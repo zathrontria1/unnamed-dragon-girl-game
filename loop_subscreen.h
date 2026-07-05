@@ -58,3 +58,6 @@ void Subscreen_Help();
 void Subscreen_Help_DrawText(bool copy_result);
 
 void Subscreen_ResetConfirmation();
+
+void Subscreen_Internal_UpdateNavigation(const struct menu_item * item_array);
+
