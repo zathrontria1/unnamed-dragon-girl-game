@@ -100,116 +100,44 @@ void ObjectSystem_ProcessObjects()
     }
 
     // New implementation
-    #if VBCC_ASM == 1
-        __asm(
-        "\ta16\n"
-	    "\tx16\n"
+    int obj_process_count = 0;
 
-        "\tldx #<_obj_general\n"
-        "\tldy #0\n"
-        "\tcpy _obj_active_count\n"
-        "\tbcs .object_break_loop\n"
+    struct game_object * ptr = (struct game_object *)&obj_general[0];
 
-        ".object_process_loop:\n"
-            "\tlda $7e0000,x\n" // assumes object memory is in bank 7e
-            "\tbeq .object_process_increment\n"
-            "\tiny\n"
-            "\tlda $7e0037,x\n"
-            "\tsta _system_JMLCodeInWRAM+2\n"
-            "\tlda $7e0036,x\n"
-            "\tsta _system_JMLCodeInWRAM+1\n"
-            "\tphy\n"
-            "\tphx\n"
-            "\ttxa\n"
-            "\tldx #^_obj_general\n"
-            "\tjsl >_system_JMLCodeInWRAM\n"
-            "\tplx\n"
-            "\tply\n"
-
-        ".object_process_increment:\n"
-            "\ttxa\n"
-            "\tclc\n"
-            "\tadc #128\n"
-            "\tcmp #<_obj_general+5120\n"
-            "\tbcs .object_break_loop\n"
-            "\ttax\n"
-            "\tcpy _obj_active_count\n"
-            "\tbcc .object_process_loop\n"
-
-        ".object_break_loop:\n"
-    );
-    #else
-        int obj_process_count = 0;
-
-        struct game_object * ptr = (struct game_object *)&obj_general[0];
-
-        for (int i = 0; i < OBJ_GENERAL_MAX_COUNT; i++)
+    for (int i = 0; i < OBJ_GENERAL_MAX_COUNT; i++)
+    {
+        if (ptr->id == OBJID_NULL)
         {
-            if (ptr->id == OBJID_NULL)
-            {
-                ptr++;
-                continue;
-            }
-
-            void (*func)(struct game_object *) = ptr->func_ptr; 
-            func(ptr);
-            obj_process_count++;
-
             ptr++;
-
-            if (obj_process_count >= obj_active_count)
-            {
-                break;
-            }
+            continue;
         }
-    #endif
+
+        void (*func)(struct game_object *) = ptr->func_ptr; 
+        func(ptr);
+        obj_process_count++;
+
+        ptr++;
+
+        if (obj_process_count >= obj_active_count)
+        {
+            break;
+        }
+    }
 
     // Repeat for player hitboxes
     obj_player_active_fireballs = 0;
 
-    #if VBCC_ASM == 1
-        __asm(
-        "\ta16\n"
-	    "\tx16\n"
-        
-        "\tldx #<_obj_hitbox_player\n"
-        "\tlda _obj_hitbox_count_player\n"
-        "\tbeq .hitbox_player_break_loop\n"
-        
-        ".hitbox_player_process_loop:\n"
-            "\tlda $7e0037,x\n"
-            "\tsta _system_JMLCodeInWRAM+2\n"
-            "\tlda $7e0036,x\n"
-            "\tsta _system_JMLCodeInWRAM+1\n"
-            "\tphx\n"
-            "\ttxa\n"
-            "\tldx #^_obj_hitbox_player\n"
-            "\tjsl >_system_JMLCodeInWRAM\n"
-            "\tplx\n"
-        ".hitbox_player_process_increment:\n"
-            "\ttxa\n"
-            "\tclc\n"
-            "\tadc #128\n"
-            "\ttax\n"
-            "\tcpx #<_obj_hitbox_player+2048\n"
-            "\tbcc .hitbox_player_process_loop\n"
+    ptr = (struct game_object *)&obj_hitbox_player[0];
 
-        ".hitbox_player_break_loop:\n"
-    );
-    #else
-        ptr = (struct game_object *)&obj_hitbox_player[0];
-
-        if(obj_hitbox_count_player != 0)
+    if(obj_hitbox_count_player != 0)
+    {
+        for (int i = 0; i < OBJ_PLAYERHITBOX_MAX_COUNT; i++)
         {
-            for (int i = 0; i < OBJ_PLAYERHITBOX_MAX_COUNT; i++)
-            {
-                void (*func)(struct game_object *) = ptr->func_ptr; 
-                func(ptr);
-                ptr++;
-            }
+            void (*func)(struct game_object *) = ptr->func_ptr; 
+            func(ptr);
+            ptr++;
         }
-        
-    #endif
+    }
 
     if (obj_player_active_fireballs > 0)
     {
@@ -220,51 +148,18 @@ void ObjectSystem_ProcessObjects()
     }
 
     // Finally repeat for enemies
-    #if VBCC_ASM == 1
-        __asm(
-        "\ta16\n"
-	    "\tx16\n"
-        
-        "\tldx #<_obj_hitbox_enemy\n"
+    ptr = (struct game_object *)&obj_hitbox_enemy[0];
 
-        "\tlda _obj_hitbox_count_enemy\n"
-        "\tbeq .hitbox_enemy_break_loop\n"
-
-        ".hitbox_enemy_process_loop:\n"
-            "\tlda $7e0037,x\n"
-            "\tsta _system_JMLCodeInWRAM+2\n"
-            "\tlda $7e0036,x\n"
-            "\tsta _system_JMLCodeInWRAM+1\n"
-            "\tphx\n"
-            "\ttxa\n"
-            "\tldx #^_obj_hitbox_enemy\n"
-            "\tjsl >_system_JMLCodeInWRAM\n"
-            "\tplx\n"
-
-        ".hitbox_enemy_process_increment:\n"
-            "\ttxa\n"
-            "\tclc\n"
-            "\tadc #128\n"
-            "\ttax\n"
-            "\tcpx #<_obj_hitbox_enemy+2048\n"
-            "\tbcc .hitbox_enemy_process_loop\n"
-
-        ".hitbox_enemy_break_loop:\n"
-    );
-    #else
-        ptr = (struct game_object *)&obj_hitbox_enemy[0];
-    
-        if (obj_hitbox_count_enemy != 0)
+    if (obj_hitbox_count_enemy != 0)
+    {
+        for (int i = 0; i < OBJ_ENEMYHITBOX_MAX_COUNT; i++)
         {
-            for (int i = 0; i < OBJ_ENEMYHITBOX_MAX_COUNT; i++)
-            {
-                void (*func)(struct game_object *) = ptr->func_ptr; 
-                func(ptr);
+            void (*func)(struct game_object *) = ptr->func_ptr; 
+            func(ptr);
 
-                ptr++;
-            }
+            ptr++;
         }
-    #endif
+    }
 
     event_in_combat_shadow = event_in_combat;
 
@@ -303,52 +198,21 @@ void ObjectSystem_ProcessObjects()
 */
 void ObjectSystem_ResetStandardObjects(int start_index)
 {
-    #if VBCC_ASM == 1 // Write the first byte as zero, then use MVN to copy the rest.
-        __asm(
-            "\ta16\n"
-            "\tx16\n"
-        
-            "\tphb\n"
+    REG_DMAP7 = 0x08; // byte reg write, fixed
+    REG_BBAD7 = 0x80; // WMDATA
 
-            "\txba\n" 
-            "\tlsr\n" // mul 128
-            "\ttax\n"
-            "\tsta r0\n" // offset of start, also subtract length with this
-            "\tlda #5120\n"
-            "\tsec\n"
-            "\tsbc r0\n"
-            "\tsta r1\n" // actual transfer length
+    REG_A1B7 = (uint8_t)((uint32_t)&const_zero >> 16);
+    
+    REG_WMADDH = (uint8_t)((uint32_t)&obj_general[start_index] >> 16);
 
-            "\ta8\n"
-            "\tsep #$20\n"
-            "\tlda #$00\n"
-            "\tsta >_obj_general,x\n" // write first zero byte
-            "\tlda #^_obj_general\n"
-            "\tsta >_system_MVNCodeInWRAM+1\n" // write bank byte of source 
-            "\tsta >_system_MVNCodeInWRAM+2\n" // ditto for destination
+    REG_WMADDLM = (uint16_t)((uint32_t)&obj_general[start_index]);
 
-            "\ta16\n"
-            "\trep #$21\n"
-            "\tlda r0\n" // load source address
-            "\tadc #<_obj_general\n" 
-            "\ttax\n" 
-            "\ttay\n" 
-            "\tiny\n" // destination address
-            "\tlda r1\n" // load transfer length
-            "\tdec\n" 
-            "\tdec\n" // Decrement by 2 to remove the first byte and MVN implied byte
-            "\tjsl >_system_MVNCodeInWRAM;\n"
+    REG_A1T7LH = (uint16_t)((uint32_t)&const_zero);
+    REG_DAS7LH = ((OBJ_GENERAL_MAX_COUNT - start_index) * (uint16_t)sizeof(struct game_object));
 
-            "\tplb\n"
-        );
-    #else
-        uint8_t * ptr = (uint8_t *)&obj_general[start_index];
-        for (int i = start_index; i < (OBJ_GENERAL_MAX_COUNT * (uint16_t)sizeof(struct game_object)); i++)
-        {
-            *ptr = 0x00;
-            ptr++;
-        }
-    #endif
+    System_Hsync(0);
+    
+    REG_MDMAEN = 0x80;
 
     // Then initialize the next pointers and function pointers for all of them
     for (int i = start_index; i < (OBJ_GENERAL_MAX_COUNT - 1); i++)
@@ -370,48 +234,21 @@ void ObjectSystem_ResetStandardObjects(int start_index)
 */
 void ObjectSystem_ResetPlayerHitboxes()
 {
-    #if VBCC_ASM == 1 // Write the first byte as zero, then use MVN to copy the rest.
-        __asm(
-            "\ta16\n"
-            "\tx16\n"
+    REG_DMAP7 = 0x08; // byte reg write, fixed
+    REG_BBAD7 = 0x80; // WMDATA
 
-            "\tphb\n"
+    REG_A1B7 = (uint8_t)((uint32_t)&const_zero >> 16);
+    
+    REG_WMADDH = (uint8_t)((uint32_t)&obj_hitbox_player[0] >> 16);
 
-            "\tstz r0\n" // offset of start, also subtract length with this
-            "\tlda #2048\n"
-            "\tsec\n"
-            "\tsbc r0\n"
-            "\tsta r1\n" // actual transfer length
+    REG_WMADDLM = (uint16_t)((uint32_t)&obj_hitbox_player[0]);
 
-            "\ta8\n"
-            "\tsep #$20\n"
-            "\tlda #$00\n"
-            "\tsta >_obj_hitbox_player\n" // write first zero byte
-            "\tlda #^_obj_hitbox_player\n"
-            "\tsta >_system_MVNCodeInWRAM+1\n" // write bank byte of source 
-            "\tsta >_system_MVNCodeInWRAM+2\n" // ditto for destination
+    REG_A1T7LH = (uint16_t)((uint32_t)&const_zero);
+    REG_DAS7LH = (OBJ_PLAYERHITBOX_MAX_COUNT * (uint16_t)sizeof(struct game_object));
 
-            "\ta16\n"
-            "\trep #$21\n"
-            "\tlda r0\n" // load source address
-            "\tadc #<_obj_hitbox_player\n" 
-            "\ttax\n" 
-            "\ttay\n" 
-            "\tiny\n" // destination address
-            "\tlda r1\n" // load transfer length
-            "\tdec\n" 
-            "\tdec\n" // Decrement by 2 to remove the first byte and MVN implied byte
-            "\tjsl >_system_MVNCodeInWRAM;\n"
-
-            "\tplb\n");
-    #else
-        uint8_t * ptr = (uint8_t *)&obj_hitbox_player[0];
-        for (int i = 0; i < (OBJ_PLAYERHITBOX_MAX_COUNT * (uint16_t)sizeof(struct game_object)); i++)
-        {
-            *ptr = 0x00;
-            ptr++;
-        }
-    #endif
+    System_Hsync(0);
+    
+    REG_MDMAEN = 0x80;
 
     // Then initialize the next pointers and function pointers for all of them
     for (int i = 0; i < (OBJ_PLAYERHITBOX_MAX_COUNT - 1); i++)
@@ -433,49 +270,21 @@ void ObjectSystem_ResetPlayerHitboxes()
 */
 void ObjectSystem_ResetEnemyHitboxes()
 {
-    #if VBCC_ASM == 1 // Write the first byte as zero, then use MVN to copy the rest.
-        __asm(
-            "\ta16\n"
-            "\tx16\n"
+    REG_DMAP7 = 0x08; // byte reg write, fixed
+    REG_BBAD7 = 0x80; // WMDATA
 
-            "\tphb\n"
+    REG_A1B7 = (uint8_t)((uint32_t)&const_zero >> 16);
+    
+    REG_WMADDH = (uint8_t)((uint32_t)&obj_hitbox_enemy[0] >> 16);
 
-            "\tstz r0\n" // offset of start, also subtract length with this
-            "\tlda #1024\n"
-            "\tsec\n"
-            "\tsbc r0\n"
-            "\tsta r1\n" // actual transfer length
+    REG_WMADDLM = (uint16_t)((uint32_t)&obj_hitbox_enemy[0]);
 
-            "\ta8\n"
-            "\tsep #$20\n"
-            "\tlda #$00\n"
-            "\tsta >_obj_hitbox_enemy\n" // write first zero byte
-            "\tlda #^_obj_hitbox_enemy\n"
-            "\tsta >_system_MVNCodeInWRAM+1\n" // write bank byte of source 
-            "\tsta >_system_MVNCodeInWRAM+2\n" // ditto for destination
+    REG_A1T7LH = (uint16_t)((uint32_t)&const_zero);
+    REG_DAS7LH = (OBJ_ENEMYHITBOX_MAX_COUNT * (uint16_t)sizeof(struct game_object));
 
-            "\ta16\n"
-            "\trep #$21\n"
-            "\tlda r0\n" // load source address
-            "\tadc #<_obj_hitbox_enemy\n" 
-            "\ttax\n" 
-            "\ttay\n" 
-            "\tiny\n" // destination address
-            "\tlda r1\n" // load transfer length
-            "\tdec\n" 
-            "\tdec\n" // Decrement by 2 to remove the first byte and MVN implied byte
-            "\tjsl >_system_MVNCodeInWRAM;\n"
-
-            "\tplb\n");
-    #else
-        uint8_t * ptr = (uint8_t *)&obj_hitbox_enemy[0];
-
-        for (int i = 0; i < (OBJ_ENEMYHITBOX_MAX_COUNT * (uint16_t)sizeof(struct game_object)); i++)
-        {
-            *ptr = 0x00;
-            ptr++;
-        }
-    #endif
+    System_Hsync(0);
+    
+    REG_MDMAEN = 0x80;
 
     // Then initialize the next pointers and function pointers for all of them
     for (int i = 0; i < (OBJ_ENEMYHITBOX_MAX_COUNT - 1); i++)
