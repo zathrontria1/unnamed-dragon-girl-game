@@ -28,6 +28,7 @@
 
 #include "snd.h"
 #include "ui.h"
+#include "ui_vwf.h"
 
 #include "errorhandling.h"
 
@@ -251,125 +252,60 @@ void System_Init_Graphics(void)
     return;
 }
 
+/*
+    Flush the BG1 and BG3 tilemaps with the correct null tiles.
+
+    Requires Fblank
+*/
 void System_Init_UiTilemap()
 {
-    // flush the BG1 tilemap with the correct null tiles
-    #if VBCC_ASM == 1
-        REG_VMAIN = VRAM_INCLOW;
-        REG_VMADDLH = TILEMAP_ADDR_GAME_UI_4BPP;
+    // Start with the shared initial items.
+    REG_A1T0LH = (uint16_t)((uint32_t)&dma_filler_val);
+    REG_A1B0 = (uint8_t)(((uint32_t)&dma_filler_val) >> 16);
+    
+    // BG1, high byte
+    REG_DMAP0 = 0x08; // byte reg write, fixed increment
 
-        __asm(
-            "\ta8\n"
-            "\tx16\n"
-            "\tsep #$20\n"
+    REG_BBAD0 = 0x19; // VMDATAH
+    REG_VMAIN = VRAM_INCHIGH;
+    REG_VMADDLH = TILEMAP_ADDR_GAME_UI_4BPP;
 
-            "\tldx #256\n"
-            "\tstx r0\n"
+    REG_DAS0LH = 1024;
 
-            "\tlda #$08\n"
-            "\tsta $4300\n"
-            
-            "\tldx #<r0\n"
-            "\tstx $4302\n"
-            "\tlda #^r0\n"
-            "\tsta $4304\n"
+    // See https://cppreference.com/c/language/volatile
+    // on why this is needed.
+    // 
+    // Relevant excrept:
+    //     A cast of a non-volatile value to a volatile type has no effect.
+    //     To access a non-volatile object using volatile semantics, 
+    //     its address must be cast to a pointer-to-volatile and then 
+    //     the access must be made through that pointer.
 
-            "\tldx #1024\n"
-            "\tstx $4305\n"
+    volatile uint8_t * fill = (uint8_t *)&dma_filler_val;
+    *fill = 0x01;
 
-            "\tlda #$18\n"
-            "\tsta $4301\n"
+    REG_MDMAEN = 0x01;
 
-            "\tlda #$01\n"
-            "\tsta $420b\n"
+    // BG1, low byte
+    REG_BBAD0 = 0x18; // VMDATAL
+    REG_VMAIN = VRAM_INCLOW;
+    REG_VMADDLH = TILEMAP_ADDR_GAME_UI_4BPP;
 
-            "\ta16\n"
-            "\trep #$20\n"
-        );
+    REG_DAS0LH = 1024;
 
-        REG_VMAIN = VRAM_INCHIGH;
-        REG_VMADDLH = TILEMAP_ADDR_GAME_UI_4BPP;
+    *fill = 0x00;
 
-        __asm(
-            "\ta8\n"
-            "\tx16\n"
-            "\tsep #$20\n"
+    REG_MDMAEN = 0x01;
 
-            "\tldx #256\n"
-            "\tstx r0\n"
+    // BG3, word
+    REG_DMAP0 = 0x09; // word reg write, fixed increment
 
-            "\tlda #$08\n"
-            "\tsta $4300\n"
-            
-            "\tldx #<r0+1\n"
-            "\tstx $4302\n"
-            "\tlda #^r0\n"
-            "\tsta $4304\n"
+    REG_VMAIN = VRAM_INCHIGH;
+    REG_VMADDLH = TILEMAP_ADDR_GAME_UI_2BPP;
 
-            "\tldx #1024\n"
-            "\tstx $4305\n"
+    REG_DAS0LH = 2048;
 
-            "\tlda #$19\n"
-            "\tsta $4301\n"
-
-            "\tlda #$01\n"
-            "\tsta $420b\n"
-
-            "\ta16\n"
-            "\trep #$20\n"
-        );
-    #else
-        REG_VMAIN = VRAM_INCHIGH;
-        REG_VMADDLH = TILEMAP_ADDR_GAME_UI_4BPP;
-
-        for (int i = 0; i < 1024; i++)
-        {
-            REG_VMDATALH = 256;
-        }
-    #endif
-
-    // Repeat for BG3
-    #if VBCC_ASM == 1
-        REG_VMAIN = VRAM_INCHIGH;
-        REG_VMADDLH = TILEMAP_ADDR_GAME_UI_2BPP;
-
-        __asm(
-            "\ta8\n"
-            "\tx16\n"
-            "\tsep #$20\n"
-
-            "\tldx #$00000\n"
-            "\tstx r0\n"
-
-            "\tlda #$09\n"
-            "\tsta $4300\n"
-            
-            "\tldx #<r0\n"
-            "\tstx $4302\n"
-            "\tlda #^r0\n"
-            "\tsta $4304\n"
-
-            "\tldx #2048\n"
-            "\tstx $4305\n"
-
-            "\tlda #$18\n"
-            "\tsta $4301\n"
-
-            "\tlda #$01\n"
-            "\tsta $420b\n"
-
-            "\ta16\n"
-            "\trep #$20\n"
-        );
-    #else
-        REG_VMAIN = VRAM_INCHIGH;
-        REG_VMADDLH = TILEMAP_ADDR_GAME_UI_2BPP;
-
-        for (int i = 0; i < 1024; i++)
-        {
-            REG_VMDATALH = 0;
-        }
-    #endif
+    REG_MDMAEN = 0x01;
 
     return;
 }
