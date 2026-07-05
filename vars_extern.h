@@ -38,9 +38,6 @@ extern const uint8_t data_bg_dungeon_anim_torch_lz4[]; // dungeon torch animatio
 extern const uint8_t data_bg_map_dungeon_0_8bpp_lz4[]; // dungeon map, compressed
 extern const uint8_t data_bg_map_dungeon_1_8bpp_lz4[]; // dungeon map, compressed
 
-extern const uint8_t data_bg_splash_lz4[]; // loading splash
-extern const uint8_t data_tilemap_splash_lz4[]; // loading splash tilemap
-
 extern const uint8_t data_bg_error_back_lz4[]; // error general back
 extern const uint8_t data_tilemap_error_back_lz4[];
 
@@ -68,7 +65,8 @@ extern const uint8_t data_spr_drop_coin[]; // dropped coins
 
 extern const uint8_t data_spr_boss_placeholder_dd[]; // boss
 extern const uint16_t data_spr_boss_placeholder_lut[]; // boss
-extern const uint8_t data_spr_boss_placeholder_addon_attack1[]; /// boss attack 1
+extern const uint8_t data_spr_boss_placeholder_addon_attack1[]; // boss attack 1
+extern const uint8_t data_spr_boss_placeholder_hands[]; /// boss hands
 
 // Tables
 extern const NEAR int32_t data_sine_1[];

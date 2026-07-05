@@ -34,11 +34,16 @@ _data_spr_boss_placeholder_addon_attack1:
     incbin "sprites/boss/spr_boss_addon_attack1.bin"
 
     section "_rodata.far.bindata.sprtiles.6"
+    global _data_spr_boss_placeholder_hands
+_data_spr_boss_placeholder_hands:
+    incbin "sprites/boss/spr_boss_hands.bin"
+
+    section "_rodata.far.bindata.sprtiles.7"
     global _data_spr_spawn_placeholder
 _data_spr_spawn_placeholder:
     incbin "sprites/spr_spawn_placeholder.bin"
     
-    section "_rodata.far.bindata.sprtiles.7"
+    section "_rodata.far.bindata.sprtiles.8"
     global _data_spr_fixed_lz4
 _data_spr_fixed_lz4:
     incbin "sprites/spr_fixed.bin.lz4"

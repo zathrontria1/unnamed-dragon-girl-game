@@ -556,9 +556,9 @@ void Routines_Boss_Test_Hands_DmaFrame(struct game_object * o)
     if (obj_boss_hands_vram_stale)
     {
         bool failed = false;
-        failed |= DmaSystem_AddItemToQueue((uint8_t *)&data_spr_boss_placeholder_dd, 0x7800, 512, VRAM_INCHIGH, 2);
+        failed |= DmaSystem_AddItemToQueue((uint8_t *)&data_spr_boss_placeholder_hands, 0x7800, 512, VRAM_INCHIGH, 2);
 
-        failed |= DmaSystem_AddItemToQueue((uint8_t *)&data_spr_boss_placeholder_dd+128, 0x7840, 512, VRAM_INCHIGH, 2);
+        failed |= DmaSystem_AddItemToQueue((uint8_t *)&data_spr_boss_placeholder_hands+128, 0x7840, 512, VRAM_INCHIGH, 2);
 
         if (!failed)
         {
