@@ -8,6 +8,8 @@ extern bool dma_filler_enable;
 extern uint16_t dma_filler_dest;
 extern uint16_t dma_filler_length;
 
+extern uint8_t dma_filler_val;
+
 void DmaSystem_ClearWram(uint8_t * dest, uint16_t length);
 
 #if VBCC_ASM == 1
@@ -67,7 +69,7 @@ uint16_t DmaSystem_AddItemToQueue(
     uint16_t vmain, 
     uint16_t split);
 
-uint16_t DmaSystem_SetClear(uint16_t dest, uint16_t length);
+uint16_t DmaSystem_SetClear(uint16_t dest, uint16_t length, uint8_t val);
 
 void DmaSystem_ResetQueue();
 void DmaSystem_ProcessQueue();

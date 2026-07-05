@@ -15,6 +15,8 @@ bool dma_filler_enable;
 uint16_t dma_filler_dest;
 uint16_t dma_filler_length;
 
+uint8_t dma_filler_val;
+
 /*
     Clears a block of WRAM.
 
@@ -608,7 +610,7 @@ void DmaSystem_ResetQueue()
     return;
 }
 
-uint16_t DmaSystem_SetClear(uint16_t dest, uint16_t length)
+uint16_t DmaSystem_SetClear(uint16_t dest, uint16_t length, uint8_t val)
 {
     // Check for capacity (count, length) issues
     uint16_t temp_length = length + const_lut_dma_split_lookup[0] + dma_queue_length;
@@ -620,6 +622,7 @@ uint16_t DmaSystem_SetClear(uint16_t dest, uint16_t length)
 
     dma_filler_dest = dest;
     dma_filler_length = length;
+    dma_filler_val = val;
     dma_filler_enable = true;
 
     return 0;
@@ -704,8 +707,8 @@ void DmaSystem_ProcessQueue()
 
         REG_VMADDLH = dma_filler_dest;
 
-        REG_A1T0LH = (uint16_t)((uint32_t)&const_zero);
-        REG_A1B0 = (uint8_t)(((uint32_t)&const_zero) >> 16);
+        REG_A1T0LH = (uint16_t)((uint32_t)&dma_filler_val);
+        REG_A1B0 = (uint8_t)(((uint32_t)&dma_filler_val) >> 16);
 
         REG_DAS0LH = dma_filler_length;
 
