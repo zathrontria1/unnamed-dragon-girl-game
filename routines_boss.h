@@ -21,6 +21,8 @@ extern int obj_boss_hands_timer_attack;
 
 extern const int16_t const_boss_positions_0[];
 
+void Routines_Boss_Init();
+
 void Routines_Boss_Test(struct game_object * o);
 
 bool Routines_Boss_Test_RunPhase(struct game_object * o);

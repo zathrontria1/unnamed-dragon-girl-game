@@ -36,6 +36,8 @@
 #include "system.h"
 #include "map.h"
 
+#define BOSS_POS_CENTER 456
+
 uint16_t obj_boss_state; // Boss state machine variable
 bool obj_boss_palette_swap;
 
@@ -59,6 +61,34 @@ bool obj_boss_hands_vram_stale;
 int obj_boss_hands_timer_attack;
 
 #define BOSS_ATTACK_BASETIME_1 ((5 * FPS) >> 1) - 1
+
+/*
+    Call this when instantiating a boss object to ensure 
+    that all boss state variables are reset.
+*/
+void Routines_Boss_Init()
+{
+    obj_boss_palette_swap = false;
+    obj_boss_state = 0;
+
+    obj_boss_phase = 0;
+    obj_boss_subphase = 0;
+    obj_boss_timer_movement = 0;
+    obj_boss_timer_attack = 0;
+    obj_boss_moving = false;
+
+    obj_boss_prev_frame = 0xffff;
+    obj_boss_vram_stale = true;
+
+    obj_boss_hands_show = true;
+    obj_boss_hands_prev_frame = 0xffff;
+    obj_boss_hands_vram_stale = true;
+
+    obj_boss_hands_timer_attack = 0;
+
+    return;
+}
+
 
 void Routines_Boss_Test(struct game_object * o)
 {
@@ -658,14 +688,14 @@ void Routines_Boss_Test_Draw(struct game_object * o, bool flip)
 const int16_t const_boss_positions_0[] = 
 {
     384, 384,
-    456, 384,
+    BOSS_POS_CENTER, 384,
     528, 384,
 
-    384, 456,
-    456, 456,
-    528, 456,
+    384, BOSS_POS_CENTER,
+    BOSS_POS_CENTER, BOSS_POS_CENTER,
+    528, BOSS_POS_CENTER,
 
     384, 528,
-    456, 528,
+    BOSS_POS_CENTER, 528,
     528, 528,
 };
