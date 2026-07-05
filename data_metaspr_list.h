@@ -50,6 +50,12 @@ const struct spr_metaspr_definition data_metaspr_shadow_64x16[] = {
     {0, 0, 0, 0xffff},
 };
 
+const struct spr_metaspr_definition data_metaspr_shadow_32x16[] = {
+    {0xa6 | PAL_FX_SHADOW << 9 | 2 << 12, 0, 0, 0},
+    {0xa6 | PAL_FX_SHADOW << 9 | true << 14 | 2 << 12, 16, 0, 0},
+    {0, 0, 0, 0xffff},
+};
+
 const struct spr_metaspr_definition data_metaspr_boss_generic_64x96[] = {
     {0x14e | PAL_BOSS_TEST << 9 | 2 << 12, 48, 0, 0},
     {0x14c | PAL_BOSS_TEST << 9 | 2 << 12, 32, 0, 0},
@@ -85,5 +91,51 @@ const struct spr_metaspr_definition data_metaspr_boss_generic_64x96_hflip[] = {
 
     {0x100 | PAL_BOSS_TEST << 9 | true << 14 | 2 << 12, 32, -80, 1},
     {0x104 | PAL_BOSS_TEST << 9 | true << 14 | 2 << 12, 0, -80, 1},
+    {0, 0, 0, 0xffff},
+};
+
+const struct spr_metaspr_definition data_metaspr_boss_generic_hands_l[] = {
+    {0x184 | PAL_BOSS_TEST << 9 | 2 << 12, 40, -36, 1}, // Inner
+
+    {0, 0, 0, 0xffff},
+};
+
+
+const struct spr_metaspr_definition data_metaspr_boss_generic_hands_r[] = {
+    {0x180 | PAL_BOSS_TEST << 9 | 2 << 12, -8, -28, 1}, // Outer
+
+    {0, 0, 0, 0xffff},
+};
+
+const struct spr_metaspr_definition data_metaspr_boss_generic_hands_hflip_l[] = {
+    {0x180 | PAL_BOSS_TEST << 9 | true << 14 | 2 << 12, 40, -28, 1}, // Outer
+
+    {0, 0, 0, 0xffff},
+};
+
+
+const struct spr_metaspr_definition data_metaspr_boss_generic_hands_hflip_r[] = {
+    {0x184 | PAL_BOSS_TEST << 9 | true << 14 | 2 << 12, -8, -36, 1}, // Inner
+
+    {0, 0, 0, 0xffff},
+};
+
+const struct spr_metaspr_definition data_metaspr_shadow_hands[] = {
+    {0xa6 | PAL_FX_SHADOW << 9 | 2 << 12, -8, 4, 0},
+    {0xa6 | PAL_FX_SHADOW << 9 | true << 14 | 2 << 12, 8, 4, 0},
+
+    {0xa6 | PAL_FX_SHADOW << 9 | 2 << 12, 40, -4, 0},
+    {0xa6 | PAL_FX_SHADOW << 9 | true << 14 | 2 << 12, 56, -4, 0},
+
+    {0, 0, 0, 0xffff},
+};
+
+const struct spr_metaspr_definition data_metaspr_shadow_hands_hflip[] = {
+    {0xa6 | PAL_FX_SHADOW << 9 | 2 << 12, -8, -4, 0},
+    {0xa6 | PAL_FX_SHADOW << 9 | true << 14 | 2 << 12, 8, -4, 0},
+
+    {0xa6 | PAL_FX_SHADOW << 9 | 2 << 12, 40, 4, 0},
+    {0xa6 | PAL_FX_SHADOW << 9 | true << 14 | 2 << 12, 56, 4, 0},
+
     {0, 0, 0, 0xffff},
 };

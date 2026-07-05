@@ -50,6 +50,14 @@ int obj_boss_timer_attack;
 uint16_t obj_boss_prev_frame;
 bool obj_boss_vram_stale;
 
+// For the hands parts
+bool obj_boss_hands_show;
+
+uint16_t obj_boss_hands_prev_frame;
+bool obj_boss_hands_vram_stale;
+
+int obj_boss_hands_timer_attack;
+
 #define BOSS_ATTACK_BASETIME_1 ((5 * FPS) >> 1) - 1
 
 void Routines_Boss_Test(struct game_object * o)
@@ -144,19 +152,11 @@ void Routines_Boss_Test(struct game_object * o)
     Routines_Boss_Test_ReconstructFrame(o);
     Routines_Boss_Test_DmaFrame(o);
 
-    if (temp_facing_left)
-    {
-        SpriteEngine_AddMetaSprite(o, (const struct spr_metaspr_definition *)&data_metaspr_boss_generic_64x96_hflip);
-    }
-    else
-    {
-        SpriteEngine_AddMetaSprite(o, (const struct spr_metaspr_definition *)&data_metaspr_boss_generic_64x96);
-    }
+    // Defer boss body draws to combination drawing
 
-    if (system_frames_elapsed & 0x01)
-    {
-        Routines_Boss_Test_DrawShadow(o);
-    }
+    Routines_Boss_Test_Hands(o, temp_facing_left);
+
+    Routines_Boss_Test_Draw(o, temp_facing_left);
 
     return;
 }
@@ -539,6 +539,115 @@ bool Routines_Boss_Test_Movement(struct game_object * o, int32_t x, int32_t y)
     obj_boss_timer_movement = 5 * FPS; // Move for 5 seconds.
 
     return temp_invalidate_animation_frame;
+}
+
+/*
+    Sub-sub function for boss hands
+*/
+void Routines_Boss_Test_Hands(struct game_object * o, bool flip)
+{
+    Routines_Boss_Test_Hands_DmaFrame(o);
+    
+    return;
+}
+
+void Routines_Boss_Test_Hands_DmaFrame(struct game_object * o)
+{
+    if (obj_boss_hands_vram_stale)
+    {
+        bool failed = false;
+        failed |= DmaSystem_AddItemToQueue((uint8_t *)&data_spr_boss_placeholder_dd, 0x7800, 512, VRAM_INCHIGH, 2);
+
+        failed |= DmaSystem_AddItemToQueue((uint8_t *)&data_spr_boss_placeholder_dd+128, 0x7840, 512, VRAM_INCHIGH, 2);
+
+        if (!failed)
+        {
+            obj_boss_hands_prev_frame = 0;
+            obj_boss_hands_vram_stale = false;
+        }
+        
+    }
+
+    return;
+}
+
+void Routines_Boss_Test_Hands_DrawShadow(struct game_object * o, bool flip)
+{
+    struct game_object temp;
+
+    temp.pos.x.a = o->pos.x.a;
+    temp.pos.y.a = o->pos.y.a;
+    temp.pos.z.a = 0;
+
+    if (flip)
+    {
+        SpriteEngine_AddMetaSprite_Back(&temp, (const struct spr_metaspr_definition *)&data_metaspr_shadow_hands_hflip);
+    }
+    else
+    {
+        SpriteEngine_AddMetaSprite_Back(&temp, (const struct spr_metaspr_definition *)&data_metaspr_shadow_hands);
+    }
+
+    return;
+}
+
+/*
+    Draw the boss. It's broken into multiple parts to ensure correct depth sorting.
+*/
+void Routines_Boss_Test_Draw(struct game_object * o, bool flip)
+{
+    // Inner hand
+    if (obj_boss_hands_show)
+    {
+        if (flip)
+        {
+            SpriteEngine_AddMetaSprite(o, (struct spr_metaspr_definition *)&data_metaspr_boss_generic_hands_hflip_r);
+
+        }
+        else
+        {
+            SpriteEngine_AddMetaSprite(o, (struct spr_metaspr_definition *)&data_metaspr_boss_generic_hands_l);
+        }
+    }
+
+    // Body - done this way to avoid depth sort issues
+    if (flip)
+    {
+        SpriteEngine_AddMetaSprite(o, (const struct spr_metaspr_definition *)&data_metaspr_boss_generic_64x96_hflip);
+
+    }
+    else
+    {
+        SpriteEngine_AddMetaSprite(o, (const struct spr_metaspr_definition *)&data_metaspr_boss_generic_64x96);
+    }
+
+    // Body shadow
+    if (system_frames_elapsed & 0x01)
+    {
+        Routines_Boss_Test_DrawShadow(o);
+    }
+
+    // Outer hand
+    if (obj_boss_hands_show)
+    {
+        if (flip)
+        {
+            SpriteEngine_AddMetaSprite(o, (struct spr_metaspr_definition *)&data_metaspr_boss_generic_hands_hflip_l);
+
+        }
+        else
+        {
+            SpriteEngine_AddMetaSprite(o, (struct spr_metaspr_definition *)&data_metaspr_boss_generic_hands_r);
+        }
+
+        // Hand shadows for both
+        if (system_frames_elapsed & 0x01)
+        {
+            Routines_Boss_Test_Hands_DrawShadow(o, flip);
+        }
+    }
+
+    return;
 }
 
 /*

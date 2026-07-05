@@ -115,7 +115,16 @@ extern const struct spr_metaspr_definition data_metaspr_door_ew_open[];
 extern const struct spr_metaspr_definition data_metaspr_door_ew_open_flip[];
 extern const struct spr_metaspr_definition data_metaspr_door_ew_closed[];
 
+extern const struct spr_metaspr_definition data_metaspr_shadow_64x16[];
+extern const struct spr_metaspr_definition data_metaspr_shadow_32x16[];
+
 extern const struct spr_metaspr_definition data_metaspr_boss_generic_64x96[];
 extern const struct spr_metaspr_definition data_metaspr_boss_generic_64x96_hflip[];
-extern const struct spr_metaspr_definition data_metaspr_shadow_64x16[];
 
+extern const struct spr_metaspr_definition data_metaspr_boss_generic_hands_l[];
+extern const struct spr_metaspr_definition data_metaspr_boss_generic_hands_r[];
+extern const struct spr_metaspr_definition data_metaspr_boss_generic_hands_hflip_l[];
+extern const struct spr_metaspr_definition data_metaspr_boss_generic_hands_hflip_r[];
+
+extern const struct spr_metaspr_definition data_metaspr_shadow_hands[];
+extern const struct spr_metaspr_definition data_metaspr_shadow_hands_hflip[];
