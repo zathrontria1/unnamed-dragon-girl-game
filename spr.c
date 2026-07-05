@@ -4,6 +4,7 @@
 #include "vars.h"
 
 #include "spr.h"
+#include "map.h"
 #include "system.h"
 
 ZP uint16_t spr_sprite_count; // Rendered sprites this frame
