@@ -35,10 +35,10 @@ Welcome to Unnamed Dragon Girl Game!\n\
 Controls are as below:\n\
 \x14 Confirm/Attack \x15 Cancel/Run \x1d\x1e\x1f Map\n\
 \x16 Menu \x17 Ranged Attack \x1a\x1b\x1c Pause\r\
-This is a prototype game,\n\
-and I hope you have fun\n\
-trying the game out.\n\
-                 - Zathrontria";
+This is a prototype game, and I hope you have fun\n\
+trying the game out!\n\
+\n\
+                                             - Zathrontria";
 
 HUGE const uint8_t STR_MSG_INCOMBAT[] = "Can't use while in combat";
 HUGE const uint8_t STR_MSG_FOUNDMONEY[] = "Found %ju money!";
