@@ -100,8 +100,6 @@ void ObjectSystem_ProcessObjects()
     }
 
     // New implementation
-    int obj_process_count = 0;
-
     struct game_object * ptr = (struct game_object *)&obj_general[0];
 
     for (int i = 0; i < OBJ_GENERAL_MAX_COUNT; i++)
@@ -114,14 +112,8 @@ void ObjectSystem_ProcessObjects()
 
         void (*func)(struct game_object *) = ptr->func_ptr; 
         func(ptr);
-        obj_process_count++;
 
         ptr++;
-
-        if (obj_process_count >= obj_active_count)
-        {
-            break;
-        }
     }
 
     // Repeat for player hitboxes
@@ -437,23 +429,7 @@ int16_t ObjectSystem_InstantiateObject(
         {
             SpriteEngine_GetVramForBoss();
             
-            obj_boss_palette_swap = false;
-            obj_boss_state = 0;
-
-            obj_boss_phase = 0;
-            obj_boss_subphase = 0;
-            obj_boss_timer_movement = 0;
-            obj_boss_timer_attack = 0;
-            obj_boss_moving = false;
-
-            obj_boss_prev_frame = 0xffff;
-            obj_boss_vram_stale = true;
-
-            obj_boss_hands_show = true;
-            obj_boss_hands_prev_frame = 0xffff;
-            obj_boss_hands_vram_stale = true;
-
-            obj_boss_hands_timer_attack = 0;
+            Routines_Boss_Init();
         }
     }
     else
