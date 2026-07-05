@@ -137,35 +137,41 @@ uint16_t ObjectSystem_Move(struct game_object * o)
     void ObjectSystem_MoveWithoutCollision(struct game_object * o)
 #endif
 {
-    
-
     #if VBCC_ASM == 1
         __asm(
             "\ta16\n"
             "\tx16\n"
+
+            "\tphb\n"
+            "\tphx\n"
+            "\tplb\n"
+
             "\ttax\n" // Set up the pointer
 
-            "\tlda $7e0006,x\n"
+            "\tlda !$0006,x\n"
             "\tclc\n"
-            "\tadc $7e0012,x\n"
-            "\tsta $7e0006,x\n"
-            "\tlda $7e0008,x\n"
-            "\tadc $7e0014,x\n"
-            "\tsta $7e0008,x\n"
+            "\tadc !$0012,x\n"
+            "\tsta !$0006,x\n"
+            "\tlda !$0008,x\n"
+            "\tadc !$0014,x\n"
+            "\tsta !$0008,x\n"
             "\tclc\n"
-            "\tadc $7e0028,x\n"
-            "\tsta $7e002c,x\n"
+            "\tadc !$0028,x\n"
+            "\tsta !$002c,x\n"
 
-            "\tlda $7e000a,x\n"
+            "\tlda !$000a,x\n"
             "\tclc\n"
-            "\tadc $7e0016,x\n"
-            "\tsta $7e000a,x\n"
-            "\tlda $7e000c,x\n"
-            "\tadc $7e0018,x\n"
-            "\tsta $7e000c,x\n"
+            "\tadc !$0016,x\n"
+            "\tsta !$000a,x\n"
+            "\tlda !$000c,x\n"
+            "\tadc !$0018,x\n"
+            "\tsta !$000c,x\n"
             "\tclc\n"
-            "\tadc $7e002a,x\n"
-            "\tsta $7e002e,x\n"
+            "\tadc !$002a,x\n"
+            "\tsta !$002e,x\n"
+
+            "\tplb\n"
+            "\tplb\n"
             )   ;
 
     #else
@@ -197,23 +203,31 @@ uint16_t ObjectSystem_Move(struct game_object * o)
         __asm(
             "\ta16\n"
             "\tx16\n"
+            
+            "\tphb\n"
+            "\tphx\n"
+            "\tplb\n"
+
             "\ttax\n" // Set up the pointer
 
-            "\tlda $7e0006,x\n"
+            "\tlda !$0006,x\n"
             "\tclc\n"
-            "\tadc $7e0012,x\n"
-            "\tsta $7e0006,x\n"
-            "\tlda $7e0008,x\n"
-            "\tadc $7e0014,x\n"
-            "\tsta $7e0008,x\n"
+            "\tadc !$0012,x\n"
+            "\tsta !$0006,x\n"
+            "\tlda !$0008,x\n"
+            "\tadc !$0014,x\n"
+            "\tsta !$0008,x\n"
 
-            "\tlda $7e000a,x\n"
+            "\tlda !$000a,x\n"
             "\tclc\n"
-            "\tadc $7e0016,x\n"
-            "\tsta $7e000a,x\n"
-            "\tlda $7e000c,x\n"
-            "\tadc $7e0018,x\n"
-            "\tsta $7e000c,x\n"
+            "\tadc !$0016,x\n"
+            "\tsta !$000a,x\n"
+            "\tlda !$000c,x\n"
+            "\tadc !$0018,x\n"
+            "\tsta !$000c,x\n"
+
+            "\tplb\n"
+            "\tplb\n"
             )   ;
 
     #else
