@@ -93,7 +93,7 @@ void UserInterface_ClearTextbox(uint16_t row, uint16_t h)
 
 void UserInterface_ClearTextboxText(uint16_t row, uint16_t h)
 {
-    DmaSystem_SetClear(0x3400 + ((row + 1) << 5), h << 6); // Add one extra row for the indicator overhang
+    DmaSystem_SetClear(0x3400 + ((row + 1) << 5), h << 6, 0x00); // Add one extra row for the indicator overhang
 
     return;
 }
