@@ -34,7 +34,6 @@
 #include "data_strings.h"
 
 uint8_t system_MVNCodeInWRAM[4];
-uint8_t system_JMLCodeInWRAM[4];
 
 // Input system
 uint16_t input_pad0;
@@ -125,30 +124,11 @@ void System_Init_CpuRegs(void)
     return;
 }
 
-// Write out the MVN and JML opcodes here so that they can be used ASAP
-void System_Init_WramFunctions(void)
+// Write out the MVN opcode here so that it can be used ASAP
+void System_Init_WramFunctions()
 {
-    // Write out the MVN and JML program codes
-    #if VBCC_ASM == 1
-    __asm(
-        "\ta16\n"
-	    "\tx16\n"
-        "\ta8\n"
-        "\tsep #$20\n"
-        "\tlda #$6B\n" // RTL opcode
-        "\tsta >_system_MVNCodeInWRAM+3\n"
-        "\tlda #$54\n" // MVN opcode
-        "\tsta >_system_MVNCodeInWRAM\n"
-        "\tlda #$5c\n" // JML opcode
-        "\tsta >_system_JMLCodeInWRAM\n"
-        "\ta16\n"
-        "\trep #$20\n");
-    #else
-        system_MVNCodeInWRAM[0] = 0x54;
-        system_MVNCodeInWRAM[3] = 0x6b;
-
-        system_JMLCodeInWRAM[0] = 0x5c;
-    #endif
+    system_MVNCodeInWRAM[0] = 0x54;
+    system_MVNCodeInWRAM[3] = 0x6b;
 
     return;
 }
