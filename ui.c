@@ -13,6 +13,7 @@
 #include "obj.h"
 
 #include "dma.h"
+#include "system.h"
 
 #include "ui.h"
 #include "ui_messagebox.h"
@@ -603,20 +604,20 @@ void UserInterface_PrintText_Mode3(uint8_t * string_ptr, uint16_t row, uint16_t 
 */
 void UserInterface_ClearWindowBuffer(bool use_clear_tile)
 {
-    for (int x = 0; x < 32; x++)
+    volatile uint16_t vwf_tile_id_copy = vwf_tile_id_empty;
+
+    if (use_clear_tile)
     {
-        for (int y = 0; y < (SCREEN_HEIGHT >> 3); y++)
-        {
-            if (use_clear_tile)
-            {
-                ui_window_background[y][x] = 0x0100 | 0x2000 | (PAL_UI_4BPP << 10);
-            }
-            else
-            {
-                ui_window_background[y][x] = 0x015f | 0x2000 | (PAL_UI_4BPP << 10);
-            }
-        }
+        vwf_tile_id_empty = 0x0100 | 0x2000 | (PAL_UI_4BPP << 10);
     }
+    else
+    {
+        vwf_tile_id_empty = 0x015f | 0x2000 | (PAL_UI_4BPP << 10);
+    }
+    
+    VwfEngine_PrintText_ResetTilemap((uint16_t *)&ui_window_background[0][0], 32 * (SCREEN_HEIGHT >> 3));
+    vwf_tile_id_empty = vwf_tile_id_copy;
+
     return;
 }
 
@@ -650,7 +651,7 @@ void UserInterface_ClearTextBuffer_Line(uint16_t y)
 void UserInterface_DrawWindowBackground(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 {
     // Sanity checks
-    if ((w == 0) || (h == 0))
+    if ((w == 0) || (h == 0)) // Both must be tested separately
     {
         // Size is 0
         return;
@@ -688,7 +689,7 @@ void UserInterface_DrawWindowBackground(uint16_t x, uint16_t y, uint16_t w, uint
         else if (i == (y + h - 1))
         {
             // Last row
-            if ((h % 2) == 0)
+            if ((h & 0x1) == 0)
             {
                 // row height is even
                 ui_window_background[i][x] = 0x01a0 | 0x2000 | (PAL_UI_4BPP << 10);
@@ -723,7 +724,8 @@ void UserInterface_DrawWindowBackground(uint16_t x, uint16_t y, uint16_t w, uint
                 break;
             }
 
-            for (int j = x+1; j < x+w-1; j++)
+            for (int j = x+1; j < x+3; j++)
+            //for (int j = x+1; j < x+w-1; j++)
             {
                 if (j >= 32)
                 {
@@ -734,66 +736,39 @@ void UserInterface_DrawWindowBackground(uint16_t x, uint16_t y, uint16_t w, uint
                 if (i - y == 0)
                 {
                     // First row
-                    if (x % 2 == 0)
-                    {
-                        ui_window_background[i][j] = (0x0171 + ((j + 1) % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
-                    }
-                    else
-                    {
-                        ui_window_background[i][j] = (0x0171 + (j % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
-                    }
+                    ui_window_background[i][j] = (0x0171 + ((j + x + 1) & 0x1)) | 0x2000 | (PAL_UI_4BPP << 10);
                 }
                 else if (i == (y + h - 1))
                 {
                     // Last row
-                    if ((h % 2) == 0)
+                    if ((h & 0x1) == 0)
                     {
                         // row height is even
-                        if (x % 2 == 0)
-                        {
-                            ui_window_background[i][j] = (0x01a1 + ((j + 1) % 2))  | 0x2000 | (PAL_UI_4BPP << 10);
-                        }
-                        else
-                        {
-                            ui_window_background[i][j] = (0x01a1 + (j % 2))  | 0x2000 | (PAL_UI_4BPP << 10);
-                        }
+                        ui_window_background[i][j] = (0x01a1 + ((j + x + 1) & 0x1))  | 0x2000 | (PAL_UI_4BPP << 10);
                     }
                     else
                     {
                         // row height is odd
-                        if (x % 2 == 0)
-                        {
-                            ui_window_background[i][j] = (0x01b1 + ((j + 1) % 2))  | 0x2000 | (PAL_UI_4BPP << 10);
-                        }
-                        else
-                        {
-                            ui_window_background[i][j] = (0x01b1 + (j % 2))  | 0x2000 | (PAL_UI_4BPP << 10);
-                        }
+                        ui_window_background[i][j] = (0x01b1 + ((j + x + 1) & 0x1))  | 0x2000 | (PAL_UI_4BPP << 10);
                     }
                 }
                 else if ((i - y) & 0x0001 == 1)
                 {
                     // Odd row
-                    if (x % 2 == 0)
-                    {
-                        ui_window_background[i][j] = (0x0181 + ((j + 1) % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
-                    }
-                    else
-                    {
-                        ui_window_background[i][j] = (0x0181 + (j % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
-                    }
+                    ui_window_background[i][j] = (0x0181 + ((j + x + 1) & 0x1)) | 0x2000 | (PAL_UI_4BPP << 10);
                 }
                 else
                 {
                     // Even row
-                    if (x % 2 == 0)
-                    {
-                        ui_window_background[i][j] = (0x0191 + ((j + 1) % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
-                    }
-                    else
-                    {
-                        ui_window_background[i][j] = (0x0191 + (j % 2)) | 0x2000 | (PAL_UI_4BPP << 10);
-                    }
+                    ui_window_background[i][j] = (0x0191 + ((j + x + 1) & 0x1)) | 0x2000 | (PAL_UI_4BPP << 10);
+                }
+
+                // Set up block moves after all columns are built.
+                int16_t block_len = (w-4) << 1;
+                if (block_len >= 2)
+                {
+                    // Row can be block moved
+                    System_CopyBlock((uint8_t *)&ui_window_background[i][x+1], (uint8_t *)&ui_window_background[i][x+3], block_len);
                 }
             }
         }
@@ -808,7 +783,7 @@ void UserInterface_DrawWindowBackground(uint16_t x, uint16_t y, uint16_t w, uint
             break;
         }
 
-        if ((w % 2) == 0)
+        if ((w & 0x1) == 0)
         {
             // Column width is even
             if (i - y == 0)
@@ -829,7 +804,7 @@ void UserInterface_DrawWindowBackground(uint16_t x, uint16_t y, uint16_t w, uint
             else if (i == (y + h - 1))
             {
                 // Last row
-                if ((h % 2) == 0)
+                if ((h & 0x1) == 0)
                 {
                     // row height is even
                     ui_window_background[i][x+w-1] = 0x01a3 | 0x2000 | (PAL_UI_4BPP << 10);
@@ -872,7 +847,7 @@ void UserInterface_DrawWindowBackground(uint16_t x, uint16_t y, uint16_t w, uint
             else if (i == (y + h - 1))
             {
                 // Last row
-                if ((h % 2) == 0)
+                if ((h & 0x1) == 0)
                 {
                     // row height is even
                     ui_window_background[i][x+w-1] = 0x01a4 | 0x2000 | (PAL_UI_4BPP << 10);
@@ -950,7 +925,8 @@ void UserInterface_DrawWindowBox(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
                 break;
             }
 
-            for (int j = x+1; j < x+w-1; j++)
+            for (int j = x+1; j < x+2; j++)
+            //for (int j = x+1; j < x+w-1; j++)
             {
                 if (j >= 32)
                 {
@@ -971,6 +947,14 @@ void UserInterface_DrawWindowBox(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
                 else
                 {
                     ui_window_background[i][j] = 0x019b | 0x2000 | (PAL_UI_4BPP << 10);
+                }
+
+                // Set up block moves after all columns are built.
+                int16_t block_len = (w-3) << 1;
+                if (block_len >= 2)
+                {
+                    // Row can be block moved
+                    System_CopyBlock((uint8_t *)&ui_window_background[i][x+1], (uint8_t *)&ui_window_background[i][x+2], block_len);
                 }
             }
         }
