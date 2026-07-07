@@ -152,7 +152,7 @@ void UserInterface_UpdateHealthCounters()
     // Calculate the "behind" backing
     uint32_t temp_bar_tile_offset;
 
-    switch ((temp_bar_length_max % 8) - 1)
+    switch ((temp_bar_length_max & 0x07) - 1)
     {
         case 0:
             temp_bar_tile_offset = 0;
@@ -187,14 +187,14 @@ void UserInterface_UpdateHealthCounters()
             // the last tile
             ui_hp_gauge[i] = 0x0169 | 0x2000 | (PAL_UI_4BPP << 10);
 
-            if ((temp_bar_length_max % 8) >= 5)
+            if ((temp_bar_length_max & 0x07) >= 5)
             {
                 // One extra tile
                 temp_extra_length = 1;
                 ui_hp_gauge[i+1] = 0x016a | 0x2000 | (PAL_UI_4BPP << 10);
 
                 if ((DmaSystem_AddItemToQueue(
-                    (uint8_t *)(&data_ui_dynamic_hp) + (((temp_bar_length_max % 8) + 1) << 5) + temp_bar_tile_offset, 
+                    (uint8_t *)(&data_ui_dynamic_hp) + (((temp_bar_length_max & 0x07) + 1) << 5) + temp_bar_tile_offset, 
                     0x56a0, 
                     32,
                     VRAM_INCHIGH, 
@@ -226,14 +226,14 @@ void UserInterface_UpdateHealthCounters()
         i++;
     }
 
-    if ((temp_bar_length_max % 8) == 0)
+    if ((temp_bar_length_max & 0x07) == 0)
     {
         temp_bar_empty_tiles--;
     }
 
     for (; i < (temp_bar_filled_tiles + temp_bar_empty_tiles + 2); i++)
     {
-        if (i == (temp_bar_filled_tiles + temp_bar_empty_tiles + 1) && ((temp_bar_length_max % 8) != 00))
+        if (i == (temp_bar_filled_tiles + temp_bar_empty_tiles + 1) && ((temp_bar_length_max & 0x07) != 00))
         {
             // last tile is partial
             // Use the dynamic tile if the partial fill tile is 
@@ -243,7 +243,7 @@ void UserInterface_UpdateHealthCounters()
             ui_hp_gauge[i+1] = (0x016a) | 0x2000 | (PAL_UI_4BPP << 10);
 
             if (DmaSystem_AddItemToQueue(
-                    (uint8_t *)(&data_ui_dynamic_hp) + (((temp_bar_length_max % 8) + 1) << 5) + temp_bar_tile_offset, 
+                    (uint8_t *)(&data_ui_dynamic_hp) + (((temp_bar_length_max & 0x07) + 1) << 5) + temp_bar_tile_offset, 
                     0x56a0, 
                     32,
                     VRAM_INCHIGH, 
@@ -272,7 +272,7 @@ void UserInterface_UpdateHealthCounters()
         }
     }
 
-    if ((temp_bar_length_max % 8) == 0)
+    if ((temp_bar_length_max & 0x07) == 0)
     {
         // One extra tile and the last tile was a full tile
         temp_extra_length = 1;
@@ -1083,8 +1083,8 @@ void UserInterface_CopyTextBuffer_Line(uint16_t y)
 
 void UserInterface_CopyUiGraphicsToVram()
 {
-    DmaSystem_AddItemToQueue((uint8_t *)((uint32_t)&data_ui_dynamic_textadvance + ((uint16_t)((system_frames_elapsed >> 2) % 4) * 32)), 0x4300, 32, VRAM_INCHIGH, 0);
-    DmaSystem_AddItemToQueue((uint8_t *)((uint32_t)&data_ui_dynamic_textadvance + 256 + ((uint16_t)((system_frames_elapsed >> 2) % 4) * 32)), 0x4380, 32, VRAM_INCHIGH, 0);
+    DmaSystem_AddItemToQueue((uint8_t *)((uint32_t)&data_ui_dynamic_textadvance + ((uint16_t)((system_frames_elapsed >> 2) & 0x03) << 5)), 0x4300, 32, VRAM_INCHIGH, 0);
+    DmaSystem_AddItemToQueue((uint8_t *)((uint32_t)&data_ui_dynamic_textadvance + 256 + ((uint16_t)((system_frames_elapsed >> 2) & 0x03) << 5)), 0x4380, 32, VRAM_INCHIGH, 0);
     
     return;
 }
