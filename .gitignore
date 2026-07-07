@@ -101,3 +101,7 @@ main_temp.sfc
 # some emulators dump files in the same folder as the output ROM
 /*.sym
 /*.srm
+
+#Calypsi support files (not maintained for now)
+old-calypsi
+old-calypsi/*

@@ -63,8 +63,6 @@ This project uses the definition of bool as defined in the C standard. PVSnesLib
 
 If you get compilation errors with the tolower function, change the compiler flag to favour size.
 
-A work-in-progress Makefile and SCM is also provided for [Calypsi](https://www.calypsi.cc/) but is currently still not fully functional.
-
 Other C compilers are not tested at all, and may or may not result in a functional binary.
 
 I also am currently unable to verify functionality on actual hardware or clones.
