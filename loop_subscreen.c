@@ -538,7 +538,7 @@ void Subscreen_Upgrade_Hp()
 
         subscreen_rendered = 0;
 
-        SoundInterface_PlayClip(STREAM_VOICE_UPGRADE_SUCCESS_1 + (Math_GetRandom_u16() & 0x01));
+        //SoundInterface_PlayClip(STREAM_VOICE_UPGRADE_SUCCESS_1 + (Math_GetRandom_u16() & 0x01));
     }
 
     return;
@@ -561,7 +561,7 @@ void Subscreen_Upgrade_Attack()
 
         subscreen_rendered = 0;
 
-        SoundInterface_PlayClip(STREAM_VOICE_UPGRADE_SUCCESS_1 + (Math_GetRandom_u16() & 0x01));
+        //SoundInterface_PlayClip(STREAM_VOICE_UPGRADE_SUCCESS_1 + (Math_GetRandom_u16() & 0x01));
     }
 
     return;
@@ -584,7 +584,7 @@ void Subscreen_Upgrade_Defense()
 
         subscreen_rendered = 0;
 
-        SoundInterface_PlayClip(STREAM_VOICE_UPGRADE_SUCCESS_1 + (Math_GetRandom_u16() & 0x01));
+        //SoundInterface_PlayClip(STREAM_VOICE_UPGRADE_SUCCESS_1 + (Math_GetRandom_u16() & 0x01));
     }
 
     return;

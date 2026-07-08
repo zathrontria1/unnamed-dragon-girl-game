@@ -209,7 +209,7 @@ void Routines_TreasureChest(struct game_object * o)
 
                     o->struct_data.interactable_data.ttl = 180 / V_MUL;
 
-                    SoundInterface_PlayClip(STREAM_VOICE_TREASURE_1 + (Math_GetRandom_u16() & 0x01));
+                    //SoundInterface_PlayClip(STREAM_VOICE_TREASURE_1 + (Math_GetRandom_u16() & 0x01));
                 }
                 else
                 {

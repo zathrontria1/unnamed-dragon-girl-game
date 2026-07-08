@@ -181,6 +181,8 @@ void HdmaEngine_UpdateBgScrollValues()
             "\tadc r5\n" 
             "\tadc #<_const_hdma_scroll_sine\n" // Carry is still clear
             "\tsta r5\n" // This table is located in near memory
+            "\tlda #^_const_hdma_scroll_sine\n" // This table is located in near memory
+            "\tsta r6\n" // This table is located in near memory
 
             "\tlda _bg_scroll_y+2\n"
             "\tdec\n"
@@ -191,7 +193,7 @@ void HdmaEngine_UpdateBgScrollValues()
             ".loop:\n"
             "\ttxa\n"
             "\tclc\n"
-            "\tadc (r5),y\n" // This table is located in near memory
+            "\tadc [r5],y\n"
             "\tsta [r3],y\n"
             "\tdey\n"
             "\tdey\n"
@@ -387,7 +389,7 @@ const uint8_t const_hdma_tm_msgbox[] =
 
 
 // sine offsets, intensity 0-15, 2 cycles each
-NEAR const int16_t const_hdma_scroll_sine[16][64] = 
+const int16_t const_hdma_scroll_sine[16][64] = 
 {
     {
      0,     0,     0,     0,     0,     0,     0,

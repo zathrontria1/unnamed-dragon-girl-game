@@ -54,6 +54,9 @@ const struct enemy_data data_enemy_stats_boss_0 =
 const struct sound_stream_data data_stream_table[] = 
 {
     {(void *)&data_snd_stream_silence, 288, false, 0}, // STREAM_SILENCE
+    
+    {(void *)&data_snd_stream_typewriter, 576, true, 0}, // STREAM_TYPEWRITER
+    {(void *)&data_snd_stream_hiss, 2304, false, 0}, // STREAM_HISS
 
     {(void *)&data_snd_stream_voice_hurt_1, 1440, false, 0}, // STREAM_VOICE_HURT_1
     {(void *)&data_snd_stream_voice_hurt_2, 864, false, 0}, // STREAM_VOICE_HURT_2
@@ -61,14 +64,11 @@ const struct sound_stream_data data_stream_table[] =
     {(void *)&data_snd_stream_voice_attack_1, 864, false, 0}, // STREAM_VOICE_ATTACK_1
     {(void *)&data_snd_stream_voice_attack_2, 864, false, 0}, // STREAM_VOICE_ATTACK_2
 
-    {(void *)&data_snd_stream_voice_upgrade_success_1, 2592, false, 0}, // STREAM_VOICE_UPGRADE_SUCCESS_1
-    {(void *)&data_snd_stream_voice_upgrade_success_2, 3456, false, 0}, // STREAM_VOICE_UPGRADE_SUCCESS_2
+    //{(void *)&data_snd_stream_voice_upgrade_success_1, 2592, false, 0}, // STREAM_VOICE_UPGRADE_SUCCESS_1
+    //{(void *)&data_snd_stream_voice_upgrade_success_2, 3456, false, 0}, // STREAM_VOICE_UPGRADE_SUCCESS_2
 
-    {(void *)&data_snd_stream_voice_treasure_1, 2880, false, 0}, // STREAM_VOICE_TREASURE_1
-    {(void *)&data_snd_stream_voice_treasure_2, 2592, false, 0}, // STREAM_VOICE_TREASURE_2
-
-    {(void *)&data_snd_stream_typewriter, 576, true, 0}, // STREAM_TYPEWRITER
-    {(void *)&data_snd_stream_hiss, 2304, false, 0}, // STREAM_HISS
+    //{(void *)&data_snd_stream_voice_treasure_1, 2880, false, 0}, // STREAM_VOICE_TREASURE_1
+    //{(void *)&data_snd_stream_voice_treasure_2, 2592, false, 0}, // STREAM_VOICE_TREASURE_2
 };
 
 // wav2brr produces files with 2 byte headers. Take into account this and subtract 2 from file length on disk.
@@ -171,8 +171,8 @@ const struct obj_list_entry_interactable data_interactables_debug0[] =
     {OBJID_INTERACTABLE_BLOCKER_DOOR_EW, 624, 512, 0}, 
     {OBJID_INTERACTABLE_BLOCKER_DOOR_NS, 496, 640, 0}, 
     //{OBJID_INTERACTABLE_BLOCKER_DOOR_NS, 512, 624, 0}, 
-    {OBJID_INTERACTABLE_SIGN_WALL, 592, 432-8, (void *)&STR_MSG_TEST_MULTILINE}, 
-    {OBJID_INTERACTABLE_SIGN_WALL, 480, 432-8, (void *)&STR_MSG_TEST_MULTIPAGE}, 
+    //{OBJID_INTERACTABLE_SIGN_WALL, 592, 432-8, (void *)&STR_MSG_TEST_MULTILINE}, 
+    //{OBJID_INTERACTABLE_SIGN_WALL, 480, 432-8, (void *)&STR_MSG_TEST_MULTIPAGE}, 
 
     {OBJID_INTERACTABLE_LEVEL_WARP, 496, 32, (void *)&data_level_test_1}, 
 

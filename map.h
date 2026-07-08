@@ -16,11 +16,11 @@ extern const uint8_t * map_lut_col;
 extern uint8_t map_collision_buf[64*64]; // 4KB // There is no speed benefit from making this 16-bit wide
 
 // Camera/background scroll
-ZP extern union pos_bgscroll bg_scroll_x;
-ZP extern union pos_bgscroll bg_scroll_y;
+extern ZP union pos_bgscroll bg_scroll_x;
+extern ZP union pos_bgscroll bg_scroll_y;
 extern union pos_bgscroll bg_scroll_x_prev;
 extern union pos_bgscroll bg_scroll_y_prev;
-ZP extern union pos_bgscroll bg_scroll_y_mod;
+extern ZP union pos_bgscroll bg_scroll_y_mod;
 
 extern union pos_bgscroll bg_scroll_x_saved;
 extern union pos_bgscroll bg_scroll_y_saved;

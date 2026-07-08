@@ -150,58 +150,58 @@ _data_snd_smp_ins_drum_stick:
 
 ; START OF STREAMED AUDIO
 ; Player voice data
-    section "_rodata.huge.bindata.audio.stream.0"
+    section "_rodata.huge.bindata.audio.stream.player.0"
     global _data_snd_stream_voice_hurt_1
 _data_snd_stream_voice_hurt_1:
     incbin "sound/stream/stream_voice_hurt_1.brr"
 
-    section "_rodata.huge.bindata.audio.stream.1"
+    section "_rodata.huge.bindata.audio.stream.player.1"
     global _data_snd_stream_voice_hurt_2
 _data_snd_stream_voice_hurt_2:
     incbin "sound/stream/stream_voice_hurt_2.brr"
 
-    section "_rodata.huge.bindata.audio.stream.2"
+    section "_rodata.huge.bindata.audio.stream.player.2"
     global _data_snd_stream_voice_attack_1
 _data_snd_stream_voice_attack_1:
     incbin "sound/stream/stream_voice_attack_1.brr"
 
-    section "_rodata.huge.bindata.audio.stream.3"
+    section "_rodata.huge.bindata.audio.stream.player.3"
     global _data_snd_stream_voice_attack_2
 _data_snd_stream_voice_attack_2:
     incbin "sound/stream/stream_voice_attack_2.brr"
 
-    section "_rodata.huge.bindata.audio.stream.4"
-    global _data_snd_stream_voice_upgrade_success_1
-_data_snd_stream_voice_upgrade_success_1:
-    incbin "sound/stream/stream_voice_upgrade_success_1.brr"
+;    section "_rodata.huge.bindata.audio.stream.4"
+;    global _data_snd_stream_voice_upgrade_success_1
+;_data_snd_stream_voice_upgrade_success_1:
+;    incbin "sound/stream/stream_voice_upgrade_success_1.brr"
 
-    section "_rodata.huge.bindata.audio.stream.5"
-    global _data_snd_stream_voice_upgrade_success_2
-_data_snd_stream_voice_upgrade_success_2:
-    incbin "sound/stream/stream_voice_upgrade_success_2.brr"
+;    section "_rodata.huge.bindata.audio.stream.5"
+;    global _data_snd_stream_voice_upgrade_success_2
+;_data_snd_stream_voice_upgrade_success_2:
+;    incbin "sound/stream/stream_voice_upgrade_success_2.brr"
 
-    section "_rodata.huge.bindata.audio.stream.6"
-    global _data_snd_stream_voice_treasure_1
-_data_snd_stream_voice_treasure_1:
-    incbin "sound/stream/stream_voice_treasure_1.brr"
+;    section "_rodata.huge.bindata.audio.stream.6"
+;    global _data_snd_stream_voice_treasure_1
+;_data_snd_stream_voice_treasure_1:
+;    incbin "sound/stream/stream_voice_treasure_1.brr"
 
-    section "_rodata.huge.bindata.audio.stream.7"
-    global _data_snd_stream_voice_treasure_2
-_data_snd_stream_voice_treasure_2:
-    incbin "sound/stream/stream_voice_treasure_2.brr"
+;    section "_rodata.huge.bindata.audio.stream.7"
+;    global _data_snd_stream_voice_treasure_2
+;_data_snd_stream_voice_treasure_2:
+;    incbin "sound/stream/stream_voice_treasure_2.brr"
 
 ; Other streams
-    section "_rodata.huge.bindata.audio.stream.8"
+    section "_rodata.huge.bindata.audio.stream.system.0"
     global _data_snd_stream_silence
 _data_snd_stream_silence:
     incbin "sound/stream/stream_silence.brr"
 
-    section "_rodata.huge.bindata.audio.stream.9"
+    section "_rodata.huge.bindata.audio.stream.system.1"
     global _data_snd_stream_typewriter
 _data_snd_stream_typewriter:
     incbin "sound/stream/stream_typewriter.brr"
 
-    section "_rodata.huge.bindata.audio.stream.10"
+    section "_rodata.huge.bindata.audio.enemy.0"
     global _data_snd_stream_hiss
 _data_snd_stream_hiss:
     incbin "sound/stream/stream_hiss.brr"

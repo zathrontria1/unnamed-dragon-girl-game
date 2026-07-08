@@ -1,77 +1,77 @@
 
-extern const uint8_t data_soundengine_binary[];
+extern HUGE const uint8_t data_soundengine_binary[];
 
 // Sequence data
-extern const struct seq_command data_seq_test_t1[];
-extern const struct seq_command data_seq_test_t2[];
-extern const struct seq_command data_seq_test_t3[];
-extern const struct seq_command data_seq_test_t4[];
-extern const struct seq_command data_seq_test_t5[];
-extern const struct seq_command data_seq_test_t6[];
+extern HUGE const struct seq_command data_seq_test_t1[];
+extern HUGE const struct seq_command data_seq_test_t2[];
+extern HUGE const struct seq_command data_seq_test_t3[];
+extern HUGE const struct seq_command data_seq_test_t4[];
+extern HUGE const struct seq_command data_seq_test_t5[];
+extern HUGE const struct seq_command data_seq_test_t6[];
 
-extern const struct sample_list_entry_ins data_snd_instruments[];
-extern const struct sample_list_entry data_snd_samples[];
+extern HUGE const struct sample_list_entry_ins data_snd_instruments[];
+extern HUGE const struct sample_list_entry data_snd_samples[];
 
 // SFX
-extern const uint8_t data_snd_smp_sfx_whoosh[];
-extern const uint8_t data_snd_smp_sfx_punch[];
-extern const uint8_t data_snd_smp_sfx_footstep[];
-extern const uint8_t data_snd_smp_sfx_coin[];
-extern const uint8_t data_snd_smp_sfx_msgclick[];
-extern const uint8_t data_snd_smp_sfx_switch[];
-extern const uint8_t data_snd_smp_sfx_splash[];
-extern const uint8_t data_snd_smp_sfx_splathit[];
-extern const uint8_t data_snd_smp_sfx_flamestream[];
-extern const uint8_t data_snd_smp_sfx_firecrackle[];
-extern const uint8_t data_snd_smp_sfx_bounce[];
+extern HUGE const uint8_t data_snd_smp_sfx_whoosh[];
+extern HUGE const uint8_t data_snd_smp_sfx_punch[];
+extern HUGE const uint8_t data_snd_smp_sfx_footstep[];
+extern HUGE const uint8_t data_snd_smp_sfx_coin[];
+extern HUGE const uint8_t data_snd_smp_sfx_msgclick[];
+extern HUGE const uint8_t data_snd_smp_sfx_switch[];
+extern HUGE const uint8_t data_snd_smp_sfx_splash[];
+extern HUGE const uint8_t data_snd_smp_sfx_splathit[];
+extern HUGE const uint8_t data_snd_smp_sfx_flamestream[];
+extern HUGE const uint8_t data_snd_smp_sfx_firecrackle[];
+extern HUGE const uint8_t data_snd_smp_sfx_bounce[];
 
 // Instruments
-extern const uint8_t data_snd_smp_ins_tone_square[];
+extern HUGE const uint8_t data_snd_smp_ins_tone_square[];
 
-extern const uint8_t data_snd_smp_ins_bass[];
+extern HUGE const uint8_t data_snd_smp_ins_bass[];
 
-extern const uint8_t data_snd_smp_ins_piano[];
+extern HUGE const uint8_t data_snd_smp_ins_piano[];
 
-extern const uint8_t data_snd_smp_ins_guitar_acos[];
-extern const uint8_t data_snd_smp_ins_guitar_dist[];
+extern HUGE const uint8_t data_snd_smp_ins_guitar_acos[];
+extern HUGE const uint8_t data_snd_smp_ins_guitar_dist[];
 
-extern const uint8_t data_snd_smp_ins_flute[];
-extern const uint8_t data_snd_smp_ins_trumpet[];
-extern const uint8_t data_snd_smp_ins_sax[];
+extern HUGE const uint8_t data_snd_smp_ins_flute[];
+extern HUGE const uint8_t data_snd_smp_ins_trumpet[];
+extern HUGE const uint8_t data_snd_smp_ins_sax[];
 
-extern const uint8_t data_snd_smp_ins_strings[];
-extern const uint8_t data_snd_smp_ins_cello[];
-extern const uint8_t data_snd_smp_ins_violin[];
+extern HUGE const uint8_t data_snd_smp_ins_strings[];
+extern HUGE const uint8_t data_snd_smp_ins_cello[];
+extern HUGE const uint8_t data_snd_smp_ins_violin[];
 
-extern const uint8_t data_snd_smp_ins_marimba[];
+extern HUGE const uint8_t data_snd_smp_ins_marimba[];
 
 // Drums/one-shot instruments
-extern const uint8_t data_snd_smp_ins_drum_kick[];
-extern const uint8_t data_snd_smp_ins_drum_snare[];
-extern const uint8_t data_snd_smp_ins_drum_hihat[];
-extern const uint8_t data_snd_smp_ins_drum_cymbals[];
-extern const uint8_t data_snd_smp_ins_drum_clap[];
-extern const uint8_t data_snd_smp_ins_drum_stick[];
+extern HUGE const uint8_t data_snd_smp_ins_drum_kick[];
+extern HUGE const uint8_t data_snd_smp_ins_drum_snare[];
+extern HUGE const uint8_t data_snd_smp_ins_drum_hihat[];
+extern HUGE const uint8_t data_snd_smp_ins_drum_cymbals[];
+extern HUGE const uint8_t data_snd_smp_ins_drum_clap[];
+extern HUGE const uint8_t data_snd_smp_ins_drum_stick[];
 
 // Streamed audio
 // Player voice
-extern const uint8_t data_snd_stream_voice_hurt_1[];
-extern const uint8_t data_snd_stream_voice_hurt_2[];
+extern HUGE const uint8_t data_snd_stream_voice_hurt_1[];
+extern HUGE const uint8_t data_snd_stream_voice_hurt_2[];
 
-extern const uint8_t data_snd_stream_voice_attack_1[];
-extern const uint8_t data_snd_stream_voice_attack_2[];
+extern HUGE const uint8_t data_snd_stream_voice_attack_1[];
+extern HUGE const uint8_t data_snd_stream_voice_attack_2[];
 
-extern const uint8_t data_snd_stream_voice_upgrade_success_1[];
-extern const uint8_t data_snd_stream_voice_upgrade_success_2[];
+/*extern HUGE const uint8_t data_snd_stream_voice_upgrade_success_1[];
+extern HUGE const uint8_t data_snd_stream_voice_upgrade_success_2[];
 
-extern const uint8_t data_snd_stream_voice_treasure_1[];
-extern const uint8_t data_snd_stream_voice_treasure_2[];
+extern HUGE const uint8_t data_snd_stream_voice_treasure_1[];
+extern HUGE const uint8_t data_snd_stream_voice_treasure_2[];*/
 
 
 // Other streams
-extern const uint8_t data_snd_stream_silence[];
-extern const uint8_t data_snd_stream_typewriter[];
-extern const uint8_t data_snd_stream_hiss[];
+extern HUGE const uint8_t data_snd_stream_silence[];
+extern HUGE const uint8_t data_snd_stream_typewriter[];
+extern HUGE const uint8_t data_snd_stream_hiss[];
 
 // Streamed audio table to make it easier to refer to them
-extern const struct sound_stream_data data_stream_table[];
+extern HUGE const struct sound_stream_data data_stream_table[];

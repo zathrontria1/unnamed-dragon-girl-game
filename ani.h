@@ -1,9 +1,9 @@
 
 // Lookup tables for animations
 // With flipping
-extern NEAR const uint16_t const_ani_lut_basic[56];
-extern NEAR const uint16_t const_ani_lut_lizardman[56];
-extern NEAR const uint16_t const_ani_lut_frame_byteoffsets_16[512];
+extern const uint16_t const_ani_lut_basic[56];
+extern const uint16_t const_ani_lut_lizardman[56];
+extern const uint16_t const_ani_lut_frame_byteoffsets_16[512];
 
 extern uint16_t buf_player_prev_frame;
 

@@ -1,4 +1,4 @@
-const struct seq_command data_seq_test_t1[] = {
+HUGE const struct seq_command data_seq_test_t1[] = {
     {SEQ_OPCODE_SETLOOPPOINT, 6, 0, 0},
     {SEQ_OPCODE_PLAY_ONESHOT, INS_DRUM_KICK, 31, 31},
     {SEQ_OPCODE_WAIT, 0, 0, 0},
@@ -26,7 +26,7 @@ const struct seq_command data_seq_test_t1[] = {
     {SEQ_OPCODE_RESTART, 0, 0, 0},
 };
 
-const struct seq_command data_seq_test_t2[] = {
+HUGE const struct seq_command data_seq_test_t2[] = {
     {SEQ_OPCODE_WAIT, 3, 0, 0},
 
     {SEQ_OPCODE_PLAY_ONESHOT, INS_DRUM_SNARE, 31, 31},
@@ -35,7 +35,7 @@ const struct seq_command data_seq_test_t2[] = {
     {SEQ_OPCODE_RESTART, 0, 0, 0},
 };
 
-const struct seq_command data_seq_test_t3[] = {
+HUGE const struct seq_command data_seq_test_t3[] = {
     {SEQ_OPCODE_WAIT, 1, 0, 0},
 
     {SEQ_OPCODE_SETLOOPPOINT, 3, 0, 0},
@@ -118,7 +118,7 @@ const struct seq_command data_seq_test_t3[] = {
 
 // Example: (0x0f | (0x03 << 4) | (0x01 << 7)),  ((0x17) | (0x07 << 5))
 
-const struct seq_command data_seq_test_t4[] = {
+HUGE const struct seq_command data_seq_test_t4[] = {
     {SEQ_OPCODE_WAIT, 63, 0, 0},
 
     {SEQ_OPCODE_SETRESTARTPOINT, 0, 0, 0}, 
@@ -182,7 +182,7 @@ const struct seq_command data_seq_test_t4[] = {
 };
 
 // Drum test
-const struct seq_command data_seq_test_t5[] = {
+HUGE const struct seq_command data_seq_test_t5[] = {
     {SEQ_OPCODE_PLAY_ONESHOT, INS_DRUM_KICK, 31, 31},
     {SEQ_OPCODE_WAIT, 2, 0, 0},
 
@@ -205,7 +205,7 @@ const struct seq_command data_seq_test_t5[] = {
 };
 
 // Instrument test, pending note chart
-const struct seq_command data_seq_test_t6[] = {
+HUGE const struct seq_command data_seq_test_t6[] = {
     // Drums
     /*{SEQ_OPCODE_PLAY_ONESHOT, INS_DRUM_KICK, 31, 31},
     {SEQ_OPCODE_WAIT, 2, 0, 0},

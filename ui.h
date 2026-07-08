@@ -1,4 +1,4 @@
-ZP extern bool ui_in_subscreen;
+extern ZP bool ui_in_subscreen;
 extern bool ui_in_bg2;
 
 // UI cache invalidation stuff

@@ -1,73 +1,75 @@
-extern const uint8_t STR_MSG_TEST_SINGLELINE[];
-extern const uint8_t STR_MSG_TEST_MULTILINE[];
+/*extern HUGE const char STR_MSG_TEST_SINGLELINE[];
+extern HUGE const char STR_MSG_TEST_MULTILINE[];
+extern HUGE const char STR_MSG_TEST_MULTIPAGE[];*/
 
-extern const uint8_t STR_MSG_TEST_MULTIPAGE[];
+extern HUGE const char STR_MSG_TUTORIAL_BOSS[];
 
-extern const uint8_t STR_MSG_TUTORIAL_BOSS[];
+extern HUGE const char STR_MSG_TUTORIAL_MP[];
 
-extern const uint8_t STR_MSG_TUTORIAL_MP[];
+extern HUGE const char STR_MSG_INCOMBAT[];
+extern HUGE const char STR_MSG_FOUNDMONEY[];
 
-extern const uint8_t STR_MSG_INCOMBAT[];
-extern const uint8_t STR_MSG_FOUNDMONEY[];
+extern HUGE const char STR_UI_HELP_MAP[];
 
-extern const uint8_t STR_UI_HELP_MAP[];
+extern HUGE const char STR_UI_SUBSCREEN_RESUME[];
+extern HUGE const char STR_UI_SUBSCREEN_PROFILE[];
+extern HUGE const char STR_UI_SUBSCREEN_MAP[];
+extern HUGE const char STR_UI_SUBSCREEN_HELP[];
+extern HUGE const char STR_UI_SUBSCREEN_OPTIONS[];
+extern HUGE const char STR_UI_SUBSCREEN_RESTART[];
 
-extern const uint8_t STR_UI_SUBSCREEN_RESUME[];
-extern const uint8_t STR_UI_SUBSCREEN_PROFILE[];
-extern const uint8_t STR_UI_SUBSCREEN_MAP[];
-extern const uint8_t STR_UI_SUBSCREEN_HELP[];
-extern const uint8_t STR_UI_SUBSCREEN_OPTIONS[];
-extern const uint8_t STR_UI_SUBSCREEN_RESTART[];
+extern HUGE const char STR_UI_SUBSCREEN_MONEY[];
+extern HUGE const char STR_UI_SUBSCREEN_PLAYTIME[];
+extern HUGE const char STR_UI_SUBSCREEN_PLAYTIME_NOCOLON[];
+extern HUGE const char STR_UI_SUBSCREEN_LAGCOUNTER[];
 
-extern const uint8_t STR_UI_SUBSCREEN_MONEY[];
-extern const uint8_t STR_UI_SUBSCREEN_PLAYTIME[];
-extern const uint8_t STR_UI_SUBSCREEN_PLAYTIME_NOCOLON[];
-extern const uint8_t STR_UI_SUBSCREEN_LAGCOUNTER[];
+extern HUGE const char STR_UI_SUBSCREEN_PROFILE_HEADING[];
 
-extern const uint8_t STR_UI_SUBSCREEN_PROFILE_HEADING[];
+extern HUGE const char STR_UI_SUBSCREEN_PROFILE_HEALTH[];
+extern HUGE const char STR_UI_SUBSCREEN_PROFILE_HEALTH_DIV[];
+extern HUGE const char STR_UI_SUBSCREEN_PROFILE_ATTACK[];
+extern HUGE const char STR_UI_SUBSCREEN_PROFILE_DEFENSE[];
 
-extern const uint8_t STR_UI_SUBSCREEN_PROFILE_HEALTH[];
-extern const uint8_t STR_UI_SUBSCREEN_PROFILE_HEALTH_DIV[];
-extern const uint8_t STR_UI_SUBSCREEN_PROFILE_ATTACK[];
-extern const uint8_t STR_UI_SUBSCREEN_PROFILE_DEFENSE[];
+extern HUGE const char STR_UI_SUBSCREEN_PROFILE_MONEY[]; 
+extern HUGE const char STR_UI_SUBSCREEN_PROFILE_UPGRADE_HP[];
+extern HUGE const char STR_UI_SUBSCREEN_PROFILE_UPGRADE_ATTACK[];
+extern HUGE const char STR_UI_SUBSCREEN_PROFILE_UPGRADE_DEFENSE[];
+extern HUGE const char STR_UI_SUBSCREEN_PROFILE_COST[];
 
-extern const uint8_t STR_UI_SUBSCREEN_PROFILE_MONEY[]; 
-extern const uint8_t STR_UI_SUBSCREEN_PROFILE_UPGRADE_HP[];
-extern const uint8_t STR_UI_SUBSCREEN_PROFILE_UPGRADE_ATTACK[];
-extern const uint8_t STR_UI_SUBSCREEN_PROFILE_UPGRADE_DEFENSE[];
-extern const uint8_t STR_UI_SUBSCREEN_PROFILE_COST[];
+extern HUGE const char STR_UI_SUBSCREEN_PROFILE_UPGRADE_SUCCESS[];
+extern HUGE const char STR_UI_SUBSCREEN_PROFILE_UPGRADE_FAILURE[];
 
-extern const uint8_t STR_UI_SUBSCREEN_PROFILE_RETURN[];
+extern HUGE const char STR_UI_SUBSCREEN_PROFILE_RETURN[];
 
-extern const uint8_t STR_UI_SUBSCREEN_HELP_HEADING[];
+extern HUGE const char STR_UI_SUBSCREEN_HELP_HEADING[];
 
-extern const uint8_t STR_UI_SUBSCREEN_HELP_MOVEMENT_H[];
-extern const uint8_t STR_UI_SUBSCREEN_HELP_INTERACTION_H[];
-extern const uint8_t STR_UI_SUBSCREEN_HELP_ATTACK_H[];
-extern const uint8_t STR_UI_SUBSCREEN_HELP_PROGRESSION_H[];
-extern const uint8_t STR_UI_SUBSCREEN_HELP_MAP_H[];
-extern const uint8_t STR_UI_SUBSCREEN_HELP_RESET_H[];
+extern HUGE const char STR_UI_SUBSCREEN_HELP_MOVEMENT_H[];
+extern HUGE const char STR_UI_SUBSCREEN_HELP_INTERACTION_H[];
+extern HUGE const char STR_UI_SUBSCREEN_HELP_ATTACK_H[];
+extern HUGE const char STR_UI_SUBSCREEN_HELP_PROGRESSION_H[];
+extern HUGE const char STR_UI_SUBSCREEN_HELP_MAP_H[];
+extern HUGE const char STR_UI_SUBSCREEN_HELP_RESET_H[];
 
-extern const uint8_t STR_UI_SUBSCREEN_HELP_MOVEMENT[];
-extern const uint8_t STR_UI_SUBSCREEN_HELP_INTERACTION[];
-extern const uint8_t STR_UI_SUBSCREEN_HELP_ATTACK[];
-extern const uint8_t STR_UI_SUBSCREEN_HELP_PROGRESSION[];
-extern const uint8_t STR_UI_SUBSCREEN_HELP_MAP[];
-extern const uint8_t STR_UI_SUBSCREEN_HELP_RESET[];
+extern HUGE const char STR_UI_SUBSCREEN_HELP_MOVEMENT[];
+extern HUGE const char STR_UI_SUBSCREEN_HELP_INTERACTION[];
+extern HUGE const char STR_UI_SUBSCREEN_HELP_ATTACK[];
+extern HUGE const char STR_UI_SUBSCREEN_HELP_PROGRESSION[];
+extern HUGE const char STR_UI_SUBSCREEN_HELP_MAP[];
+extern HUGE const char STR_UI_SUBSCREEN_HELP_RESET[];
 
-extern const uint8_t STR_UI_SUBSCREEN_RESETCONFIRMATION[];
+extern HUGE const char STR_UI_SUBSCREEN_RESETCONFIRMATION[];
 
-extern const uint8_t STR_UI_SUBSCREEN_CONFIRM_YES[];
-extern const uint8_t STR_UI_SUBSCREEN_CONFIRM_NO[];
+extern HUGE const char STR_UI_SUBSCREEN_CONFIRM_YES[];
+extern HUGE const char STR_UI_SUBSCREEN_CONFIRM_NO[];
 
-extern const uint8_t STR_LEVELNAME_DEBUG_B1F[];
-extern const uint8_t STR_LEVELNAME_DEBUG_B2F[];
-extern const uint8_t STR_LEVELNAME_DEBUG_B3F[];
+extern HUGE const char STR_LEVELNAME_DEBUG_B1F[];
+extern HUGE const char STR_LEVELNAME_DEBUG_B2F[];
+extern HUGE const char STR_LEVELNAME_DEBUG_B3F[];
 
-extern const uint8_t STR_ERROR_CONTROLLER[];
-extern const uint8_t STR_ERROR_REGION[];
+extern HUGE const char STR_ERROR_CONTROLLER[];
+extern HUGE const char STR_ERROR_REGION[];
 
-extern const uint8_t STR_STARTUP[];
+extern HUGE const char STR_STARTUP[];
 
-extern const uint8_t STR_TITLE_START[];
-extern const uint8_t STR_GAME_OVER[];
+extern HUGE const char STR_TITLE_START[];
+extern HUGE const char STR_GAME_OVER[];
