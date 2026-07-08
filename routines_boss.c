@@ -183,7 +183,6 @@ void Routines_Boss_Test(struct game_object * o)
     Routines_Boss_Test_DmaFrame(o);
 
     // Defer boss body draws to combination drawing
-
     Routines_Boss_Test_Hands(o, temp_facing_left);
 
     Routines_Boss_Test_Draw(o, temp_facing_left);
@@ -576,8 +575,35 @@ bool Routines_Boss_Test_Movement(struct game_object * o, int32_t x, int32_t y)
 */
 void Routines_Boss_Test_Hands(struct game_object * o, bool flip)
 {
+    if (obj_boss_hands_timer_attack != 0)
+    {
+        obj_boss_hands_timer_attack--;
+    }
+
+    if (!obj_boss_hands_timer_attack)
+    {
+        // Process hand phase.
+        if (obj_boss_phase & 0x01)
+        {
+            // Launch a hand attack every other phase
+            Routines_Boss_Test_Hands_Attack_Pattern1(o);
+            obj_boss_hands_show = false;
+        }
+        else
+        {
+            obj_boss_hands_show = true;
+        }
+
+        obj_boss_hands_timer_attack = (5 * FPS);
+    }
+
     Routines_Boss_Test_Hands_DmaFrame(o);
     
+    return;
+}
+
+void Routines_Boss_Test_Hands_Attack_Pattern1(struct game_object * o)
+{
     return;
 }
 

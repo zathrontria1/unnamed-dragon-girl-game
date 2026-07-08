@@ -40,6 +40,9 @@ uint8_t * Routines_Boss_Test_GetCompressedFrame(const uint8_t * data, const uint
 void Routines_Boss_Test_DrawShadow(struct game_object * o);
 
 void Routines_Boss_Test_Hands(struct game_object * o, bool flip);
+
+void Routines_Boss_Test_Hands_Attack_Pattern1(struct game_object * o);
+
 void Routines_Boss_Test_Hands_DrawShadow(struct game_object * o, bool flip);
 void Routines_Boss_Test_Hands_DmaFrame(struct game_object * o);
 
