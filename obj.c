@@ -548,8 +548,7 @@ int16_t ObjectSystem_InstantiateEnemyHitbox(
     }
 
     // perform additional checks for sprite slots
-    if (((id >= OBJID_START_OF_DMA_SPRITES) && (id <= OBJID_END_OF_DMA_SPRITES)) ||
-        ((id >= OBJID_START_OF_DMA_LIGHT_SPRITES) && (id <= OBJID_END_OF_DMA_LIGHT_SPRITES)) )
+    if ((id >= OBJID_START_OF_DMA_LIGHT_SPRITES) && (id <= OBJID_END_OF_DMA_LIGHT_SPRITES))
     {
         uint16_t k = SpriteEngine_GetVramSlot16(OBJ_GENERAL_MAX_COUNT + i);
         
