@@ -25,6 +25,7 @@
 #include "consts_snd.h"
 
 #include "main.h"
+#include "lz4.h"
 
 #include "interrupt_sub.h"
 
@@ -205,7 +206,9 @@ void Cs_StartCutscene()
         DmaSystem_CopyToVram((uint8_t *)const_zero, 0x5800, 32);
 
         // Write the frame data.
-        DmaSystem_CopyToVram((uint8_t *)cs_current->frame, 0x0000, 20480);
+        LZ4_UnpackToWRAM((uint8_t *)cs_current->frame, (void *)0x007f0000);
+        //DmaSystem_CopyToVram((uint8_t *)cs_current->frame, 0x0000, 20480);
+        DmaSystem_CopyToVram((uint8_t *)0x007f0000, 0x0000, 20480);
         DmaSystem_CopyToVram((uint8_t *)cs_current->tilemap, TILEMAP_ADDR_CS_FRAME_A, 1280);
         DmaSystem_CopyToWram((uint8_t *)cs_current->palette, (uint8_t *)&shadow_cgram, 256);
 
@@ -301,16 +304,23 @@ void Cs_PreloadNextFrame()
     uint16_t offset_tilemap_vram = cs_preload_subsection * 320; // 320 words
     uint16_t offset_tilemap = offset_tilemap_vram << 1;
 
+    if (!cs_preload_subsection)
+    {
+        LZ4_UnpackToWRAM(ptr->frame, (void *)0x007f0000);
+    }
+
     // Tile data in 10KB chunks, and tilemap data in 640b chunks
     // It fits in DMA queue system.
     if (!cs_use_second_frame)
     {
-        DmaSystem_AddItemToQueue((uint8_t *)((uint32_t)ptr->frame + offset), 0x3000+offset_vram, 10240, VRAM_INCHIGH, 0);
+        //DmaSystem_AddItemToQueue((uint8_t *)((uint32_t)ptr->frame + offset), 0x3000+offset_vram, 10240, VRAM_INCHIGH, 0);
+        DmaSystem_AddItemToQueue((uint8_t *)((uint32_t)0x007f0000 + offset), 0x3000+offset_vram, 10240, VRAM_INCHIGH, 0);
         DmaSystem_AddItemToQueue((uint8_t *)((uint32_t)ptr->tilemap + offset_tilemap), TILEMAP_ADDR_CS_FRAME_B+offset_tilemap_vram, 640, VRAM_INCHIGH, 0);
     }
     else
     {
-        DmaSystem_AddItemToQueue((uint8_t *)((uint32_t) ptr->frame + offset), 0x0000+offset_vram, 10240, VRAM_INCHIGH, 0);
+        //DmaSystem_AddItemToQueue((uint8_t *)((uint32_t)ptr->frame + offset), 0x0000+offset_vram, 10240, VRAM_INCHIGH, 0);
+        DmaSystem_AddItemToQueue((uint8_t *)((uint32_t)0x007f0000 + offset), 0x0000+offset_vram, 10240, VRAM_INCHIGH, 0);
         DmaSystem_AddItemToQueue((uint8_t *)((uint32_t)ptr->tilemap + offset_tilemap), TILEMAP_ADDR_CS_FRAME_A+offset_tilemap_vram, 640, VRAM_INCHIGH, 0);
     }
 
