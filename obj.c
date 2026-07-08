@@ -546,9 +546,6 @@ int16_t ObjectSystem_InstantiateEnemyHitbox(
     {
         return -1;
     }
-    obj_hitbox_enemy_first_available = obj_hitbox_enemy[i].next_free;
-
-    uint16_t j = 0;
 
     // perform additional checks for sprite slots
     if (((id >= OBJID_START_OF_DMA_SPRITES) && (id <= OBJID_END_OF_DMA_SPRITES)) ||
@@ -562,6 +559,8 @@ int16_t ObjectSystem_InstantiateEnemyHitbox(
             return -1;
         }
 
+        obj_hitbox_enemy_first_available = obj_hitbox_enemy[i].next_free;
+
         //if relevant bits are taken to as they shift all the way to bit 0 first for the lowest bit:
         uint16_t temp_tilenum = 0; 
         temp_tilenum |= (k & 0xf0) << 2;
@@ -572,6 +571,10 @@ int16_t ObjectSystem_InstantiateEnemyHitbox(
 
         obj_hitbox_enemy[i].struct_data.npc_data.tilenum = temp_tilenum;
         obj_hitbox_enemy[i].struct_data.npc_data.vram_addr = temp_tilenum << 4; // mul by 16, size of a 8x8 tile - this is in words
+    }
+    else
+    {
+        obj_hitbox_enemy_first_available = obj_hitbox_enemy[i].next_free;
     }
 
     struct game_object * p = &obj_hitbox_enemy[i];
@@ -842,9 +845,8 @@ void ObjectSystem_CleanupEnemyHitboxes()
 {
     for (int i = 0; i < obj_hitbox_enemy_delete_queue_count; i++)
     {
-        if ((obj_hitbox_enemy[obj_hitbox_enemy_delete_queue[i]].id == OBJID_BUBBLE_E) || 
-        (obj_hitbox_enemy[obj_hitbox_enemy_delete_queue[i]].id == OBJID_ARROW_E) || 
-        (obj_hitbox_enemy[obj_hitbox_enemy_delete_queue[i]].id == OBJID_BOSS_TEST1_ATTACK1))
+        unsigned int id = obj_hitbox_enemy[obj_hitbox_enemy_delete_queue[i]].id;
+        if ((id >= OBJID_START_OF_DMA_LIGHT_SPRITES) && (id <= OBJID_END_OF_DMA_LIGHT_SPRITES))
         {
             SpriteEngine_ReleaseVramSlot(OBJ_GENERAL_MAX_COUNT + obj_hitbox_enemy_delete_queue[i], 1);
         }
