@@ -5,7 +5,7 @@
 #include "math_int.h"
 
 // Random numbers
-ZP int8_t rand_array[3];
+int8_t rand_array[3];
 uint16_t rand_seeded;
 
 /* 

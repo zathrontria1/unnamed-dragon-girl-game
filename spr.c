@@ -7,17 +7,17 @@
 #include "map.h"
 #include "system.h"
 
-ZP uint16_t spr_sprite_count; // Rendered sprites this frame
+uint16_t spr_sprite_count; // Rendered sprites this frame
 uint16_t spr_sprite_count_prev; // previous
 
 uint16_t spr_vram_slots[128];
 
-ZP uint16_t spr_front_count; // Rendered non-UI unsorted front-forced sprites this frame
+uint16_t spr_front_count; // Rendered non-UI unsorted front-forced sprites this frame
 NEAR struct spr_queue_entry spr_queue_front[SPR_COUNT_MAX_FRONT];
-ZP uint16_t spr_back_count; // Rendered non-UI unsorted back-forced sprites this frame (e.g. background impostors and shadows)
+uint16_t spr_back_count; // Rendered non-UI unsorted back-forced sprites this frame (e.g. background impostors and shadows)
 NEAR struct spr_queue_entry spr_queue_back[SPR_COUNT_MAX_BACK];
 
-ZP uint16_t spr_normal_count;
+uint16_t spr_normal_count;
 //NEAR uint8_t spr_depth_count[257]; // Count of sprites on each depth line // Declared in ASM
 NEAR struct spr_queue_entry spr_queue_normal[SPR_COUNT_MAX_SORTED]; // depth sorted sprite entries
 
@@ -105,7 +105,7 @@ void SpriteEngine_AddToFrontLayer(struct game_object * o, uint16_t tileattrib)
             // (use only high 16 bits for them)
 
             // Test if queue full first
-            "\tlda <_spr_front_count\n"
+            "\tlda _spr_front_count\n"
             "\tcmp #64\n"
             "\tbcs .reject\n"
 
@@ -158,7 +158,7 @@ void SpriteEngine_AddToFrontLayer(struct game_object * o, uint16_t tileattrib)
             "\tsta _spr_queue_front+8,y\n"
             "\tlda 4,s\n"
             "\tsta _spr_queue_front+4,y\n"
-            "\tinc <_spr_front_count\n"
+            "\tinc _spr_front_count\n"
 
             ".reject:\n"
         );
@@ -222,7 +222,7 @@ void SpriteEngine_AddToSortedLayer(struct game_object * o, uint16_t tileattrib)
             // (use only high 16 bits for them)
 
             // Test if queue full first
-            "\tlda <_spr_normal_count\n"
+            "\tlda _spr_normal_count\n"
             "\tcmp #64\n"
             "\tbcs .reject\n"
 
@@ -277,7 +277,7 @@ void SpriteEngine_AddToSortedLayer(struct game_object * o, uint16_t tileattrib)
             "\tsta _spr_queue_normal+8,y\n"
             "\tlda 4,s\n"
             "\tsta _spr_queue_normal+4,y\n"
-            "\tinc <_spr_normal_count\n"
+            "\tinc _spr_normal_count\n"
 
             ".reject:\n"
         );
@@ -340,7 +340,7 @@ void SpriteEngine_AddToBackLayer(struct game_object * o, uint16_t tileattrib)
             // (use only high 16 bits for them)
 
             // Test if queue full first
-            "\tlda <_spr_back_count\n"
+            "\tlda _spr_back_count\n"
             "\tcmp #64\n"
             "\tbcs .reject\n"
 
@@ -393,7 +393,7 @@ void SpriteEngine_AddToBackLayer(struct game_object * o, uint16_t tileattrib)
             "\tsta _spr_queue_back+8,y\n"
             "\tlda 4,s\n"
             "\tsta _spr_queue_back+4,y\n"
-            "\tinc <_spr_back_count\n"
+            "\tinc _spr_back_count\n"
 
             ".reject:\n"
         );
@@ -577,7 +577,7 @@ void SpriteEngine_ProcessSpriteLists_WriteFrontSprites()
         "\ta16\n"
         "\tx16\n"
 
-        "\tlda <_spr_front_count\n"
+        "\tlda _spr_front_count\n"
         "\tbeq .end_drawfront\n"
         
         "\ttay\n"
@@ -663,7 +663,7 @@ void SpriteEngine_ProcessSpriteLists_TallySprites()
         "\tlda #<_spr_queue_normal\n"
         "\tsta r0\n"
         
-        "\tlda <_spr_normal_count\n"
+        "\tlda _spr_normal_count\n"
         "\tbeq .end\n"
         "\tsta r2\n"
 
@@ -725,9 +725,9 @@ void SpriteEngine_ProcessSpriteLists_CalculateOffsets()
         "\tsep #$10\n"
         "\tlda #$0000\n"
         "\ttax\n"
-        "\tlda !_spr_sprite_count\n"
+        "\tlda _spr_sprite_count\n"
         "\tclc\n"
-        "\tadc !_spr_normal_count\n"
+        "\tadc _spr_normal_count\n"
         "\tsep #$21\n"
         "\ta8\n"
         "\ttay\n"
@@ -803,7 +803,7 @@ void SpriteEngine_ProcessSpriteLists_WriteSortedSprites()
         "\ta16\n"
         "\tx16\n"
 
-        "\tlda <_spr_normal_count\n"
+        "\tlda _spr_normal_count\n"
         "\tbeq .end2\n"
         "\tsta r2\n"
 
@@ -886,7 +886,7 @@ void SpriteEngine_ProcessSpriteLists_WriteBackSprites()
         "\ta16\n"
         "\tx16\n"
 
-        "\tlda <_spr_back_count\n"
+        "\tlda _spr_back_count\n"
         "\tbeq .end_drawback\n"
 
         "\ttay\n"
@@ -937,7 +937,7 @@ void SpriteEngine_ProcessSpriteLists_WriteBackSprites()
 	    "\tx16\n"
         "\tphy\n"
 
-        "\tlda <_spr_sprite_count\n"
+        "\tlda _spr_sprite_count\n"
         "\tasl\n"
         "\tasl\n"
         "\ttax\n"
@@ -956,7 +956,7 @@ void SpriteEngine_ProcessSpriteLists_WriteBackSprites()
         "\tlda $0006,y \n"
         "\tsta >_shadow_oam+512,x \n"
         "\tinx\n"
-        "\tstx <_spr_sprite_count\n"
+        "\tstx _spr_sprite_count\n"
         "\ta16\n"
         "\trep #$20\n"
         "\tply\n");
@@ -1054,7 +1054,7 @@ void SpriteEngine_PackOamHighTable()
         "\trep #$30\n"
 
         "\tpld\n"
-        "\tstz <_spr_sprite_count\n"
+        "\tstz _spr_sprite_count\n"
         );
     #else
         int j = 0;
@@ -1097,7 +1097,7 @@ void SpriteEngine_ResetOam()
         ".sprcount_is_already_multiple_of_four:\n"
         "\tsta r10\n"
 
-        "\tlda <_spr_sprite_count\n"
+        "\tlda _spr_sprite_count\n"
         "\tcmp r10\n"
         "\tbcs .end_sprreset\n"
 
@@ -1135,7 +1135,7 @@ void SpriteEngine_ResetOam()
         "\trep #$20\n"
             
         ".end_sprreset:\n"
-        "\tlda <_spr_sprite_count\n"
+        "\tlda _spr_sprite_count\n"
         "\tsta _spr_sprite_count_prev\n"
     );
     #else

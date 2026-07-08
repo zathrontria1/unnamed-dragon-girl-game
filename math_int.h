@@ -1,5 +1,5 @@
 // Random numbers
-extern ZP int8_t rand_array[3];
+extern int8_t rand_array[3];
 extern uint16_t rand_seeded;
 
 uint8_t Math_GetAtan2_u8(int16_t y, int16_t x);

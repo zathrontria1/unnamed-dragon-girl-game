@@ -57,7 +57,7 @@ void SpriteEngine_AddMetaSprite(struct game_object * o, const struct spr_metaspr
                 uint16_t size; +6
             */
             // Test if sprite queue full
-            "\tlda <_spr_normal_count\n"
+            "\tlda _spr_normal_count\n"
             "\tcmp #64\n"
             "\tbcs .finish\n"
 
@@ -158,7 +158,7 @@ void SpriteEngine_AddMetaSprite(struct game_object * o, const struct spr_metaspr
                     "\tsta _spr_queue_normal+8,y\n"
                     "\tlda [r0]\n"
                     "\tsta _spr_queue_normal+4,y\n"
-                    "\tinc <_spr_normal_count\n"
+                    "\tinc _spr_normal_count\n"
             ".next_item:\n"
 
             "\tlda r0\n"
@@ -300,7 +300,7 @@ void SpriteEngine_AddMetaSprite_Back(struct game_object * o, const struct spr_me
                 uint16_t size; +6
             */
             // Test if sprite queue full
-            "\tlda <_spr_back_count\n"
+            "\tlda _spr_back_count\n"
             "\tcmp #64\n"
             "\tbcs .finish\n"
 
@@ -401,7 +401,7 @@ void SpriteEngine_AddMetaSprite_Back(struct game_object * o, const struct spr_me
                     "\tsta _spr_queue_back+8,y\n"
                     "\tlda [r0]\n"
                     "\tsta _spr_queue_back+4,y\n"
-                    "\tinc <_spr_back_count\n"
+                    "\tinc _spr_back_count\n"
             ".next_item:\n"
 
             "\tlda r0\n"
