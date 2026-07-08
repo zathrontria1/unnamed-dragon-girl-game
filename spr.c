@@ -510,7 +510,7 @@ void SpriteEngine_ReleaseVramSlot(uint16_t i, uint16_t slot_count)
         slot_count = 1;
     }
 
-    for (int j = 0; j < 128; j += slot_count)
+    for (int j = 48; j < 128; j += slot_count)
     {
         if (spr_vram_slots[j] == i)
         {
