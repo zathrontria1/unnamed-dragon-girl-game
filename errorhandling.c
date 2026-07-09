@@ -96,14 +96,16 @@ void ErrorHandler_Internal_Display(uint8_t * string_ptr)
     DmaSystem_ProcessQueue();
 
     // Set up a fade-in
-    shadow_inidisp_change = 1;
+    shadow_brightness_change = (64 * V_MUL);
+    shadow_brightness = 0 << 8;
+    shadow_fblank_enable = 0x00;
 
     gfx_mosaic_change = 0;
     gfx_mosaic_layers = 0; // Off
     gfx_mosaic_intensity = 0; // Off
     system_use_alternate_nmi = true;
 
-    shadow_inidisp = 0x00;
+    
 
     HdmaEngine_SetHdmaShadow();
 

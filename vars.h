@@ -40,8 +40,10 @@ extern ZP bool system_suppress_odd_transfers;
 
 // Shadow buffers
 extern ZP uint8_t shadow_nmitimen;
-extern ZP uint8_t shadow_inidisp;
-extern ZP int8_t shadow_inidisp_change;
+
+extern ZP uint8_t shadow_fblank_enable;
+extern ZP int16_t shadow_brightness;
+extern ZP int16_t shadow_brightness_change;
 
 extern ZP uint8_t shadow_mosaic;
 

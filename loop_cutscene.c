@@ -111,36 +111,40 @@ void Cs_Loop()
             // Perform level load stuff
             LevelSystem_LoadLevel(level_data_ptr); // non-VRAM hitting parts here
 
-            shadow_inidisp_change = 0;
+            shadow_brightness_change = 0;
+
             gfx_mosaic_change = 0;
             system_use_alternate_nmi = false;
 
-            while (shadow_inidisp != 0x00)
+            while (shadow_brightness != 0x0000)
             {
                 while ((REG_HVBJOY & VBL_READY) != VBL_READY)
                 {
                     ;
                 }
 
-                REG_INIDISP = shadow_inidisp;
+                REG_INIDISP = 0x00 | (shadow_brightness >> 8);
 
                 REG_MOSAIC = shadow_mosaic;
 
-                shadow_mosaic = (((0x0f - shadow_inidisp) << 4) | 0x01);
+                shadow_mosaic = (((0x0f - (shadow_brightness >> 8)) << 4) | 0x01);
 
                 while ((REG_HVBJOY & VBL_READY) == VBL_READY)
                 {
                     ;
                 }
-
-                shadow_inidisp -= 1;
+                
+                shadow_brightness -= 128;
             }
 
             shadow_mosaic = 0x00;
 
             REG_MOSAIC = shadow_mosaic;
+
             REG_INIDISP = 0x8f;
-            shadow_inidisp = 0;
+            
+            shadow_fblank_enable = 0;
+            shadow_brightness = 0 << 8;
 
             // Screen is forced blank again. Do anything that touches PPU regs here now
 
@@ -196,7 +200,9 @@ void Cs_StartCutscene()
 
         System_AlignToVblank();
 
-        shadow_inidisp = 0x8f;
+        shadow_fblank_enable = 0x80;
+        shadow_brightness = 15 << 8;
+
         REG_INIDISP = 0x8f;
 
         System_DisableInterrupts();
@@ -243,7 +249,9 @@ void Cs_StartCutscene()
     {
         System_AlignToVblank();
 
-        shadow_inidisp = 0x00;
+        shadow_fblank_enable = 0x00;
+        shadow_brightness = 0 << 8;
+
         REG_INIDISP = 0x00;
         system_current_routine = ROUTINE_FADEIN;
 
@@ -258,8 +266,11 @@ void Cs_StartCutscene()
     }
     else
     {
-        shadow_inidisp = 0x0f;
+        shadow_fblank_enable = 0x00;
+        shadow_brightness = 15 << 8;
+        
         REG_INIDISP = 0x0f;
+
         system_current_routine = ROUTINE_CUTSCENE;
         
         system_target_routine = ROUTINE_CUTSCENE;

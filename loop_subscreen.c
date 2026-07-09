@@ -164,9 +164,10 @@ void Subscreen_Top()
                 // Open the map screen.
                 SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
 
-                shadow_inidisp = 0x0f;
+                shadow_brightness = 15 << 8;
+                shadow_brightness_change = -(64 * V_MUL);
+
                 system_use_alternate_nmi = true;
-                shadow_inidisp_change = -1;
 
                 system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_MAPDISPLAY_INIT);
                 system_target_routine = ROUTINE_MAPDISPLAY_INIT;

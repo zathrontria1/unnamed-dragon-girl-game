@@ -24,7 +24,7 @@
 #endif
 {
     // Write the current INIDISP value
-    REG_INIDISP = shadow_inidisp;
+    REG_INIDISP = shadow_fblank_enable | (shadow_brightness >> 8);
 
     // Get the STAT77 value and set if an overflow happened
     shadow_stat77 = REG_STAT77;
@@ -126,26 +126,26 @@
 #endif
 {
     // Write the current INIDISP value
-    REG_INIDISP = shadow_inidisp;
+    REG_INIDISP = shadow_fblank_enable | (shadow_brightness >> 8);
 
     // Always reset them if an alternate NMI is used
     system_in_vblank = false; // Clear the vblank flag now to prevent problems later.
     system_nmis_counted = 0;
 
-    // Adjust the INIDISP value based on the change
-    if ((shadow_inidisp == 0x00) && (shadow_inidisp_change < 0))
+    // Adjust brightness based on the change
+    if ((shadow_brightness == 0x0000) && (shadow_brightness_change < 0))
     {
-        shadow_inidisp_change = 0;
+        shadow_brightness_change = 0;
     }
 
-    if ((shadow_inidisp >= 0x0f) && (shadow_inidisp_change > 0))
+    if ((shadow_brightness >= 0x0f00) && (shadow_brightness_change > 0))
     {
-        shadow_inidisp_change = 0;
+        shadow_brightness_change = 0;
     }
 
-    if (shadow_inidisp_change != 0)
+    if (shadow_brightness_change != 0)
     {
-        shadow_inidisp += shadow_inidisp_change;
+        shadow_brightness += shadow_brightness_change;
     }
 
     // Do not interfere with HDMA
@@ -178,7 +178,7 @@
 #endif
 {
     // Enable fblank
-    REG_INIDISP = (shadow_inidisp | 0x80);
+    REG_INIDISP = 0x80 | (shadow_brightness >> 8);
 
     // Get the STAT77 value and set if an overflow happened
     shadow_stat77 = REG_STAT77;
@@ -213,7 +213,7 @@
     }
 
     // Disable fblank
-    REG_INIDISP = shadow_inidisp;
+    REG_INIDISP = shadow_fblank_enable | (shadow_brightness >> 8);
 
     return;
 }

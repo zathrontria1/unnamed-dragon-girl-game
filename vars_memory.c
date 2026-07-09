@@ -55,8 +55,11 @@ ZP bool system_suppress_odd_transfers;
 
 // Shadow buffers
 ZP uint8_t shadow_nmitimen;
-ZP uint8_t shadow_inidisp;
-ZP int8_t shadow_inidisp_change;
+
+// Additional variables to enable the ability to smoothly alter INIDISP. 
+ZP uint8_t shadow_fblank_enable; // Valid values are 0x80 and 0x00. Will be OR'd with the highest 4 bits of the below.
+ZP int16_t shadow_brightness; // 12-bit (4+8). Must be clamped to positive values only, but otherwise has to be an int
+ZP int16_t shadow_brightness_change; // Must be signed to be able to describe a negative delta. -256/+256 is equivalent to 1 INIDISP brightness level
 
 ZP uint8_t shadow_mosaic;
 

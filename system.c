@@ -149,13 +149,15 @@ void System_DisplayStartupSplash()
 
     // Set up a fade-in. Doing this so that we can actually run the other steps
     // while the game is still setting up.
-    shadow_inidisp_change = 1;
+    
     gfx_mosaic_change = -1;
     gfx_mosaic_layers = 0x01; // BG1
     gfx_mosaic_intensity = 16; // Max intensity
     system_use_alternate_nmi = true;
 
-    shadow_inidisp = 0x00;
+    shadow_brightness_change = (64 * V_MUL);
+    shadow_brightness = 0 << 8;
+    shadow_fblank_enable = 0x00;
 
     System_EnableInterrupts();
 
@@ -173,7 +175,7 @@ void System_DisplayStartupSplash()
 
     //LevelSystem_LoadLevel(level_data_ptr); // non-VRAM hitting parts here
     
-    while (shadow_inidisp != 0x0f)
+    while (shadow_brightness < (15 << 8))
     {
         ; // Prevent execution from continuing to SPC upload while the screen isn't fully bright
     }
@@ -198,36 +200,37 @@ void System_DisplayStartupSplash()
     //SoundInterface_UploadMusicSequence((struct seq_command *)&data_seq_test_t6[0], 5); // Drum + instrument test sequence
     SoundInterface_SetMusicTempo(120);
 
-    shadow_inidisp_change = 0;
+    shadow_brightness_change = 0;
+
     gfx_mosaic_change = 0;
     system_use_alternate_nmi = false;
 
-    while (shadow_inidisp != 0x00)
+    while (shadow_brightness > 0)
     {
         while ((REG_HVBJOY & VBL_READY) != VBL_READY)
         {
             ;
         }
 
-        REG_INIDISP = shadow_inidisp;
+        REG_INIDISP = shadow_brightness >> 8;
 
         REG_MOSAIC = shadow_mosaic;
 
-        shadow_mosaic = (((0x0f - shadow_inidisp) << 4) | 0x01);
+        shadow_mosaic = (((0x0f - (shadow_brightness >> 8)) << 4) | 0x01);
 
         while ((REG_HVBJOY & VBL_READY) == VBL_READY)
         {
             ;
         }
 
-        shadow_inidisp -= 1;
+        shadow_brightness -= (64 * V_MUL);
     }
 
     shadow_mosaic = 0x00;
 
     REG_MOSAIC = shadow_mosaic;
     REG_INIDISP = 0x8f;
-    shadow_inidisp = 0;
+    shadow_brightness = 0;
     
     return;
 }

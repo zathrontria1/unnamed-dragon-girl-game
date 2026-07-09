@@ -54,9 +54,9 @@ void Loop_Fade_In()
     shadow_coldata_g = 0x00;
     shadow_coldata_b = 0x00;
 
-    shadow_inidisp += 1;
+    shadow_brightness += (64 * V_MUL);
 
-    if (shadow_inidisp >= 15)
+    if (shadow_brightness >= (15 << 8))
     {
         system_loop_func_ptr = main_GetFunctionPointer(system_target_routine);
     }
@@ -82,9 +82,14 @@ void Loop_Fade_Out()
     shadow_coldata_g = 0x00;
     shadow_coldata_b = 0x00;
 
-    shadow_inidisp -= 1;
+    shadow_brightness -= 128;
 
-    if (!shadow_inidisp)
+    if (shadow_brightness < 0)
+    {
+        shadow_brightness = 0;
+    }
+
+    if (!shadow_brightness)
     {
         system_loop_func_ptr = main_GetFunctionPointer(system_target_routine);
     }
@@ -274,9 +279,10 @@ void Loop_Game()
         if (System_CheckKey(KEY_SELECT))
         {
             // Let's try using the new alternate NMI part
-            shadow_inidisp = 0x0f;
             system_use_alternate_nmi = true;
-            shadow_inidisp_change = -1;
+
+            shadow_brightness = 15 << 8;
+            shadow_brightness_change = -(64 * V_MUL);
 
             system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_MAPDISPLAY_INIT);
             system_target_routine = ROUTINE_MAPDISPLAY_INIT;
@@ -286,15 +292,16 @@ void Loop_Game()
             system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_PAUSE);
             system_target_routine = ROUTINE_PAUSE;
 
-            shadow_inidisp = 0x08;
+            shadow_brightness = 0x08 << 8;
         }
 
         if (level_data_ptr_next != level_data_ptr)
         {
             // Switch to new level
-            shadow_inidisp = 0x0f;
             system_use_alternate_nmi = true;
-            shadow_inidisp_change = -1;
+
+            shadow_brightness = 15 << 8;
+            shadow_brightness_change = -(64 * V_MUL);
 
             level_data_ptr = level_data_ptr_next;
             system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_NEWLEVEL);
@@ -327,8 +334,8 @@ void Loop_Game_Pause()
     {
         system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_GAMELOOP);
         system_target_routine = ROUTINE_GAMELOOP;
-        
-        shadow_inidisp = 0x0f;
+
+        shadow_brightness = 15 << 8;
     }
 
     return;
@@ -373,7 +380,7 @@ void Loop_Subscreen_MapDisplay_Init()
 
     LZ4_UnpackToWRAM(level_data_ptr->map_overview_tiles_lz4, (void *)0x007f0000);
 
-    while (shadow_inidisp != 0x00)
+    while (shadow_brightness != 0x00)
     {
         ; // Prevent execution from continuing to VRAM writing parts while the display is turned on
     }
@@ -494,10 +501,10 @@ void Loop_Subscreen_MapDisplay_Init()
     System_Init_TilemapSettings(system_target_routine);
     System_Init_DisplaySettings(system_target_routine);
 
-    shadow_inidisp = 0x00;
+    shadow_brightness = 0 << 8;
+    shadow_brightness_change = 0;
 
     system_use_alternate_nmi = false;
-    shadow_inidisp_change = 0;
 
     shadow_hdmaen = 0x00;
 
@@ -567,9 +574,9 @@ void Loop_Subscreen_MapDisplay()
     // Check for *any* key
     if (System_CheckKeyAny())
     {
-        shadow_inidisp = 0x0f;
+        shadow_brightness = 15 << 8;
+        shadow_brightness_change = -(64 * V_MUL);
         system_use_alternate_nmi = true;
-        shadow_inidisp_change = -1;
 
         system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_GAMELOOP_RELOAD);
         system_target_routine = ROUTINE_GAMELOOP_RELOAD;
@@ -598,7 +605,7 @@ void Loop_Game_ReloadScene()
     bg_scroll_x = bg_scroll_x_saved;
     bg_scroll_y = bg_scroll_y_saved;
 
-    while (shadow_inidisp != 0x00)
+    while (shadow_brightness > 0)
     {
         ; // Prevent execution from continuing to VRAM writing parts while the display is turned on
     }
@@ -636,10 +643,10 @@ void Loop_Game_ReloadScene()
 
     HdmaEngine_EnableHdma(); 
 
-    shadow_inidisp = 0x00;
+    shadow_brightness = 0x00;
 
     system_use_alternate_nmi = false;
-    shadow_inidisp_change = 0;
+    shadow_brightness_change = 0;
 
     system_game_paused = false;
     
@@ -683,7 +690,7 @@ void Loop_Game_NewLevel()
     ui_in_bg2 = false;
     ui_force_update = true;
 
-    while (shadow_inidisp != 0x00)
+    while (shadow_brightness > 0)
     {
         ; // Prevent execution from continuing to VRAM writing parts while the display is turned on
     }
@@ -725,10 +732,10 @@ void Loop_Game_NewLevel()
 
     HdmaEngine_EnableHdma(); 
 
-    shadow_inidisp = 0x00;
+    shadow_brightness = 0;
 
     system_use_alternate_nmi = false;
-    shadow_inidisp_change = 0;
+    shadow_brightness_change = 0;
 
     Sram_SaveToSlot(0);
 

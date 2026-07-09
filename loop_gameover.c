@@ -34,9 +34,9 @@ void GameOver_Loop()
         {
             timer--;
 
-            if (timer <= 0xf)
+            if (timer <= (16 * V_MUL) - 1)
             {
-                shadow_inidisp = timer;
+                shadow_brightness = (timer << 8) / V_MUL;
             }
         }
 
