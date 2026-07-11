@@ -164,6 +164,22 @@ either: \n\
 Unsaved progress will\n\
 be lost.";
 
+HUGE const char STR_UI_SUBSCREEN_OPTIONS_HEADING[] = "Options";
+
+HUGE const char STR_UI_SUBSCREEN_OPTIONS_SOUND_MODE[] = "Audio mode";
+HUGE const char STR_UI_SUBSCREEN_OPTIONS_SOUND_MODE_STEREO[] = "Stereo";
+HUGE const char STR_UI_SUBSCREEN_OPTIONS_SOUND_MODE_MONO[] = "Mono";
+
+HUGE const char STR_UI_SUBSCREEN_OPTIONS_SOUND_MVOL[] = "Audio volume";
+HUGE const char STR_UI_SUBSCREEN_OPTIONS_SOUND_BGM_ENABLE[] = "Music";
+HUGE const char STR_UI_SUBSCREEN_OPTIONS_SOUND_SFX_ENABLE[] = "Sound effects";
+HUGE const char STR_UI_SUBSCREEN_OPTIONS_SOUND_VOI_ENABLE[] = "Voices";
+
+HUGE const char STR_UI_SUBSCREEN_OPTIONS_GFX_HITBLUR[] = "Hit mosaic/blur on dmg taken";
+HUGE const char STR_UI_SUBSCREEN_OPTIONS_GFX_HEATWAVE[] = "Heat wave effect";
+
+HUGE const char STR_UI_SUBSCREEN_OPTIONS_RETURN[] = "Back";
+
 HUGE const char STR_UI_SUBSCREEN_RESETCONFIRMATION[] = "\
 Unsaved progress will be lost.\n\
 Restart the game?";

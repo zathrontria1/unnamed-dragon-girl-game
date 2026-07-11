@@ -39,6 +39,7 @@ extern uint8_t subscreen_cgadsub_copy;
 extern const struct menu_item subscreen_items_toplevel[7];
 extern const struct menu_item subscreen_items_profile[5];
 extern const struct menu_item subscreen_items_help[7];
+extern const struct menu_item subscreen_items_options[9];
 extern const struct menu_item subscreen_items_resetconfirm[3];
 
 void Subscreen_Top();
@@ -56,6 +57,8 @@ void Subscreen_Upgrade_Defense();
 
 void Subscreen_Help();
 void Subscreen_Help_DrawText(bool copy_result);
+
+void Subscreen_Options();
 
 void Subscreen_ResetConfirmation();
 
