@@ -19,6 +19,7 @@
 
 #include "loop_title.h"
 
+// Placeholder; this should be filled with real code sometime soon
 void Title_Loop()
 {
 
