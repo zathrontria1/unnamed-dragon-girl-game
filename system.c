@@ -501,7 +501,7 @@ void System_WaitUntilVblank()
 
     while (system_in_vblank)
     {
-        emitWAI();
+        Asm_EmitWai();
     }  
 
     if (system_use_long_vblank)
@@ -708,7 +708,7 @@ void System_EnableInterrupts()
     shadow_nmitimen = INT_VBLENABLE | INT_JOYPAD_ENABLE;
     REG_NMITIMEN = INT_VBLENABLE | INT_JOYPAD_ENABLE;
     
-    emitCLI();
+    Asm_EmitCli();
 
     return;
 }
@@ -724,7 +724,7 @@ void System_DisableInterrupts()
     shadow_nmitimen = 0x00;
     REG_NMITIMEN = 0x00;
     
-    emitSEI();
+    Asm_EmitSei();
 
     return;
 }
@@ -743,7 +743,7 @@ void System_EnableFblankInterrupts()
     shadow_nmitimen = INT_HVIRQ_V;
     REG_NMITIMEN = INT_HVIRQ_V;
     
-    emitCLI();
+    Asm_EmitCli();
 
     return;
 }
@@ -885,19 +885,19 @@ void System_Hsync(uint16_t dot)
             "\trep #$24\n"
             );
     #else
-        emitSEI();
+        Asm_EmitSei();
         REG_HTIMELH = dot;
         register volatile uint8_t temp = REG_RDNMI;
         temp = REG_TIMEUP;
 
         REG_NMITIMEN = shadow_nmitimen | INT_HVIRQ_H;
         
-        emitWAI();
+        Asm_EmitWai();
         temp = REG_RDNMI;
         temp = REG_TIMEUP;
 
         REG_NMITIMEN = shadow_nmitimen;
-        emitCLI();
+        Asm_EmitCli();
     #endif
 
     return;

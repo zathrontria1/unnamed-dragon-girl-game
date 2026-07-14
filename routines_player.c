@@ -528,7 +528,7 @@ void Routines_Player(struct game_object * o)
                 // Initiate the soft reset handler
                 // TODO: game over?
 
-                system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_FADEOUT);
+                system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_FADEOUT);
                 system_target_routine = ROUTINE_GAMEOVER;
                 
                 shadow_brightness = 15 << 8;

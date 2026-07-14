@@ -58,7 +58,7 @@ void Loop_Fade_In()
 
     if (shadow_brightness >= (15 << 8))
     {
-        system_loop_func_ptr = main_GetFunctionPointer(system_target_routine);
+        system_loop_func_ptr = Main_GetFunctionPointer(system_target_routine);
     }
 
     return;
@@ -91,7 +91,7 @@ void Loop_Fade_Out()
 
     if (!shadow_brightness)
     {
-        system_loop_func_ptr = main_GetFunctionPointer(system_target_routine);
+        system_loop_func_ptr = Main_GetFunctionPointer(system_target_routine);
     }
 
     return;
@@ -171,7 +171,7 @@ void Loop_Game_Messagebox()
                 
                 system_game_paused = false;
 
-                system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_GAMELOOP);
+                system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_GAMELOOP);
                 system_target_routine = ROUTINE_GAMELOOP;
             }
             else if (!vwf_print_finished)
@@ -231,7 +231,7 @@ void Loop_Game()
 
         event_tutorial_shown = true;
 
-        system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_MSGBOX);
+        system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_MSGBOX);
         system_target_routine = ROUTINE_MSGBOX;
 
         return;
@@ -245,7 +245,7 @@ void Loop_Game()
 
         subscreen_rendered = 0; // Clear subscreen state so it re-renders
 
-        system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_SUBSCREEN);
+        system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_SUBSCREEN);
         system_target_routine = ROUTINE_SUBSCREEN;
 
         return;
@@ -284,12 +284,12 @@ void Loop_Game()
             shadow_brightness = 15 << 8;
             shadow_brightness_change = -(64 * V_MUL);
 
-            system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_MAPDISPLAY_INIT);
+            system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_MAPDISPLAY_INIT);
             system_target_routine = ROUTINE_MAPDISPLAY_INIT;
         }
         else if (System_CheckKey(KEY_START))
         {
-            system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_PAUSE);
+            system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_PAUSE);
             system_target_routine = ROUTINE_PAUSE;
 
             shadow_brightness = 0x08 << 8;
@@ -304,7 +304,7 @@ void Loop_Game()
             shadow_brightness_change = -(64 * V_MUL);
 
             level_data_ptr = level_data_ptr_next;
-            system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_NEWLEVEL);
+            system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_NEWLEVEL);
             system_target_routine = ROUTINE_NEWLEVEL;
 
             return;
@@ -332,7 +332,7 @@ void Loop_Game_Pause()
     
     if (System_CheckKey(KEY_START))
     {
-        system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_GAMELOOP);
+        system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_GAMELOOP);
         system_target_routine = ROUTINE_GAMELOOP;
 
         shadow_brightness = 15 << 8;
@@ -496,7 +496,7 @@ void Loop_Subscreen_MapDisplay_Init()
 
     system_target_routine = ROUTINE_MAPDISPLAY;
 
-    system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_FADEIN);
+    system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_FADEIN);
     
     System_Init_TilemapSettings(system_target_routine);
     System_Init_DisplaySettings(system_target_routine);
@@ -578,7 +578,7 @@ void Loop_Subscreen_MapDisplay()
         shadow_brightness_change = -(64 * V_MUL);
         system_use_alternate_nmi = true;
 
-        system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_GAMELOOP_RELOAD);
+        system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_GAMELOOP_RELOAD);
         system_target_routine = ROUTINE_GAMELOOP_RELOAD;
     }
 
@@ -625,7 +625,7 @@ void Loop_Game_ReloadScene()
     // Re-copy the animated background tiles
     AniSystem_BgTile_Setup((uint8_t *)&data_bg_dungeon_anim_water_lz4, (uint8_t *)&data_bg_dungeon_anim_torch_lz4);
 
-    system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_FADEIN);
+    system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_FADEIN);
     system_target_routine = ROUTINE_GAMELOOP;
 
     System_Init_TilemapSettings(system_target_routine);
@@ -713,7 +713,7 @@ void Loop_Game_NewLevel()
     
     MapSystem_Tilemap_RegenerateTilemap();
 
-    system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_FADEIN);
+    system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_FADEIN);
     system_target_routine = ROUTINE_GAMELOOP;
 
     System_Init_TilemapSettings(system_target_routine);

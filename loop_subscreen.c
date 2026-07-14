@@ -169,7 +169,7 @@ void Subscreen_Top()
 
                 system_use_alternate_nmi = true;
 
-                system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_MAPDISPLAY_INIT);
+                system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_MAPDISPLAY_INIT);
                 system_target_routine = ROUTINE_MAPDISPLAY_INIT;
 
                 // Restore CGADSUB
@@ -219,7 +219,7 @@ void Subscreen_Top()
 
             ui_in_subscreen = false;
 
-            system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_GAMELOOP);
+            system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_GAMELOOP);
             system_target_routine = ROUTINE_GAMELOOP;
         }
     }
@@ -353,7 +353,7 @@ void Subscreen_Upgrade()
             subscreen_rendered = 0;
             // Exiting the profile subscreen.
 
-            system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_SUBSCREEN);
+            system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_SUBSCREEN);
             system_target_routine = ROUTINE_SUBSCREEN;
         }
     }
@@ -642,7 +642,7 @@ void Subscreen_Help()
             subscreen_rendered = 0;
             // Exiting the help subscreen.
 
-            system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_SUBSCREEN);
+            system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_SUBSCREEN);
             system_target_routine = ROUTINE_SUBSCREEN;
         }
     }
@@ -771,7 +771,7 @@ void Subscreen_Options()
             subscreen_rendered = 0;
             // Exiting the options subscreen.
 
-            system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_SUBSCREEN);
+            system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_SUBSCREEN);
             system_target_routine = ROUTINE_SUBSCREEN;
         }
     }
@@ -883,7 +883,7 @@ void Subscreen_ResetConfirmation()
             subscreen_rendered = 0;
             // Exiting the confirmation subscreen.
 
-            system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_SUBSCREEN);
+            system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_SUBSCREEN);
             system_target_routine = ROUTINE_SUBSCREEN;
         }
     }

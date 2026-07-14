@@ -168,7 +168,7 @@ void Cs_Loop()
 
             SoundInterface_PlayMusic(); 
 
-            system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_FADEIN);
+            system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_FADEIN);
             system_target_routine = ROUTINE_GAMELOOP;
 
             System_Init_TilemapSettings(system_target_routine);
@@ -260,7 +260,7 @@ void Cs_StartCutscene()
         shadow_hdmaen = 0x00;
         system_suppress_odd_transfers = true;
 
-        system_loop_func_ptr = main_GetFunctionPointer(system_current_routine);
+        system_loop_func_ptr = Main_GetFunctionPointer(system_current_routine);
 
         System_EnableFblankInterrupts();
     }
@@ -278,7 +278,7 @@ void Cs_StartCutscene()
         shadow_hdmaen = 0x00;
         system_suppress_odd_transfers = true;
 
-        system_loop_func_ptr = main_GetFunctionPointer(system_current_routine);
+        system_loop_func_ptr = Main_GetFunctionPointer(system_current_routine);
 
         // Check if we're at an idle state. If not, last frame likely was copies and we're pushed down in active display, so defer it
         if (cs_preload_subsection >= 4)

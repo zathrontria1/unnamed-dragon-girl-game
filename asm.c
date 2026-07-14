@@ -6,7 +6,7 @@
 
 // assembly for instructions that can't be directly specified in C
 // Always use the compiler defines, not whether inline ASM is enabled
-void emitWAI(void) {
+void Asm_EmitWai(void) {
 #ifdef __VBCC__
     __asm("\twai\n");
 #endif
@@ -16,7 +16,7 @@ void emitWAI(void) {
 #endif
 }
 
-void emitSEI(void) {
+void Asm_EmitSei(void) {
 #ifdef __VBCC__
     __asm("\tsei\n");
 #endif
@@ -26,7 +26,7 @@ void emitSEI(void) {
 #endif
 }
 
-void emitCLI(void) {
+void Asm_EmitCli(void) {
 #ifdef __VBCC__
     __asm("\tcli\n");
 #endif

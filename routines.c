@@ -162,7 +162,7 @@ void Routines_Interactable_Sign(struct game_object * o)
                     DmaSystem_AddItemToQueue((uint8_t *)(LZ4_BUFFER_ADDR+0x8000), 0x4400, 16, VRAM_INCHIGH, 0);
                     DmaSystem_AddItemToQueue((uint8_t *)(LZ4_BUFFER_ADDR+0x8800), TILEMAP_ADDR_GAME_UI_2BPP+((UI_MSGBOX_ML_START + 1) << 5), 256, VRAM_INCHIGH, 0);
                     
-                    system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_MSGBOX);
+                    system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_MSGBOX);
                     //system_current_routine = ROUTINE_MSGBOX;
                     system_target_routine = ROUTINE_MSGBOX;
 

@@ -60,7 +60,7 @@ int main()
 
     System_DisplayStartupSplash(); // A good amount of init is here.
     
-    system_loop_func_ptr = main_GetFunctionPointer(ROUTINE_CUTSCENE_INIT);
+    system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_CUTSCENE_INIT);
     //system_target_routine = ROUTINE_GAMELOOP;
 
     // WIP: attempt to integrate the cutscene engine
@@ -88,7 +88,7 @@ int main()
     return 0;
 }
 
-void * main_GetFunctionPointer(uint16_t routine)
+void * Main_GetFunctionPointer(uint16_t routine)
 {
     system_current_routine = routine; // Also set this for code that don't want to read function pointers
 
@@ -140,7 +140,7 @@ void * main_GetFunctionPointer(uint16_t routine)
             return (void *)&GameOver_Loop;
             break;
         case ROUTINE_RESET: // Special cased to immediately reset
-            return (void *)&main_Reset;
+            return (void *)&Main_Reset;
             break;
     }
 
@@ -150,7 +150,7 @@ void * main_GetFunctionPointer(uint16_t routine)
 /*
     Call to soft reset.
 */
-void main_Reset()
+void Main_Reset()
 {
     SoundInterface_ResetAPU();
     System_Reset();
