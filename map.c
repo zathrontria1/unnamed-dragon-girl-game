@@ -564,8 +564,7 @@ bool MapSystem_Tilemap_BuildColumn(const uint8_t * p, const uint16_t * lut, int1
     bool temp_section = ((((tile_x + 16) >> 4) - 1 )& 0x0001); // Offset it by 16 so that the values are always positive, then shift right by 4 and take just the lowest bit.
     
     // values here pertain to the buffer
-    uint16_t j = ((tile_y + 16) & 0x0f); // the offset on Y axis
-    uint16_t k = ((tile_x + 16) & 0x0f); // the offset on X axis
+    uint16_t j = ((tile_y + 16) & 0x0f) << 1; // the offset on Y axis
 
     uint16_t temp_screen_x;
     uint16_t temp_screen_y;
@@ -599,46 +598,58 @@ bool MapSystem_Tilemap_BuildColumn(const uint8_t * p, const uint16_t * lut, int1
 
     p += temp_screen_offset + temp_start_x + ((temp_start_y) << 4);
 
-    for (int i = 0; i < 16; i++)
+    // Make sure X is valid
+    if ((tile_x < 0) || (tile_x >= map_extent_tiles_x))
     {
-        if ((tile_x < 0) || (tile_y < 0) || (tile_x >= map_extent_tiles_x) || (tile_y >= map_extent_tiles_y))
+        // X is out of range. Fill the entire column with 0s.
+        for (int i = 0; i < 32; i++)
         {
-            int16_t l = j << 1;
-            // Out of range tile
-            map_column[l] = 0;
-            map_column[l+1] = 0;
-
-            // Do not increment pointer
+            map_column[i] = 0;
         }
-        else
+    }
+    else
+    {
+        // X is in range.
+        for (int i = 0; i < 16; i++)
         {
-            int16_t l = j << 1;
-            int16_t q = (*p) << 2;
-            if (!odd)
+            if ((tile_y < 0) || (tile_y >= map_extent_tiles_y))
             {
-                map_column[l] = lut[q];
-                map_column[l+1] = lut[q+2];
+                // Y is out of range.
+                map_column[j] = 0;
+                map_column[j+1] = 0;
+
+                // Do not increment pointer
             }
             else
             {
-                map_column[l] = lut[q+1];
-                map_column[l+1] = lut[q+3];
+                // Y is in range.
+                int16_t q = (*p) << 2;
+                if (!odd)
+                {
+                    map_column[j] = lut[q];
+                    map_column[j+1] = lut[q+2];
+                }
+                else
+                {
+                    map_column[j] = lut[q+1];
+                    map_column[j+1] = lut[q+3];
+                }
+
+                p += 16; // Next row in source data
             }
 
-            p += 16; // Next row in source data
-        }
+            tile_y++; // next row in absolute tile count
+            if (((tile_y & 0x0f) == 0) && (tile_y > 0))
+            {
+                // A screen edge has been exceeded
+                p += ((((map_extent_x >> 8) - 1) << 8));
+            }
 
-        tile_y++; // next row in absolute tile count
-        if (((tile_y & 0x0f) == 0) && (tile_y > 0))
-        {
-            // A screen edge has been exceeded
-            p += ((((map_extent_x >> 8) - 1) << 8));
-        }
-
-        j++; // Next row in Y offset within the tilemap
-        if (j >= 16)
-        {
-            j = 0;
+            j += 2; // Next row in Y offset within the tilemap
+            if (j >= 32)
+            {
+                j = 0;
+            }
         }
     }
 
@@ -653,12 +664,11 @@ void MapSystem_Tilemap_BuildRow(const uint8_t * p, const uint16_t * lut, int16_t
     uint16_t temp_section = ((((tile_x + 16) >> 4) - 1 )& 0x0001); // Offset it by 16 so that the values are always positive, then shift right by 4 and take just the lowest bit.
     
     // if -7, 15...
-    uint16_t j = (tile_y + 16) & 0x0f; // the offset on Y axis
     uint16_t k = (tile_x + 32) & 0x1f; // the offset on X axis
 
     uint16_t temp_internal_section = k >> 4;
     
-    uint16_t l = k & 0xf; // Use this for writing the tilemap entries, which are only realistically 16 wide
+    uint16_t l = (k & 0xf) << 1; // Use this for writing the tilemap entries, which are only realistically 16 wide
 
     uint16_t temp_screen_x;
     uint16_t temp_screen_y;
@@ -691,50 +701,60 @@ void MapSystem_Tilemap_BuildRow(const uint8_t * p, const uint16_t * lut, int16_t
 
     p += temp_screen_offset + temp_start_x + (temp_start_y << 4);
 
-    for (int i = 0; i < 32; i++) // Two effective rows, L and R.
+    if ((tile_y < 0) || (tile_y >= map_extent_tiles_y))
     {
-        int16_t m = l << 1;
-        if ((tile_x < 0) || (tile_y < 0) || (tile_x >= map_extent_tiles_x) || (tile_y >= map_extent_tiles_y))
+        // Y is out of range, so both rows can be filled with 0s.
+        for (int i = 0; i < 32; i++)
         {
-            
-            // Out of range tile
-            map_row[temp_internal_section][m] = 0;
-            map_row[temp_internal_section][m+1] = 0;
-            // Do not increment pointer
+            map_row[0][i] = 0;
+            map_row[1][i] = 0;
         }
-        else
+    }
+    else
+    {
+        for (int i = 0; i < 32; i++) // Two effective rows, L and R.
         {
-            // Note: for row building:
-            // [0][i] is for the left 2 rows
-            // [1][i] is for the right 2 rows.
-            // Change the map selection after crossing a boundary.
-            if (!odd)
+            if ((tile_x < 0) || (tile_x >= map_extent_tiles_x))
             {
-                map_row[temp_internal_section][(l << 1)] = lut[((*p) << 2)]; // Top left
-                map_row[temp_internal_section][(l << 1)+1] = lut[((*p) << 2) + 1]; // Top right
+                // Out of range tile
+                map_row[temp_internal_section][l] = 0;
+                map_row[temp_internal_section][l+1] = 0;
+                // Do not increment pointer
             }
             else
             {
-                map_row[temp_internal_section][(l << 1)] = lut[((*p) << 2) + 2]; // Bottom left
-                map_row[temp_internal_section][(l << 1)+1] = lut[((*p) << 2) + 3]; // Bottom right
+                // Note: for row building:
+                // [0][i] is for the left 2 rows
+                // [1][i] is for the right 2 rows.
+                // Change the map selection after crossing a boundary.
+                if (!odd)
+                {
+                    map_row[temp_internal_section][l] = lut[((*p) << 2)]; // Top left
+                    map_row[temp_internal_section][l+1] = lut[((*p) << 2) + 1]; // Top right
+                }
+                else
+                {
+                    map_row[temp_internal_section][l] = lut[((*p) << 2) + 2]; // Bottom left
+                    map_row[temp_internal_section][l+1] = lut[((*p) << 2) + 3]; // Bottom right
+                }
+                p++; // Next column in source data
             }
-            p++; // Next column in source data
-        }
 
-        tile_x++; // next column in absolute tile count
-        if (((tile_x & 0x0f) == 0) && (tile_x > 0))
-        {
-            // A screen edge has been exceeded
-            p += 240;
-        }
+            tile_x++; // next column in absolute tile count
+            if (((tile_x & 0x0f) == 0) && (tile_x > 0))
+            {
+                // A screen edge has been exceeded
+                p += 240;
+            }
 
-        l++; // Next row in X offset within the tilemap row builder
-        if (l >= 16)
-        {
-            l = 0;
-            temp_internal_section ^= 0x0001;
+            l += 2; // Next row in X offset within the tilemap row builder
+            if (l >= 32)
+            {
+                l = 0;
+                temp_internal_section ^= 0x0001;
+            }
+            
         }
-        
     }
 
     return;
