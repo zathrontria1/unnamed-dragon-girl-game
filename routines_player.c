@@ -464,7 +464,7 @@ void Routines_Player(struct game_object * o)
 
                         // Also trigger the mosaic
                         gfx_mosaic_change = -1;
-                        gfx_mosaic_intensity = 4;
+                        gfx_mosaic_intensity = 0x0400;
                         gfx_mosaic_layers = 0x02;
                     }
 

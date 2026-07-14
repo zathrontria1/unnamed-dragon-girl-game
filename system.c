@@ -152,7 +152,7 @@ void System_DisplayStartupSplash()
     
     gfx_mosaic_change = -1;
     gfx_mosaic_layers = 0x01; // BG1
-    gfx_mosaic_intensity = 16; // Max intensity
+    gfx_mosaic_intensity = 0x0f00; // Max intensity
     system_use_alternate_nmi = true;
 
     shadow_brightness_change = (64 * V_MUL);

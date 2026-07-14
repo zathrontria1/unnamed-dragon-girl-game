@@ -35,7 +35,7 @@ void Gfx_ProcessMosaic()
 {
     if (gfx_mosaic_change != 0)
     {
-        gfx_mosaic_intensity += gfx_mosaic_change;
+        gfx_mosaic_intensity += (gfx_mosaic_change << 8);
 
         if (gfx_mosaic_intensity < 0)
         {
@@ -46,9 +46,9 @@ void Gfx_ProcessMosaic()
                 gfx_mosaic_change = 0;
             }
         }
-        else if (gfx_mosaic_intensity > 16)
+        else if (gfx_mosaic_intensity > 0x0f00)
         {
-            gfx_mosaic_intensity = 16;
+            gfx_mosaic_intensity = 0x0f00;
 
             if (gfx_mosaic_change > 0)
             {
@@ -64,7 +64,9 @@ void Gfx_ProcessMosaic()
     }
     else
     {
-        shadow_mosaic = (gfx_mosaic_layers | ((gfx_mosaic_intensity - 1) << 4));
+        // Don't forget to -1 since hardware values 0-15 correspond to actual values 1-16. To achieve "mosaic off", disable all enabled layers instead.
+        uint8_t mosaic_intensity = ((gfx_mosaic_intensity >> 8) & 0x0f) - 1;
+        shadow_mosaic = (gfx_mosaic_layers & 0x0f) | (mosaic_intensity << 4);
     }
 
     return;
