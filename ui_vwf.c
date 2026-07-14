@@ -31,6 +31,7 @@ uint16_t vwf_tilemap_len;
 uint8_t * vwf_tiledata_ptr;
 uint8_t * vwf_tiledata_ptr_start;
 bool vwf_text_rendered;
+bool vwf_text_prev_is_newline;
 
 uint16_t vwf_wram_offset;
 uint16_t vwf_vram_offset;
@@ -144,6 +145,8 @@ uint8_t * VwfEngine_PrintText_Gradual(int len)
             {
                 VwfEngine_PrintText_Internal_AlignPointers();
 
+                vwf_text_prev_is_newline = true;
+
                 vwf_row++;
                 
                 continue;
@@ -170,6 +173,8 @@ uint8_t * VwfEngine_PrintText_Gradual(int len)
                 vwf_tiledata_ptr += 16;
             }
             
+            vwf_text_prev_is_newline = false;
+
             if (vwf_row >= 28)
             {
                 break;
@@ -291,11 +296,12 @@ void VwfEngine_PrintText_Internal_AlignPointers()
     vwf_shift = 0;
     vwf_string_ptr++;
 
-    if (vwf_text_rendered)
+    if (vwf_text_rendered && !vwf_text_prev_is_newline)
     {
         vwf_run_width++;
         vwf_advance_width++;
         vwf_tile_id++;
+
         vwf_tiledata_ptr += 16;
     }
 

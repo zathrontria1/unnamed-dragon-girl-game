@@ -29,6 +29,7 @@ extern uint16_t vwf_wram_offset;
 extern uint16_t vwf_vram_offset;
 
 extern bool vwf_text_rendered;
+extern bool vwf_text_prev_is_newline;
 
 extern bool vwf_print_ongoing;
 extern bool vwf_print_finished;
