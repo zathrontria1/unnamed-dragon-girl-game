@@ -80,6 +80,9 @@ maps/*.py
 *.tsx
 *.tiled*
 
+# AI customization files
+AGENTS.md
+
 # non-finalized sound data
 sound/abigassbundleofsamples/*
 *.wav

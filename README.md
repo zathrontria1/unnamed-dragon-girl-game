@@ -8,6 +8,8 @@ Game features are otherwise not yet set in stone.
 
 **Don't expect too much quality in either code or assets as I'm still figuring out how things work for the most part.**
 
+*Disclaimer: Some of the C code may be AI-assisted where appropriate as I'm also exploring whether it can help or not.*
+
 ## Technical
 - Built targetting NTSC systems, which should cover the majority of owned hardware as well as all modern emulation purposes
 - The game functions on PAL systems too, but is not speed, display, nor audio optimized
