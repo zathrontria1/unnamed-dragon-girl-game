@@ -504,7 +504,7 @@ void System_WaitUntilVblank()
         emitWAI();
     }  
 
-    if (system_fblank_enabled)
+    if (system_use_long_vblank)
     {
         System_GetInput_Manual();
     }
@@ -699,7 +699,7 @@ uint16_t System_CheckKeyHeld(enum KEYPAD_BITS k)
 
 void System_EnableInterrupts()
 {
-    system_fblank_enabled = false;
+    system_use_long_vblank = false;
 
     // Set up interrupts
     register volatile uint8_t temp1 = REG_RDNMI;
@@ -715,7 +715,7 @@ void System_EnableInterrupts()
 
 void System_DisableInterrupts()
 {
-    system_fblank_enabled = false;
+    system_use_long_vblank = false;
 
     // Set up interrupts
     register volatile uint8_t temp1 = REG_RDNMI;
@@ -731,7 +731,7 @@ void System_DisableInterrupts()
 
 void System_EnableFblankInterrupts()
 {
-    system_fblank_enabled = true;
+    system_use_long_vblank = true;
 
     // Set up interrupts
     register volatile uint8_t temp1 = REG_RDNMI;
@@ -918,7 +918,7 @@ void System_CheckForActiveDisplayEnd()
             "\tsta r0\n"
             "\tbit $213d\n" // We don't really need to check the entire thing, just the low byte. So just read this to make sure both values are read.
 
-            "\tlda _system_fblank_enabled\n"
+            "\tlda _system_use_long_vblank\n"
             "\tbeq .normal\n" 
 
             "\tlda r0\n"
@@ -965,7 +965,7 @@ void System_CheckForActiveDisplayEnd()
 
         uint16_t target_line = 224; // Last line of active display
 
-        if (system_fblank_enabled)
+        if (system_use_long_vblank)
         {
             target_line = 208;
         }

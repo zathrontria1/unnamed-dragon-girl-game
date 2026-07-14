@@ -543,7 +543,7 @@ uint16_t DmaSystem_AddItemToQueue(
         return 1; // exceeds current max queue count
     }
     
-    if (system_fblank_enabled)
+    if (system_use_long_vblank)
     {
         if (temp_length > DMA_QUEUE_MAX_LENGTH_FBE)
         {

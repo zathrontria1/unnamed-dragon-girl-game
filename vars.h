@@ -30,7 +30,7 @@ extern bool system_dont_count_lag; // set to 1 to not increment the lag counter 
 extern ZP uint16_t system_nmis_counted;
 extern ZP bool system_use_alternate_nmi;
 
-extern ZP bool system_fblank_enabled;
+extern ZP bool system_use_long_vblank;
 
 extern ZP bool system_game_paused;
 

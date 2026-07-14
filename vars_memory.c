@@ -45,7 +45,7 @@ bool system_dont_count_lag; // set to 1 to not increment the lag counter during 
 ZP uint16_t system_nmis_counted;
 ZP bool system_use_alternate_nmi;
 
-ZP bool system_fblank_enabled;
+ZP bool system_use_long_vblank;
 
 ZP bool system_game_paused;
 
