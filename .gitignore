@@ -80,9 +80,12 @@ maps/*.py
 *.tsx
 *.tiled*
 
-# AI customization files
+# AI customisation files
 AGENTS.md
 instructions.md
+
+# AI planning files
+plan-*.md
 
 # non-finalized sound data
 sound/abigassbundleofsamples/*
