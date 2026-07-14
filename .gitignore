@@ -82,6 +82,7 @@ maps/*.py
 
 # AI customization files
 AGENTS.md
+instructions.md
 
 # non-finalized sound data
 sound/abigassbundleofsamples/*
