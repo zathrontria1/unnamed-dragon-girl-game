@@ -328,9 +328,9 @@ void HdmaEngine_UpdateColdataValues()
     {
         for (int i = 31; i >= 0; i--)
         {
-            hdma_coldata_data[hdma_coldata_select][i][0] = 0; // Make all entries no-ops
-            hdma_coldata_data[hdma_coldata_select][i][1] = 0;
-            hdma_coldata_data[hdma_coldata_select][i][2] = 0;
+            hdma_coldata_data[temp_table_to_write][i][0] = 0; // Make all entries no-ops
+            hdma_coldata_data[temp_table_to_write][i][1] = 0;
+            hdma_coldata_data[temp_table_to_write][i][2] = 0;
         }
     }
     else
@@ -347,9 +347,9 @@ void HdmaEngine_UpdateColdataValues()
 
         for (int i = 31; i >= 0; i--)
         {
-            hdma_coldata_data[hdma_coldata_select][i][0] = r;
-            hdma_coldata_data[hdma_coldata_select][i][1] = g;
-            hdma_coldata_data[hdma_coldata_select][i][2] = b;
+            hdma_coldata_data[temp_table_to_write][i][0] = r;
+            hdma_coldata_data[temp_table_to_write][i][1] = g;
+            hdma_coldata_data[temp_table_to_write][i][2] = b;
 
             r += r_add;
             g += g_add;
