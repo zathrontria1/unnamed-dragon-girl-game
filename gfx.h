@@ -10,6 +10,6 @@ extern int16_t gfx_cmath_b;
 
 void Gfx_ProcessMosaic();
 void Gfx_ProcessColorMath();
-void Gfx_SetColorMath(int16_t r, int16_t g, int16_t b);
+void Gfx_SetColorMath(int16_t r, int16_t g, int16_t b, bool gradient);
 
 void Gfx_EmitSmoke(struct game_object * o, int offset);

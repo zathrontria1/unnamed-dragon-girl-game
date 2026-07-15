@@ -133,7 +133,7 @@ void ObjectSystem_ProcessObjects()
 
     if (obj_player_active_fireballs > 0)
     {
-        Gfx_SetColorMath(obj_player_active_fireballs,0,0);
+        Gfx_SetColorMath(obj_player_active_fireballs,0,0, true);
         gfx_cmath_change = -64 * V_MUL;
         shadow_cgwsub = 0x00;
         shadow_cgadsub = 0x32;

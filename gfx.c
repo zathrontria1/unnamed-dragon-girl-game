@@ -8,6 +8,7 @@
 #include "gfx.h"
 #include "obj.h"
 #include "map.h"
+#include "hdma.h"
 
 #include "math_int.h"
 
@@ -110,6 +111,8 @@ void Gfx_ProcessColorMath()
         shadow_coldata_r = 0x20;
         shadow_coldata_g = 0x40;
         shadow_coldata_b = 0x80;
+
+        hdma_coldata_usegradient = false;
     }
     else
     {
@@ -121,11 +124,13 @@ void Gfx_ProcessColorMath()
     return;
 }
 
-void Gfx_SetColorMath(int16_t r, int16_t g, int16_t b)
+void Gfx_SetColorMath(int16_t r, int16_t g, int16_t b, bool gradient)
 {
     gfx_cmath_r = r << 8;
     gfx_cmath_g = g << 8;
     gfx_cmath_b = b << 8;
+
+    hdma_coldata_usegradient = gradient;
 
     return;
 }

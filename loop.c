@@ -315,6 +315,7 @@ void Loop_Game()
     Gfx_ProcessColorMath();
 
     HdmaEngine_UpdateBgScrollValues();
+    HdmaEngine_UpdateColdataValues();
     
     return;
 }

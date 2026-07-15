@@ -42,6 +42,7 @@
 
         // Repoint the HDMA table
         REG_A1T3LH = hdma_scroll_ptr;
+        REG_A1T4LH = hdma_coldata_ptr;
         
         DmaSystem_UploadOam();
         DmaSystem_UploadCgram();

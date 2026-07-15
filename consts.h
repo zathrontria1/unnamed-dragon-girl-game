@@ -249,12 +249,13 @@
     1: Palette (CGADD+CGDATA)
     2: Palette (CGADD+CGDATA)
     3: Background Scroll (BG2HOFS)
+    4: Colour Math (COLDATA)
 
     6: Message box sprite enable/disable (TM)
     7: RESERVED for Vblank Odd Frame DMAs
 */
-#define HDMA_USED_CHANNELS_NORMAL 0x0a
-#define HDMA_USED_CHANNELS_MSGBOX 0x4e
+#define HDMA_USED_CHANNELS_NORMAL 0x1a
+#define HDMA_USED_CHANNELS_MSGBOX 0x5e
 #define HDMA_USED_CHANNELS_SUBSCREEN 0x0e
 //#define HDMA_USED_CHANNELS 0xfe // All channels except channel 0
 

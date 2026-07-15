@@ -9,6 +9,7 @@
 
 #include "map.h"
 #include "hdma.h"
+#include "gfx.h"
 
 #include "ui.h"
 
@@ -19,16 +20,23 @@ struct hdma_indirect_table_entry hdma_windowbackground_tables[2][4];
 uint16_t hdma_windowbackground_data[2][SCREEN_HEIGHT << 1];
 uint16_t hdma_windowbackground_select;
 
-uint16_t hdma_scroll_data[2][32];
-uint16_t hdma_scroll_select;
-ZP uint16_t hdma_scroll_ptr;
-uint16_t hdma_scroll_sine_index;
-
 ZP uint16_t hdma_use_gradient;
 ZP uint16_t hdma_gradient_ptr;
 
 // Scroll tables for v-scroll
 struct hdma_indirect_table_entry hdma_scroll_tables[2][8];
+uint16_t hdma_scroll_data[2][32];
+
+uint16_t hdma_scroll_select;
+ZP uint16_t hdma_scroll_ptr;
+uint16_t hdma_scroll_sine_index;
+
+bool hdma_coldata_usegradient; // If set, does the more complicated colour math version
+struct hdma_indirect_table_entry hdma_coldata_tables[2][225];
+uint16_t hdma_coldata_data[2][32][4]; // Deliberately use 2 bytes; highest 8 bits relevant
+
+uint16_t hdma_coldata_select;
+ZP uint16_t hdma_coldata_ptr;
 
 /*
     Setup all HDMA and their tables
@@ -39,9 +47,13 @@ void HdmaEngine_SetupHdma()
 
     HdmaEngine_SetupPaletteHdma();
     HdmaEngine_SetupBgScrollHdma();
+    HdmaEngine_SetupColdataHdma();
+
     HdmaEngine_UpdateBgScrollValues();
     HdmaEngine_UpdateBgScrollValues(); // Yes, run this twice, so both tables are populated
 
+    HdmaEngine_UpdateColdataValues();
+    HdmaEngine_UpdateColdataValues(); // Same as above
     return;
 }
 
@@ -143,6 +155,72 @@ void HdmaEngine_SetupBgScrollHdma()
 }
 
 /*
+    Colour math data HDMA
+
+    3.5 lines means 3 followed by 3 + 1 gap
+*/
+void HdmaEngine_SetupColdataHdma()
+{
+    REG_DMAP4 = 0x40;  // COLDATA - Indirect, pattern 1
+
+    REG_BBAD4 = (uint8_t)((uint32_t)&REG_COLDATA); // One register
+
+    REG_A1T4LH = (uint16_t)((uint32_t)&hdma_coldata_tables[0]);
+
+    REG_A1B4 = (uint8_t)((uint32_t)&hdma_coldata_tables[0] >> 16);
+
+    REG_DAS4LH = (uint16_t)((uint32_t)&hdma_coldata_data[0]);
+
+    REG_DASB4 = (uint8_t)((uint32_t)&hdma_coldata_data[0] >> 16);
+
+    // The indirect table is 64 entries large.
+    // Set up the tables so that the max intensity is the first entry (last data)
+    // and go backwards, then mirror it.
+
+    for (int i = 0; i < 2; i++) // For each array...
+    {
+        int line_counter = 0;
+        for (int j = 0; j < 32; j++) // For 32 groups of 7 lines...
+        {
+            for (int k = 0; k < 2; k++) // Even/odd...
+            {
+                for (int l = 0; l < 3; l++) // Each colour channel
+                {
+                    if ((!l) && (k)) // Insert a gap
+                    {
+                        hdma_coldata_tables[i][line_counter].count = 2;
+                    }
+                    else
+                    {
+                        hdma_coldata_tables[i][line_counter].count = 1;
+                    }
+
+                    // Then write the channel addresses
+                    if (j < 16) // low 16
+                    {
+                        hdma_coldata_tables[i][line_counter].addr = (uint16_t)((uint32_t)&hdma_coldata_data[i][(j << 1) + k][l] + 1);
+                    }
+                    else // high 16; write in reverse
+                    {
+                        // Make sense of the value here...
+                        int index_inverse = (31 - j) << 1;
+                        int odd_even_inverse = k ^ 0x01;
+                        hdma_coldata_tables[i][line_counter].addr = (uint16_t)((uint32_t)&hdma_coldata_data[i][index_inverse + odd_even_inverse][l] + 1);
+                    }
+
+                    line_counter++;
+                }
+            }
+        }
+
+        // Set the last byte as a terminator
+        hdma_coldata_tables[i][line_counter].count = 0;
+    }
+
+    return;
+}
+
+/*
     Call to update background scroll values for the HDMA table.
     The table values are double-buffered, so also do a table pointer flip here.
 */
@@ -235,6 +313,52 @@ void HdmaEngine_UpdateBgScrollValues()
     {
         hdma_scroll_sine_index -= 32;
     }
+
+    return;
+}
+
+/*
+    Colour math data is similar.
+*/
+void HdmaEngine_UpdateColdataValues()
+{
+    uint16_t temp_table_to_write = (hdma_coldata_select + 1) & 0x01;
+
+    if (!hdma_coldata_usegradient) // Gradient mode disabled
+    {
+        for (int i = 31; i >= 0; i--)
+        {
+            hdma_coldata_data[hdma_coldata_select][i][0] = 0; // Make all entries no-ops
+            hdma_coldata_data[hdma_coldata_select][i][1] = 0;
+            hdma_coldata_data[hdma_coldata_select][i][2] = 0;
+        }
+    }
+    else
+    {
+        // Split out the coldata values... and divide them by 32
+        uint16_t r_add = gfx_cmath_r >> 5;
+        uint16_t g_add = gfx_cmath_g >> 5;
+        uint16_t b_add = gfx_cmath_b >> 5;
+
+        // It's a fade going from value of 0 all the way to max saturation
+        uint16_t r = 0x2000;
+        uint16_t g = 0x4000;
+        uint16_t b = 0x8000;
+
+        for (int i = 31; i >= 0; i--)
+        {
+            hdma_coldata_data[hdma_coldata_select][i][0] = r;
+            hdma_coldata_data[hdma_coldata_select][i][1] = g;
+            hdma_coldata_data[hdma_coldata_select][i][2] = b;
+
+            r += r_add;
+            g += g_add;
+            b += b_add;
+        }
+    }
+
+    hdma_coldata_select = temp_table_to_write;
+    hdma_coldata_ptr = (uint16_t)((uint32_t)&hdma_coldata_tables[hdma_coldata_select]);
 
     return;
 }
