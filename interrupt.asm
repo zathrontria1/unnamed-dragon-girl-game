@@ -212,6 +212,27 @@ l11:
 	pla
 
 	rti
+
+; stacksize=0+??
+;vcprmin=10000
+	section	"DONTMERGE_text.near.__irq_brk.0","acrx"
+	a16
+	x16
+	global	___irq_brk
+___irq_brk:
+	jml _System_CrashHandler
+	;rti ; unreachable
+
+; stacksize=0+??
+;vcprmin=10000
+	section	"DONTMERGE_text.near.__irq_cop.0","acrx"
+	a16
+	x16
+	global	___irq_cop
+___irq_cop:
+	jml _System_CrashHandler
+	;rti ; unreachable
+
 ; stacksize=0+??
 	global	_system_use_alternate_nmi
 	zpage	_system_use_alternate_nmi
@@ -221,6 +242,7 @@ l11:
 	global	_Nmi_Primary
 	global	_Nmi_Alternate
 	global	_Nmi_Cutscene
+	global  _System_CrashHandler
 	zpage	r0
 	zpage	r1
 	zpage	r2

@@ -87,3 +87,6 @@ uint16_t event_in_combat;
 uint16_t event_in_combat_shadow;
 
 uint16_t event_tutorial_shown;
+
+// Scratch area used by crash handler.
+uint8_t crashhandler_scratch[256]; 

@@ -55,3 +55,28 @@
     register volatile char temp = REG_TIMEUP;
     return;
 }
+
+
+#ifdef __CALYPSI__
+    __attribute__((interrupt(0xffe6))) void __irq_brk(void)
+#else
+NEAR INTERRUPT void __irq_brk(void)
+#endif
+{
+    System_CrashHandler();
+
+    // unreachable
+    return;
+}
+
+#ifdef __CALYPSI__
+    __attribute__((interrupt(0xffe4))) void __irq_cop(void)
+#else
+NEAR INTERRUPT void __irq_cop(void)
+#endif
+{
+    System_CrashHandler();
+
+    // unreachable
+    return;
+}

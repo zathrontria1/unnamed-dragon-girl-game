@@ -71,3 +71,5 @@ extern uint16_t event_in_combat;
 extern uint16_t event_in_combat_shadow;
 
 extern uint16_t event_tutorial_shown;
+
+extern uint8_t crashhandler_scratch[256]; 
