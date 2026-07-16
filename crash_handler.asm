@@ -95,6 +95,11 @@ _System_CrashHandler:
         ; stack valid
         .loop_save_stack:
             lda !$0000,y
+            ; check if it's at the last valid byte
+            cpy #$1fff
+            bcc .no_open_bus
+                and #$00ff ; discard high byte
+            .no_open_bus:
             sta >_crashhandler_stack,x
             inx
             inx
@@ -108,6 +113,8 @@ _System_CrashHandler:
     .stack_invalid:
         ; stack invalid
         .loop_save_invalid_stack_start:
+        cpx #$0020
+        bcs .stack_done
         lda #$0000
         .loop_save_invalid_stack:
             sta >_crashhandler_stack,x
