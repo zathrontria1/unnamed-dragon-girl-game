@@ -87,22 +87,3 @@ uint16_t event_in_combat;
 uint16_t event_in_combat_shadow;
 
 uint16_t event_tutorial_shown;
-
-// Scratch area used by crash handler.
-uint16_t crashhandler_a;
-uint16_t crashhandler_x;
-uint16_t crashhandler_y;
-
-uint8_t crashhandler_flags;
-
-uint32_t crashhandler_pc;
-uint16_t crashhandler_sp;
-
-uint16_t crashhandler_directpage;
-uint8_t crashhandler_databank;
-
-// Treat pseudoregs as 32-bit regs
-uint32_t crashhandler_regs[16];
-uint32_t crashhandler_regs_float[4];
-
-uint16_t crashhandler_stack[16];
