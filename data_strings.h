@@ -89,3 +89,5 @@ extern HUGE const char STR_STARTUP[];
 
 extern HUGE const char STR_TITLE_START[];
 extern HUGE const char STR_GAME_OVER[];
+
+extern HUGE const char STR_CRASH_FORMATSTR[];

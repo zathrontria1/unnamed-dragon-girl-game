@@ -259,3 +259,27 @@ destination.";
 
 HUGE const char STR_TITLE_START[] = "PRESS START BUTTON";
 HUGE const char STR_GAME_OVER[] = "GAME OVER";
+
+HUGE const char STR_CRASH_FORMATSTR[] = "\
+CRASH HANDLER\n\
+\n\
+A %04x X %04x  Y %04x   P %02x\n\
+S %04x D %04x PC %06lx B %02x\n\
+\n\
+R0  %08lx    R2  %08lx\n\
+R4  %08lx    R6  %08lx\n\
+R8  %08lx    R10 %08lx\n\
+R12 %08lx    R14 %08lx\n\
+R16 %08lx    R18 %08lx\n\
+R20 %08lx    R22 %08lx\n\
+R24 %08lx    R26 %08lx\n\
+R28 %08lx    R30 %08lx\n\
+\n\
+B0  %08lx    B1  %08lx\n\
+B2  %08lx    B3  %08lx\n\
+\n\
+Stack trace (32 bytes):\n\
+     %04x %04x  %04x %04x\n\
+     %04x %04x  %04x %04x\n\
+     %04x %04x  %04x %04x\n\
+     %04x %04x  %04x %04x";
