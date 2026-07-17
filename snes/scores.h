@@ -33,4 +33,10 @@
 
 #include <snes/snestypes.h>
 
+typedef struct
+{
+    u16 scolo;
+    u16 scohi;
+} scoMemory;
+
 #endif // SNES_SCORE_INCLUDE

@@ -1,4 +1,4 @@
-#include <snes/console.h>
+#include "snes/console.h"
 
 extern uint8_t system_MVNCodeInWRAM[4];
 

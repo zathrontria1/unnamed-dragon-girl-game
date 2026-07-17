@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <snes/console.h>
+#include "snes/console.h"
 
 #include "vars.h"
 

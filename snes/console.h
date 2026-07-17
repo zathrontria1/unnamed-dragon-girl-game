@@ -45,4 +45,7 @@
 #define REG_MEMSEL (*(vuint8 *)0x420d)
 #define REG_WRIO (*(vuint8 *)0x4201)
 
+#define REG_WMADDLM (*(vuint16 *)0x2181)
+#define REG_WMADDH (*(vuint8 *)0x2183)
+
 #endif

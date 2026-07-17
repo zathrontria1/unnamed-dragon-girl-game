@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include <snes/console.h>
+#include "snes/console.h"
 
 #include "vars.h"
 

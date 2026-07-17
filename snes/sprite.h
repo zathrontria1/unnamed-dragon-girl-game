@@ -57,6 +57,62 @@
 #define OBJ_SPRITE16 2 /*!< \brief sprite with 16x16 identifier */
 #define OBJ_SPRITE8 4  /*!< \brief sprite with 8x8 identifier */
 
+/*!	\struct t_sprites
+    \brief Dynamic sprite definition (16 bytes)
+*/
+typedef struct
+{
+    s16 oamx;        /*!< \brief 0 x position on the screen  */
+    s16 oamy;        /*!< \brief 2 y position on the screen  */
+    u16 oamframeid;  /*!< \brief 4 frame index in graphic file of the sprite  */
+    u8 oamattribute; /*!< \brief 6 sprite attribute value (vhoopppc v : vertical flip h: horizontal flip o: priority bits p: palette num c : last byte of tile num)  */
+    u8 oamrefresh;   /*!< \brief 7 =1 if we need to load graphics from graphic file  */
+    u8 *oamgraphics; /*!< \brief 8..11 pointer to graphic file  */
+    u16 dummy1;      /*!< \brief 12..15 to be 16 aligned */
+    u16 dummy2;
+} t_sprites /*__attribute__((__packed__))*/; /*!< seems to do nothing */
+
+/*!	\struct t_metasprites
+    \brief Dynamic metasprite definition (16 bytes)
+*/
+typedef struct
+{
+    s16 metsprofsx;                          /*!< 0 x offset of the current sprite in meta sprite  */
+    s16 metsprofsy;                          /*!< 2 y offset of the current sprite in meta sprite  */
+    u16 metsprframeid;                       /*!< 4 frame index in graphic file of the sprite  */
+    u8 metsprattribute;                      /*!< 6 sprite attribute value (vhoopppc v : vertical flip h: horizontal flip o: priority bits p: palette num c : last byte of tile num)  */
+    u8 metsprtype;                           /*!< 7 1,2 or 4 for 32x32, 16x16, 8x8 sprite type */
+    u8 *metsprgraphics;                      /*!< 8..11 pointer to graphic file  */
+    u16 metsprend;                           /*!< 12..13 0xFFFF if it is the end of meta sprite definition */
+    u16 dummy1;                              /*!< 14..15 to be 16 aligned */
+} t_metasprites /*__attribute__((__packed__))*/; /*!< seems to do nothing */
+
+/*!  \brief Sprite Table (from no$sns help file)<br>
+Contains data for 128 OBJs. OAM Size is 512+32 Bytes. The first part (512<br>
+bytes) contains 128 4-byte entries for each OBJ:<br>
+  Byte 0 - X-Coordinate (lower 8bit) (upper 1bit at end of OAM)<br>
+  Byte 1 - Y-Coordinate (all 8bits)<br>
+  Byte 2 - Tile Number  (lower 8bit) (upper 1bit within Attributes)<br>
+  Byte 3 - Attributes<br>
+Attributes:<br>
+  Bit7    Y-Flip (0=Normal, 1=Mirror Vertically)<br>
+  Bit6    X-Flip (0=Normal, 1=Mirror Horizontally)<br>
+  Bit5-4  Priority relative to BG (0=Low..3=High)<br>
+  Bit3-1  Palette Number (0-7) (OBJ Palette 4-7 can use Color Math via CGADSUB)<br>
+  Bit0    Tile Number (upper 1bit)<br>
+After above 512 bytes, additional 32 bytes follow, containing 2-bits per OBJ:<br>
+  Bit7    OBJ 3 OBJ Size     (0=Small, 1=Large)<br>
+  Bit6    OBJ 3 X-Coordinate (upper 1bit)<br>
+  Bit5    OBJ 2 OBJ Size     (0=Small, 1=Large)<br>
+  Bit4    OBJ 2 X-Coordinate (upper 1bit)<br>
+  Bit3    OBJ 1 OBJ Size     (0=Small, 1=Large)<br>
+  Bit2    OBJ 1 X-Coordinate (upper 1bit)<br>
+  Bit1    OBJ 0 OBJ Size     (0=Small, 1=Large)<br>
+  Bit0    OBJ 0 X-Coordinate (upper 1bit)<br>
+And so on, next 31 bytes with bits for OBJ4..127. Note: The meaning of the OBJ<br>
+Size bit (Small/Large) can be defined in OBSEL Register (Port 2101h).<br>
+*/
+
 /*! \def REG_OBSEL
     \brief Object Size and Object Base (W)
     7-5   OBJ Size Selection  (0-5, see below) (6-7=Reserved)
@@ -104,14 +160,5 @@
 */
 #define REG_OAMDATA (*(vuint8 *)0x2104) /*!< \brief OAM Data Write (W) */
 #define REG_RDOAM (*(vuint8 *)0x2138)   /*!< \brief OAM Data Read (R) */
-
-/*! \brief defined attribute of a sprite
-    \param priority The sprite priority (0 to 3)
-    \param vflip flip the sprite vertically
-    \param hflip flip the sprite horizontally
-    \param gfxoffset tilenumber graphic offset
-    \param paletteoffset palette default offset for sprite
-*/
-#define OAM_ATTR(priority, hflip, vflip, gfxoffset, paletteoffset) ((vflip << 7) | (hflip << 6) | (priority << 4) | (paletteoffset << 1) | ((gfxoffset >> 8) & 1))
 
 #endif // SNES_SPRITES_INCLUDE

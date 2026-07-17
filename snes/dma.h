@@ -229,19 +229,13 @@
 #define REG_DAS6LH (*(vuint16 *)0x4365)
 #define REG_DAS7LH (*(vuint16 *)0x4375)
 
-#define REG_DASB0 (*(vuint8 *)0x4307)
-#define REG_DASB1 (*(vuint8 *)0x4317)
-#define REG_DASB2 (*(vuint8 *)0x4327)
-#define REG_DASB3 (*(vuint8 *)0x4337)
-#define REG_DASB4 (*(vuint8 *)0x4347)
-#define REG_DASB5 (*(vuint8 *)0x4357)
-#define REG_DASB6 (*(vuint8 *)0x4367)
-#define REG_DASB7 (*(vuint8 *)0x4377)
-
-#define REG_WMDATA (*(vuint8 *)0x2180)
-#define REG_WMADDL (*(vuint8 *)0x2181)
-#define REG_WMADDM (*(vuint8 *)0x2182)
-#define REG_WMADDLM (*(vuint16 *)0x2181)
-#define REG_WMADDH (*(vuint8 *)0x2183)
+#define REG_DASB0 (*(vuint16 *)0x4307)
+#define REG_DASB1 (*(vuint16 *)0x4317)
+#define REG_DASB2 (*(vuint16 *)0x4327)
+#define REG_DASB3 (*(vuint16 *)0x4337)
+#define REG_DASB4 (*(vuint16 *)0x4347)
+#define REG_DASB5 (*(vuint16 *)0x4357)
+#define REG_DASB6 (*(vuint16 *)0x4367)
+#define REG_DASB7 (*(vuint16 *)0x4377)
 
 #endif // SNES_DMA_INCLUDE

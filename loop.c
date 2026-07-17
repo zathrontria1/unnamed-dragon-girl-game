@@ -1,4 +1,4 @@
-#include <snes/console.h>
+#include "snes/console.h"
 
 #include <stdio.h>
 #include <stdint.h>

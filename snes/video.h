@@ -312,8 +312,6 @@ The overflow flags are set (regardless of OBJ enable/disable in 212Ch), at follo
 */
 #define REG_STAT78 (*(vuint8 *)0x213F)
 
-#define REG_SETINI (*(vuint8 *)0x2133)
-
 #define REG_SLHV (*(vuint8 *)0x2137)
 #define REG_OPHCT (*(vuint8 *)0x213C)
 #define REG_OPVCT (*(vuint8 *)0x213D)
@@ -325,5 +323,49 @@ The overflow flags are set (regardless of OBJ enable/disable in 212Ch), at follo
 
 #define SCREEN_HEIGHT 224 /** \brief  Screen height in pixels */
 #define SCREEN_WIDTH 256  /** \brief  Screen width in pixels */
+
+/*
+    7  bit  0
+    ---- ----
+    EX.. HOiI
+    ||   ||||
+    ||   |||+- Screen interlacing
+    ||   ||+-- OBJ interlacing
+    ||   |+--- Overscan mode
+    ||   +---- High-res mode
+    |+-------- EXTBG mode
+    +--------- External sync
+
+    Screen interlacing causes every odd frame to lower its picture scanlines half a line between the even frames. 
+    When enabled, this produces a 480i picture composed of 2 frames (fields), 
+    instead of the default 240p progressive picture where each frame appears at the same vertical level.
+    STAT78 ($213F) can be used to check whether the current frame is an even or odd field.
+    When interlacing is enabled for BG mode 5 or 6, the BG layers are automatically interlaced to give a view 
+    of the background that has double the vertical resolution in 480i, effectively making every BG pixel half 
+    as tall.
+    The BGMODE character size bits still choose between 16x8 and 16x16px tiles even when interlacing is true.
+
+    OBJ interlacing interlaces the sprites to double their vertical resolution in 480i. Sprite pixels will 
+    appear half as tall.
+
+    Overscan mode enables the full 239 line picture when set, instead of only 224. On NTSC televisions 
+    this extra area is not normally visible, but on PAL it is very visible. Setting this causes NMI/vblank 
+    to begin 8 lines later, and end 8 lines earlier, dramatically reducing the vblank length in NTSC. Sprite 
+    and scroll positions are relative to the end of the blanking period, so enabling this automatically shifts 
+    everything up 8 lines. Using this feature makes the SNES drawing positions similar to the NES.
+
+    High-res mode doubles the horizontal output resolution from 256 to 512 pixels.
+    In most BG modes this causes the sub screen to render pixels on even columns (assuming zero-based column
+    indices), and the main screen to render on odd columns. This is sometimes called "pseudo-hires". Some 
+    games use this for a transparency effect (Kirby's Dreamland 3, Jurassic Park), relying on blurring from 
+    the composite video signal to blend the columns.
+    In BG modes 5 and 6, this high-res is forced, but the BG layers are automatically interleaved to double 
+    their horizontal resolution, making every BG pixel half as wide.
+
+    EXTBG controls a second-layer effect in BG mode 7 only. In other modes, enabling EXTBG will display garbage.
+    
+    External sync is used for super-imposing images from an external device. Normally 0.
+*/
+#define REG_SETINI (*(vuint8 *)0x2133)
 
 #endif // SNES_VIDEO_INCLUDE
