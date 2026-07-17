@@ -220,6 +220,14 @@ l11:
 	x16
 	global	___irq_brk
 ___irq_brk:
+	a8
+	sep #$20
+	sta >_crashhandler_emulation_mode+2
+	lda #$00
+	sta >_crashhandler_emulation_mode
+	lda >_crashhandler_emulation_mode+2
+	a16
+	rep #$20
 	jml _System_CrashHandler
 	;rti ; unreachable
 
@@ -230,7 +238,36 @@ ___irq_brk:
 	x16
 	global	___irq_cop
 ___irq_cop:
+	a8
+	sep #$20
+	sta >_crashhandler_emulation_mode+2
+	lda #$00
+	sta >_crashhandler_emulation_mode
+	lda >_crashhandler_emulation_mode+2
+	a16
+	rep #$20
 	jml _System_CrashHandler
+	;rti ; unreachable
+
+; emulation mode vectors for catching crashes
+; stacksize=0+??
+;vcprmin=10000
+	section	"DONTMERGE_text.near.__irq_cop6502.0","acrx"
+	a8
+	x8
+	global	___irq_cop6502
+___irq_cop6502:
+	jml _System_CrashHandler_EmulationMode
+	;rti ; unreachable
+
+; stacksize=0+??
+;vcprmin=10000
+	section	"DONTMERGE_text.near.__irq_ext6502.0","acrx"
+	a8
+	x8
+	global	___irq_ext6502
+___irq_ext6502:
+	jml _System_CrashHandler_EmulationMode
 	;rti ; unreachable
 
 ; stacksize=0+??
@@ -243,6 +280,7 @@ ___irq_cop:
 	global	_Nmi_Alternate
 	global	_Nmi_Cutscene
 	global  _System_CrashHandler
+	global  _System_CrashHandler_EmulationMode
 	zpage	r0
 	zpage	r1
 	zpage	r2

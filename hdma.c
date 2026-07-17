@@ -320,45 +320,169 @@ void HdmaEngine_UpdateBgScrollValues()
 /*
     Colour math data is similar.
 */
+#if VBCC_ASM == 1
+NO_INLINE void HdmaEngine_UpdateColdataValues()
+#else
 void HdmaEngine_UpdateColdataValues()
+#endif
 {
-    uint16_t temp_table_to_write = (hdma_coldata_select + 1) & 0x01;
+    #if VBCC_ASM == 1
+        __asm(
+            "\ta16\n"
+            "\tx16\n"
 
-    if (!hdma_coldata_usegradient) // Gradient mode disabled
-    {
-        for (int i = 31; i >= 0; i--)
+            "\tlda _hdma_coldata_select\n"
+            "\tinc\n"
+            "\tand #$0001\n"
+            "\tsta r0\n"
+            "\txba\n" // x256
+            "\tadc #<_hdma_coldata_data\n"
+            "\tsta r3\n" // R pointer
+            "\tadc #2\n"
+            "\tsta r5\n" // G pointer
+            "\tadc #2\n"
+            "\tsta r7\n" // B pointer
+            "\tlda #^_hdma_coldata_data\n"
+            "\tsta r4\n"
+            "\tsta r6\n"
+            "\tsta r8\n" // Bank bytes
+
+            "\tlda _hdma_coldata_usegradient\n"
+            "\tand #$00ff\n"
+            "\tbeq .coldata_is_zero\n"
+
+            // Calculate what the added R, G, and B values should be
+            "\tlda _gfx_cmath_r\n"
+            "\tlsr\n"
+            "\tlsr\n"
+            "\tlsr\n"
+            "\tlsr\n"
+            "\tlsr\n" // /32
+            "\tsta r9\n" // R add
+
+            "\tlda _gfx_cmath_g\n"
+            "\tlsr\n"
+            "\tlsr\n"
+            "\tlsr\n"
+            "\tlsr\n"
+            "\tlsr\n"
+            "\tsta r10\n" // G add
+ 
+            "\tlda _gfx_cmath_b\n"
+            "\tlsr\n"
+            "\tlsr\n"
+            "\tlsr\n"
+            "\tlsr\n"
+            "\tlsr\n"
+            "\tsta r11\n" // B add
+
+            // Check if RGB is valid
+            "\tlda r9\n"
+            "\tora r10\n"
+            "\tora r11\n"
+            "\tbne .start_coldata\n"
+                ".coldata_is_zero:"
+                // COLDATA is all zero. Use a special loop to write 0s to the entire table.
+                "\tldy #$00fc\n" // The last B entry
+                "\tlda #$0000\n"
+                
+                ".loop_coldata_zero:\n" 
+                    "\tsta [r3],y\n"
+                    "\tdey\n"
+                    "\tdey\n"
+                    "\tbpl .loop_coldata_zero\n"
+                    "\tbra .end_coldata_write\n"
+
+            ".start_coldata:\n" 
+
+            // Write initial values
+            "\tlda #$2000\n"
+            "\tsta r12\n" // Running R
+            "\tlda #$4000\n"
+            "\tsta r13\n" // Running G
+            "\tlda #$8000\n"
+            "\tsta r14\n" // Running B
+
+            // Start from the highest offset (entry 31)
+            // Byte wise they'd be the offset 248, 250, 252
+            "\tldy #$00f8\n" // Work backward so that once this becomes neg we can exit.
+
+            // Put loop here
+            ".loop_coldata:\n" 
+                "\tlda r12\n" 
+                "\tclc\n" 
+                "\tadc r9\n"
+                "\tsta [r3], y\n"
+                "\tsta r12\n"
+
+                "\tlda r13\n" 
+                "\tadc r10\n"
+                "\tsta [r5], y\n"
+                "\tsta r13\n"
+
+                "\tlda r14\n" 
+                "\tadc r11\n"
+                "\tsta [r7], y\n"
+                "\tsta r14\n"
+
+                "\ttya\n" 
+                "\tsec\n" 
+                "\tsbc #8\n"  // each data entry is 8 bytes wide.
+                "\ttay\n" 
+                "\tbpl .loop_coldata\n" 
+
+            // End of loop
+            ".end_coldata_write:\n" 
+
+            "\tlda r0\n" 
+            "\tsta _hdma_coldata_select\n"
+            "\tbeq .coldata_no_offset\n"
+                "\tlda #$02a3\n" // 225x3
+            ".coldata_no_offset:\n"
+
+            "\tclc\n"
+            "\tadc #<_hdma_coldata_tables\n"
+            "\tsta _hdma_coldata_ptr\n" // Must do last to avoid corruption
+        );
+    #else
+        uint16_t temp_table_to_write = (hdma_coldata_select + 1) & 0x01;
+
+        if (!hdma_coldata_usegradient) // Gradient mode disabled
         {
-            hdma_coldata_data[temp_table_to_write][i][0] = 0; // Make all entries no-ops
-            hdma_coldata_data[temp_table_to_write][i][1] = 0;
-            hdma_coldata_data[temp_table_to_write][i][2] = 0;
+            for (int i = 31; i >= 0; i--)
+            {
+                hdma_coldata_data[temp_table_to_write][i][0] = 0; // Make all entries no-ops
+                hdma_coldata_data[temp_table_to_write][i][1] = 0;
+                hdma_coldata_data[temp_table_to_write][i][2] = 0;
+            }
         }
-    }
-    else
-    {
-        // Split out the coldata values... and divide them by 32
-        uint16_t r_add = gfx_cmath_r >> 5;
-        uint16_t g_add = gfx_cmath_g >> 5;
-        uint16_t b_add = gfx_cmath_b >> 5;
-
-        // It's a fade going from value of 0 all the way to max saturation
-        uint16_t r = 0x2000;
-        uint16_t g = 0x4000;
-        uint16_t b = 0x8000;
-
-        for (int i = 31; i >= 0; i--)
+        else
         {
-            hdma_coldata_data[temp_table_to_write][i][0] = r;
-            hdma_coldata_data[temp_table_to_write][i][1] = g;
-            hdma_coldata_data[temp_table_to_write][i][2] = b;
+            // Split out the coldata values... and divide them by 32
+            uint16_t r_add = gfx_cmath_r >> 5;
+            uint16_t g_add = gfx_cmath_g >> 5;
+            uint16_t b_add = gfx_cmath_b >> 5;
 
-            r += r_add;
-            g += g_add;
-            b += b_add;
+            // It's a fade going from value of 0 all the way to max saturation
+            uint16_t r = 0x2000;
+            uint16_t g = 0x4000;
+            uint16_t b = 0x8000;
+
+            for (int i = 31; i >= 0; i--)
+            {
+                hdma_coldata_data[temp_table_to_write][i][0] = r;
+                hdma_coldata_data[temp_table_to_write][i][1] = g;
+                hdma_coldata_data[temp_table_to_write][i][2] = b;
+
+                r += r_add;
+                g += g_add;
+                b += b_add;
+            }
         }
-    }
 
-    hdma_coldata_select = temp_table_to_write;
-    hdma_coldata_ptr = (uint16_t)((uint32_t)&hdma_coldata_tables[hdma_coldata_select]);
+        hdma_coldata_select = temp_table_to_write;
+        hdma_coldata_ptr = (uint16_t)((uint32_t)&hdma_coldata_tables[hdma_coldata_select]);
+    #endif
 
     return;
 }

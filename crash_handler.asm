@@ -30,16 +30,29 @@ _System_CrashHandler:
 
     lda #$00
     sta >_crashhandler_pc+3
+    
+    lda >_crashhandler_emulation_mode
+    beq .native_mode
+        pla
+        sta >_crashhandler_pc+1
+        lda #$00
+        sta >_crashhandler_pc+2
+        sta >_crashhandler_databank
 
-    phb
-    pla
-    sta >_crashhandler_databank
+        a16
+        rep #$20
+        bra .saved_native
+    .native_mode:
+        a8
+        phb
+        pla
+        sta >_crashhandler_databank
 
-    rep #$20
-    a16
-    pla
-    sta >_crashhandler_pc+1
-
+        rep #$20
+        a16
+        pla
+        sta >_crashhandler_pc+1
+    .saved_native:
     tsc
     sta >_crashhandler_sp
 
@@ -137,6 +150,24 @@ _System_CrashHandler:
     
     stp ; Stop the CPU. It's done.
 
+    global	_System_CrashHandler_EmulationMode
+    a8
+    x8
+_System_CrashHandler_EmulationMode:
+    clc
+    xce
+
+    a8
+    sep #$20
+	sta >_crashhandler_emulation_mode+2
+	lda #$01
+	sta >_crashhandler_emulation_mode
+	lda >_crashhandler_emulation_mode+2
+	a16
+	rep #$20
+    
+    jml >_System_CrashHandler
+
 ; stacksize=0+??
     global _crashhandler_a
     global _crashhandler_x
@@ -151,6 +182,8 @@ _System_CrashHandler:
     global _crashhandler_regs_float
 
     global _crashhandler_stack
+
+    global _crashhandler_emulation_mode
 
     global _System_CrashHandler_Followup
     zpage	r0

@@ -45,6 +45,8 @@ uint32_t crashhandler_regs_float[4];
 
 uint16_t crashhandler_stack[16];
 
+uint32_t crashhandler_emulation_mode; // This must be 4 bytes wide to avoid clobbering the next bytes over in case
+
 /*
     Handle the rest of the crash here. Jump into this from assembly code.
 */
@@ -53,8 +55,9 @@ void System_CrashHandler_Followup()
     REG_INIDISP = 0x8f; // enable forced blank
 
     // Now we should have free reign in video memory. Re-init.
-
     System_Init_CpuRegs();
+    System_Init_WramFunctions();
+
     System_Init_BgScroll();
 
     System_Init_UiTilemap();
@@ -78,7 +81,7 @@ void System_CrashHandler_Followup()
     char temp_error_string[512] = "";
 
     snprintf((char *)&temp_error_string, 512, (char *)&STR_CRASH_FORMATSTR, 
-    crashhandler_a, crashhandler_x, crashhandler_y, crashhandler_flags, 
+    crashhandler_a, crashhandler_x, crashhandler_y, crashhandler_flags, (uint8_t)crashhandler_emulation_mode, 
     crashhandler_sp, crashhandler_directpage, crashhandler_pc, crashhandler_databank, 
     crashhandler_regs[0], crashhandler_regs[1],
     crashhandler_regs[2], crashhandler_regs[3], 

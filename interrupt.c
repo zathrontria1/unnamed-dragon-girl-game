@@ -9,6 +9,8 @@
 #include "interrupt.h"
 #include "interrupt_sub.h"
 
+#include "crash_handler.h"
+
 #ifdef __CALYPSI__ // This should use the compiler define always
     __attribute__((interrupt(0xffea))) void __irq_vblank(void)
 #else
@@ -80,3 +82,24 @@ NEAR INTERRUPT void __irq_cop(void)
     // unreachable
     return;
 }
+
+#ifdef __CALYPSI__
+    __attribute__((interrupt(0xfff4))) void __irq_cop6502(void);
+#else
+NEAR INTERRUPT void __irq_cop6502(void)
+{
+    System_CrashHandler_EmulationMode();
+
+    // unreachable
+    return;
+}
+#endif
+
+#ifdef __CALYPSI__
+    __attribute__((interrupt(0xfffe))) void __irq_ext6502(void);
+#else
+NEAR INTERRUPT void __irq_ext6502(void)
+{
+    System_CrashHandler_EmulationMode();
+}
+#endif

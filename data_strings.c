@@ -263,7 +263,7 @@ HUGE const char STR_GAME_OVER[] = "GAME OVER";
 HUGE const char STR_CRASH_FORMATSTR[] = "\
 CRASH HANDLER\n\
 \n\
-A %04x X %04x  Y %04x   P %02x\n\
+A %04x X %04x Y %04x P %02x:E%1x\n\
 S %04x D %04x PC %06lx B %02x\n\
 \n\
 R0  %08lx    R2  %08lx\n\

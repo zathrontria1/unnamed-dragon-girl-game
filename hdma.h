@@ -32,7 +32,12 @@ void HdmaEngine_SetupPaletteHdma();
 void HdmaEngine_SetupBgScrollHdma();
 void HdmaEngine_SetupColdataHdma();
 void HdmaEngine_UpdateBgScrollValues();
+#if VBCC_ASM == 1
+NO_INLINE void HdmaEngine_UpdateColdataValues();
+#else
 void HdmaEngine_UpdateColdataValues();
+#endif
+
 
 void HdmaEngine_GeneratePaletteTable(uint16_t * table_ptr, uint16_t pal_start, uint16_t entries, uint16_t target_color, uint16_t alpha, uint16_t height);
 
