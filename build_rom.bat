@@ -27,6 +27,7 @@ REM make
 
 REM compute and patch the checksum
 python .\checksum.py --hirom %sfc_name%_temp.sfc -o %sfc_name%.sfc
+DEL %sfc_name%_temp.sfc
 
 REM fix symbols
 python .\reprocess_symbols.py %sfc_name%.sym
