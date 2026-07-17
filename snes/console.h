@@ -32,15 +32,15 @@
 #ifndef CONSOLE_H
 #define CONSOLE_H
 
-#include <snes/snestypes.h>
+#include "snes/snestypes.h"
 
-#include <snes/background.h>
-#include <snes/dma.h>
-#include <snes/input.h>
-#include <snes/interrupt.h>
-#include <snes/sprite.h>
-#include <snes/sound.h>
-#include <snes/video.h>
+#include "snes/background.h"
+#include "snes/dma.h"
+#include "snes/input.h"
+#include "snes/interrupt.h"
+#include "snes/sprite.h"
+#include "snes/sound.h"
+#include "snes/video.h"
 
 #define REG_MEMSEL (*(vuint8 *)0x420d)
 #define REG_WRIO (*(vuint8 *)0x4201)
