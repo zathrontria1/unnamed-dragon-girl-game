@@ -150,7 +150,7 @@ void SoundInterface_StartSoundEngine()
         );
     #else
         
-        for (uint16_t i = 0; i < len; i++)
+        for (uint16_t i = 0; i < chunk_len; i++)
         {
             REG_APU01 = *data_ptr++;
 
@@ -549,7 +549,7 @@ void SoundInterface_UploadSample(struct sample_list_entry * s)
     uint16_t temp_len = s->len;
     
     // Sanity check the length first. If the length is not even, pad it
-    if (s->len & 0x0001 != 0x0000)
+    if ((s->len & 0x0001) != 0x0000)
     {
         temp_len++;
     }

@@ -958,7 +958,7 @@ void System_CheckForActiveDisplayEnd()
         );
     #else
         // Check if the current scanline is exactly 224 or not.
-        register volatile temp = REG_SLHV;
+        register volatile uint8_t temp = REG_SLHV;
         uint8_t scanline_lo = REG_OPVCT;
         uint8_t scanline_hi = REG_OPVCT & 0x01;
         uint16_t scanline = scanline_lo | (scanline_hi << 8);

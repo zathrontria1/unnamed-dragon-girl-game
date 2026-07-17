@@ -1,3 +1,5 @@
+#include <stdint.h>
+
 #define MENUACTION_NO 0
 #define MENUACTION_YES 1
 
@@ -50,7 +52,7 @@ void Subscreen_Internal_SaveLastSpritePage();
 void Subscreen_Upgrade_UploadProfilePicture();
 void Subscreen_Internal_RestoreLastSpritePage();
 void Subscreen_Upgrade_CalculateUpgradeCosts();
-void Subscreen_Upgrade_DrawText();
+void Subscreen_Upgrade_DrawText(bool copy_result);
 void Subscreen_Upgrade_Hp();
 void Subscreen_Upgrade_Attack();
 void Subscreen_Upgrade_Defense();

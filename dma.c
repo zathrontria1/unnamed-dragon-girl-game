@@ -5,6 +5,8 @@
 
 #include "vars.h"
 
+#include "ani_bg.h"
+
 #include "dma.h"
 
 NEAR struct dma_entry dma_queue[DMA_QUEUE_MAX_ENTRIES];
