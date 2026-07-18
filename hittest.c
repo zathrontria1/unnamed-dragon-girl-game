@@ -108,6 +108,9 @@ struct game_object * CollisionCheck_PlayerTestEnemy(struct game_object * o)
 
 /*
     Axis-aligned bounding box test between two objects
+
+    Although an equivalent is already used inlined in other functions, this needs to be kept for pickupable objects
+    as performance will become worse
 */
 uint16_t CollisionCheck_Aabb_BetweenObjects(struct game_object * a, struct game_object * b)
 {
