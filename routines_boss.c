@@ -255,9 +255,9 @@ uint8_t * Routines_Boss_Test_GetCompressedFrame(const uint8_t * data, const uint
 
     for (int s = 0; s < 2; s++)
     {
-        System_Hsync(156); // This is enough
         for (int y = 0; y < 6; y++)
         {
+            System_Hsync(156); // This is enough
             REG_WMADDLM = (uint16_t)((uint32_t)buffer + (s << 8) + (y << 9));
 
             for (int x = 0; x < 4; x++)
