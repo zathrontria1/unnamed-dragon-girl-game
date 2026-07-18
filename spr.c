@@ -168,29 +168,22 @@ void SpriteEngine_AddToFrontLayer(struct game_object * o, uint16_t tileattrib)
             return;
         }
 
-        int16_t temp_x;
-        int16_t temp_y;
-
-        temp_x = o->pos.x.lh.h - bg_scroll_x.full.high.a;
+        int16_t temp_x = o->pos.x.lh.h - bg_scroll_x.full.high.a;
 
         if ((temp_x > -16) && (temp_x < 256))
         {
-            if (temp_x < 0)
-            {
-                spr_queue_front[spr_front_count].signsize = 0x40;
-            }
-            else
-            {
-                spr_queue_front[spr_front_count].signsize = 0x00;
-            }
-            temp_y = o->pos.y.lh.h - o->pos.z.lh.h - bg_scroll_y.full.high.a;
+            struct spr_queue_entry *entry = &spr_queue_front[spr_front_count];
+
+            entry->signsize = (temp_x < 0) ? 0x40 : 0x00;
+
+            int16_t temp_y = o->pos.y.lh.h - o->pos.z.lh.h - bg_scroll_y.full.high.a;
 
             if ((temp_y > -16) && (temp_y < 224))
             {
-                spr_queue_front[spr_front_count].tileattrib = tileattrib;
-                spr_queue_front[spr_front_count].x = temp_x;
-                spr_queue_front[spr_front_count].y = temp_y;
-                spr_queue_front[spr_front_count].depth = (temp_y + 16) & 0x00ff;
+                entry->tileattrib = tileattrib;
+                entry->x = temp_x;
+                entry->y = temp_y;
+                entry->depth = (temp_y + 16) & 0x00ff;
 
                 spr_front_count++;
 
@@ -287,29 +280,22 @@ void SpriteEngine_AddToSortedLayer(struct game_object * o, uint16_t tileattrib)
             return;
         }
 
-        int16_t temp_x;
-        int16_t temp_y;
-
-        temp_x = o->pos.x.lh.h - bg_scroll_x.full.high.a;
+        int16_t temp_x = o->pos.x.lh.h - bg_scroll_x.full.high.a;
 
         if ((temp_x > -16) && (temp_x < 256))
         {
-            if (temp_x < 0)
-            {
-                spr_queue_normal[spr_normal_count].signsize = 0x40;
-            }
-            else
-            {
-                spr_queue_normal[spr_normal_count].signsize = 0x00;
-            }
-            temp_y = o->pos.y.lh.h - o->pos.z.lh.h - bg_scroll_y.full.high.a;
+            struct spr_queue_entry *entry = &spr_queue_normal[spr_normal_count];
+
+            entry->signsize = (temp_x < 0) ? 0x40 : 0x00;
+
+            int16_t temp_y = o->pos.y.lh.h - o->pos.z.lh.h - bg_scroll_y.full.high.a;
 
             if ((temp_y > -16) && (temp_y < 224))
             {
-                spr_queue_normal[spr_normal_count].x = temp_x;
-                spr_queue_normal[spr_normal_count].y = temp_y;
-                spr_queue_normal[spr_normal_count].tileattrib = tileattrib;
-                spr_queue_normal[spr_normal_count].depth = (temp_y + 16) & 0x00ff;
+                entry->x = temp_x;
+                entry->y = temp_y;
+                entry->tileattrib = tileattrib;
+                entry->depth = (temp_y + 16) & 0x00ff;
 
                 spr_normal_count++;
 
@@ -403,29 +389,22 @@ void SpriteEngine_AddToBackLayer(struct game_object * o, uint16_t tileattrib)
             return;
         }
 
-        int16_t temp_x;
-        int16_t temp_y;
-
-        temp_x = o->pos.x.lh.h - bg_scroll_x.full.high.a;
+        int16_t temp_x = o->pos.x.lh.h - bg_scroll_x.full.high.a;
 
         if ((temp_x > -16) && (temp_x < 256))
         {
-            if (temp_x < 0)
-            {
-                spr_queue_back[spr_back_count].signsize = 0x40;
-            }
-            else
-            {
-                spr_queue_back[spr_back_count].signsize = 0x00;
-            }
-            temp_y = o->pos.y.lh.h - o->pos.z.lh.h - bg_scroll_y.full.high.a;
+            struct spr_queue_entry *entry = &spr_queue_back[spr_back_count];
+
+            entry->signsize = (temp_x < 0) ? 0x40 : 0x00;
+
+            int16_t temp_y = o->pos.y.lh.h - o->pos.z.lh.h - bg_scroll_y.full.high.a;
 
             if ((temp_y > -16) && (temp_y < 224))
             {
-                spr_queue_back[spr_back_count].tileattrib = tileattrib;
-                spr_queue_back[spr_back_count].x = temp_x;
-                spr_queue_back[spr_back_count].y = temp_y;
-                spr_queue_back[spr_back_count].depth = (temp_y + 16) & 0x00ff;
+                entry->tileattrib = tileattrib;
+                entry->x = temp_x;
+                entry->y = temp_y;
+                entry->depth = (temp_y + 16) & 0x00ff;
 
                 spr_back_count++;
 
@@ -594,9 +573,10 @@ void SpriteEngine_ProcessSpriteLists_WriteFrontSprites()
         ".end_drawfront:\n"
         );
     #else
+        struct spr_queue_entry *queue = &spr_queue_front[0];
         for (int i = 0; i < spr_front_count; i++)
         {
-            SpriteEngine_DrawSprite(&spr_queue_front[i]); 
+            SpriteEngine_DrawSprite(queue++); 
         }
     #endif
 
@@ -855,16 +835,18 @@ void SpriteEngine_ProcessSpriteLists_WriteSortedSprites()
         ".end2:\n"
     );    
     #else
+        struct spr_queue_entry *queue = &spr_queue_normal[0];
         for (int i = 0; i < spr_normal_count; i++)
         {
-            spr_depth_count[spr_queue_normal[i].depth]--;
+            uint16_t depth = queue->depth;
+            uint16_t index = --spr_depth_count[depth];
 
-            shadow_oam.entries.shadow_oam_low[spr_depth_count[spr_queue_normal[i].depth]].x = (uint8_t)spr_queue_normal[i].x;
-            shadow_oam.entries.shadow_oam_low[spr_depth_count[spr_queue_normal[i].depth]].y = (uint8_t)spr_queue_normal[i].y;
+            shadow_oam.entries.shadow_oam_low[index].x = (uint8_t)queue->x;
+            shadow_oam.entries.shadow_oam_low[index].y = (uint8_t)queue->y;
+            shadow_oam.entries.shadow_oam_low[index].tileattrib = queue->tileattrib;
+            shadow_oam.entries.shadow_oam_high[index].signsize = queue->signsize;
 
-            shadow_oam.entries.shadow_oam_low[spr_depth_count[spr_queue_normal[i].depth]].tileattrib = spr_queue_normal[i].tileattrib;
-
-            shadow_oam.entries.shadow_oam_high[spr_depth_count[spr_queue_normal[i].depth]].signsize = spr_queue_normal[i].signsize;
+            queue++;
         }
     #endif
     
@@ -903,9 +885,10 @@ void SpriteEngine_ProcessSpriteLists_WriteBackSprites()
         ".end_drawback:\n"
     );
     #else
+        struct spr_queue_entry *queue = &spr_queue_back[0];
         for (int i = 0; i < spr_back_count; i++)
         {
-            SpriteEngine_DrawSprite(&spr_queue_back[i]); 
+            SpriteEngine_DrawSprite(queue++); 
         }
     #endif
 
