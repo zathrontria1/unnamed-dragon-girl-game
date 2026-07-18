@@ -523,19 +523,20 @@ void Routines_Dummy(struct game_object * o)
 bool Routines_Shared_StatusMaintenance(struct game_object * o)
 {
     bool invalidate = false;
+    struct game_data_npc * npc_data = &o->struct_data.npc_data;
 
-    if (o->struct_data.npc_data.invuln_time > 0)
+    if (npc_data->invuln_time > 0)
     {
-        o->struct_data.npc_data.invuln_time--;
+        npc_data->invuln_time--;
     }
 
-    if (o->struct_data.npc_data.status_time > 0)
+    if (npc_data->status_time > 0)
     {
-        o->struct_data.npc_data.status_time--;
+        npc_data->status_time--;
 
-        if (o->struct_data.npc_data.status_time == 0)
+        if (npc_data->status_time == 0)
         {
-            o->struct_data.npc_data.status = STATUS_NORMAL;
+            npc_data->status = STATUS_NORMAL;
 
             if (o->state == STATE_HURT_BURN_MOVE)
             {
@@ -577,55 +578,57 @@ void Routines_Shared_CheckIfDead(struct game_object * o)
 */
 void Routines_Shared_Draw(struct game_object * o, uint8_t * spr_addr, int pal, int layer, bool always_flicker, bool is_player)
 {
-    if ((spr_addr != o->struct_data.npc_data.ani.last_address))
+    struct game_data_npc * npc_data = &o->struct_data.npc_data;
+
+    if ((spr_addr != npc_data->ani.last_address))
     {
         if (is_player)
         {
             if (DmaSystem_AddItemToQueue((uint8_t *)(LZ4_BUFFER_ADDR+0xc000), 0x6000, 128, VRAM_INCHIGH, 1))
             {
-                o->struct_data.npc_data.ani.last_dmafailed = 1;
+                npc_data->ani.last_dmafailed = 1;
             }
             else
             {
-                o->struct_data.npc_data.ani.last_dmafailed = 0;
+                npc_data->ani.last_dmafailed = 0;
             }
         }
         else
         {
-            if (DmaSystem_AddItemToQueue(spr_addr, 0x6000+(o->struct_data.npc_data.vram_addr), 128, VRAM_INCHIGH, 1))
+            if (DmaSystem_AddItemToQueue(spr_addr, 0x6000+(npc_data->vram_addr), 128, VRAM_INCHIGH, 1))
             {
-                o->struct_data.npc_data.ani.last_dmafailed = 1;
+                npc_data->ani.last_dmafailed = 1;
             }
             else
             {
-                o->struct_data.npc_data.ani.last_dmafailed = 0;
+                npc_data->ani.last_dmafailed = 0;
             }
         }
         // Save the requested frame into object's data
         // for comparison and in case it fails
-        o->struct_data.npc_data.ani.last_address = spr_addr; 
+        npc_data->ani.last_address = spr_addr; 
     }
-    else if ((o->struct_data.npc_data.ani.last_dmafailed))
+    else if ((npc_data->ani.last_dmafailed))
     {
         // The previous DMA failed. Attempt it again.
         if (is_player)
         {
             if (!(DmaSystem_AddItemToQueue((uint8_t *)(LZ4_BUFFER_ADDR+0xc000), 0x6000, 128, VRAM_INCHIGH, 1)))
             {
-                o->struct_data.npc_data.ani.last_dmafailed = 0;
+                npc_data->ani.last_dmafailed = 0;
             }   
         }
         else
         {
-            if (!DmaSystem_AddItemToQueue(o->struct_data.npc_data.ani.last_address, 0x6000+(o->struct_data.npc_data.vram_addr), 128, VRAM_INCHIGH, 1))
+            if (!DmaSystem_AddItemToQueue(npc_data->ani.last_address, 0x6000+(npc_data->vram_addr), 128, VRAM_INCHIGH, 1))
             {
-                o->struct_data.npc_data.ani.last_dmafailed = 0;
+                npc_data->ani.last_dmafailed = 0;
             }   
         } 
     }
 
     // DMA variant
-    uint16_t tileattrib = o->struct_data.npc_data.tilenum | pal << 9;
+    uint16_t tileattrib = npc_data->tilenum | pal << 9;
 
     if (((uint32_t)spr_addr & 0x80000000) == 0x80000000) // sign bit is used for flip
     {
