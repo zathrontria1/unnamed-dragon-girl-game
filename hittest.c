@@ -13,12 +13,19 @@
 struct game_object * CollisionCheck_EnemyTestPlayer(struct game_object * o)
 {
     struct game_object * p = &obj_hitbox_player[0];
+    int16_t ox = o->pos.x.lh.h;
+    int16_t oy = o->pos.y.lh.h;
+    int16_t or = o->r;
+    int16_t ob = o->b;
     
     for (int i = 0; i < OBJ_PLAYERHITBOX_MAX_COUNT; i++)
     {
         if (p->id != OBJID_NULL)
         {
-            if (!CollisionCheck_Aabb_BetweenObjects(o, p))
+            if ((p->r >= ox) &&
+                (or >= p->pos.x.lh.h) &&
+                (ob >= p->pos.y.lh.h) &&
+                (p->b >= oy))
             {
                 return p;
             }
@@ -52,6 +59,11 @@ struct game_object * CollisionCheck_PlayerTestEnemy(struct game_object * o)
     temp.w = 2;
     temp.h = 2;
 
+    int16_t tx = temp.pos.x.lh.h;
+    int16_t ty = temp.pos.y.lh.h;
+    int16_t tr = temp.r;
+    int16_t tb = temp.b;
+
     struct game_object * hit = NULL;
     struct game_object * p = &obj_hitbox_enemy[0];
 
@@ -64,7 +76,10 @@ struct game_object * CollisionCheck_PlayerTestEnemy(struct game_object * o)
         {
             if (p->hit_type == 0x8001)
             {
-                if (CollisionCheck_Aabb_BetweenObjects(&temp, p) == 0)
+                if ((p->r >= tx) &&
+                    (tr >= p->pos.x.lh.h) &&
+                    (tb >= p->pos.y.lh.h) &&
+                    (p->b >= ty))
                 {
                     if (hit == NULL)
                     {
