@@ -443,25 +443,21 @@ void SpriteEngine_AddToBackLayer(struct game_object * o, uint16_t tileattrib)
 
 void SpriteEngine_InitVramSlot()
 {
-    for (int i = 0; i < 128; i++)
+    for (int i = 0; i < 48; i++)
     {
-        // Slots are in the order of i, i+2, i+32, i+34, etc...
-        if (i < 48)
-        {
-            // All entries lower than 48 are considered permanently occupied
-            // (fixed for player and fixed sprites)
-            // use the player's slot index which is always 0
-            spr_vram_slots[i] = 0x0000;
-        }
-        else
-        {
-            // An empty slot is 0xffff.
-            // A used slot will contain the object array slot
-            // 32x32 sprites will take 4 such slots consecutively
-            spr_vram_slots[i] = 0xffff;
-        }
+        // All entries lower than 48 are considered permanently occupied
+        // (fixed for player and fixed sprites)
+        // use the player's slot index which is always 0
+        spr_vram_slots[i] = 0x0000;
     }
-
+    for (int i = 48; i < 128; i++)
+    {
+        // An empty slot is 0xffff.
+        // A used slot will contain the object array slot
+        // 32x32 sprites will take 4 such slots consecutively
+        spr_vram_slots[i] = 0xffff;
+    }
+    
     return;
 }
 
