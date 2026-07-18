@@ -31,14 +31,19 @@ uint16_t ObjectSystem_Move(struct game_object * o)
     // if a collision check fails on an axis,
     // that axis' delta will be zeroed out
 
+    int32_t delta_x = o->delta.x.a;
+    int32_t delta_y = o->delta.y.a;
+    int32_t pos_x = o->pos.x.a;
+    int32_t pos_y = o->pos.y.a;
+
     // first test X axis movement
-    int32_t temp_xl = o->pos.x.a + o->delta.x.a; // Must be done in 32-bit space
+    int32_t temp_xl = pos_x + delta_x; // Must be done in 32-bit space
     
     uint16_t temp_x_pixel = (uint16_t)(temp_xl >> 16) + 1;
-    uint16_t temp_y = o->pos.y.lh.h + 1;
+    uint16_t temp_y = (uint16_t)(pos_y >> 16) + 1;
     
     // Get position tile
-    if (o->delta.x.a > 0)
+    if (delta_x > 0)
     {
         temp_x_pixel += 13;
     }
@@ -53,7 +58,7 @@ uint16_t ObjectSystem_Move(struct game_object * o)
 
     if ((map_collision_buf[q] < 128) || (map_collision_buf[q2] < 128))
     {
-        o->delta.x.a = 0;
+        delta_x = 0;
     }
 
     // Additional check for screen bounds if it exists
@@ -61,22 +66,22 @@ uint16_t ObjectSystem_Move(struct game_object * o)
     {
         if (temp_x_pixel < bg_scroll_x_bounds_min.full.high.a)
         {
-            o->delta.x.a = 0;
+            delta_x = 0;
         }
         else if (temp_x_pixel > bg_scroll_x_bounds_max.full.high.a + 256)
         {
-            o->delta.x.a = 0;
+            delta_x = 0;
         }
     }
     
     // Now for the top edge Y axis moves
-    uint32_t temp_yl = o->pos.y.a + o->delta.y.a;
+    uint32_t temp_yl = pos_y + delta_y;
     
-    temp_x = o->pos.x.lh.h + 1;
+    temp_x = (uint16_t)(pos_x >> 16) + 1;
     uint16_t temp_y_pixel = (uint16_t)(temp_yl >> 16) + 1;
     
     // Get position tile
-    if (o->delta.y.a > 0)
+    if (delta_y > 0)
     {
         temp_y_pixel += 13;
     }
@@ -91,8 +96,8 @@ uint16_t ObjectSystem_Move(struct game_object * o)
 
     if (map_collision_buf[q] < 128 || map_collision_buf[q2] < 128)
     {
-        o->delta.y.a = 0;
-        if ((o->delta.x.a | o->delta.y.a) == 0)
+        delta_y = 0;
+        if ((delta_x | delta_y) == 0)
         {
             return 1;
         }
@@ -102,22 +107,24 @@ uint16_t ObjectSystem_Move(struct game_object * o)
     {
         if (temp_y_pixel < bg_scroll_y_bounds_min.full.high.a)
         {
-            o->delta.y.a = 0;
+            delta_y = 0;
         }
         else if (temp_y_pixel > bg_scroll_y_bounds_max.full.high.a + 224)
         {
-            o->delta.y.a = 0;
+            delta_y = 0;
         }
 
-        if ((o->delta.x.a | o->delta.y.a) == 0)
+        if ((delta_x | delta_y) == 0)
         {
             return 1;
         }
     }
 
     // Add the deltas here
-    o->pos.x.a += o->delta.x.a;
-    o->pos.y.a += o->delta.y.a;
+    o->pos.x.a = pos_x + delta_x;
+    o->pos.y.a = pos_y + delta_y;
+    o->delta.x.a = delta_x;
+    o->delta.y.a = delta_y;
 
     // Update right and bottom edges
     o->r = o->pos.x.lh.h + o->w;
