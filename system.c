@@ -15,6 +15,7 @@
 #include "routines.h"
 #include "loop.h"
 #include "loop_cutscene.h"
+#include "loop_subscreen.h"
 #include "map.h"
 #include "math_int.h"
 #include "sram_management.h"
@@ -669,6 +670,10 @@ uint16_t System_CheckController(void)
 
 uint16_t System_CheckKey(enum KEYPAD_BITS k)
 {
+    if (subscreen_transition_state != 0)
+    {
+        return 0;
+    }
     if ((input_pad0_new & k) == k)
     {
         return 1;
@@ -679,6 +684,10 @@ uint16_t System_CheckKey(enum KEYPAD_BITS k)
 
 uint16_t System_CheckKeyAny()
 {
+    if (subscreen_transition_state != 0)
+    {
+        return 0;
+    }
     if (input_pad0_new != 0x0000)
     {
         return 1;
@@ -689,6 +698,10 @@ uint16_t System_CheckKeyAny()
 
 uint16_t System_CheckKeyHeld(enum KEYPAD_BITS k)
 {
+    if (subscreen_transition_state != 0)
+    {
+        return 0;
+    }
     if ((input_pad0 & k) == k)
     {
         return 1;
