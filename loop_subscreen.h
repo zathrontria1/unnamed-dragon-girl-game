@@ -14,6 +14,11 @@
 #define MENUACTION_OPENMAPSCREEN 131
 #define MENUACTION_CALLFUNCTION 255
 
+#define TRANSITION_STATE_NONE 0
+#define TRANSITION_STATE_FADE_OUT 1
+#define TRANSITION_STATE_INITIALIZE 2
+#define TRANSITION_STATE_FADE_IN 3
+
 struct menu_item {
     int16_t x;
     int16_t y;
@@ -21,7 +26,6 @@ struct menu_item {
     void * ptr;
     uint8_t padding[6];
 };
-
 
 extern uint16_t subscreen_selection;
 extern uint16_t subscreen_selection_profile;
@@ -37,6 +41,8 @@ extern bool subscreen_rendered;
 extern bool subscreen_skip_window_redraw;
 
 extern uint8_t subscreen_cgadsub_copy;
+
+extern uint16_t subscreen_transition_state;
 
 extern const struct menu_item subscreen_items_toplevel[7];
 extern const struct menu_item subscreen_items_profile[5];
@@ -68,3 +74,6 @@ void Subscreen_ResetConfirmation();
 
 void Subscreen_Internal_UpdateNavigation(const struct menu_item * item_array);
 
+void Subscreen_Transition_Start(void * next_func);
+void Subscreen_Transition_Loop();
+void Subscreen_Transition_Exit();

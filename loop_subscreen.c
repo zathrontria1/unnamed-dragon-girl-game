@@ -20,6 +20,7 @@
 #include "snd.h"
 #include "consts_snd.h"
 
+#include "loop.h"
 #include "loop_subscreen.h"
 
 #include "data_strings.h"
@@ -43,6 +44,101 @@ bool subscreen_rendered;
 bool subscreen_skip_window_redraw;
 
 uint8_t subscreen_cgadsub_copy;
+
+static void * subscreen_current_func_ptr;
+static void * subscreen_next_func_ptr;
+uint16_t subscreen_transition_state;
+
+void Subscreen_Transition_Loop()
+{
+    if (subscreen_transition_state == TRANSITION_STATE_FADE_OUT)
+    {
+        void (*current_func)() = (void (*)())subscreen_current_func_ptr;
+        if (subscreen_current_func_ptr == Main_GetFunctionPointer(ROUTINE_GAMELOOP))
+        {
+            Loop_Game_Partial();
+        }
+        else
+        {
+            current_func();
+        }
+
+        shadow_brightness -= (256 * V_MUL);
+        if (shadow_brightness <= 0)
+        {
+            shadow_brightness = 0;
+            subscreen_rendered = 0;
+            subscreen_transition_state = TRANSITION_STATE_INITIALIZE;
+        }
+    }
+    else if (subscreen_transition_state == TRANSITION_STATE_INITIALIZE)
+    {
+        void (*next_func)() = (void (*)())subscreen_next_func_ptr;
+        next_func();
+
+        shadow_brightness = 0;
+        subscreen_transition_state = TRANSITION_STATE_FADE_IN;
+    }
+    else if (subscreen_transition_state == TRANSITION_STATE_FADE_IN)
+    {
+        void (*next_func)() = (void (*)())subscreen_next_func_ptr;
+        if (subscreen_next_func_ptr == Main_GetFunctionPointer(ROUTINE_GAMELOOP))
+        {
+            Loop_Game_Partial();
+        }
+        else
+        {
+            next_func();
+        }
+
+        shadow_brightness += (256 * V_MUL);
+        if (shadow_brightness >= (15 << 8))
+        {
+            shadow_brightness = (15 << 8);
+            system_loop_func_ptr = subscreen_next_func_ptr;
+            subscreen_transition_state = TRANSITION_STATE_NONE;
+        }
+    }
+
+    return;
+}
+
+void Subscreen_Transition_Start(void * next_func)
+{
+    subscreen_current_func_ptr = system_loop_func_ptr;
+    subscreen_next_func_ptr = next_func;
+    subscreen_transition_state = TRANSITION_STATE_FADE_OUT;
+    system_loop_func_ptr = (void *)&Subscreen_Transition_Loop;
+
+    return;
+}
+
+void Subscreen_Transition_Exit()
+{
+    // Restore CGADSUB
+    shadow_cgadsub = subscreen_cgadsub_copy; 
+
+    // Exiting the subscreen. Load normal player palettes and resume game.
+    AniSystem_Pal_LoadSubpalette((uint8_t *)&data_palette_player, 8);
+        
+    system_game_paused = false;
+
+    UserInterface_ClearWindowBuffer(true);
+    UserInterface_ClearTextBuffer();
+    UserInterface_CopyUiBuffers(); // Perform a total clear
+
+    ui_force_update = true; // Then perform a wipe of the UI
+
+    ui_in_subscreen = false;
+
+    system_target_routine = ROUTINE_GAMELOOP;
+    subscreen_next_func_ptr = Main_GetFunctionPointer(ROUTINE_GAMELOOP);
+
+    // Run first frame of gameplay loop while black to populate OAM shadow
+    Loop_Game_Partial();
+
+    return;
+}
 
 void Subscreen_Top()
 {
@@ -149,8 +245,7 @@ void Subscreen_Top()
                 SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
                 if (subscreen_items_toplevel[subscreen_selection].ptr != 0)
                 {
-                    subscreen_rendered = 0;
-                    system_loop_func_ptr = subscreen_items_toplevel[subscreen_selection].ptr;
+                    Subscreen_Transition_Start(subscreen_items_toplevel[subscreen_selection].ptr);
 
                     return;
                 }
@@ -165,7 +260,7 @@ void Subscreen_Top()
                 SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
 
                 shadow_brightness = 15 << 8;
-                shadow_brightness_change = -(64 * V_MUL);
+                shadow_brightness_change = -(128 * V_MUL);
 
                 system_use_alternate_nmi = true;
 
@@ -201,26 +296,8 @@ void Subscreen_Top()
 
         if (System_CheckKey(KEY_X) || System_CheckKey(KEY_B) || temp_exit_subscreen)
         {
-            // Restore CGADSUB
-            shadow_cgadsub = subscreen_cgadsub_copy; 
-
-            // Exiting the top level subscreen.
             SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
-
-            AniSystem_Pal_LoadSubpalette((uint8_t *)&data_palette_player, 8);
-                
-            system_game_paused = false;
-
-            UserInterface_ClearWindowBuffer(true);
-            UserInterface_ClearTextBuffer();
-            UserInterface_CopyUiBuffers(); // Perform a total clear
-
-            ui_force_update = true; // Then perform a wipe of the UI
-
-            ui_in_subscreen = false;
-
-            system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_GAMELOOP);
-            system_target_routine = ROUTINE_GAMELOOP;
+            Subscreen_Transition_Start((void *)&Subscreen_Transition_Exit);
         }
     }
 
@@ -350,10 +427,7 @@ void Subscreen_Upgrade()
 
             subscreen_selection_profile = 0;
             
-            subscreen_rendered = 0;
-            // Exiting the profile subscreen.
-
-            system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_SUBSCREEN);
+            Subscreen_Transition_Start(Main_GetFunctionPointer(ROUTINE_SUBSCREEN));
             system_target_routine = ROUTINE_SUBSCREEN;
         }
     }
@@ -639,10 +713,7 @@ void Subscreen_Help()
         if (System_CheckKey(KEY_B))
         {
             SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
-            subscreen_rendered = 0;
-            // Exiting the help subscreen.
-
-            system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_SUBSCREEN);
+            Subscreen_Transition_Start(Main_GetFunctionPointer(ROUTINE_SUBSCREEN));
             system_target_routine = ROUTINE_SUBSCREEN;
         }
     }
@@ -768,10 +839,7 @@ void Subscreen_Options()
         if (System_CheckKey(KEY_B) || temp_exit_subscreen)
         {
             SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
-            subscreen_rendered = 0;
-            // Exiting the options subscreen.
-
-            system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_SUBSCREEN);
+            Subscreen_Transition_Start(Main_GetFunctionPointer(ROUTINE_SUBSCREEN));
             system_target_routine = ROUTINE_SUBSCREEN;
         }
     }
