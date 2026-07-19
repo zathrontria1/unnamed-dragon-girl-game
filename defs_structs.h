@@ -1,25 +1,25 @@
-struct cutscene_data // in an array
+typedef struct cutscene_data // in an array
 {
     void * frame;
     void * palette;
     void * tilemap;
     uint16_t time; // amount of 60fps frames (16.67ms) to wait before auto-advance, including data decompression time
-}; // Last entry should be all null and invalid values so the cutscene engine knows when to return control.
+} cutscene_data_t; // Last entry should be all null and invalid values so the cutscene engine knows when to return control.
 
-struct level_palette_list
+typedef struct level_palette_list
 {
     void * subpal[16];
-};
+} level_palette_list_t;
 
-struct sound_stream_data
+typedef struct sound_stream_data
 {
     void * ptr;
     uint16_t len;
     bool loop;
     uint8_t padding;
-};
+} sound_stream_data_t;
 
-struct enemy_data
+typedef struct enemy_data
 {
     int32_t hp;
     
@@ -31,9 +31,9 @@ struct enemy_data
 
     uint16_t width;
     uint16_t height;
-};
+} enemy_data_t;
 
-struct level_data
+typedef struct level_data
 {
     uint16_t player_start_x;
     uint16_t player_start_y;
@@ -52,17 +52,17 @@ struct level_data
     void * map_overview_palette;
 
     void * level_name;
-};
+} level_data_t;
 
-struct seq_command
+typedef struct seq_command
 {
     uint8_t opcode;
     uint8_t data1;
     uint8_t data2;
     uint8_t data3;
-};
+} seq_command_t;
 
-struct sample_list_entry
+typedef struct sample_list_entry
 {
     uint8_t id;
     void * data_ptr;
@@ -71,9 +71,9 @@ struct sample_list_entry
     uint16_t adsr;
     uint8_t ticks;
     // ticks are implied by length and sample rate if set to 0
-};
+} sample_list_entry_t;
 
-struct sample_list_entry_ins
+typedef struct sample_list_entry_ins
 {
     uint8_t id;
     void * data_ptr;
@@ -83,39 +83,39 @@ struct sample_list_entry_ins
     uint8_t ticks;
     // ticks are implied by length and sample rate if set to 0
     uint8_t tune;
-};
+} sample_list_entry_ins_t;
 
-struct spr_metaspr_definition
+typedef struct spr_metaspr_definition
 {
     uint16_t tileattrib;
     int16_t offset_x;
     int16_t offset_y;
     uint16_t size;
-};
+} spr_metaspr_definition_t;
 
-struct hdma_indirect_table_entry
+typedef struct hdma_indirect_table_entry
 {
     uint8_t count;
     uint16_t addr;
-};
+} hdma_indirect_table_entry_t;
 
-struct obj_list_entry_spawns
+typedef struct obj_list_entry_spawns
 {
     uint16_t id;
     int16_t x;
     int16_t y;
     uint16_t random_spread;
-};
+} obj_list_entry_spawns_t;
 
-struct obj_list_entry_interactable
+typedef struct obj_list_entry_interactable
 {
     uint16_t id;
     int16_t x;
     int16_t y;
     void * flag;
-};
+} obj_list_entry_interactable_t;
 
-struct obj_list_entry_spawners
+typedef struct obj_list_entry_spawners
 {
     uint16_t id; // should always hold the spawner IDs
     int16_t x; // top left
@@ -129,15 +129,15 @@ struct obj_list_entry_spawners
     void * spawn_list; // list of spawns
 
     uint8_t padding[10]; // array access padding
-};
+} obj_list_entry_spawners_t;
 
-struct tile_xy
+typedef struct tile_xy
 {
     int16_t x;
     int16_t y;
-};
+} tile_xy_t;
 
-struct dma_entry 
+typedef struct dma_entry 
 {
     uint16_t vmain; // VMain type
     // Splits are handled on function, divide it into 2^split. For copying a square section.
@@ -146,9 +146,9 @@ struct dma_entry
     uint16_t length;
 
     uint8_t padding[6]; 
-};
+} dma_entry_t;
 
-struct spr_queue_entry 
+typedef struct spr_queue_entry 
 {
     int16_t x; 
     int16_t y;
@@ -156,60 +156,60 @@ struct spr_queue_entry
     uint16_t signsize;
     uint16_t depth;
     uint8_t padding[6];
-};
+} spr_queue_entry_t;
 
-struct pos_lh32
+typedef struct pos_lh32
 {
     int16_t l;
     int16_t h;
-};
+} pos_lh32_t;
 
-union pos_32
+typedef union pos_32
 {
     int32_t a;
     struct pos_lh32 lh;
-};
+} pos_32_t;
 
-struct pos_lh16
+typedef struct pos_lh16
 {
     int8_t l;
     int8_t h;
-};
+} pos_lh16_t;
 
-union pos_16
+typedef union pos_16
 {
     int16_t a;
     struct pos_lh16 lh;
-};
+} pos_16_t;
 
-struct pos_bgscroll_lh
+typedef struct pos_bgscroll_lh
 {
     int16_t sub;
     union pos_16 high;
-};
+} pos_bgscroll_lh_t;
 
-union pos_bgscroll
+typedef union pos_bgscroll
 {
     int32_t a;
     struct pos_bgscroll_lh full;
-};
+} pos_bgscroll_t;
 
-struct coords
+typedef struct coords
 {
     union pos_32 x;
     union pos_32 y;
     union pos_32 z;
-};
+} coords_t;
 
-struct ani_data
+typedef struct ani_data
 {   
     uint16_t frame; // timer of current frame
     uint16_t display; // currently displayed frame
     void * last_address; // Address of previous rendered frame
     uint16_t last_dmafailed; // Did the previous DMA fail?
-};
+} ani_data_t;
 
-struct game_data_npc
+typedef struct game_data_npc
 {
     // Case one: Player, NPCs, and particles
     // Animation system
@@ -237,9 +237,9 @@ struct game_data_npc
     uint16_t ai_state;
     uint16_t ai_timer;
     uint16_t ai_makeattack;
-};
+} game_data_npc_t;
 
-struct game_data_interactable
+typedef struct game_data_interactable
 {
     // Case two: interactables and spawners (i.e. non-NPCs)
     uint16_t event_flag; // the local event flag it's tied to
@@ -258,16 +258,16 @@ struct game_data_interactable
     uint16_t opened; // for treasure chests, if it's opened
     uint16_t ttl; // time remaining for auto-despawn TODO: put this in shared area
     uint32_t money; // held money TODO: put this in shared area
-};
+} game_data_interactable_t;
 
-union game_data
+typedef union game_data
 {
     uint8_t size[68];
     struct game_data_npc npc_data;
     struct game_data_interactable interactable_data; 
-};
+} game_data_t;
 
-struct game_object
+typedef struct game_object
 {
     // Object type
     uint16_t id;
@@ -295,38 +295,39 @@ struct game_object
 
     // Everything after this can go to the same area
     union game_data struct_data;
-};
+} game_object_t;
 
-struct oam_entry_low
+typedef struct oam_entry_low
 {
     // Match snes format
     uint8_t x;
     uint8_t y;
     uint16_t tileattrib;
-};
-struct oam_entry_high
+} oam_entry_low_t;
+
+typedef struct oam_entry_high
 {
     // Expanded; must be packed before DMA
     uint8_t signsize;
-};
+} oam_entry_high_t;
 
-struct oam_combine 
+typedef struct oam_combine 
 {
     struct oam_entry_low shadow_oam_low[128];
     struct oam_entry_high shadow_oam_high[128];
-};
+} oam_combine_t;
 
-union oam_buffer{
+typedef union oam_buffer{
     uint8_t bytes[640];
     struct oam_combine entries;
-};
+} oam_buffer_t;
 
-struct cgram_group {
+typedef struct cgram_group {
     uint16_t bg[128];
     uint16_t spr[128];
-};
+} cgram_group_t;
 
-union cgram_full {
+typedef union cgram_full {
     uint16_t entry[256];
     struct cgram_group grouped;
-};
+} cgram_full_t;
