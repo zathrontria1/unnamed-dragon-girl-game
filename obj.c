@@ -817,25 +817,33 @@ void ObjectSystem_DestroyEnemyHitbox(uint16_t i)
 */
 void ObjectSystem_CleanupStandardObjects()
 {
+    uint16_t actual_deletions = 0;
     for (int i = 0; i < obj_delete_queue_count; i++)
     {
-        // TODO: use a function call return value
-        if ((obj_general[obj_delete_queue[i]].id == OBJID_SLIME) || (obj_general[obj_delete_queue[i]].id == OBJID_LIZARDMAN))
+        uint16_t index_of_deletee = obj_delete_queue[i];
+        if (obj_general[index_of_deletee].id == OBJID_NULL)
         {
-            SpriteEngine_ReleaseVramSlot(obj_delete_queue[i], 1);
+            continue;
         }
 
-        obj_general[obj_delete_queue[i]].id = OBJID_NULL;
+        // TODO: use a function call return value
+        if ((obj_general[index_of_deletee].id == OBJID_SLIME) || (obj_general[index_of_deletee].id == OBJID_LIZARDMAN))
+        {
+            SpriteEngine_ReleaseVramSlot(index_of_deletee, 1);
+        }
+
+        obj_general[index_of_deletee].id = OBJID_NULL;
 
         // Thread back the object to the next free
-        obj_general[obj_delete_queue[i]].next_free = obj_first_available;
-        obj_first_available = obj_delete_queue[i];
+        obj_general[index_of_deletee].next_free = obj_first_available;
+        obj_first_available = index_of_deletee;
 
         // Fix the object function to dummy
-        obj_general[obj_delete_queue[i]].func_ptr = (void *)&Routines_Dummy;
+        obj_general[index_of_deletee].func_ptr = (void *)&Routines_Dummy;
+        actual_deletions++;
     }
     
-    obj_active_count -= obj_delete_queue_count;
+    obj_active_count -= actual_deletions;
 
     obj_delete_queue_count = 0;
     return;
@@ -843,19 +851,27 @@ void ObjectSystem_CleanupStandardObjects()
 
 void ObjectSystem_CleanupPlayerHitboxes()
 {
+    uint16_t actual_deletions = 0;
     for (int i = 0; i < obj_hitbox_player_delete_queue_count; i++)
     {
-        obj_hitbox_player[obj_hitbox_player_delete_queue[i]].id = OBJID_NULL;
+        uint16_t index_of_deletee = obj_hitbox_player_delete_queue[i];
+        if (obj_hitbox_player[index_of_deletee].id == OBJID_NULL)
+        {
+            continue;
+        }
+
+        obj_hitbox_player[index_of_deletee].id = OBJID_NULL;
 
         // Thread back the object to the next free
-        obj_hitbox_player[obj_hitbox_player_delete_queue[i]].next_free = obj_hitbox_player_first_available;
-        obj_hitbox_player_first_available = obj_hitbox_player_delete_queue[i];
+        obj_hitbox_player[index_of_deletee].next_free = obj_hitbox_player_first_available;
+        obj_hitbox_player_first_available = index_of_deletee;
 
         // Fix the object function to dummy
-        obj_hitbox_player[obj_hitbox_player_delete_queue[i]].func_ptr = (void *)&Routines_Dummy;
+        obj_hitbox_player[index_of_deletee].func_ptr = (void *)&Routines_Dummy;
+        actual_deletions++;
     }
     
-    obj_hitbox_count_player -= obj_hitbox_player_delete_queue_count;
+    obj_hitbox_count_player -= actual_deletions;
 
     obj_hitbox_player_delete_queue_count = 0;
     return;
@@ -863,25 +879,33 @@ void ObjectSystem_CleanupPlayerHitboxes()
 
 void ObjectSystem_CleanupEnemyHitboxes()
 {
+    uint16_t actual_deletions = 0;
     for (int i = 0; i < obj_hitbox_enemy_delete_queue_count; i++)
     {
-        unsigned int id = obj_hitbox_enemy[obj_hitbox_enemy_delete_queue[i]].id;
-        if ((id >= OBJID_START_OF_DMA_LIGHT_SPRITES) && (id <= OBJID_END_OF_DMA_LIGHT_SPRITES))
+        uint16_t index_of_deletee = obj_hitbox_enemy_delete_queue[i];
+        if (obj_hitbox_enemy[index_of_deletee].id == OBJID_NULL)
         {
-            SpriteEngine_ReleaseVramSlot(OBJ_GENERAL_MAX_COUNT + obj_hitbox_enemy_delete_queue[i], 1);
+            continue;
         }
 
-        obj_hitbox_enemy[obj_hitbox_enemy_delete_queue[i]].id = OBJID_NULL;
+        unsigned int id = obj_hitbox_enemy[index_of_deletee].id;
+        if ((id >= OBJID_START_OF_DMA_LIGHT_SPRITES) && (id <= OBJID_END_OF_DMA_LIGHT_SPRITES))
+        {
+            SpriteEngine_ReleaseVramSlot(OBJ_GENERAL_MAX_COUNT + index_of_deletee, 1);
+        }
+
+        obj_hitbox_enemy[index_of_deletee].id = OBJID_NULL;
 
         // Thread back the object to the next free
-        obj_hitbox_enemy[obj_hitbox_enemy_delete_queue[i]].next_free = obj_hitbox_enemy_first_available;
-        obj_hitbox_enemy_first_available = obj_hitbox_enemy_delete_queue[i];
+        obj_hitbox_enemy[index_of_deletee].next_free = obj_hitbox_enemy_first_available;
+        obj_hitbox_enemy_first_available = index_of_deletee;
 
         // Fix the object function to dummy
-        obj_hitbox_enemy[obj_hitbox_enemy_delete_queue[i]].func_ptr = (void *)&Routines_Dummy;
+        obj_hitbox_enemy[index_of_deletee].func_ptr = (void *)&Routines_Dummy;
+        actual_deletions++;
     }
     
-    obj_hitbox_count_enemy -= obj_hitbox_enemy_delete_queue_count;
+    obj_hitbox_count_enemy -= actual_deletions;
 
     obj_hitbox_enemy_delete_queue_count = 0;
     return;
