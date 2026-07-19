@@ -779,27 +779,105 @@ void Subscreen_Options()
     return;
 }
 
-/*
-    Helper function to update play time
-*/
+void Subscreen_Top_DrawTime_Internal_Format_6Chars(char *dest, uint16_t val)
+{
+    dest[0] = ' ';
+    
+    uint8_t d4 = 0;
+    while (val >= 10000) {
+        val -= 10000;
+        d4++;
+    }
+    uint8_t d3 = 0;
+    while (val >= 1000) {
+        val -= 1000;
+        d3++;
+    }
+    uint8_t d2 = 0;
+    while (val >= 100) {
+        val -= 100;
+        d2++;
+    }
+    uint8_t d1 = 0;
+    while (val >= 10) {
+        val -= 10;
+        d1++;
+    }
+    uint8_t d0 = (uint8_t)val;
+    
+    if (d4 != 0) {
+        dest[1] = '0' + d4;
+        dest[2] = '0' + d3;
+        dest[3] = '0' + d2;
+        dest[4] = '0' + d1;
+        dest[5] = '0' + d0;
+    } else if (d3 != 0) {
+        dest[1] = ' ';
+        dest[2] = '0' + d3;
+        dest[3] = '0' + d2;
+        dest[4] = '0' + d1;
+        dest[5] = '0' + d0;
+    } else if (d2 != 0) {
+        dest[1] = ' ';
+        dest[2] = ' ';
+        dest[3] = '0' + d2;
+        dest[4] = '0' + d1;
+        dest[5] = '0' + d0;
+    } else if (d1 != 0) {
+        dest[1] = ' ';
+        dest[2] = ' ';
+        dest[3] = ' ';
+        dest[4] = '0' + d1;
+        dest[5] = '0' + d0;
+    } else {
+        dest[1] = ' ';
+        dest[2] = ' ';
+        dest[3] = ' ';
+        dest[4] = ' ';
+        dest[5] = '0' + d0;
+    }
+}
+
+void Subscreen_Top_DrawTime_Internal_Format_2Chars_ZeroPadded(char *dest, uint16_t val)
+{
+    uint8_t d1 = 0;
+    while (val >= 10) {
+        val -= 10;
+        d1++;
+    }
+    dest[0] = '0' + d1;
+    dest[1] = '0' + (uint8_t)val;
+}
+
 void Subscreen_Top_DrawTime()
 {
-    char temp_time_string[32] = "          ";
+    char temp_time_string[48];
 
     uint16_t temp_h = system_time_h;
     uint16_t temp_m = system_time_m;
     uint16_t temp_s = system_time_s;
 
-    //if ((system_frames_elapsed % (60 / V_MUL)) >= (FPS / 2))
-    if (system_time_subframe >= (FPS / 2))
+    // Dynamically copy the prefix from STR_UI_SUBSCREEN_PLAYTIME up to the first '%'
+    uint16_t prefix_len = 0;
+    while (STR_UI_SUBSCREEN_PLAYTIME[prefix_len] != '%' && STR_UI_SUBSCREEN_PLAYTIME[prefix_len] != '\0')
     {
-        snprintf((char *)&temp_time_string, 32, (char *)&STR_UI_SUBSCREEN_PLAYTIME_NOCOLON, temp_h, temp_m, temp_s);
+        temp_time_string[prefix_len] = STR_UI_SUBSCREEN_PLAYTIME[prefix_len];
+        prefix_len++;
     }
-    else
-    {
-        snprintf((char *)&temp_time_string, 32, (char *)&STR_UI_SUBSCREEN_PLAYTIME, temp_h, temp_m, temp_s);
-    }
-    
+
+    Subscreen_Top_DrawTime_Internal_Format_6Chars(&temp_time_string[prefix_len], temp_h);
+
+    char colon = (system_time_subframe >= (FPS / 2)) ? ' ' : ':';
+    temp_time_string[prefix_len + 6] = colon;
+
+    Subscreen_Top_DrawTime_Internal_Format_2Chars_ZeroPadded(&temp_time_string[prefix_len + 7], temp_m);
+
+    temp_time_string[prefix_len + 9] = colon;
+
+    Subscreen_Top_DrawTime_Internal_Format_2Chars_ZeroPadded(&temp_time_string[prefix_len + 10], temp_s);
+
+    temp_time_string[prefix_len + 12] = '\0';
+
     UserInterface_DrawWindowText((char *)&temp_time_string, 7, 26);
     UserInterface_CopyTextBuffer_Line(26);
 
@@ -880,10 +958,7 @@ void Subscreen_ResetConfirmation()
         if (System_CheckKey(KEY_B) || temp_exit_subscreen)
         {
             SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
-            subscreen_rendered = 0;
-            // Exiting the confirmation subscreen.
-
-            system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_SUBSCREEN);
+            Subscreen_Transition_Start(Main_GetFunctionPointer(ROUTINE_SUBSCREEN));
             system_target_routine = ROUTINE_SUBSCREEN;
         }
     }

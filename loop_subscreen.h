@@ -46,6 +46,8 @@ extern const struct menu_item subscreen_items_resetconfirm[3];
 
 void Subscreen_Top();
 void Subscreen_Top_DrawTime();
+void Subscreen_Top_DrawTime_Internal_Format_6Chars(char *dest, uint16_t val);
+void Subscreen_Top_DrawTime_Internal_Format_2Chars_ZeroPadded(char *dest, uint16_t val);
 
 void Subscreen_Upgrade();
 void Subscreen_Internal_SaveLastSpritePage();
