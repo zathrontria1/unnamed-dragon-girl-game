@@ -453,48 +453,56 @@ void MapSystem_UpdateCameraPosition(bool suppress_map_gen)
 // Split into its own function to make code neater
 void MapSystem_CheckCrossedTilemapEdge()
 {
-    const uint8_t * p = map_current; // Make a copy of the pointer to prevent clobbers
-    p += 2;
-
-    bool temp_x_odd = ((uint16_t)bg_scroll_x.full.high.a >> 3) & 0x0001;
-    int16_t temp_x_tile_offset_8 = (uint16_t)bg_scroll_x.full.high.a >> 3;
-    int16_t temp_x_tile_offset = (uint16_t)bg_scroll_x.full.high.a >> 4;
-    int16_t temp_x_tile_offset_prev_8 = (uint16_t)bg_scroll_x_prev.full.high.a >> 3;
-    int16_t temp_y_tile_offset = (uint16_t)bg_scroll_y.full.high.a >> 4;
-
-    if (temp_x_tile_offset_8 > temp_x_tile_offset_prev_8)
+    if (bg_scroll_x.full.high.a == bg_scroll_x_prev.full.high.a &&
+        bg_scroll_y.full.high.a == bg_scroll_y_prev.full.high.a)
     {
-        if ((temp_x_tile_offset+16) < map_extent_tiles_x)
+        return;
+    }
+
+    int16_t temp_x_tile_offset_8 = (uint16_t)bg_scroll_x.full.high.a >> 3;
+    int16_t temp_x_tile_offset_prev_8 = (uint16_t)bg_scroll_x_prev.full.high.a >> 3;
+
+    if (temp_x_tile_offset_8 != temp_x_tile_offset_prev_8)
+    {
+        const uint8_t * p = map_current + 2;
+        bool temp_x_odd = temp_x_tile_offset_8 & 0x0001;
+        int16_t temp_x_tile_offset = (uint16_t)bg_scroll_x.full.high.a >> 4;
+        int16_t temp_y_tile_offset = (uint16_t)bg_scroll_y.full.high.a >> 4;
+
+        if (temp_x_tile_offset_8 > temp_x_tile_offset_prev_8)
         {
-            uint16_t temp_section = MapSystem_Tilemap_BuildColumn(p, map_lut, temp_x_tile_offset+24, temp_y_tile_offset-1, temp_x_odd);
-
-            uint16_t temp_x_wrap = (((temp_x_tile_offset+24) & 0x1f) << 1) & 0x1f;
-
-            if (!temp_x_odd)
+            if ((temp_x_tile_offset+16) < map_extent_tiles_x)
             {
-                DmaSystem_AddItemToQueue((uint8_t *)&map_column[0], (TILEMAP_ADDR_GAME_MAP+(temp_section * 1024)+temp_x_wrap), 64, (VRAM_INCHIGH|VRAM_ADRSTINC_32), 0);
-            }
-            else
-            {
-                DmaSystem_AddItemToQueue((uint8_t *)&map_column[0], (TILEMAP_ADDR_GAME_MAP+(temp_section * 1024)+temp_x_wrap+1), 64, (VRAM_INCHIGH|VRAM_ADRSTINC_32), 0);
+                uint16_t temp_section = MapSystem_Tilemap_BuildColumn(p, map_lut, temp_x_tile_offset+24, temp_y_tile_offset-1, temp_x_odd);
+
+                uint16_t temp_x_wrap = (((temp_x_tile_offset+24) & 0x1f) << 1) & 0x1f;
+
+                if (!temp_x_odd)
+                {
+                    DmaSystem_AddItemToQueue((uint8_t *)&map_column[0], (TILEMAP_ADDR_GAME_MAP+(temp_section * 1024)+temp_x_wrap), 64, (VRAM_INCHIGH|VRAM_ADRSTINC_32), 0);
+                }
+                else
+                {
+                    DmaSystem_AddItemToQueue((uint8_t *)&map_column[0], (TILEMAP_ADDR_GAME_MAP+(temp_section * 1024)+temp_x_wrap+1), 64, (VRAM_INCHIGH|VRAM_ADRSTINC_32), 0);
+                }
             }
         }
-    }
-    else if (temp_x_tile_offset_8 < temp_x_tile_offset_prev_8)
-    {
-        if ((temp_x_tile_offset -7) >= -7)
+        else
         {
-            uint16_t temp_section = MapSystem_Tilemap_BuildColumn(p, map_lut, temp_x_tile_offset-7, temp_y_tile_offset-1, temp_x_odd);
-
-            uint16_t temp_x_wrap = (((temp_x_tile_offset+25) & 0x1f) << 1) & 0x1f;
-
-            if (!temp_x_odd)
+            if ((temp_x_tile_offset -7) >= -7)
             {
-                DmaSystem_AddItemToQueue((uint8_t *)&map_column[0], (TILEMAP_ADDR_GAME_MAP+(temp_section * 1024)+temp_x_wrap), 64, (VRAM_INCHIGH|VRAM_ADRSTINC_32), 0);
-            }
-            else
-            {
-                DmaSystem_AddItemToQueue((uint8_t *)&map_column[0], (TILEMAP_ADDR_GAME_MAP+(temp_section * 1024)+temp_x_wrap+1), 64, (VRAM_INCHIGH|VRAM_ADRSTINC_32), 0);
+                uint16_t temp_section = MapSystem_Tilemap_BuildColumn(p, map_lut, temp_x_tile_offset-7, temp_y_tile_offset-1, temp_x_odd);
+
+                uint16_t temp_x_wrap = (((temp_x_tile_offset+25) & 0x1f) << 1) & 0x1f;
+
+                if (!temp_x_odd)
+                {
+                    DmaSystem_AddItemToQueue((uint8_t *)&map_column[0], (TILEMAP_ADDR_GAME_MAP+(temp_section * 1024)+temp_x_wrap), 64, (VRAM_INCHIGH|VRAM_ADRSTINC_32), 0);
+                }
+                else
+                {
+                    DmaSystem_AddItemToQueue((uint8_t *)&map_column[0], (TILEMAP_ADDR_GAME_MAP+(temp_section * 1024)+temp_x_wrap+1), 64, (VRAM_INCHIGH|VRAM_ADRSTINC_32), 0);
+                }
             }
         }
     }
@@ -502,47 +510,51 @@ void MapSystem_CheckCrossedTilemapEdge()
     bg_scroll_x_prev.full.high.a = bg_scroll_x.full.high.a;
 
     // Now to test the Y axis
-    bool temp_y_odd = ((uint16_t)bg_scroll_y.full.high.a >> 3) & 0x0001;
-
     int16_t temp_y_tile_offset_8 = (uint16_t)bg_scroll_y.full.high.a >> 3;
-    temp_y_tile_offset = (uint16_t)bg_scroll_y.full.high.a >> 4;
     int16_t temp_y_tile_offset_prev_8 = (uint16_t)bg_scroll_y_prev.full.high.a >> 3;
-    temp_x_tile_offset = (uint16_t)bg_scroll_x.full.high.a >> 4;
 
-    if (temp_y_tile_offset_8 > temp_y_tile_offset_prev_8)
+    if (temp_y_tile_offset_8 != temp_y_tile_offset_prev_8)
     {
-        MapSystem_Tilemap_BuildRow(p, map_lut, temp_x_tile_offset - 7, temp_y_tile_offset + 14, temp_y_odd);
+        const uint8_t * p = map_current + 2;
+        bool temp_y_odd = temp_y_tile_offset_8 & 0x0001;
+        int16_t temp_y_tile_offset = (uint16_t)bg_scroll_y.full.high.a >> 4;
+        int16_t temp_x_tile_offset = (uint16_t)bg_scroll_x.full.high.a >> 4;
 
-        uint16_t temp_y_wrap = ((((temp_y_tile_offset+14) & 0x0f) << 1) & 0x1f) << 5;
-
-        // Sections are not important for rows as both maps will be updated.
-        if (!temp_y_odd)
+        if (temp_y_tile_offset_8 > temp_y_tile_offset_prev_8)
         {
-            DmaSystem_AddItemToQueue((uint8_t *)&map_row[0][0], (TILEMAP_ADDR_GAME_MAP+temp_y_wrap), 64, VRAM_INCHIGH, 0);
-            DmaSystem_AddItemToQueue((uint8_t *)&map_row[1][0], (TILEMAP_ADDR_GAME_MAP+1024+temp_y_wrap), 64, VRAM_INCHIGH, 0);
+            MapSystem_Tilemap_BuildRow(p, map_lut, temp_x_tile_offset - 7, temp_y_tile_offset + 14, temp_y_odd);
+
+            uint16_t temp_y_wrap = ((((temp_y_tile_offset+14) & 0x0f) << 1) & 0x1f) << 5;
+
+            // Sections are not important for rows as both maps will be updated.
+            if (!temp_y_odd)
+            {
+                DmaSystem_AddItemToQueue((uint8_t *)&map_row[0][0], (TILEMAP_ADDR_GAME_MAP+temp_y_wrap), 64, VRAM_INCHIGH, 0);
+                DmaSystem_AddItemToQueue((uint8_t *)&map_row[1][0], (TILEMAP_ADDR_GAME_MAP+1024+temp_y_wrap), 64, VRAM_INCHIGH, 0);
+            }
+            else
+            {
+                DmaSystem_AddItemToQueue((uint8_t *)&map_row[0][0], (TILEMAP_ADDR_GAME_MAP+32+temp_y_wrap), 64, VRAM_INCHIGH, 0);
+                DmaSystem_AddItemToQueue((uint8_t *)&map_row[1][0], (TILEMAP_ADDR_GAME_MAP+32+1024+temp_y_wrap), 64, VRAM_INCHIGH, 0);
+            }
         }
         else
         {
-            DmaSystem_AddItemToQueue((uint8_t *)&map_row[0][0], (TILEMAP_ADDR_GAME_MAP+32+temp_y_wrap), 64, VRAM_INCHIGH, 0);
-            DmaSystem_AddItemToQueue((uint8_t *)&map_row[1][0], (TILEMAP_ADDR_GAME_MAP+32+1024+temp_y_wrap), 64, VRAM_INCHIGH, 0);
-        }
-    }
-    else if (temp_y_tile_offset_8 < temp_y_tile_offset_prev_8)
-    {
-        MapSystem_Tilemap_BuildRow(p, map_lut, temp_x_tile_offset - 7, temp_y_tile_offset - 1, temp_y_odd);
+            MapSystem_Tilemap_BuildRow(p, map_lut, temp_x_tile_offset - 7, temp_y_tile_offset - 1, temp_y_odd);
 
-        uint16_t temp_y_wrap = ((((temp_y_tile_offset+15) & 0x0f) << 1) & 0x1f) << 5;
+            uint16_t temp_y_wrap = ((((temp_y_tile_offset+15) & 0x0f) << 1) & 0x1f) << 5;
 
-        // Sections are not important for rows as both maps will be updated.
-        if (!temp_y_odd)
-        {
-            DmaSystem_AddItemToQueue((uint8_t *)&map_row[0][0], (TILEMAP_ADDR_GAME_MAP+temp_y_wrap), 64, VRAM_INCHIGH, 0);
-            DmaSystem_AddItemToQueue((uint8_t *)&map_row[1][0], (TILEMAP_ADDR_GAME_MAP+1024+temp_y_wrap), 64, VRAM_INCHIGH, 0);
-        }
-        else
-        {
-            DmaSystem_AddItemToQueue((uint8_t *)&map_row[0][0], (TILEMAP_ADDR_GAME_MAP+32+temp_y_wrap), 64, (VRAM_INCHIGH), 0);
-            DmaSystem_AddItemToQueue((uint8_t *)&map_row[1][0], (TILEMAP_ADDR_GAME_MAP+32+1024+temp_y_wrap), 64, (VRAM_INCHIGH), 0);
+            // Sections are not important for rows as both maps will be updated.
+            if (!temp_y_odd)
+            {
+                DmaSystem_AddItemToQueue((uint8_t *)&map_row[0][0], (TILEMAP_ADDR_GAME_MAP+temp_y_wrap), 64, VRAM_INCHIGH, 0);
+                DmaSystem_AddItemToQueue((uint8_t *)&map_row[1][0], (TILEMAP_ADDR_GAME_MAP+1024+temp_y_wrap), 64, VRAM_INCHIGH, 0);
+            }
+            else
+            {
+                DmaSystem_AddItemToQueue((uint8_t *)&map_row[0][0], (TILEMAP_ADDR_GAME_MAP+32+temp_y_wrap), 64, (VRAM_INCHIGH), 0);
+                DmaSystem_AddItemToQueue((uint8_t *)&map_row[1][0], (TILEMAP_ADDR_GAME_MAP+32+1024+temp_y_wrap), 64, (VRAM_INCHIGH), 0);
+            }
         }
     }
 
