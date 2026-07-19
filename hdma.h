@@ -1,3 +1,5 @@
+#define CACHE_PALETTE_ENTRIES 8
+
 extern struct hdma_indirect_table_entry hdma_bgpalette_tables[3];
 extern uint16_t hdma_bgpalette_data[SCREEN_HEIGHT << 1];
 
@@ -25,6 +27,9 @@ extern ZP uint16_t hdma_coldata_ptr;
 extern const uint8_t const_hdma_tm_msgbox[];
 extern const int16_t const_hdma_scroll_sine[16][64];
 
+extern uint8_t hdma_cache_scaled_r[CACHE_PALETTE_ENTRIES * 64];
+extern uint8_t hdma_cache_scaled_g[CACHE_PALETTE_ENTRIES * 64];
+extern uint8_t hdma_cache_scaled_b[CACHE_PALETTE_ENTRIES * 64];
 
 void HdmaEngine_SetupHdma();
 

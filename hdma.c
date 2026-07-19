@@ -38,6 +38,11 @@ uint16_t hdma_coldata_data[2][32][4]; // Deliberately use 2 bytes; highest 8 bit
 uint16_t hdma_coldata_select;
 ZP uint16_t hdma_coldata_ptr;
 
+// These are so large that they are larger than the available stack (1536 bytes > 1024), so they're defined globally
+uint8_t hdma_cache_scaled_r[CACHE_PALETTE_ENTRIES * 64];
+uint8_t hdma_cache_scaled_g[CACHE_PALETTE_ENTRIES * 64];
+uint8_t hdma_cache_scaled_b[CACHE_PALETTE_ENTRIES * 64];
+
 /*
     Setup all HDMA and their tables
 */
@@ -555,85 +560,128 @@ void HdmaEngine_EnableHdma()
 */
 void HdmaEngine_GeneratePaletteTable(uint16_t * table_ptr, uint16_t pal_start, uint16_t entries, uint16_t target_color, uint16_t alpha, uint16_t height)
 {
-    bool temp_overflow = false;
+    // Cache target colors
+    uint8_t cache_scaled_target_r[33];
+    uint8_t cache_scaled_target_g[33];
+    uint8_t cache_scaled_target_b[33];
+    int Q, R, j;
+    uint16_t val2;
+    uint16_t temp_r2, temp_g2, temp_b2;
+    uint16_t cgram_addr_start;
+    uint16_t cgram_addr;
+    uint16_t entries_shifted;
+    uint16_t j_shifted;
+    int y;
+    int w;
+    int k;
 
     // Split the target colour
-    uint16_t temp_r2 = (target_color & 0x001f);
-    uint16_t temp_g2 = (target_color & 0x03e0) >> 5;
-    uint16_t temp_b2 = (target_color & 0x7c00) >> 10;
+    temp_r2 = (target_color & 0x001f);
+    temp_g2 = (target_color & 0x03e0) >> 5;
+    temp_b2 = (target_color & 0x7c00) >> 10;
 
-    for (int i = 0; i < height; i += entries)
+    for (j = 0; j < entries; j++)
     {
-        for (int j = 0; j < entries; j++)
+        uint16_t color = shadow_cgram.entry[pal_start + j];
+        uint16_t r1 = color & 0x001f;
+        uint16_t g1 = (color & 0x03e0) >> 5;
+        uint16_t b1 = (color & 0x7c00) >> 10;
+        uint16_t cache_j_shifted = j << 6;
+
+        for (w = 0; w <= 32; w++)
         {
-            // Write the CGRAM address
-            *table_ptr = (pal_start+j) << 8;
-
-            // Fetch the base colour
-            uint16_t temp_r1 = (shadow_cgram.entry[pal_start+j] & 0x001f);
-            uint16_t temp_g1 = (shadow_cgram.entry[pal_start+j] & 0x03e0) >> 5;
-            uint16_t temp_b1 = (shadow_cgram.entry[pal_start+j] & 0x7c00) >> 10;
-
-            // Calculate weights
-            uint16_t temp_weight_adjust = ((height - (i+j)) << 5) / height;
-
-            uint16_t temp_weight_2 = ((32 - temp_weight_adjust) * alpha) >> 5;
-
-            uint16_t temp_weight_1 = 32 - temp_weight_2;
-
-            // Weight them
-            uint16_t temp_r = ((temp_r1 * temp_weight_1) + (temp_r2 * temp_weight_2)) >> 5;
-            uint16_t temp_g = ((temp_g1 * temp_weight_1) + (temp_g2 * temp_weight_2)) >> 5;
-            uint16_t temp_b = ((temp_b1 * temp_weight_1) + (temp_b2 * temp_weight_2)) >> 5;
-
-            // Make sure the value doesn't overflow on the channel
-            if (temp_r > 31)
-            {
-                temp_r = 31;
-            }
-            if (temp_g > 31)
-            {
-                temp_g = 31;
-            }
-            if (temp_b > 31)
-            {
-                temp_b = 31;
-            }
-
-            // Save the colour value
-            table_ptr++;
-
-            *table_ptr = RGB5(temp_r, temp_g, temp_b);
-
-            table_ptr++;
-
-            if ((i+j+1) >= height)
-            {
-                // If this is true, the next entry will go out of range, and terminate the table now
-                temp_overflow = true;
-                break;
-            }
-        }
-
-        if (temp_overflow)
-        {
-            break;
+            hdma_cache_scaled_r[cache_j_shifted | w] = (r1 * w) >> 5;
+            hdma_cache_scaled_g[cache_j_shifted | w] = (g1 * w) >> 5;
+            hdma_cache_scaled_b[cache_j_shifted | w] = (b1 * w) >> 5;
         }
     }
 
-    if (height < 223-entries)
+    if (target_color != 0)
+    {
+        for (w = 0; w <= 32; w++)
+        {
+            cache_scaled_target_r[w] = (temp_r2 * w) >> 5;
+            cache_scaled_target_g[w] = (temp_g2 * w) >> 5;
+            cache_scaled_target_b[w] = (temp_b2 * w) >> 5;
+        }
+    }
+
+    // Initialize Bresenham / fractional step parameters for the weight ramp
+    // Q represents the weight value (starts at 32, decreases to 0)
+    // R is the division remainder
+    // val2 = Q_inv * alpha (starts at 0, increases by alpha whenever Q decrements / Q_inv increments)
+    Q = 32;
+    R = 0;
+    val2 = 0;
+
+    cgram_addr_start = pal_start << 8;
+    cgram_addr = cgram_addr_start;
+    entries_shifted = entries << 6;
+    j_shifted = 0;
+
+    for (y = 0; y < height; y++)
+    {
+        uint16_t temp_weight_2, temp_weight_1;
+        uint16_t temp_r, temp_g, temp_b;
+        uint16_t offset;
+
+        // Write the CGRAM address
+        *table_ptr = cgram_addr;
+        table_ptr++;
+
+        // temp_weight_2 = (Q_inv * alpha) >> 5;
+        temp_weight_2 = val2 >> 5;
+        temp_weight_1 = 32 - temp_weight_2;
+
+        offset = j_shifted | temp_weight_1;
+
+        // Weight them
+        if (target_color == 0)
+        {
+            temp_r = hdma_cache_scaled_r[offset];
+            temp_g = hdma_cache_scaled_g[offset];
+            temp_b = hdma_cache_scaled_b[offset];
+        }
+        else
+        {
+            temp_r = hdma_cache_scaled_r[offset] + cache_scaled_target_r[temp_weight_2];
+            temp_g = hdma_cache_scaled_g[offset] + cache_scaled_target_g[temp_weight_2];
+            temp_b = hdma_cache_scaled_b[offset] + cache_scaled_target_b[temp_weight_2];
+        }
+
+        *table_ptr = RGB5(temp_r, temp_g, temp_b);
+        table_ptr++;
+
+        // Update step parameters for the next iteration (y + 1)
+        R -= 32;
+        while (R < 0)
+        {
+            R += height;
+            Q--;
+            val2 += alpha;
+        }
+
+        // Increment and wrap palette index
+        cgram_addr += 256;
+        j_shifted += 64;
+        if (j_shifted == entries_shifted)
+        {
+            j_shifted = 0;
+            cgram_addr = cgram_addr_start;
+        }
+    }
+
+    if (height < 223 - entries)
     {
         // Write palette restore entries
-        for (int j = 0; j < entries; j++)
+        uint16_t restore_addr = cgram_addr_start;
+        for (k = 0; k < entries; k++)
         {
-            // Write the CGRAM address
-            *table_ptr = (pal_start+j) << 8;
-
+            *table_ptr = restore_addr;
             table_ptr++;
-
-            *table_ptr = shadow_cgram.entry[pal_start+j];
-            
+            *table_ptr = shadow_cgram.entry[pal_start + k];
             table_ptr++;
+            restore_addr += 256;
         }
     }
 
