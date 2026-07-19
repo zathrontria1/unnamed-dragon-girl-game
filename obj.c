@@ -928,41 +928,11 @@ void ObjectSystem_SetFunctionPointer(struct game_object * o)
 {
     switch (o->id)
     {
-        case OBJID_NULL:
-            o->func_ptr = (void *)&Routines_Dummy;
-            break;
-        case OBJID_PLAYER:
-            o->func_ptr = (void *)&Routines_Player;
-            break;
-        case OBJID_FIREBALL:
-            o->func_ptr = (void *)&Routines_Player_Fireball;
-            break;
-        case OBJID_SLIME:
-            o->func_ptr = (void *)&Routines_Enemy_Slime;
-            break;
-        case OBJID_BUBBLE_E:
-            o->func_ptr = (void *)&Routines_Enemy_Slime_Bubble;
-            break;
-        case OBJID_ARROW_E:
-            o->func_ptr = (void *)&Routines_Enemy_Lizardman_Arrow;
-            break;
-        case OBJID_LIZARDMAN:
-            o->func_ptr = (void *)&Routines_Enemy_Lizardman;
-            break;
-        case OBJID_BOSS_TEST1:
-            o->func_ptr = (void *)&Routines_Boss_Test;
-            break;
-        case OBJID_BOSS_TEST1_ATTACK1:
-            o->func_ptr = (void *)&Routines_Boss_Test_Attack_Particle;
+        case OBJID_SYS_IMPACT:
+            o->func_ptr = (void *)&Routines_Fx_Impact;
             break;
         case OBJID_FX_SMOKE:
             o->func_ptr = (void *)&Routines_Fx_Smoke;
-            break;
-        case OBJID_DROP_REC_MEAT:
-            o->func_ptr = (void *)&Routines_Drops_Recovery_Meat;
-            break;
-        case OBJID_DROP_MONEY:
-            o->func_ptr = (void *)&Routines_Drops_Money;
             break;
         case OBJID_HITBOX_INVISIBLE:
             o->func_ptr = (void *)&Routines_Player_InvisibleHit;
@@ -970,8 +940,35 @@ void ObjectSystem_SetFunctionPointer(struct game_object * o)
         case OBJID_HITBOX_INVISIBLE_E:
             o->func_ptr = (void *)&Routines_Enemy_InvisibleHit;
             break;
-        case OBJID_SYS_IMPACT:
-            o->func_ptr = (void *)&Routines_Fx_Impact;
+        case OBJID_FIREBALL:
+            o->func_ptr = (void *)&Routines_Player_Fireball;
+            break;
+        case OBJID_BUBBLE_E:
+            o->func_ptr = (void *)&Routines_Enemy_Slime_Bubble;
+            break;
+        case OBJID_ARROW_E:
+            o->func_ptr = (void *)&Routines_Enemy_Lizardman_Arrow;
+            break;
+        case OBJID_DROP_MONEY:
+            o->func_ptr = (void *)&Routines_Drops_Money;
+            break;
+        case OBJID_DROP_REC_MEAT:
+            o->func_ptr = (void *)&Routines_Drops_Recovery_Meat;
+            break;
+        case OBJID_SLIME:
+            o->func_ptr = (void *)&Routines_Enemy_Slime;
+            break;
+        case OBJID_LIZARDMAN:
+            o->func_ptr = (void *)&Routines_Enemy_Lizardman;
+            break;
+        case OBJID_PLAYER:
+            o->func_ptr = (void *)&Routines_Player;
+            break;
+        case OBJID_BOSS_TEST1:
+            o->func_ptr = (void *)&Routines_Boss_Test;
+            break;
+        case OBJID_BOSS_TEST1_ATTACK1:
+            o->func_ptr = (void *)&Routines_Boss_Test_Attack_Particle;
             break;
         case OBJID_INTERACTABLE_SWITCH_WALL:
         case OBJID_INTERACTABLE_SWITCH_FLOOR:
@@ -994,6 +991,7 @@ void ObjectSystem_SetFunctionPointer(struct game_object * o)
         case OBJID_INTERACTABLE_TREASURECHEST:
             o->func_ptr = (void *)&Routines_TreasureChest;
             break;
+        case OBJID_NULL:
         default:
             // Unimplemented object
             o->func_ptr = (void *)&Routines_Dummy;
