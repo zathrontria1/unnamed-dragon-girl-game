@@ -8,6 +8,8 @@
 
 #include "sram_management.h"
 
+uint8_t sram_available_slots;
+
 // Note: the game is configured with 32KB SRAM, divided into 4 banks of 8KB.
 
 /*  Check each SRAM slot for the verification string.
@@ -102,6 +104,9 @@ void Sram_Check()
     return;
 }
 
+/*
+    Clears a SRAM slot
+*/
 void Sram_ClearSlot(uint16_t slot)
 {
     if (slot >= SRAM_BANKS)
@@ -127,6 +132,11 @@ void Sram_ClearSlot(uint16_t slot)
     return;
 }
 
+/*
+    Saves the current game state into SRAM.
+
+    It does take a while, so do it while no gameplay is taking place (e.g. during level changes)
+*/
 void Sram_SaveToSlot(uint16_t slot)
 {
     if (slot >= SRAM_BANKS)
@@ -137,17 +147,26 @@ void Sram_SaveToSlot(uint16_t slot)
     void * p = (uint8_t *)(SRAM_ADDR + SRAM_DATA_OFFSET + (0x00010000 * slot));
 
     // Data to be copied:
-    // Current level pointer
+    // Current level ID
     // Player object blob
     // Global event flags
 
-    // First the level pointer
-    const struct level_data * * temp_ld = p; // BEWARE: pointer of pointer
-    
-    *temp_ld = level_data_ptr;
-    temp_ld++;
+    // First, map the current level pointer to a Level ID
+    uint16_t level_id = LEVEL_ID_INVALID;
+    for (uint16_t i = 0; i < LEVEL_ID_COUNT; i++)
+    {
+        if (const_level_pointer_table[i] == level_data_ptr)
+        {
+            level_id = i;
+            break;
+        }
+    }
 
-    p = (void *) temp_ld;
+    // Save the level ID as a 16-bit integer
+    uint16_t * temp_id = p;
+    *temp_id = level_id;
+    temp_id++;
+    p = (void *) temp_id;
 
     // Then the object data
     uint8_t * temp_playerdata = p; // BEWARE: not a pointer of pointer! Data must be copied
@@ -159,12 +178,6 @@ void Sram_SaveToSlot(uint16_t slot)
         temp_playerdata++;
         temp_livedata++;
     }
-
-    // below is bugged
-    /*struct game_object * temp_playerdata = p; // BEWARE: not a pointer of pointer! Data must be copied
-
-    *temp_playerdata = objects[obj_player_index];
-    temp_playerdata++;*/
     
     p = (void *) temp_playerdata;
 
@@ -177,8 +190,134 @@ void Sram_SaveToSlot(uint16_t slot)
         temp_ef++;
     }
 
+    // Compute and save checksum validation details
+    uint16_t checksum = Sram_CalculateChecksum(slot);
+    
+    uint16_t * p_checksum = (uint16_t *)(SRAM_ADDR + 9 + (0x00010000 * slot));
+    *p_checksum = checksum;
+    
+    p_checksum++; // Go forward 2 bytes
+    *p_checksum = ~checksum;
+
+    // Write layout version to offset 13 (1 byte)
+    uint8_t * p_version = (uint8_t *)(SRAM_ADDR + 13 + (0x00010000 * slot));
+    *p_version = SRAM_LAYOUT_VERSION;
+
     return;
 }
 
+/*
+    Calculates a 16-bit checksum value by adding every byte of the saved game data
+*/
+uint16_t Sram_CalculateChecksum(uint16_t slot)
+{
+    uint8_t * p = (uint8_t *)(SRAM_ADDR + SRAM_DATA_OFFSET + (0x00010000 * slot));
+    uint16_t checksum = 0;
+    
+    // Total size of the data saved to the slot
+    for (uint16_t i = 0; i < sizeof(uint16_t) + sizeof(struct game_object) + EVENT_FLAG_GLOBAL_MAX; i++)
+    {
+        checksum += p[i];
+    }
+    
+    return checksum;
+}
+
+/*
+    Called to load data from SRAM.
+
+    Returns true if data can be loaded, false otherwise.
+*/
+bool Sram_LoadFromSlot(uint16_t slot)
+{
+    if (slot >= SRAM_BANKS)
+    {
+        return false;
+    }
+
+    // Verify verification string (magic number)
+    uint8_t * p_verify = (uint8_t *)(SRAM_ADDR + (0x00010000 * slot));
+    for (int i = 0; i < 8; i++)
+    {
+        if (p_verify[i] != const_sram_verify_str[i])
+        {
+            return false;
+        }
+    }
+
+    // Verify SRAM layout version (offset 13)
+    uint8_t * p_version = (uint8_t *)(SRAM_ADDR + 13 + (0x00010000 * slot));
+    if (*p_version != SRAM_LAYOUT_VERSION)
+    {
+        return false; // Incompatible save format version
+    }
+
+    // Read and verify checksum/complement integrity
+    uint16_t * p_checksum = (uint16_t *)(SRAM_ADDR + 9 + (0x00010000 * slot));
+    uint16_t stored_checksum = *p_checksum;
+    
+    uint16_t * p_complement = (uint16_t *)(SRAM_ADDR + 11 + (0x00010000 * slot));
+    uint16_t stored_complement = *p_complement;
+
+    if (stored_checksum != (uint16_t)(~stored_complement))
+    {
+        return false; // Header checksum field itself is corrupted
+    }
+
+    // Compute and compare data checksum
+    uint16_t calculated_checksum = Sram_CalculateChecksum(slot);
+    if (calculated_checksum != stored_checksum)
+    {
+        return false; // Saved game data is corrupted
+    }
+
+    // Integrity verified, so what's left is to validate the map ID itself
+    void * p = (uint8_t *)(SRAM_ADDR + SRAM_DATA_OFFSET + (0x00010000 * slot));
+
+    // Restore level pointer via ID lookup
+    uint16_t * temp_id = p;
+    uint16_t loaded_level_id = *temp_id;
+    temp_id++;
+    p = (void *) temp_id;
+
+    if (loaded_level_id >= LEVEL_ID_COUNT)
+    {
+        return false; // Invalid or unknown level ID
+    }
+
+    level_data_ptr = const_level_pointer_table[loaded_level_id];
+
+    // Restore player object data
+    uint8_t * temp_playerdata = p;
+    uint8_t * temp_livedata = (uint8_t *)&obj_general[obj_player_index];
+    for (int i = 0; i < sizeof(struct game_object); i++)
+    {
+        *temp_livedata = *temp_playerdata;
+        temp_playerdata++;
+        temp_livedata++;
+    }
+    p = (void *) temp_playerdata;
+
+    // Restore event flags
+    uint8_t * temp_ef = p;
+    for (int i = 0; i < EVENT_FLAG_GLOBAL_MAX; i++)
+    {
+        event_flags_global[i] = *temp_ef;
+        temp_ef++;
+    }
+
+    // Re-resolve the player's function pointers based on its ID to handle linker shifts
+    struct game_object * player = &obj_general[obj_player_index];
+    ObjectSystem_SetFunctionPointer(player);
+    player->data_ptr = 0; // Reset runtime pointer to prevent bad references
+
+    return true;
+}
+
 const uint8_t const_sram_verify_str[] = "EIEIMUN!"; // Can use any 8 character string that isn't all 0x00 or 0xff. Will occupy 9 bytes in ROM
-uint8_t sram_available_slots;
+
+const struct level_data * const_level_pointer_table[LEVEL_ID_COUNT] = {
+    (void *)&data_level_test_0,
+    (void *)&data_level_test_1,
+    (void *)&data_level_test_2
+};
