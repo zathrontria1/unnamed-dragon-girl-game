@@ -27,108 +27,145 @@
 */
 uint16_t ObjectSystem_Move(struct game_object * o)
 {
-    // one axis needs to be tested at a time
-    // if a collision check fails on an axis,
-    // that axis' delta will be zeroed out
-
     int32_t delta_x = o->delta.x.a;
     int32_t delta_y = o->delta.y.a;
-    int32_t pos_x = o->pos.x.a;
-    int32_t pos_y = o->pos.y.a;
 
-    // first test X axis movement
-    int32_t temp_xl = pos_x + delta_x; // Must be done in 32-bit space
-    
-    uint16_t temp_x_pixel = (uint16_t)(temp_xl >> 16) + 1;
-    uint16_t temp_y = (uint16_t)(pos_y >> 16) + 1;
-    
-    // Get position tile
-    if (delta_x > 0)
+    bool has_x = (delta_x != 0);
+    bool has_y = (delta_y != 0);
+
+    union pos_32 temp_xl;
+    union pos_32 temp_yl;
+
+    if (has_x)
     {
-        temp_x_pixel += 13;
-    }
+        temp_xl.a = o->pos.x.a + delta_x;
+        
+        uint16_t temp_x_pixel = temp_xl.lh.h + 1;
+        uint16_t temp_y = o->pos.y.lh.h + 1;
+        
+        if (delta_x > 0)
+        {
+            temp_x_pixel += 13;
+        }
 
-    uint16_t temp_y_2 = (temp_y + 13) >> 4; // Lower edge
-    uint16_t temp_x = temp_x_pixel >> 4;
-    temp_y >>= 4;
+        uint16_t temp_y_2 = (temp_y + 13) >> 4; // Lower edge
+        uint16_t temp_x = temp_x_pixel >> 4;
+        temp_y >>= 4;
 
-    // Top edge.
-    uint16_t q = ((uint8_t)temp_y << map_extent_tiles_x_shiftcount) + temp_x;
-    uint16_t q2 = ((uint8_t)temp_y_2 << map_extent_tiles_x_shiftcount) + temp_x;
+        uint16_t shiftcount = map_extent_tiles_x_shiftcount;
+        uint16_t shift_temp_y, shift_temp_y2;
+        if (shiftcount == 6) {
+            shift_temp_y = temp_y << 6;
+            shift_temp_y2 = temp_y_2 << 6;
+        } else if (shiftcount == 5) {
+            shift_temp_y = temp_y << 5;
+            shift_temp_y2 = temp_y_2 << 5;
+        } else if (shiftcount == 7) {
+            shift_temp_y = temp_y << 7;
+            shift_temp_y2 = temp_y_2 << 7;
+        } else if (shiftcount == 4) {
+            shift_temp_y = temp_y << 4;
+            shift_temp_y2 = temp_y_2 << 4;
+        } else {
+            shift_temp_y = temp_y << shiftcount;
+            shift_temp_y2 = temp_y_2 << shiftcount;
+        }
+        uint16_t q = shift_temp_y + temp_x;
+        uint16_t q2 = shift_temp_y2 + temp_x;
 
-    if ((map_collision_buf[q] < 128) || (map_collision_buf[q2] < 128))
-    {
-        delta_x = 0;
-    }
-
-    // Additional check for screen bounds if it exists
-    if (bg_scroll_x_bounds_min.full.high.a != -32768)
-    {
-        if (temp_x_pixel < bg_scroll_x_bounds_min.full.high.a)
+        if ((map_collision_buf[q] < 128) || (map_collision_buf[q2] < 128))
         {
             delta_x = 0;
         }
-        else if (temp_x_pixel > bg_scroll_x_bounds_max.full.high.a + 256)
+
+        if (bg_scroll_x_bounds_min.full.high.a != -32768)
         {
-            delta_x = 0;
-        }
-    }
-    
-    // Now for the top edge Y axis moves
-    uint32_t temp_yl = pos_y + delta_y;
-    
-    temp_x = (uint16_t)(pos_x >> 16) + 1;
-    uint16_t temp_y_pixel = (uint16_t)(temp_yl >> 16) + 1;
-    
-    // Get position tile
-    if (delta_y > 0)
-    {
-        temp_y_pixel += 13;
-    }
-
-    temp_y = temp_y_pixel >> 4;
-    uint16_t temp_x_2 = (temp_x + 13) >> 4; // right edge
-    temp_x >>= 4;
-
-    // Left edge.
-    q = ((uint8_t)temp_y << map_extent_tiles_x_shiftcount) + temp_x;
-    q2 = ((uint8_t)temp_y << map_extent_tiles_x_shiftcount) + temp_x_2;
-
-    if (map_collision_buf[q] < 128 || map_collision_buf[q2] < 128)
-    {
-        delta_y = 0;
-        if ((delta_x | delta_y) == 0)
-        {
-            return 1;
+            if (temp_x_pixel < bg_scroll_x_bounds_min.full.high.a)
+            {
+                delta_x = 0;
+            }
+            else if (temp_x_pixel > bg_scroll_x_bounds_max.full.high.a + 256)
+            {
+                delta_x = 0;
+            }
         }
     }
 
-    if (bg_scroll_y_bounds_min.full.high.a != -32768)
+    if (has_y)
     {
-        if (temp_y_pixel < bg_scroll_y_bounds_min.full.high.a)
+        temp_yl.a = o->pos.y.a + delta_y;
+        
+        uint16_t temp_x = o->pos.x.lh.h + 1;
+        uint16_t temp_y_pixel = temp_yl.lh.h + 1;
+        
+        if (delta_y > 0)
+        {
+            temp_y_pixel += 13;
+        }
+
+        uint16_t temp_y = temp_y_pixel >> 4;
+        uint16_t temp_x_2 = (temp_x + 13) >> 4; // right edge
+        temp_x >>= 4;
+
+        uint16_t shiftcount = map_extent_tiles_x_shiftcount;
+        uint16_t shift_temp_y;
+        if (shiftcount == 6) {
+            shift_temp_y = temp_y << 6;
+        } else if (shiftcount == 5) {
+            shift_temp_y = temp_y << 5;
+        } else if (shiftcount == 7) {
+            shift_temp_y = temp_y << 7;
+        } else if (shiftcount == 4) {
+            shift_temp_y = temp_y << 4;
+        } else {
+            shift_temp_y = temp_y << shiftcount;
+        }
+        uint16_t q = shift_temp_y + temp_x;
+        uint16_t q2 = shift_temp_y + temp_x_2;
+
+        if (map_collision_buf[q] < 128 || map_collision_buf[q2] < 128)
         {
             delta_y = 0;
         }
-        else if (temp_y_pixel > bg_scroll_y_bounds_max.full.high.a + 224)
-        {
-            delta_y = 0;
-        }
 
-        if ((delta_x | delta_y) == 0)
+        if (bg_scroll_y_bounds_min.full.high.a != -32768)
         {
-            return 1;
+            if (temp_y_pixel < bg_scroll_y_bounds_min.full.high.a)
+            {
+                delta_y = 0;
+            }
+            else if (temp_y_pixel > bg_scroll_y_bounds_max.full.high.a + 224)
+            {
+                delta_y = 0;
+            }
         }
     }
 
-    // Add the deltas here
-    o->pos.x.a = pos_x + delta_x;
-    o->pos.y.a = pos_y + delta_y;
-    o->delta.x.a = delta_x;
-    o->delta.y.a = delta_y;
+    if (has_x)
+    {
+        if (delta_x == 0)
+        {
+            o->delta.x.a = 0;
+        }
+        else
+        {
+            o->pos.x.a = temp_xl.a;
+            o->r = temp_xl.lh.h + o->w;
+        }
+    }
 
-    // Update right and bottom edges
-    o->r = o->pos.x.lh.h + o->w;
-    o->b = o->pos.y.lh.h + o->h;
+    if (has_y)
+    {
+        if (delta_y == 0)
+        {
+            o->delta.y.a = 0;
+        }
+        else
+        {
+            o->pos.y.a = temp_yl.a;
+            o->b = temp_yl.lh.h + o->h;
+        }
+    }
 
     return 0;
 }
