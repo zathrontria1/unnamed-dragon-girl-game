@@ -23,7 +23,6 @@
 
 #include "gfx.h"
 
-
 ZP struct game_object * obj_player_pointer;
 
 ZP uint16_t obj_first_available;
@@ -102,18 +101,23 @@ void ObjectSystem_ProcessObjects()
     // New implementation
     struct game_object * ptr = (struct game_object *)&obj_general[0];
 
-    for (int i = 0; i < OBJ_GENERAL_MAX_COUNT; i++)
+    if (obj_active_count != 0)
     {
-        if (ptr->id == OBJID_NULL)
+        uint16_t processed = 0;
+        for (int i = 0; i < OBJ_GENERAL_MAX_COUNT; i++)
         {
+            if (ptr->id != OBJID_NULL)
+            {
+                void (*func)(struct game_object *) = ptr->func_ptr; 
+                func(ptr);
+                processed++;
+                if (processed >= obj_active_count)
+                {
+                    break;
+                }
+            }
             ptr++;
-            continue;
         }
-
-        void (*func)(struct game_object *) = ptr->func_ptr; 
-        func(ptr);
-
-        ptr++;
     }
 
     // Repeat for player hitboxes
@@ -123,10 +127,19 @@ void ObjectSystem_ProcessObjects()
 
     if(obj_hitbox_count_player != 0)
     {
+        uint16_t processed = 0;
         for (int i = 0; i < OBJ_PLAYERHITBOX_MAX_COUNT; i++)
         {
-            void (*func)(struct game_object *) = ptr->func_ptr; 
-            func(ptr);
+            if (ptr->id != OBJID_NULL)
+            {
+                void (*func)(struct game_object *) = ptr->func_ptr; 
+                func(ptr);
+                processed++;
+                if (processed >= obj_hitbox_count_player)
+                {
+                    break;
+                }
+            }
             ptr++;
         }
     }
@@ -144,11 +157,19 @@ void ObjectSystem_ProcessObjects()
 
     if (obj_hitbox_count_enemy != 0)
     {
+        uint16_t processed = 0;
         for (int i = 0; i < OBJ_ENEMYHITBOX_MAX_COUNT; i++)
         {
-            void (*func)(struct game_object *) = ptr->func_ptr; 
-            func(ptr);
-
+            if (ptr->id != OBJID_NULL)
+            {
+                void (*func)(struct game_object *) = ptr->func_ptr; 
+                func(ptr);
+                processed++;
+                if (processed >= obj_hitbox_count_enemy)
+                {
+                    break;
+                }
+            }
             ptr++;
         }
     }
