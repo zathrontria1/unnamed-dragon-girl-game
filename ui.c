@@ -454,6 +454,34 @@ void UserInterface_UpdateMoneyCounters()
 }
 
 
+void UserInterface_Internal_Format3U(char *buf, uint16_t val)
+{
+    if (val > 999)
+    {
+        val = 999;
+    }
+
+    if (val >= 100)
+    {
+        buf[0] = '0' + (val / 100);
+        val %= 100;
+        buf[1] = '0' + (val / 10);
+        buf[2] = '0' + (val % 10);
+    }
+    else if (val >= 10)
+    {
+        buf[0] = ' ';
+        buf[1] = '0' + (val / 10);
+        buf[2] = '0' + (val % 10);
+    }
+    else
+    {
+        buf[0] = ' ';
+        buf[1] = ' ';
+        buf[2] = '0' + val;
+    }
+}
+
 void UserInterface_UpdateEnemyCounters()
 {
     // Copy these values

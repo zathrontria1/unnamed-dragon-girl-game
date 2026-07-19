@@ -49,3 +49,5 @@ void UserInterface_CopyTextBuffer_Line(uint16_t y);
 void UserInterface_DrawEnemyHealthBar(struct game_object * o);
 
 void UserInterface_CopyUiGraphicsToVram(void);
+
+void UserInterface_Internal_Format3U(char *buf, uint16_t val);
