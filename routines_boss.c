@@ -539,7 +539,7 @@ void Routines_Boss_Test_Attack_Particle(struct game_object * o)
 
     uint8_t * temp_addr = AniSystem_GetDynamicFrame_EnemyBossParticle(o);
 
-    Routines_Shared_Draw(o, temp_addr, PAL_BOSS_TEST, 1, false, false); // Don't enable flicker here, it looks really strobey
+    Routines_Shared_Draw(o, temp_addr, PAL_BOSS_TEST << 9, 1, false, false); // Don't enable flicker here, it looks really strobey
 
     AniSystem_DrawDropShadow(o);
 

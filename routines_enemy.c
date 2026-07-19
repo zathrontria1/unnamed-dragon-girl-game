@@ -269,7 +269,7 @@ void Routines_Enemy_Slime(struct game_object * o)
     // Testing DMA on demand
     uint8_t * temp_addr = AniSystem_GetDynamicFrame_Slime(o);
 
-    Routines_Shared_Draw(o, temp_addr, PAL_SLIME, 1, false, false);
+    Routines_Shared_Draw(o, temp_addr, PAL_SLIME << 9, 1, false, false);
 
     return;
 }
@@ -517,7 +517,7 @@ void Routines_Enemy_Lizardman(struct game_object * o)
     // Testing DMA on demand
     uint8_t * temp_addr = AniSystem_GetDynamicFrame_Lizardman(o);
 
-    Routines_Shared_Draw(o, temp_addr, PAL_LIZARDMAN, 1, false, false);
+    Routines_Shared_Draw(o, temp_addr, PAL_LIZARDMAN << 9, 1, false, false);
 
     return;
 }
@@ -549,7 +549,7 @@ void Routines_Enemy_Slime_Bubble(struct game_object * o)
 
     uint8_t * temp_addr = AniSystem_GetDynamicFrame_Bubble(o);
 
-    Routines_Shared_Draw(o, temp_addr, PAL_BUBBLE_E, 0, true, false);
+    Routines_Shared_Draw(o, temp_addr, PAL_BUBBLE_E << 9, 0, true, false);
 
     return;
 }

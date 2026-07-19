@@ -584,7 +584,7 @@ void Routines_Player(struct game_object * o)
     }
     else
     {
-        Routines_Shared_Draw(o, temp_addr, PAL_PLAYER, 1, false, true);
+        Routines_Shared_Draw(o, temp_addr, PAL_PLAYER << 9, 1, false, true);
     }
 
     return;
