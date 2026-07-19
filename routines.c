@@ -103,7 +103,7 @@ void Routines_Interactables_Switch(struct game_object * o)
         // And while not in combat
         if (!o->struct_data.interactable_data.delay_time)
         {
-            if (CollisionCheck_InteractableTestPlayerAction(o))
+            if (event_interaction_x != -32728 && CollisionCheck_InteractableTestPlayerAction(o))
             {
                 if (!event_in_combat_shadow)
                 {
@@ -150,7 +150,7 @@ void Routines_Interactable_Sign(struct game_object * o)
         // And while not in combat
         if (o->struct_data.interactable_data.delay_time == 0)
         {
-            if (CollisionCheck_InteractableTestPlayerAction(o) != 0)
+            if (event_interaction_x != -32728 && CollisionCheck_InteractableTestPlayerAction(o) != 0)
             {
                 if (!event_in_combat_shadow)
                 {
@@ -193,7 +193,7 @@ void Routines_TreasureChest(struct game_object * o)
         {
             // Check if a player hit is on the sign
             // And while not in combat
-            if (CollisionCheck_InteractableTestPlayerAction(o) != 0)
+            if (event_interaction_x != -32728 && CollisionCheck_InteractableTestPlayerAction(o) != 0)
             {
                 if (!event_in_combat_shadow)
                 {
