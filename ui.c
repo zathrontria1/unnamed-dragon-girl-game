@@ -485,7 +485,7 @@ void UserInterface_Internal_Format3U(char *buf, uint16_t val)
 void UserInterface_UpdateEnemyCounters()
 {
     // Copy these values
-    char temp_string[8] = "   /   "; // 3 spaces, a /, and another 3 spaces
+    char temp_string[8];
 
     // The icon
     ui_enemy_counter[0] = 0x016e | 0x2000 | (PAL_UI_4BPP << 10);
