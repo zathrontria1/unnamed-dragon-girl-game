@@ -332,7 +332,6 @@ int16_t ObjectSystem_InstantiateObject(
     }
     obj_first_available = obj_general[i].next_free;
 
-    uint16_t j = 0;
     // perform additional checks for sprite slots
 
     if ((id != OBJID_PLAYER) && (id != OBJID_BOSS_TEST1))
@@ -344,17 +343,13 @@ int16_t ObjectSystem_InstantiateObject(
             
             if (k >= 128)
             {
-                // Out of VRAM slots
+                // Out of VRAM slots - Restore slot back to free list
+                obj_general[i].next_free = obj_first_available;
+                obj_first_available = i;
                 return -1;
             }
 
-            //if relevant bits are taken to as they shift all the way to bit 0 first for the lowest bit:
-            uint16_t temp_tilenum = 0; 
-            temp_tilenum |= (k & 0xf0) << 2;
-            temp_tilenum |= (k & 0x0c);
-            temp_tilenum |= (k & 0x02) << 4;
-            temp_tilenum |= (k & 0x01) << 1;
-            // (RRRR * 64) + (CC * 4) + (r * 32) + (c * 2);
+            uint16_t temp_tilenum = const_obj_vram_slot_to_tilenum[k];
 
             obj_general[i].struct_data.npc_data.tilenum = temp_tilenum;
             obj_general[i].struct_data.npc_data.vram_addr = temp_tilenum << 4; // mul by 16, size of a 8x8 tile - this is in words
@@ -364,17 +359,27 @@ int16_t ObjectSystem_InstantiateObject(
     struct game_object * p = &obj_general[i];
 
     p->id = id;
-    p->uid = ObjectSystem_GetUid();
+    
+    // Inline ObjectSystem_GetUid()
+    uint16_t temp_uid = obj_next_uid++;
+    if (obj_next_uid == 0)
+    {
+        obj_next_uid = 1;
+    }
+    p->uid = temp_uid;
+
     p->array_index = i;
     
-    p->pos.x.a = ((int32_t)x) << 16;
-    p->pos.y.a = ((int32_t)y) << 16;
+    p->pos.x.lh.h = x;
+    p->pos.x.lh.l = 0;
+    p->pos.y.lh.h = y;
+    p->pos.y.lh.l = 0;
 
     p->struct_data.npc_data.ttl = 0; // always reset
 
     p->struct_data.npc_data.ani.frame = 0;
 
-    if ((id >= OBJID_CONST_END_OF_UNSORTED_SPRITES) && ((id != OBJID_HITBOX_INVISIBLE) || (id != OBJID_HITBOX_INVISIBLE_E))) // mini objects don't need these
+    if ((id >= OBJID_CONST_END_OF_UNSORTED_SPRITES) && (id != OBJID_HITBOX_INVISIBLE) && (id != OBJID_HITBOX_INVISIBLE_E)) // mini objects don't need these
     {
         p->delta.x.a = 0;
         p->delta.y.a = 0;
@@ -393,7 +398,7 @@ int16_t ObjectSystem_InstantiateObject(
 
         p->facing = FACING_DOWN;
 
-        p->struct_data.npc_data.ani.display = (uint16_t)((uint32_t)AniSystem_GetDynamicFrame(p));
+        p->struct_data.npc_data.ani.display = 0; // No need to call AniSystem_GetDynamicFrame(p) as the result is unused
     }
     else
     {
@@ -403,8 +408,8 @@ int16_t ObjectSystem_InstantiateObject(
     if ((id >= OBJID_START_OF_INTERACTABLES) && (id <= OBJID_END_OF_INTERACTABLES))
     {
         p->state = STATE_SWITCH_OFF;
-        p->tile.x = (uint16_t)p->pos.x.lh.h >> 4;
-        p->tile.y = (uint16_t)p->pos.y.lh.h >> 4;
+        p->tile.x = (uint16_t)x >> 4;
+        p->tile.y = (uint16_t)y >> 4;
 
         if (id != OBJID_INTERACTABLE_LEVEL_WARP)
         {
@@ -455,25 +460,16 @@ int16_t ObjectSystem_InstantiateObject(
     }
     else
     {
-        if ((id == OBJID_DROP_MONEY) || (id == OBJID_DROP_REC_MEAT))
-        {
-            p->w = 16;
-            p->h = 16;
-        }
+        p->w = 16;
+        p->h = 16;
 
         if ((id == OBJID_FIREBALL) || (id == OBJID_HITBOX_INVISIBLE))
         {
             p->hit_type = 0x0001;
-
-            p->w = 16;
-            p->h = 16;
         }
         else if ((id == OBJID_HITBOX_INVISIBLE_E) || (id == OBJID_BUBBLE_E) || (id == OBJID_ARROW_E))
         {
             p->hit_type = 0x8001;
-
-            p->w = 16;
-            p->h = 16;
         }
         else
         {
@@ -493,8 +489,8 @@ int16_t ObjectSystem_InstantiateObject(
 
     ObjectSystem_SetFunctionPointer(p);
 
-    p->r = p->pos.x.lh.h + p->w;
-    p->b = p->pos.y.lh.h + p->h;
+    p->r = x + p->w;
+    p->b = y + p->h;
 
     return i;
 }
@@ -515,17 +511,25 @@ int16_t ObjectSystem_InstantiatePlayerHitbox(
     }
     obj_hitbox_player_first_available = obj_hitbox_player[i].next_free;
 
-    uint16_t j = 0;
-
     // Player hitboxes don't need VRAM
     struct game_object * p = &obj_hitbox_player[i];
 
     p->id = id;
-    p->uid = ObjectSystem_GetUid(); 
+    
+    // Inline ObjectSystem_GetUid()
+    uint16_t temp_uid = obj_next_uid++;
+    if (obj_next_uid == 0)
+    {
+        obj_next_uid = 1;
+    }
+    p->uid = temp_uid;
+
     p->array_index = i;
     
-    p->pos.x.a = ((int32_t)x) << 16;
-    p->pos.y.a = ((int32_t)y) << 16;
+    p->pos.x.lh.h = x;
+    p->pos.x.lh.l = 0;
+    p->pos.y.lh.h = y;
+    p->pos.y.lh.l = 0;
 
     p->struct_data.npc_data.ttl = 0; // always reset
     
@@ -547,8 +551,8 @@ int16_t ObjectSystem_InstantiatePlayerHitbox(
 
     ObjectSystem_SetFunctionPointer(p);
 
-    p->r = p->pos.x.lh.h + p->w;
-    p->b = p->pos.y.lh.h + p->h;
+    p->r = x + p->w;
+    p->b = y + p->h;
 
     return i;
 }
@@ -581,13 +585,7 @@ int16_t ObjectSystem_InstantiateEnemyHitbox(
 
         obj_hitbox_enemy_first_available = obj_hitbox_enemy[i].next_free;
 
-        //if relevant bits are taken to as they shift all the way to bit 0 first for the lowest bit:
-        uint16_t temp_tilenum = 0; 
-        temp_tilenum |= (k & 0xf0) << 2;
-        temp_tilenum |= (k & 0x0c);
-        temp_tilenum |= (k & 0x02) << 4;
-        temp_tilenum |= (k & 0x01) << 1;
-        // (RRRR * 64) + (CC * 4) + (r * 32) + (c * 2);
+        uint16_t temp_tilenum = const_obj_vram_slot_to_tilenum[k];
 
         obj_hitbox_enemy[i].struct_data.npc_data.tilenum = temp_tilenum;
         obj_hitbox_enemy[i].struct_data.npc_data.vram_addr = temp_tilenum << 4; // mul by 16, size of a 8x8 tile - this is in words
@@ -600,11 +598,21 @@ int16_t ObjectSystem_InstantiateEnemyHitbox(
     struct game_object * p = &obj_hitbox_enemy[i];
 
     p->id = id;
-    p->uid = ObjectSystem_GetUid(); 
+    
+    // Inline ObjectSystem_GetUid()
+    uint16_t temp_uid = obj_next_uid++;
+    if (obj_next_uid == 0)
+    {
+        obj_next_uid = 1;
+    }
+    p->uid = temp_uid;
+
     p->array_index = i;
     
-    p->pos.x.a = ((int32_t)x) << 16;
-    p->pos.y.a = ((int32_t)y) << 16;
+    p->pos.x.lh.h = x;
+    p->pos.x.lh.l = 0;
+    p->pos.y.lh.h = y;
+    p->pos.y.lh.l = 0;
 
     p->struct_data.npc_data.ttl = 0; // always reset
     
@@ -615,7 +623,7 @@ int16_t ObjectSystem_InstantiateEnemyHitbox(
 
     p->state = STATE_IDLE;
     p->facing = FACING_DOWN;
-    p->struct_data.npc_data.ani.display = (uint16_t)((uint32_t)AniSystem_GetDynamicFrame_Stateless(p));
+    p->struct_data.npc_data.ani.display = 0; // No need to call AniSystem_GetDynamicFrame_Stateless(p) as the result is unused
     p->struct_data.npc_data.ani.last_address = 0; // make this invalid
 
     obj_hitbox_count_enemy++;
@@ -627,8 +635,8 @@ int16_t ObjectSystem_InstantiateEnemyHitbox(
 
     ObjectSystem_SetFunctionPointer(p);
 
-    p->r = p->pos.x.lh.h + p->w;
-    p->b = p->pos.y.lh.h + p->h;
+    p->r = x + p->w;
+    p->b = y + p->h;
 
     return i;
 }
@@ -911,19 +919,6 @@ void ObjectSystem_CleanupEnemyHitboxes()
     return;
 }
 
-uint16_t ObjectSystem_GetUid()
-{
-    uint16_t temp_uid = obj_next_uid;
-    obj_next_uid++;
-
-    if (obj_next_uid == 0)
-    {
-        obj_next_uid++;
-    }
-
-    return temp_uid;
-}
-
 void ObjectSystem_SetFunctionPointer(struct game_object * o)
 {
     switch (o->id)
@@ -1042,3 +1037,22 @@ bool ObjectSystem_GetEnemyData(struct game_object * o)
 
     return true;
 }
+
+const uint16_t const_obj_vram_slot_to_tilenum[128] = {
+    // Row 0 (0x00)
+    0x0000, 0x0002, 0x0020, 0x0022, 0x0004, 0x0006, 0x0024, 0x0026, 0x0008, 0x000a, 0x0028, 0x002a, 0x000c, 0x000e, 0x002c, 0x002e,
+    // Row 1 (0x40)
+    0x0040, 0x0042, 0x0060, 0x0062, 0x0044, 0x0046, 0x0064, 0x0066, 0x0048, 0x004a, 0x0068, 0x006a, 0x004c, 0x004e, 0x006c, 0x006e,
+    // Row 2 (0x80)
+    0x0080, 0x0082, 0x00a0, 0x00a2, 0x0084, 0x0086, 0x00a4, 0x00a6, 0x0088, 0x008a, 0x00a8, 0x00aa, 0x008c, 0x008e, 0x00ac, 0x00ae,
+    // Row 3 (0xc0)
+    0x00c0, 0x00c2, 0x00e0, 0x00e2, 0x00c4, 0x00c6, 0x00e4, 0x00e6, 0x00c8, 0x00ca, 0x00e8, 0x00ea, 0x00cc, 0x00ce, 0x00ec, 0x00ee,
+    // Row 4 (0x100)
+    0x0100, 0x0102, 0x0120, 0x0122, 0x0104, 0x0106, 0x0124, 0x0126, 0x0108, 0x010a, 0x0128, 0x012a, 0x010c, 0x010e, 0x012c, 0x012e,
+    // Row 5 (0x140)
+    0x0140, 0x0142, 0x0160, 0x0162, 0x0144, 0x0146, 0x0164, 0x0166, 0x0148, 0x014a, 0x0168, 0x016a, 0x014c, 0x014e, 0x016c, 0x016e,
+    // Row 6 (0x180)
+    0x0180, 0x0182, 0x01a0, 0x01a2, 0x0184, 0x0186, 0x01a4, 0x01a6, 0x0188, 0x018a, 0x01a8, 0x01aa, 0x018c, 0x018e, 0x01ac, 0x01ae,
+    // Row 7 (0x1c0)
+    0x01c0, 0x01c2, 0x01e0, 0x01e2, 0x01c4, 0x01c6, 0x01e4, 0x01e6, 0x01c8, 0x01ca, 0x01e8, 0x01ea, 0x01cc, 0x01ce, 0x01ec, 0x01ee
+};

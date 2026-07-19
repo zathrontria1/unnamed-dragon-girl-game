@@ -50,6 +50,8 @@ extern uint16_t obj_hitbox_enemy_delete_queue[OBJ_ENEMYHITBOX_MAX_COUNT];
 extern uint16_t obj_hitbox_enemy_delete_queue_count;
 extern uint16_t obj_hitbox_count_enemy;
 
+extern const uint16_t const_obj_vram_slot_to_tilenum[128];
+
 void ObjectSystem_ProcessObjects();
 
 void ObjectSystem_ResetStandardObjects(int start_index);
@@ -80,7 +82,6 @@ void ObjectSystem_SetFunctionPointer(struct game_object * o);
 uint16_t ObjectSystem_List_InstantiateNpcs(const struct obj_list_entry_spawns* list, int16_t offset_x, int16_t offset_y);
 uint16_t ObjectSystem_List_InstantiateSpawners(const struct obj_list_entry_spawners* list);
 uint16_t ObjectSystem_List_InstantiateInteractables(const struct obj_list_entry_interactable* list);
-uint16_t ObjectSystem_GetUid(void);
 
 void ObjectSystem_DestroyStandardObject(uint16_t i);
 void ObjectSystem_DestroyPlayerHitbox(uint16_t i);
