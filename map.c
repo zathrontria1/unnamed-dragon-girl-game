@@ -607,9 +607,64 @@ bool MapSystem_Tilemap_BuildColumn(const uint8_t * p, const uint16_t * lut, int1
             map_column[i] = 0;
         }
     }
+    else if (tile_y >= 0 && tile_y + 15 < map_extent_tiles_y)
+    {
+        // Fast path: Y is fully in-bounds for all 16 iterations
+        int16_t split_index = 15 - (tile_y & 0x0f);
+        uint16_t screen_adjustment = (((map_extent_x >> 8) - 1) << 8);
+
+        if (!odd)
+        {
+            // Even column loop
+            for (int i = 0; i <= split_index; i++)
+            {
+                const uint16_t *lut_ptr = lut + ((*p) << 2);
+                map_column[j] = lut_ptr[0];
+                map_column[j+1] = lut_ptr[2];
+                p += 16;
+                j += 2;
+            }
+
+            p += screen_adjustment;
+            j = 0;
+
+            for (int i = split_index + 1; i < 16; i++)
+            {
+                const uint16_t *lut_ptr = lut + ((*p) << 2);
+                map_column[j] = lut_ptr[0];
+                map_column[j+1] = lut_ptr[2];
+                p += 16;
+                j += 2;
+            }
+        }
+        else
+        {
+            // Odd column loop
+            for (int i = 0; i <= split_index; i++)
+            {
+                const uint16_t *lut_ptr = lut + ((*p) << 2);
+                map_column[j] = lut_ptr[1];
+                map_column[j+1] = lut_ptr[3];
+                p += 16;
+                j += 2;
+            }
+
+            p += screen_adjustment;
+            j = 0;
+
+            for (int i = split_index + 1; i < 16; i++)
+            {
+                const uint16_t *lut_ptr = lut + ((*p) << 2);
+                map_column[j] = lut_ptr[1];
+                map_column[j+1] = lut_ptr[3];
+                p += 16;
+                j += 2;
+            }
+        }
+    }
     else
     {
-        // X is in range.
+        // Slow path fallback: tile_y is near/out of map boundaries
         for (int i = 0; i < 16; i++)
         {
             if ((tile_y < 0) || (tile_y >= map_extent_tiles_y))
@@ -710,9 +765,96 @@ void MapSystem_Tilemap_BuildRow(const uint8_t * p, const uint16_t * lut, int16_t
             map_row[1][i] = 0;
         }
     }
+    else if (tile_x >= 0 && tile_x + 31 < map_extent_tiles_x)
+    {
+        // Fast path: X is fully in-bounds for all 32 iterations
+        int16_t split_index = 15 - (tile_x & 0x0f);
+
+        if (!odd)
+        {
+            // Loop 1
+            for (int i = 0; i <= split_index; i++)
+            {
+                const uint16_t *lut_ptr = lut + ((*p) << 2);
+                map_row[temp_internal_section][l] = lut_ptr[0];
+                map_row[temp_internal_section][l+1] = lut_ptr[1];
+                p++;
+                l += 2;
+            }
+
+            p += 240;
+            l = 0;
+            temp_internal_section ^= 0x0001;
+
+            // Loop 2
+            for (int i = split_index + 1; i <= split_index + 16; i++)
+            {
+                const uint16_t *lut_ptr = lut + ((*p) << 2);
+                map_row[temp_internal_section][l] = lut_ptr[0];
+                map_row[temp_internal_section][l+1] = lut_ptr[1];
+                p++;
+                l += 2;
+            }
+
+            p += 240;
+            l = 0;
+            temp_internal_section ^= 0x0001;
+
+            // Loop 3
+            for (int i = split_index + 17; i < 32; i++)
+            {
+                const uint16_t *lut_ptr = lut + ((*p) << 2);
+                map_row[temp_internal_section][l] = lut_ptr[0];
+                map_row[temp_internal_section][l+1] = lut_ptr[1];
+                p++;
+                l += 2;
+            }
+        }
+        else
+        {
+            // Loop 1 (odd)
+            for (int i = 0; i <= split_index; i++)
+            {
+                const uint16_t *lut_ptr = lut + ((*p) << 2);
+                map_row[temp_internal_section][l] = lut_ptr[2];
+                map_row[temp_internal_section][l+1] = lut_ptr[3];
+                p++;
+                l += 2;
+            }
+
+            p += 240;
+            l = 0;
+            temp_internal_section ^= 0x0001;
+
+            // Loop 2 (odd)
+            for (int i = split_index + 1; i <= split_index + 16; i++)
+            {
+                const uint16_t *lut_ptr = lut + ((*p) << 2);
+                map_row[temp_internal_section][l] = lut_ptr[2];
+                map_row[temp_internal_section][l+1] = lut_ptr[3];
+                p++;
+                l += 2;
+            }
+
+            p += 240;
+            l = 0;
+            temp_internal_section ^= 0x0001;
+
+            // Loop 3 (odd)
+            for (int i = split_index + 17; i < 32; i++)
+            {
+                const uint16_t *lut_ptr = lut + ((*p) << 2);
+                map_row[temp_internal_section][l] = lut_ptr[2];
+                map_row[temp_internal_section][l+1] = lut_ptr[3];
+                p++;
+                l += 2;
+            }
+        }
+    }
     else
     {
-        for (int i = 0; i < 32; i++) // Two effective rows, L and R.
+        // Slow path fallback: tile_x is near/out of map boundaries
+        for (int i = 0; i < 32; i++)
         {
             if ((tile_x < 0) || (tile_x >= map_extent_tiles_x))
             {
@@ -723,10 +865,6 @@ void MapSystem_Tilemap_BuildRow(const uint8_t * p, const uint16_t * lut, int16_t
             }
             else
             {
-                // Note: for row building:
-                // [0][i] is for the left 2 rows
-                // [1][i] is for the right 2 rows.
-                // Change the map selection after crossing a boundary.
                 if (!odd)
                 {
                     map_row[temp_internal_section][l] = lut[((*p) << 2)]; // Top left
@@ -753,7 +891,6 @@ void MapSystem_Tilemap_BuildRow(const uint8_t * p, const uint16_t * lut, int16_t
                 l = 0;
                 temp_internal_section ^= 0x0001;
             }
-            
         }
     }
 
