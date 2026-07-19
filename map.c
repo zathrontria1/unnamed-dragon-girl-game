@@ -98,7 +98,7 @@ void MapSystem_BuildCollisionTable()
     uint16_t y = 0;
 
     // Need to convert the map from screen-based to linear for further performance improvements
-    for (uint16_t i = 0; i < temp_len; i++)
+    for (unsigned int i = 0; i < temp_len; i++)
     {
         uint16_t temp_start_x = (x & 0xf);
         uint16_t temp_screen_x = x >> 4;
