@@ -376,26 +376,26 @@ void UserInterface_UpdateMoneyCounters()
     }
 
     uint32_t temp_money = ui_display_money + temp_counter_adjust;
-    uint32_t temp_money_copy;
+    uint16_t temp_money_copy;
 
     // Reduce the visible length of the money.
     // Every digit is a significant cost in displaying the number.
     if (temp_money >= 10000000)
     {
         // at least 10000K
-        temp_money_copy = temp_money / 1000000;
+        temp_money_copy = (uint16_t)(temp_money / 1000000);
         temp_string[4] = 'M';
     }
     else if (temp_money >= 10000)
     {
         // at least 10000, exceeding 4 digits counter.
-        temp_money_copy = temp_money / 1000;
+        temp_money_copy = (uint16_t)(temp_money / 1000);
         temp_string[4] = 'K';
     }
     else
     {
         // less than 10K, can be displayed fully
-        temp_money_copy = temp_money;
+        temp_money_copy = (uint16_t)temp_money;
     }
 
     // The icon
