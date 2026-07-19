@@ -9,97 +9,138 @@
 
 #include "hittest.h"
 
+// Function-like macros to reduce overhead of repeated code. These are used to check the hitboxes of player and enemy objects, respectively.
+
+#define CHECK_HITBOX(idx) \
+    if (obj_hitbox_player[idx].id != OBJID_NULL) \
+    { \
+        if ((obj_hitbox_player[idx].r >= ox) && \
+            (or >= obj_hitbox_player[idx].pos.x.lh.h) && \
+            (ob >= obj_hitbox_player[idx].pos.y.lh.h) && \
+            (obj_hitbox_player[idx].b >= oy)) \
+        { \
+            return &obj_hitbox_player[idx]; \
+        } \
+    }
+
+#define CHECK_ENEMY_HITBOX(idx) \
+    if (obj_hitbox_enemy[idx].id != OBJID_NULL) \
+    { \
+        if (obj_hitbox_enemy[idx].hit_type == 0x8001) \
+        { \
+            if ((obj_hitbox_enemy[idx].r >= tx) && \
+                (tr >= obj_hitbox_enemy[idx].pos.x.lh.h) && \
+                (tb >= obj_hitbox_enemy[idx].pos.y.lh.h) && \
+                (obj_hitbox_enemy[idx].b >= ty)) \
+            { \
+                if (hit == NULL) \
+                { \
+                    hit = &obj_hitbox_enemy[idx]; \
+                } \
+                if (obj_hitbox_enemy[idx].id != OBJID_BOSS_TEST1_ATTACK1) \
+                { \
+                    obj_hitbox_enemy[idx].struct_data.npc_data.ttl = 1; \
+                } \
+                else \
+                { \
+                    obj_hitbox_enemy[idx].struct_data.npc_data.ttl = 6; \
+                } \
+            } \
+        } \
+    }
+
 // Call from an enemy to hit test
 struct game_object * CollisionCheck_EnemyTestPlayer(struct game_object * o)
 {
-    struct game_object * p = &obj_hitbox_player[0];
+    if (obj_hitbox_count_player == 0)
+    {
+        return NULL;
+    }
+
     int16_t ox = o->pos.x.lh.h;
     int16_t oy = o->pos.y.lh.h;
     int16_t or = o->r;
     int16_t ob = o->b;
-    
-    for (int i = 0; i < OBJ_PLAYERHITBOX_MAX_COUNT; i++)
-    {
-        if (p->id != OBJID_NULL)
-        {
-            if ((p->r >= ox) &&
-                (or >= p->pos.x.lh.h) &&
-                (ob >= p->pos.y.lh.h) &&
-                (p->b >= oy))
-            {
-                return p;
-            }
-        }
-        
-        p++;
-    }
+
+    CHECK_HITBOX(0)
+    CHECK_HITBOX(1)
+    CHECK_HITBOX(2)
+    CHECK_HITBOX(3)
+    CHECK_HITBOX(4)
+    CHECK_HITBOX(5)
+    CHECK_HITBOX(6)
+    CHECK_HITBOX(7)
+    CHECK_HITBOX(8)
+    CHECK_HITBOX(9)
+    CHECK_HITBOX(10)
+    CHECK_HITBOX(11)
+    CHECK_HITBOX(12)
+    CHECK_HITBOX(13)
+    CHECK_HITBOX(14)
+    CHECK_HITBOX(15)
 
     return NULL;
 }
 
 uint16_t CollisionCheck_InteractableTestPlayerAction(struct game_object * o)
 {
-    int16_t x1 = o->pos.x.lh.h;
-    int16_t y1 = o->pos.y.lh.h;
-
-    if (CollisionCheck_Aabb_Direct_Square(x1, event_interaction_x, y1, event_interaction_y, 16, 16) == 0)
+    if (event_interaction_x == -32728)
     {
-        return 1;
+        return 0;
     }
 
-    return 0;
+    if ((event_interaction_x + 16) < o->pos.x.lh.h)
+    {
+        return 0;
+    }
+    if (o->r < event_interaction_x)
+    {
+        return 0;
+    }
+    if ((event_interaction_y + 16) < o->pos.y.lh.h)
+    {
+        return 0;
+    }
+    if (o->b < event_interaction_y)
+    {
+        return 0;
+    }
+
+    return 1;
 }
 
 // Call from player to hit test
 struct game_object * CollisionCheck_PlayerTestEnemy(struct game_object * o)
 {
-    // shrink the player's hitbox
-    // for this we'll make a copy
-    struct game_object temp = *o;
-    temp.w = 2;
-    temp.h = 2;
+    if (obj_hitbox_count_enemy == 0)
+    {
+        return NULL;
+    }
 
-    int16_t tx = temp.pos.x.lh.h;
-    int16_t ty = temp.pos.y.lh.h;
-    int16_t tr = temp.r;
-    int16_t tb = temp.b;
+    // shrink the player's hitbox to 2x2, centered within the original width and height
+    int16_t tx = o->pos.x.lh.h + (o->w >> 1) - 1;
+    int16_t ty = o->pos.y.lh.h + (o->h >> 1) - 1;
+    int16_t tr = tx + 2;
+    int16_t tb = ty + 2;
 
     struct game_object * hit = NULL;
-    struct game_object * p = &obj_hitbox_enemy[0];
 
-    // There's a bug with the cached list.
-    // For now reverted to testing all objects.
-    for (int i = 0; i < OBJ_ENEMYHITBOX_MAX_COUNT; i++)
-    {
-        // Test only objects that participate
-        if (p->id != OBJID_NULL)
-        {
-            if (p->hit_type == 0x8001)
-            {
-                if ((p->r >= tx) &&
-                    (tr >= p->pos.x.lh.h) &&
-                    (tb >= p->pos.y.lh.h) &&
-                    (p->b >= ty))
-                {
-                    if (hit == NULL)
-                    {
-                        hit = p;
-                    }
-
-                    if (hit->id != OBJID_BOSS_TEST1_ATTACK1)
-                    {
-                        p->struct_data.npc_data.ttl = 1;
-                    }
-                    else
-                    {
-                        p->struct_data.npc_data.ttl = 6; // Give 6 frames buffer
-                    }
-                }
-            }
-        }
-
-        p++;
-    }
+    CHECK_ENEMY_HITBOX(0)
+    CHECK_ENEMY_HITBOX(1)
+    CHECK_ENEMY_HITBOX(2)
+    CHECK_ENEMY_HITBOX(3)
+    CHECK_ENEMY_HITBOX(4)
+    CHECK_ENEMY_HITBOX(5)
+    CHECK_ENEMY_HITBOX(6)
+    CHECK_ENEMY_HITBOX(7)
+    CHECK_ENEMY_HITBOX(8)
+    CHECK_ENEMY_HITBOX(9)
+    CHECK_ENEMY_HITBOX(10)
+    CHECK_ENEMY_HITBOX(11)
+    CHECK_ENEMY_HITBOX(12)
+    CHECK_ENEMY_HITBOX(13)
+    CHECK_ENEMY_HITBOX(14)
+    CHECK_ENEMY_HITBOX(15)
 
     return hit;
 }
