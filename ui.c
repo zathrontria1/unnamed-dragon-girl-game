@@ -490,7 +490,10 @@ void UserInterface_UpdateEnemyCounters()
     // The icon
     ui_enemy_counter[0] = 0x016e | 0x2000 | (PAL_UI_4BPP << 10);
 
-    snprintf((char *)&temp_string, 8, "%3u/%3u", obj_enemies_defeated, obj_enemies_max_count);
+    UserInterface_Internal_Format3U(&temp_string[0], obj_enemies_defeated);
+    temp_string[3] = '/';
+    UserInterface_Internal_Format3U(&temp_string[4], obj_enemies_max_count);
+    temp_string[7] = '\0';
 
     for (int i = 0; i < 8; i++)
     {
