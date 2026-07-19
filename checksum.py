@@ -94,6 +94,10 @@ def main():
 		'--exhirom', action='store_true',
 		help='Input file uses LoROM mapping (header location at 0x40ffxx)')
 
+	parser.add_argument(
+		'--pad', action='store_true',
+		help='Pad the output ROM size to the next power of 2 (minimum 64KB)')
+
 	logging_args = parser.add_mutually_exclusive_group()
 
 	logging_args.add_argument(
@@ -120,6 +124,11 @@ def main():
 		header_addr = mapping_header_addr(mapping_type)
 
 		rom = input_file.read()
+		if cmd_args.pad:
+			valid_size = max(64 * 1024, ceil_pow2(len(rom)))
+			if len(rom) < valid_size:
+				rom = rom + b'\0' * (valid_size - len(rom))
+
 		old_checksum = int.from_bytes(rom[header_addr + 0xde:header_addr + 0xdf + 1], 'little')
 		old_complement = int.from_bytes(rom[header_addr + 0xdc:header_addr + 0xdd + 1], 'little')
 
