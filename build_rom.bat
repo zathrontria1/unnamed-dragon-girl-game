@@ -29,6 +29,9 @@ REM compute and patch the checksum
 python .\checksum.py --hirom --pad %sfc_name%_temp.sfc -o %sfc_name%.sfc
 DEL %sfc_name%_temp.sfc
 
+REM display how much ROM is used
+python .\check_rom_size.py
+
 REM fix symbols
 python .\reprocess_symbols.py %sfc_name%.sym
 
