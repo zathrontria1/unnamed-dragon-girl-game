@@ -19,5 +19,5 @@ void Routines_Dummy(struct game_object * o);
 bool Routines_Shared_StatusMaintenance(struct game_object * o);
 void Routines_Shared_CheckIfDead(struct game_object * o);
 
-void Routines_Shared_Draw(struct game_object * o, uint8_t * spr_addr, int pal, int layer, bool always_flicker, bool is_player);
+void Routines_Shared_Draw(struct game_object * o, uint8_t * spr_addr, uint16_t pal_shifted, int layer, bool always_flicker, bool is_player);
 void Routines_Shared_DrawFixed(struct game_object * o, uint16_t tileattrib, int layer, bool always_flicker);

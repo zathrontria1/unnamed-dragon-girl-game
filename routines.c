@@ -576,7 +576,7 @@ void Routines_Shared_CheckIfDead(struct game_object * o)
 
     The sign bit in the sprite address pointer determines horizontal flipping.
 */
-void Routines_Shared_Draw(struct game_object * o, uint8_t * spr_addr, int pal, int layer, bool always_flicker, bool is_player)
+void Routines_Shared_Draw(struct game_object * o, uint8_t * spr_addr, uint16_t pal_shifted, int layer, bool always_flicker, bool is_player)
 {
     struct game_data_npc * npc_data = &o->struct_data.npc_data;
 
