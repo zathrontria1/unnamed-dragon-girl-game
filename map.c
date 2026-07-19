@@ -144,11 +144,11 @@ void MapSystem_Tilemap_RegenerateTilemap()
     // or put it in another way
     // bg scroll div 16 on each axis
     // note that for the purposes of the tilemap builder always start slightly from the left and top edges - 7 and 1 tiles off on X and Y.
-    for (int16_t i = temp_x_tile_offset_adj - 1; i < temp_x_tile_offset_adj_target; )
+    for (int i = temp_x_tile_offset_adj; i < temp_x_tile_offset_adj_target; )
     {
         uint16_t temp_section = MapSystem_Tilemap_BuildColumn(p, map_lut, i, temp_y_tile_offset, temp_odd);
 
-        uint16_t temp_x_wrap = (((temp_x_tile_offset+24) & 0x1f) << 1) & 0x1f;
+        uint16_t temp_x_wrap = ((uint16_t)i & 0x000f) << 1;
 
         if (temp_odd == 0x0000)
         {
@@ -159,7 +159,6 @@ void MapSystem_Tilemap_RegenerateTilemap()
         {
             DmaSystem_AddItemToQueue((uint8_t *)&map_column[0], (TILEMAP_ADDR_GAME_MAP+(temp_section << 10)+temp_x_wrap+1), 64, (VRAM_INCHIGH|VRAM_ADRSTINC_32), 0);
             temp_odd = 0x0000;
-            temp_x_tile_offset++;
             i++;
         }
 
