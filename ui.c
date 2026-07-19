@@ -693,216 +693,82 @@ void UserInterface_DrawWindowBackground(uint16_t x, uint16_t y, uint16_t w, uint
         return;
     }
 
-    // First column
-    for (int i = y; i < y+h; i++)
-    {
-        if (i >= (SCREEN_HEIGHT >> 3))
-        {
-            // Over last row
-            break;
-        }
+    uint16_t end_y = y + h;
 
-        if (i - y == 0)
+    // Check that the end of the window is not outside the screen. If it is, truncate it to the screen size.
+    if (end_y > (SCREEN_HEIGHT >> 3))
+    {
+        end_y = (SCREEN_HEIGHT >> 3);
+    }
+
+    uint16_t tile_attr = 0x2000 | (PAL_UI_4BPP << 10);
+    uint16_t w_is_even = ((w & 1) == 0);
+
+    for (unsigned int i = y; i < end_y; i++)
+    {
+        uint16_t row_index = i - y;
+        uint16_t base_tile;
+
+        if (row_index == 0)
         {
             // First row
-            ui_window_background[i][x] = 0x0170 | 0x2000 | (PAL_UI_4BPP << 10);
+            base_tile = 0x0170;
         }
-        else if ((i - y == 1) && (i != (y + h - 1)))
-        {
-            // Second row, and not the last row
-            ui_window_background[i][x] = 0x0180 | 0x2000 | (PAL_UI_4BPP << 10);
-        }
-        else if (i == (y + h - 2))
-        {
-            // Second to last row
-            ui_window_background[i][x] = 0x0190 | 0x2000 | (PAL_UI_4BPP << 10);
-        }
-        else if (i == (y + h - 1))
+        else if (row_index == h - 1)
         {
             // Last row
-            if ((h & 0x1) == 0)
-            {
-                // row height is even
-                ui_window_background[i][x] = 0x01a0 | 0x2000 | (PAL_UI_4BPP << 10);
-            }
-            else
-            {
-                // row height is odd
-                ui_window_background[i][x] = 0x01b0 | 0x2000 | (PAL_UI_4BPP << 10);
-            }
-            
+            base_tile = (h & 1) ? 0x01b0 : 0x01a0;
         }
-        else if ((i - y) & 0x0001 == 1)
+        else if (row_index == 1)
+        {
+            // Second row
+            base_tile = 0x0180;
+        }
+        else if (row_index == h - 2)
+        {
+            // Second to last row
+            base_tile = 0x0190;
+        }
+        else if (row_index & 1)
         {
             // Odd row
-            ui_window_background[i][x] = 0x0180 | 0x2000 | (PAL_UI_4BPP << 10);
+            base_tile = 0x0180;
         }
         else
         {
             // Even row
-            ui_window_background[i][x] = 0x0190 | 0x2000 | (PAL_UI_4BPP << 10);
+            base_tile = 0x0190;
         }
-    }
 
-    // Middle columns
-    if (w-2 > 0)
-    {
-        for (int i = y; i < y+h; i++)
+        uint16_t *row_ptr = ui_window_background[i];
+        
+        // Draw first column
+        row_ptr[x] = base_tile | tile_attr;
+
+        if (w > 1)
         {
-            if (i >= (SCREEN_HEIGHT >> 3))
-            {
-                // Over last row
-                break;
-            }
+            // Draw rightmost column
+            uint16_t right_tile = w_is_even ? 3 : 4;
+            row_ptr[x + w - 1] = (base_tile + right_tile) | tile_attr;
 
-            for (int j = x+1; j < x+3; j++)
-            //for (int j = x+1; j < x+w-1; j++)
+            // Draw middle columns
+            if (w > 2)
             {
-                if (j >= 32)
+                row_ptr[x + 1] = (base_tile + 1) | tile_attr;
+                if (w > 3)
                 {
-                    // Over last column
-                    break;
-                }
-
-                if (i - y == 0)
-                {
-                    // First row
-                    ui_window_background[i][j] = (0x0171 + ((j + x + 1) & 0x1)) | 0x2000 | (PAL_UI_4BPP << 10);
-                }
-                else if (i == (y + h - 1))
-                {
-                    // Last row
-                    if ((h & 0x1) == 0)
+                    row_ptr[x + 2] = (base_tile + 2) | tile_attr;
+                    
+                    int16_t block_len = (w - 4) << 1;
+                    if (block_len >= 2)
                     {
-                        // row height is even
-                        ui_window_background[i][j] = (0x01a1 + ((j + x + 1) & 0x1))  | 0x2000 | (PAL_UI_4BPP << 10);
-                    }
-                    else
-                    {
-                        // row height is odd
-                        ui_window_background[i][j] = (0x01b1 + ((j + x + 1) & 0x1))  | 0x2000 | (PAL_UI_4BPP << 10);
+                        // Fill the rest using a copy
+                        System_CopyBlock((uint8_t *)&row_ptr[x + 1], (uint8_t *)&row_ptr[x + 3], block_len);
                     }
                 }
-                else if ((i - y) & 0x0001 == 1)
-                {
-                    // Odd row
-                    ui_window_background[i][j] = (0x0181 + ((j + x + 1) & 0x1)) | 0x2000 | (PAL_UI_4BPP << 10);
-                }
-                else
-                {
-                    // Even row
-                    ui_window_background[i][j] = (0x0191 + ((j + x + 1) & 0x1)) | 0x2000 | (PAL_UI_4BPP << 10);
-                }
-
-                // Set up block moves after all columns are built.
-                int16_t block_len = (w-4) << 1;
-                if (block_len >= 2)
-                {
-                    // Row can be block moved
-                    System_CopyBlock((uint8_t *)&ui_window_background[i][x+1], (uint8_t *)&ui_window_background[i][x+3], block_len);
-                }
             }
         }
     }
-
-    // Rightmost column
-    for (int i = y; i < y+h; i++)
-    {
-        if (i >= (SCREEN_HEIGHT >> 3))
-        {
-            // Over last row
-            break;
-        }
-
-        if ((w & 0x1) == 0)
-        {
-            // Column width is even
-            if (i - y == 0)
-            {
-                // First row
-                ui_window_background[i][x+w-1] = 0x0173 | 0x2000 | (PAL_UI_4BPP << 10);
-            }
-            else if ((i - y == 1) && (i != (y + h - 1)))
-            {
-                // Second row, and not the last row
-                ui_window_background[i][x+w-1] = 0x0183 | 0x2000 | (PAL_UI_4BPP << 10);
-            }
-            else if (i == (y + h - 2))
-            {
-                // Second to last row
-                ui_window_background[i][x+w-1] = 0x0193 | 0x2000 | (PAL_UI_4BPP << 10);
-            }
-            else if (i == (y + h - 1))
-            {
-                // Last row
-                if ((h & 0x1) == 0)
-                {
-                    // row height is even
-                    ui_window_background[i][x+w-1] = 0x01a3 | 0x2000 | (PAL_UI_4BPP << 10);
-                }
-                else
-                {
-                    // row height is odd
-                    ui_window_background[i][x+w-1] = 0x01b3 | 0x2000 | (PAL_UI_4BPP << 10);
-                }
-            }
-            else if ((i - y) & 0x0001 == 1)
-            {
-                // Odd row
-                ui_window_background[i][x+w-1] = 0x0183 | 0x2000 | (PAL_UI_4BPP << 10);
-            }
-            else
-            {
-                // Even row
-                ui_window_background[i][x+w-1] = 0x0193 | 0x2000 | (PAL_UI_4BPP << 10);
-            }
-        }
-        else
-        {
-            // Column width is odd
-            if (i - y == 0)
-            {
-                // First row
-                ui_window_background[i][x+w-1] = 0x0174 | 0x2000 | (PAL_UI_4BPP << 10);
-            }
-            else if ((i - y == 1) && (i != (y + h - 1)))
-            {
-                // Second row, and not the last row
-                ui_window_background[i][x+w-1] = 0x0184 | 0x2000 | (PAL_UI_4BPP << 10);
-            }
-            else if (i == (y + h - 2))
-            {
-                // Second to last row
-                ui_window_background[i][x+w-1] = 0x0194 | 0x2000 | (PAL_UI_4BPP << 10);
-            }
-            else if (i == (y + h - 1))
-            {
-                // Last row
-                if ((h & 0x1) == 0)
-                {
-                    // row height is even
-                    ui_window_background[i][x+w-1] = 0x01a4 | 0x2000 | (PAL_UI_4BPP << 10);
-                }
-                else
-                {
-                    // row height is odd
-                    ui_window_background[i][x+w-1] = 0x01b4 | 0x2000 | (PAL_UI_4BPP << 10);
-                }
-            }
-            else if ((i - y) & 0x0001 == 1)
-            {
-                // Odd row
-                ui_window_background[i][x+w-1] = 0x0184 | 0x2000 | (PAL_UI_4BPP << 10);
-            }
-            else
-            {
-                // Even row
-                ui_window_background[i][x+w-1] = 0x0194 | 0x2000 | (PAL_UI_4BPP << 10);
-            }
-        }
-    }
-    
-    return;
 }
 
 // Draws a simple box to the background layer
@@ -920,106 +786,61 @@ void UserInterface_DrawWindowBox(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
         return;
     }
 
-    // First column
-    for (int i = y; i < y+h; i++)
+    // Check that the end of the window is not outside the screen. If it is, truncate it to the screen size.
+    uint16_t end_y = y + h;
+    if (end_y > (SCREEN_HEIGHT >> 3))
     {
-        if (i >= (SCREEN_HEIGHT >> 3))
-        {
-            // Over last row
-            break;
-        }
+        end_y = (SCREEN_HEIGHT >> 3);
+    }
 
-        if (i - y == 0)
+    uint16_t tile_attr = 0x2000 | (PAL_UI_4BPP << 10);
+
+    for (unsigned int i = y; i < end_y; i++)
+    {
+        uint16_t row_index = i - y;
+        uint16_t base_tile;
+
+        if (row_index == 0)
         {
             // First row
-            ui_window_background[i][x] = 0x018a | 0x2000 | (PAL_UI_4BPP << 10);
+            base_tile = 0x018a;
         }
-        else if (i == (y + h - 1))
+        else if (row_index == h - 1)
         {
             // Last row
-            ui_window_background[i][x] = 0x01aa | 0x2000 | (PAL_UI_4BPP << 10);
+            base_tile = 0x01aa;
         }
         else
         {
-            ui_window_background[i][x] = 0x019a | 0x2000 | (PAL_UI_4BPP << 10);
+            // Neither
+            base_tile = 0x019a;
         }
-    }
 
-    // Middle columns
-    if (w-2 > 0)
-    {
-        for (int i = y; i < y+h; i++)
+        uint16_t *row_ptr = ui_window_background[i];
+
+        // Draw first column
+        row_ptr[x] = base_tile | tile_attr;
+
+        if (w > 1)
         {
-            if (i >= (SCREEN_HEIGHT >> 3))
+            // Draw rightmost column
+            row_ptr[x + w - 1] = (base_tile + 2) | tile_attr;
+
+            // Draw middle columns
+            if (w > 2)
             {
-                // Over last row
-                break;
-            }
-
-            for (int j = x+1; j < x+2; j++)
-            //for (int j = x+1; j < x+w-1; j++)
-            {
-                if (j >= 32)
-                {
-                    // Over last column
-                    break;
-                }
-
-                if (i - y == 0)
-                {
-                    // First row
-                    ui_window_background[i][j] = 0x018b | 0x2000 | (PAL_UI_4BPP << 10);
-                }
-                else if (i == (y + h - 1))
-                {
-                    // Last row
-                    ui_window_background[i][j] = 0x01ab | 0x2000 | (PAL_UI_4BPP << 10);
-                }
-                else
-                {
-                    ui_window_background[i][j] = 0x019b | 0x2000 | (PAL_UI_4BPP << 10);
-                }
-
-                // Set up block moves after all columns are built.
-                int16_t block_len = (w-3) << 1;
+                row_ptr[x + 1] = (base_tile + 1) | tile_attr;
+                
+                int16_t block_len = (w - 3) << 1;
                 if (block_len >= 2)
                 {
-                    // Row can be block moved
-                    System_CopyBlock((uint8_t *)&ui_window_background[i][x+1], (uint8_t *)&ui_window_background[i][x+2], block_len);
+                    // Fill the rest using a copy
+                    System_CopyBlock((uint8_t *)&row_ptr[x + 1], (uint8_t *)&row_ptr[x + 2], block_len);
                 }
             }
         }
     }
-
-    // Rightmost column
-    for (int i = y; i < y+h; i++)
-    {
-        if (i >= (SCREEN_HEIGHT >> 3))
-        {
-            // Over last row
-            break;
-        }
-
-        if (i - y == 0)
-        {
-            // First row
-            ui_window_background[i][x+w-1] = 0x018c | 0x2000 | (PAL_UI_4BPP << 10);
-        }
-        else if (i == (y + h - 1))
-        {
-            // Last row
-            ui_window_background[i][x+w-1] = 0x01ac | 0x2000 | (PAL_UI_4BPP << 10);
-        }
-        else
-        {
-            
-            ui_window_background[i][x+w-1] = 0x019c | 0x2000 | (PAL_UI_4BPP << 10);
-        }
-    }
-
-    return;
 }
-
 
 /*
     Call this to draw a string to the text buffer.
