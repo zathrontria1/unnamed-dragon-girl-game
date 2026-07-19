@@ -628,11 +628,11 @@ void Routines_Shared_Draw(struct game_object * o, uint8_t * spr_addr, uint16_t p
     }
 
     // DMA variant
-    uint16_t tileattrib = npc_data->tilenum | pal << 9;
+    uint16_t tileattrib = npc_data->tilenum | pal_shifted;
 
-    if (((uint32_t)spr_addr & 0x80000000) == 0x80000000) // sign bit is used for flip
+    if (((uint16_t *)&spr_addr)[1] & 0x8000) // sign bit is used for flip
     {
-        tileattrib |= true << 14;
+        tileattrib |= 0x4000;
     }
 
     bool flicker_pass = false;
@@ -660,19 +660,19 @@ void Routines_Shared_Draw(struct game_object * o, uint8_t * spr_addr, uint16_t p
     {
         if (layer == 0)
         {
-            tileattrib |= 3 << 12;
+            tileattrib |= 0x3000;
 
             SpriteEngine_AddToFrontLayer(o, tileattrib);
         }
         else if (layer == 1)
         {
-            tileattrib |= 2 << 12;
+            tileattrib |= 0x2000;
 
             SpriteEngine_AddToSortedLayer(o, tileattrib);
         }
         else
         {
-            tileattrib |= 2 << 12;
+            tileattrib |= 0x2000;
 
             SpriteEngine_AddToBackLayer(o, tileattrib);
         }
@@ -713,19 +713,19 @@ void Routines_Shared_DrawFixed(struct game_object * o, uint16_t tileattrib, int 
     {
         if (layer == 0)
         {
-            tileattrib |= 3 << 12;
+            tileattrib |= 0x3000;
 
             SpriteEngine_AddToFrontLayer(o, tileattrib);
         }
         else if (layer == 1)
         {
-            tileattrib |= 2 << 12;
+            tileattrib |= 0x2000;
 
             SpriteEngine_AddToSortedLayer(o, tileattrib);
         }
         else
         {
-            tileattrib |= 2 << 12;
+            tileattrib |= 0x2000;
 
             SpriteEngine_AddToBackLayer(o, tileattrib);
         }
