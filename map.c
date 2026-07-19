@@ -182,87 +182,118 @@ void MapSystem_Tilemap_RegenerateTilemap()
 */
 void MapSystem_UpdateCameraPosition(bool suppress_map_gen)
 {
+    int16_t max_cam_x = map_extent_x - 256;
+    int16_t max_cam_y = map_extent_y - 224;
+
     if (!bg_scroll_use_interpolation)
     {
-        bg_scroll_x.full.high.a = obj_player_pointer->pos.x.lh.h - 120;
-        bg_scroll_y.full.high.a = obj_player_pointer->pos.y.lh.h - 104;
+        int16_t px = obj_player_pointer->pos.x.lh.h - 120;
+        int16_t py = obj_player_pointer->pos.y.lh.h - 104;
+
+        int16_t bounds_min_x = bg_scroll_x_bounds_min.full.high.a;
+        if (bounds_min_x != -32768)
+        {
+            int16_t bounds_max_x = bg_scroll_x_bounds_max.full.high.a;
+            if (px > bounds_max_x)
+            {
+                px = bounds_max_x;
+                bg_scroll_x.full.sub = 0;
+            }
+            else if (px < bounds_min_x)
+            {
+                px = bounds_min_x;
+                bg_scroll_x.full.sub = 0;
+            }
+
+            int16_t bounds_min_y = bg_scroll_y_bounds_min.full.high.a;
+            int16_t bounds_max_y = bg_scroll_y_bounds_max.full.high.a;
+            if (py > bounds_max_y)
+            {
+                py = bounds_max_y;
+                bg_scroll_y.full.sub = 0;
+            }
+            else if (py < bounds_min_y)
+            {
+                py = bounds_min_y;
+                bg_scroll_y.full.sub = 0;
+            }
+        }
+        bg_scroll_x.full.high.a = px;
+        bg_scroll_y.full.high.a = py;
     }
     else
     {
         int16_t temp_x_camadjust;
         int16_t temp_y_camadjust;
 
-        if (bg_scroll_x_bounds_min.full.high.a != -32768)
+        int16_t target_x = obj_player_pointer->pos.x.lh.h - 120;
+        int16_t target_y = obj_player_pointer->pos.y.lh.h - 104;
+
+        int16_t bounds_min_x = bg_scroll_x_bounds_min.full.high.a;
+        if (bounds_min_x != -32768)
         {
-            if (
-                ((obj_player_pointer->pos.x.lh.h - 120) > bg_scroll_x_bounds_min.full.high.a) &&
-                ((obj_player_pointer->pos.x.lh.h - 120) < bg_scroll_x_bounds_max.full.high.a))
+            int16_t bounds_max_x = bg_scroll_x_bounds_max.full.high.a;
+            if (target_x < bounds_min_x)
             {
-                temp_x_camadjust = obj_player_pointer->pos.x.lh.h - 120;
+                temp_x_camadjust = bounds_min_x;
+            }
+            else if (target_x > bounds_max_x)
+            {
+                temp_x_camadjust = bounds_max_x;
             }
             else
             {
-                if ((obj_player_pointer->pos.x.lh.h - 120) < bg_scroll_x_bounds_min.full.high.a)
-                {
-                    temp_x_camadjust = bg_scroll_x_bounds_min.full.high.a;
-                }
-                else
-                {
-                    temp_x_camadjust = bg_scroll_x_bounds_max.full.high.a;
-                }
+                temp_x_camadjust = target_x;
             }
 
-            if (
-                ((obj_player_pointer->pos.y.lh.h - 104) > bg_scroll_y_bounds_min.full.high.a) &&
-                ((obj_player_pointer->pos.y.lh.h - 104) < bg_scroll_y_bounds_max.full.high.a))
+            int16_t bounds_min_y = bg_scroll_y_bounds_min.full.high.a;
+            int16_t bounds_max_y = bg_scroll_y_bounds_max.full.high.a;
+            if (target_y < bounds_min_y)
             {
-                temp_y_camadjust = obj_player_pointer->pos.y.lh.h - 104;
+                temp_y_camadjust = bounds_min_y;
+            }
+            else if (target_y > bounds_max_y)
+            {
+                temp_y_camadjust = bounds_max_y;
             }
             else
             {
-                if ((obj_player_pointer->pos.y.lh.h - 104) < bg_scroll_y_bounds_min.full.high.a)
-                {
-                    temp_y_camadjust = bg_scroll_y_bounds_min.full.high.a;
-                }
-                else
-                {
-                    temp_y_camadjust = bg_scroll_y_bounds_max.full.high.a;
-                }
+                temp_y_camadjust = target_y;
             }
         }
         else
         {
-            temp_x_camadjust = obj_player_pointer->pos.x.lh.h - 120;
-            temp_y_camadjust = obj_player_pointer->pos.y.lh.h - 104;
+            temp_x_camadjust = target_x;
+            temp_y_camadjust = target_y;
         }
 
         if (temp_x_camadjust < 0)
         {
             temp_x_camadjust = 0;
         }
-        else if (temp_x_camadjust > map_extent_x - 256)
+        else if (temp_x_camadjust > max_cam_x)
         {
-            temp_x_camadjust = map_extent_x - 256;
+            temp_x_camadjust = max_cam_x;
         }
 
         if (temp_y_camadjust < 0)
         {
             temp_y_camadjust = 0;
         }
-        else if (temp_y_camadjust > map_extent_y - 224)
+        else if (temp_y_camadjust > max_cam_y)
         {
-            temp_y_camadjust = map_extent_y - 224;
+            temp_y_camadjust = max_cam_y;
         }
 
         // Get the angle between the intended scroll position and the current scroll position.
         // The values if no adjustment were done like normal cases
-        int16_t unadjusted_bg_scroll_x = obj_player_pointer->pos.x.lh.h - 120;
-        int16_t unadjusted_bg_scroll_y = obj_player_pointer->pos.y.lh.h - 104;
+        int16_t unadjusted_bg_scroll_x = target_x;
+        int16_t unadjusted_bg_scroll_y = target_y;
 
         int16_t temp_x;
         int16_t temp_y;
 
-        if (bg_scroll_x_bounds_min.full.high.a != -32768)
+        if (bounds_min_x != -32768)
         {
             temp_x = temp_x_camadjust - unadjusted_bg_scroll_x;
             temp_y = temp_y_camadjust - unadjusted_bg_scroll_y;
@@ -283,137 +314,36 @@ void MapSystem_UpdateCameraPosition(bool suppress_map_gen)
         bg_scroll_y.a += temp_delta_y;
 
         // Check if exceed target values and snap them to the pixel grid
-        // Depends on if a screen lock area is set or not.
-        if (bg_scroll_x_bounds_min.full.high.a != -32768)
+        bg_scroll_x_at_final = false;
+        bg_scroll_y_at_final = false;
+
+        int16_t dist_x = bg_scroll_x.full.high.a - temp_x_camadjust;
+        if (dist_x < 0)
         {
-            bg_scroll_x_at_final = false;
-            bg_scroll_y_at_final = false;
-
-            if (data_sine_1[angle] >= 0)
-            {
-                if (bg_scroll_x.full.high.a >= (temp_x_camadjust - (2 * V_MUL)))
-                {
-                    bg_scroll_x.full.high.a = temp_x_camadjust;
-                    bg_scroll_x.full.sub = 0;
-
-                    bg_scroll_x_at_final = true;
-                }
-            }
-            else
-            {
-                if (bg_scroll_x.full.high.a <= (temp_x_camadjust + (2 * V_MUL)))
-                {
-                    bg_scroll_x.full.high.a = temp_x_camadjust;
-                    bg_scroll_x.full.sub = 0;
-
-                    bg_scroll_x_at_final = true;
-                }
-            }
-
-            if (data_cosine_1[angle] >= 0)
-            {
-                if (bg_scroll_y.full.high.a >= (temp_y_camadjust - (2 * V_MUL)))
-                {
-                    bg_scroll_y.full.high.a = temp_y_camadjust;
-                    bg_scroll_y.full.sub = 0;
-
-                    bg_scroll_y_at_final = true;
-                }
-            }
-            else
-            {
-                if (bg_scroll_y.full.high.a <= (temp_y_camadjust + (2 * V_MUL)))
-                {
-                    bg_scroll_y.full.high.a = temp_y_camadjust;
-                    bg_scroll_y.full.sub = 0;
-
-                    bg_scroll_y_at_final = true;
-                }
-            }
-
-            if ((bg_scroll_x_at_final + bg_scroll_y_at_final) >= 2) // Intentional
-            {
-                bg_scroll_use_interpolation = false;
-            }
+            dist_x = -dist_x;
         }
-        else
+        if (dist_x <= (2 * V_MUL))
         {
-            bg_scroll_x_at_final = false;
-            bg_scroll_y_at_final = false;
-
-            if (data_sine_1[angle] >= 0)
-            {
-                if (bg_scroll_x.full.high.a >= (temp_x_camadjust - (2 * V_MUL)))
-                {
-                    bg_scroll_x.full.high.a = temp_x_camadjust;
-                    bg_scroll_x.full.sub = 0;
-
-                    bg_scroll_x_at_final = true;
-                }
-            }
-            else
-            {
-                if (bg_scroll_x.full.high.a <= (temp_x_camadjust + (2 * V_MUL)))
-                {
-                    bg_scroll_x.full.high.a = temp_x_camadjust;
-                    bg_scroll_x.full.sub = 0;
-
-                    bg_scroll_x_at_final = true;
-                }
-            }
-
-            if (data_cosine_1[angle] >= 0)
-            {
-                if (bg_scroll_y.full.high.a >= (temp_y_camadjust - (2 * V_MUL)))
-                {
-                    bg_scroll_y.full.high.a = temp_y_camadjust;
-                    bg_scroll_y.full.sub = 0;
-
-                    bg_scroll_y_at_final = true;
-                }
-            }
-            else
-            {
-                if (bg_scroll_y.full.high.a <= (temp_y_camadjust + (2 * V_MUL)))
-                {
-                    bg_scroll_y.full.high.a = temp_y_camadjust;
-                    bg_scroll_y.full.sub = 0;
-
-                    bg_scroll_y_at_final = true;
-                }
-            }
-
-            if ((bg_scroll_x_at_final + bg_scroll_y_at_final) >= 2) // Intentional
-            {
-                bg_scroll_use_interpolation = false;
-            }
-        }
-    }
-
-    // Limit the bounds
-    // Combat extent bounds check
-    if ((bg_scroll_x_bounds_min.full.high.a != -32768) && (!bg_scroll_use_interpolation))
-    {
-        if (bg_scroll_x.full.high.a > bg_scroll_x_bounds_max.full.high.a)
-        {
-            bg_scroll_x.full.high.a = bg_scroll_x_bounds_max.full.high.a;
+            bg_scroll_x.full.high.a = temp_x_camadjust;
             bg_scroll_x.full.sub = 0;
-        }
-        else if (bg_scroll_x.full.high.a < bg_scroll_x_bounds_min.full.high.a)
-        {
-            bg_scroll_x.full.high.a = bg_scroll_x_bounds_min.full.high.a;
-            bg_scroll_x.full.sub = 0;
+            bg_scroll_x_at_final = true;
         }
 
-        if (bg_scroll_y.full.high.a > bg_scroll_y_bounds_max.full.high.a)
+        int16_t dist_y = bg_scroll_y.full.high.a - temp_y_camadjust;
+        if (dist_y < 0)
         {
-            bg_scroll_y.full.high.a = bg_scroll_y_bounds_max.full.high.a;
-            bg_scroll_y.full.sub = 0;
+            dist_y = -dist_y;
         }
-        else if (bg_scroll_y.full.high.a < bg_scroll_y_bounds_min.full.high.a)
+        if (dist_y <= (2 * V_MUL))
         {
-            bg_scroll_y.full.high.a = bg_scroll_y_bounds_min.full.high.a;
+            bg_scroll_y.full.high.a = temp_y_camadjust;
             bg_scroll_y.full.sub = 0;
+            bg_scroll_y_at_final = true;
+        }
+
+        if ((bg_scroll_x_at_final + bg_scroll_y_at_final) >= 2) // Intentional
+        {
+            bg_scroll_use_interpolation = false;
         }
     }
 
@@ -422,18 +352,18 @@ void MapSystem_UpdateCameraPosition(bool suppress_map_gen)
     {
         bg_scroll_x.full.high.a = 0;
     }
-    else if (bg_scroll_x.full.high.a > (map_extent_x - 256))
+    else if (bg_scroll_x.full.high.a > max_cam_x)
     {
-        bg_scroll_x.full.high.a = (map_extent_x - 256);
+        bg_scroll_x.full.high.a = max_cam_x;
     }
 
     if (bg_scroll_y.full.high.a < 0)
     {
         bg_scroll_y.full.high.a = 0;
     }
-    else if (bg_scroll_y.full.high.a > (map_extent_y - 224))
+    else if (bg_scroll_y.full.high.a > max_cam_y)
     {
-        bg_scroll_y.full.high.a = (map_extent_y - 224);
+        bg_scroll_y.full.high.a = max_cam_y;
     }
 
     if (!suppress_map_gen)
