@@ -243,9 +243,7 @@ void Loop_Game()
 
         SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
 
-        subscreen_rendered = 0; // Clear subscreen state so it re-renders
-
-        system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_SUBSCREEN);
+        Subscreen_Transition_Start(Main_GetFunctionPointer(ROUTINE_SUBSCREEN));
         system_target_routine = ROUTINE_SUBSCREEN;
 
         return;
