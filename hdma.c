@@ -177,44 +177,83 @@ void HdmaEngine_SetupColdataHdma()
     // Set up the tables so that the max intensity is the first entry (last data)
     // and go backwards, then mirror it.
 
-    for (int i = 0; i < 2; i++) // For each array...
+    struct hdma_indirect_table_entry *table_base = &hdma_coldata_tables[0][0];
+    uint16_t element_base_addr = (uint16_t)((uint32_t)&hdma_coldata_data[0][0][0]);
+
+    for (int i = 0; i < 2; i++)
     {
-        int line_counter = 0;
-        for (int j = 0; j < 32; j++) // For 32 groups of 7 lines...
+        struct hdma_indirect_table_entry *table_ptr = table_base;
+        uint16_t element_addr = element_base_addr;
+
+        if (i == 1)
         {
-            for (int k = 0; k < 2; k++) // Even/odd...
-            {
-                for (int l = 0; l < 3; l++) // Each colour channel
-                {
-                    if ((!l) && (k)) // Insert a gap
-                    {
-                        hdma_coldata_tables[i][line_counter].count = 2;
-                    }
-                    else
-                    {
-                        hdma_coldata_tables[i][line_counter].count = 1;
-                    }
+            table_ptr += 225;
+            element_addr += 256;
+        }
 
-                    // Then write the channel addresses
-                    if (j < 16) // low 16
-                    {
-                        hdma_coldata_tables[i][line_counter].addr = (uint16_t)((uint32_t)&hdma_coldata_data[i][(j << 1) + k][l] + 1);
-                    }
-                    else // high 16; write in reverse
-                    {
-                        // Make sense of the value here...
-                        int index_inverse = (31 - j) << 1;
-                        int odd_even_inverse = k ^ 0x01;
-                        hdma_coldata_tables[i][line_counter].addr = (uint16_t)((uint32_t)&hdma_coldata_data[i][index_inverse + odd_even_inverse][l] + 1);
-                    }
+        // For steps 0..31: incrementing phase (unrolled by 2)
+        for (int j = 0; j < 16; j++)
+        {
+            // Step (even)
+            table_ptr->count = 1;
+            table_ptr->addr = element_addr + 1;
+            table_ptr++;
+            table_ptr->count = 1;
+            table_ptr->addr = element_addr + 3;
+            table_ptr++;
+            table_ptr->count = 1;
+            table_ptr->addr = element_addr + 5;
+            table_ptr++;
 
-                    line_counter++;
-                }
-            }
+            element_addr += 8;
+
+            // Step (odd)
+            table_ptr->count = 2;
+            table_ptr->addr = element_addr + 1;
+            table_ptr++;
+            table_ptr->count = 1;
+            table_ptr->addr = element_addr + 3;
+            table_ptr++;
+            table_ptr->count = 1;
+            table_ptr->addr = element_addr + 5;
+            table_ptr++;
+
+            element_addr += 8;
+        }
+        element_addr -= 8;
+
+        // For steps 32..63: decrementing phase (unrolled by 2)
+        for (int j = 0; j < 16; j++)
+        {
+            // Step (even)
+            table_ptr->count = 1;
+            table_ptr->addr = element_addr + 1;
+            table_ptr++;
+            table_ptr->count = 1;
+            table_ptr->addr = element_addr + 3;
+            table_ptr++;
+            table_ptr->count = 1;
+            table_ptr->addr = element_addr + 5;
+            table_ptr++;
+
+            element_addr -= 8;
+
+            // Step (odd)
+            table_ptr->count = 2;
+            table_ptr->addr = element_addr + 1;
+            table_ptr++;
+            table_ptr->count = 1;
+            table_ptr->addr = element_addr + 3;
+            table_ptr++;
+            table_ptr->count = 1;
+            table_ptr->addr = element_addr + 5;
+            table_ptr++;
+
+            element_addr -= 8;
         }
 
         // Set the last byte as a terminator
-        hdma_coldata_tables[i][line_counter].count = 0;
+        table_ptr->count = 0;
     }
 
     return;
