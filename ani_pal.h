@@ -3,6 +3,8 @@ extern uint16_t pal_ani_sel;
 
 extern uint16_t pal_cycle_entries[16][16];
 
+extern NEAR const uint16_t const_pal_scale_table[8][32];
+
 void AniSystem_Pal_LoadSubpalette(uint8_t * ptr, uint16_t subpal);
 void AniSystem_Pal_LoadCycleSubpalette(uint8_t * ptr, uint16_t subpal);
 void AniSystem_Pal_UpdatePalettes(void);
