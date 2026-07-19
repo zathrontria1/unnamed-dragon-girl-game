@@ -280,7 +280,7 @@ void Loop_Game()
             system_use_alternate_nmi = true;
 
             shadow_brightness = 15 << 8;
-            shadow_brightness_change = -(64 * V_MUL);
+            shadow_brightness_change = -(128 * V_MUL);
 
             system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_MAPDISPLAY_INIT);
             system_target_routine = ROUTINE_MAPDISPLAY_INIT;
@@ -299,7 +299,7 @@ void Loop_Game()
             system_use_alternate_nmi = true;
 
             shadow_brightness = 15 << 8;
-            shadow_brightness_change = -(64 * V_MUL);
+            shadow_brightness_change = -(128 * V_MUL);
 
             level_data_ptr = level_data_ptr_next;
             system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_NEWLEVEL);
@@ -574,7 +574,7 @@ void Loop_Subscreen_MapDisplay()
     if (System_CheckKeyAny())
     {
         shadow_brightness = 15 << 8;
-        shadow_brightness_change = -(64 * V_MUL);
+        shadow_brightness_change = -(128 * V_MUL);
         system_use_alternate_nmi = true;
 
         system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_GAMELOOP_RELOAD);
