@@ -134,13 +134,15 @@
     system_nmis_counted = 0;
 
     // Adjust brightness based on the change
-    if ((shadow_brightness == 0x0000) && (shadow_brightness_change < 0))
+    if ((shadow_brightness <= 0x0000) && (shadow_brightness_change < 0))
     {
+        shadow_brightness = 0x0000;
         shadow_brightness_change = 0;
     }
 
     if ((shadow_brightness >= 0x0f00) && (shadow_brightness_change > 0))
     {
+        shadow_brightness = 0x0f00;
         shadow_brightness_change = 0;
     }
 
