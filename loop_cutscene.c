@@ -47,6 +47,8 @@ uint16_t cs_preload_subsection; // Which preload section we're at
 
 void Cs_Loop()
 {
+    system_dont_count_lag = true;
+    
     System_Init_DisplaySettings(system_target_routine);
     System_Init_TilemapSettings(system_target_routine);
 
