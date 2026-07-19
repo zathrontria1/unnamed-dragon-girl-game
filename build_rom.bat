@@ -26,7 +26,7 @@ REM TODO: there are still show-stopping bugs with the created ROM image. Althoug
 REM make
 
 REM compute and patch the checksum
-python .\checksum.py --hirom %sfc_name%_temp.sfc -o %sfc_name%.sfc
+python .\checksum.py --hirom --pad %sfc_name%_temp.sfc -o %sfc_name%.sfc
 DEL %sfc_name%_temp.sfc
 
 REM fix symbols
