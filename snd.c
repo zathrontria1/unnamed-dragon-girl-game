@@ -685,35 +685,25 @@ void SoundInterface_SetMusicTempo(uint16_t tempo)
 {
     SoundInterface_AcknowledgeBusy(false);
 
-    uint8_t temp_t2timer;
+    uint32_t val = 120000ul / tempo;
     uint16_t temp_interval = 1;
 
-    float temp_rows_per_second = ((float)(tempo << 2) / 60.0f) ; // mul 4 div 60f
-
-    float temp_t2timer_f = 8000.0f;
-
-    while ((uint32_t)temp_t2timer_f > 255)
+    while (val >= 255)
     {
-        temp_t2timer_f = 8000.0f / temp_rows_per_second;
-
-        if ((uint32_t)temp_t2timer_f < 255)
-        {
-            temp_t2timer = (uint8_t)temp_t2timer_f;
-
-            if ((temp_t2timer == 0) && (temp_t2timer_f != 0))
-            {
-                temp_t2timer = 255;
-            }
-
-            if (temp_interval > 255)
-            {
-                temp_interval = 255;
-            }
-            break;
-        }
-
+        val >>= 1;
         temp_interval <<= 1;
-        temp_rows_per_second *= 2.0f;
+    }
+
+    uint8_t temp_t2timer = (uint8_t)val;
+
+    if ((temp_t2timer == 0) && (val != 0))
+    {
+        temp_t2timer = 255;
+    }
+
+    if (temp_interval > 255)
+    {
+        temp_interval = 255;
     }
 
     REG_APU03 = (uint8_t)temp_interval;
