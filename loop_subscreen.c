@@ -381,12 +381,28 @@ void Subscreen_Upgrade()
         // Perform menu navigation
         Subscreen_Internal_UpdateNavigation((const struct menu_item *)&subscreen_items_profile);
 
+        // This used to be SpriteEngine_DrawUISprite_Large, but since it's only really used here
+        // it's done this way to speed things along.
+        struct spr_queue_entry s;
+        s.signsize = 0x80; // Large sprite (32x32), positive X position
+        
+        int16_t y = 0;
+        uint16_t base_tileattrib = 0x3100;
         for (int py = 0; py < 4; py++)
         {
+            int16_t x = 128;
+            uint16_t tileattrib = base_tileattrib;
+            s.y = y;
             for (int px = 0; px < 4; px++)
             {
-                SpriteEngine_DrawUISprite_Large(128 + (px << 5), 0 + (py << 5), ((0x100 + (px << 2) + (py << 6)) | 3 << 12));
+                s.x = x;
+                s.tileattrib = tileattrib;
+                SpriteEngine_DrawSprite(&s);
+                x += 32;
+                tileattrib += 4;
             }
+            y += 32;
+            base_tileattrib += 64;
         }
 
         SpriteEngine_ProcessSpriteLists();
