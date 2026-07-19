@@ -727,7 +727,7 @@ uint16_t ObjectSystem_List_InstantiateSpawners(const struct obj_list_entry_spawn
         obj_enemies_max_count = temp_total_spawns;
 
         // Debug: make this much smaller
-        obj_enemies_target_count = (uint16_t)((float)(obj_enemies_max_count) * 0.3f);
+        obj_enemies_target_count = (obj_enemies_max_count * 3) / 10;
 
         //obj_enemies_target_count = (uint16_t)((float)(obj_enemies_max_count) * 0.6f);
 
