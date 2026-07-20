@@ -76,8 +76,8 @@ bool Routines_Enemy_Ai_Process(struct game_object * o, uint32_t dist, int16_t x,
 
                 o->angle = temp_angle;
 
-                o->delta.x.a = data_cosine_1[temp_angle] * V_MUL;
-                o->delta.y.a = data_sine_1[temp_angle] * V_MUL;
+                o->delta.x.a = Math_Cos(temp_angle) * V_MUL;
+                o->delta.y.a = Math_Sin(temp_angle) * V_MUL;
 
                 o->struct_data.npc_data.ai_state = AI_STATE_MOVE_TOWARDS;
                 if ((o->state == STATE_HURT_BURN || o->state == STATE_HURT_BURN_MOVE))
@@ -100,8 +100,8 @@ bool Routines_Enemy_Ai_Process(struct game_object * o, uint32_t dist, int16_t x,
 
                 o->angle = temp_angle;
 
-                o->delta.x.a = data_cosine_1[temp_angle] * V_MUL;
-                o->delta.y.a = data_sine_1[temp_angle] * V_MUL;
+                o->delta.x.a = Math_Cos(temp_angle) * V_MUL;
+                o->delta.y.a = Math_Sin(temp_angle) * V_MUL;
 
                 o->struct_data.npc_data.ai_state = AI_STATE_MOVE_AWAY;
 

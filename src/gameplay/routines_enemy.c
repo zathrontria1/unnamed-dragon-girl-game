@@ -88,8 +88,8 @@ void Routines_Enemy_Slime(struct game_object * o)
                         o->angle = temp_angle;
                         o->facing = Routines_Enemy_GetFacing(o);
                         
-                        p->delta.x.a = data_cosine_1[temp_angle] * V_MUL;
-                        p->delta.y.a = data_sine_1[temp_angle] * V_MUL;
+                        p->delta.x.a = Math_Cos(temp_angle) * V_MUL;
+                        p->delta.y.a = Math_Sin(temp_angle) * V_MUL;
 
                         p->struct_data.npc_data.ttl = ENEMY_ATTACK_TTL;
                     }
@@ -334,8 +334,8 @@ void Routines_Enemy_Lizardman(struct game_object * o)
 
                         p->angle = temp_angle;
                         
-                        p->delta.x.a = data_cosine_1[temp_angle] * V_MUL * 2;
-                        p->delta.y.a = data_sine_1[temp_angle] * V_MUL * 2;
+                        p->delta.x.a = Math_Cos(temp_angle) * V_MUL * 2;
+                        p->delta.y.a = Math_Sin(temp_angle) * V_MUL * 2;
 
                         p->struct_data.npc_data.ttl = ENEMY_ATTACK_TTL;
                     }
