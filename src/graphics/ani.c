@@ -249,6 +249,25 @@ uint8_t * AniSystem_GetDynamicFrame_Bubble(struct game_object * o)
     return ((uint8_t *)&data_spr_slime + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
 }
 
+static const uint32_t const_arrow_frame_lut[16] = {
+    0x00001000ul, // Sector 0:  angle 248..7   -> tile 32 (4096), no flip
+    0x01001040ul, // Sector 1:  angle 8..23    -> tile 33 (4160), no flip
+    0x02001080ul, // Sector 2:  angle 24..39   -> tile 34 (4224), no flip
+    0x030010c0ul, // Sector 3:  angle 40..55   -> tile 35 (4288), no flip
+    0x04001100ul, // Sector 4:  angle 56..71   -> tile 36 (4352), no flip
+    0x830010c0ul, // Sector 5:  angle 72..87   -> tile 35 (4288), vflip
+    0x82001080ul, // Sector 6:  angle 88..103  -> tile 34 (4224), vflip
+    0x81001040ul, // Sector 7:  angle 104..119 -> tile 33 (4160), vflip
+    0x80001000ul, // Sector 8:  angle 120..135 -> tile 32 (4096), vflip
+    0xc1001040ul, // Sector 9:  angle 136..151 -> tile 33 (4160), hflip + vflip
+    0xc2001080ul, // Sector 10: angle 152..167 -> tile 34 (4224), hflip + vflip
+    0xc30010c0ul, // Sector 11: angle 168..183 -> tile 35 (4288), hflip + vflip
+    0x44001100ul, // Sector 12: angle 184..199 -> tile 36 (4352), hflip
+    0x430010c0ul, // Sector 13: angle 200..215 -> tile 35 (4288), hflip
+    0x42001080ul, // Sector 14: angle 216..231 -> tile 34 (4224), hflip
+    0x41001040ul  // Sector 15: angle 232..247 -> tile 33 (4160), hflip
+};
+
 /**
  * @brief Resolves animation frames and directional flips for Arrow projectiles based on angle.
  * 
@@ -257,113 +276,8 @@ uint8_t * AniSystem_GetDynamicFrame_Bubble(struct game_object * o)
  */
 uint8_t * AniSystem_GetDynamicFrame_Arrow(struct game_object * o)
 {
-    // use a virtual tilenum system before finalizing.
-    // Arrow up is 32, arrow right is 36
-    bool hflip = false;
-    bool vflip = false;
-
-    uint8_t angle = o->angle + 64; // Angle offset
-    uint16_t temp_tilenum = 32;
-
-    // get the object angle
-    if (angle >= 240+8)
-    {
-        temp_tilenum = 32;
-    }
-    else if (angle >= 224+8)
-    {
-        temp_tilenum = 33;
-        hflip = true;
-    }
-    else if (angle >= 208+8)
-    {
-        temp_tilenum = 34;
-        hflip = true;
-    }
-    else if (angle >= 192+8)
-    {
-        temp_tilenum = 35;
-        hflip = true;
-    }
-    else if (angle >= 176+8)
-    {
-        temp_tilenum = 36;
-        hflip = true;
-    }
-    else if (angle >= 160+8)
-    {
-        temp_tilenum = 35;
-        hflip = true;
-        vflip = true;
-    }
-    else if (angle >= 144+8)
-    {
-        temp_tilenum = 34;
-        hflip = true;
-        vflip = true;
-    }
-    else if (angle >= 128+8)
-    {
-        temp_tilenum = 33;
-        hflip = true;
-        vflip = true;
-    }
-    else if (angle >= 112+8)
-    {
-        temp_tilenum = 32;
-        vflip = true;
-    }
-    else if (angle >= 96+8)
-    {
-        temp_tilenum = 33;
-        vflip = true;
-    }
-    else if (angle >= 80+8)
-    {
-        temp_tilenum = 34;
-        vflip = true;
-    }
-    else if (angle >= 64+8)
-    {
-        temp_tilenum = 35;
-        vflip = true;
-    }
-    else if (angle >= 48+8)
-    {
-        temp_tilenum = 36;
-    }
-    else if (angle >= 32+8)
-    {
-        temp_tilenum = 35;
-    }
-    else if (angle >= 16+8)
-    {
-        temp_tilenum = 34;
-    }
-    else if (angle >= 0+8)
-    {
-        temp_tilenum = 33;
-    }
-    else
-    {
-        temp_tilenum = 32;
-    }
-
-    uint32_t temp_addr = ((uint32_t)&data_spr_lizardman + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
-
-    if (hflip)
-    {
-        temp_addr |= 0x40000000; // Set second highest bit
-    }
-    if (vflip)
-    {
-        temp_addr |= 0x80000000; // Set highest bit
-    }
-
-    temp_addr |= ((uint32_t)temp_tilenum - 32) << 24; // use 6 bits of the highest bytes to store the tile number minus 32
-
-    // Calculate the address
-    return (uint8_t *)temp_addr;
+    uint8_t sector = (uint8_t)(o->angle + 72) >> 4;
+    return (uint8_t *)((uint32_t)&data_spr_lizardman + const_arrow_frame_lut[sector]);
 }
 
 /**
