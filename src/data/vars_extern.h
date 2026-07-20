@@ -66,11 +66,10 @@ extern const uint8_t data_spr_drop_coin[]; // dropped coins
 extern const uint8_t data_spr_boss_placeholder_dd[]; // boss
 extern const uint16_t data_spr_boss_placeholder_lut[]; // boss
 extern const uint8_t data_spr_boss_placeholder_addon_attack1[]; // boss attack 1
-extern const uint8_t data_spr_boss_placeholder_hands[]; /// boss hands
+extern const uint8_t data_spr_boss_placeholder_hands[]; // boss hands
 
 // Tables
 extern const int32_t data_sine_1[];
-extern const int32_t data_cosine_1[];
 extern const uint32_t data_pow_2[];
 
 extern const uint32_t data_upgrade_costs[];
