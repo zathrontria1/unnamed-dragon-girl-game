@@ -1,3 +1,8 @@
+#include <stdint.h>
+#include <stdbool.h>
+#include "consts.h"
+#include "defs_structs.h"
+
 extern NEAR const uint16_t const_lut_dma_split_lookup[6];
 
 extern NEAR struct dma_entry dma_queue[DMA_QUEUE_MAX_ENTRIES];

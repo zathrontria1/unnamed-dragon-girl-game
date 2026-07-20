@@ -1,3 +1,6 @@
+#ifndef CONSTS_H
+#define CONSTS_H
+
 #ifndef _WIN32
     #define INLINE_ASM 1
 #endif
@@ -277,3 +280,5 @@
 #define SPR_COUNT_MAX_BACK 64
 
 #define LEVEL_INITIAL &data_level_test_0
+
+#endif /* CONSTS_H */

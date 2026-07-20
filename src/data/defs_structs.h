@@ -1,4 +1,9 @@
-typedef struct cutscene_data // in an array
+#ifndef DEFS_STRUCTS_H
+#define DEFS_STRUCTS_H
+
+#include <stdint.h>
+#include <stdbool.h>
+
 {
     void * frame;
     void * palette;
@@ -331,3 +336,5 @@ typedef union cgram_full {
     uint16_t entry[256];
     struct cgram_group grouped;
 } cgram_full_t;
+
+#endif /* DEFS_STRUCTS_H */

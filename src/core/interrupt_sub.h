@@ -1,3 +1,5 @@
+#include "consts.h"
+
 #if VBCC_ASM == 1
     NO_INLINE void Nmi_Primary();
     NO_INLINE void Nmi_Alternate();

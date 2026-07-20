@@ -1,3 +1,9 @@
+#include <stdint.h>
+#include <stdbool.h>
+#include "consts.h"
+#include "defs_structs.h"
+#include "snes/console.h"
+
 #define CACHE_PALETTE_ENTRIES 8
 
 extern struct hdma_indirect_table_entry hdma_bgpalette_tables[3];
