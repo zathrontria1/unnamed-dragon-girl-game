@@ -75,6 +75,11 @@ uint16_t obj_hitbox_enemy_delete_queue[OBJ_ENEMYHITBOX_MAX_COUNT];
 uint16_t obj_hitbox_enemy_delete_queue_count;
 uint16_t obj_hitbox_count_enemy;
 
+/**
+ * @brief Main object engine processing loop.
+ * 
+ * Executes logic ticks, updates hitboxes, and processes object deletion queues.
+ */
 void ObjectSystem_ProcessObjects() 
 {
     event_in_combat = 0;
@@ -209,6 +214,11 @@ void ObjectSystem_ProcessObjects()
 /*
     Reset object memory thoroughly (completely wipe)
 */
+/**
+ * @brief Resets standard object slots starting from `start_index` and rebuilds the free list.
+ * 
+ * @param start_index Index to start resetting from (e.g. 0 for full clear, 1 to keep player).
+ */
 void ObjectSystem_ResetStandardObjects(int start_index)
 {
     REG_DMAP7 = 0x08; // byte reg write, fixed
@@ -245,6 +255,9 @@ void ObjectSystem_ResetStandardObjects(int start_index)
 /*
     Player hitboxes (e.g. fireballs) reset too, in a separate list for performance reasons
 */
+/**
+ * @brief Resets player hitbox pool and rebuilds its free list.
+ */
 void ObjectSystem_ResetPlayerHitboxes()
 {
     REG_DMAP7 = 0x08; // byte reg write, fixed
@@ -281,6 +294,9 @@ void ObjectSystem_ResetPlayerHitboxes()
 /*
     Do the same for enemy hitboxes too
 */
+/**
+ * @brief Resets enemy hitbox pool and rebuilds its free list.
+ */
 void ObjectSystem_ResetEnemyHitboxes()
 {
     REG_DMAP7 = 0x08; // byte reg write, fixed
@@ -314,10 +330,15 @@ void ObjectSystem_ResetEnemyHitboxes()
     return;
 }
 
-/*! \def ObjectSystem_InstantiateObject
-
-    \brief Creates a new object with the object ID passed at pixel level location X and Y.
-*/
+/**
+ * @brief Instantiates a new standard game object.
+ * 
+ * @param id               Object type ID (`OBJID_*`).
+ * @param x                Initial X coordinate in pixels.
+ * @param y                Initial Y coordinate in pixels.
+ * @param local_event_flag Flag associated with map triggers or events.
+ * @return Index of the allocated object slot in `obj_general`, or -1 if full.
+ */
 int16_t ObjectSystem_InstantiateObject(
     uint16_t id,
     int16_t x,
@@ -498,6 +519,14 @@ int16_t ObjectSystem_InstantiateObject(
 /*
     Player hitboxes should call this instead
 */
+/**
+ * @brief Instantiates a new player hitbox object.
+ * 
+ * @param id Object type ID.
+ * @param x  Initial X coordinate.
+ * @param y  Initial Y coordinate.
+ * @return Index of allocated slot in `obj_hitbox_player`, or -1 if full.
+ */
 int16_t ObjectSystem_InstantiatePlayerHitbox(
     uint16_t id,
     int16_t x,
@@ -560,6 +589,14 @@ int16_t ObjectSystem_InstantiatePlayerHitbox(
 /*
     And use this for enemy hitboxes
 */
+/**
+ * @brief Instantiates a new enemy hitbox object.
+ * 
+ * @param id Object type ID.
+ * @param x  Initial X coordinate.
+ * @param y  Initial Y coordinate.
+ * @return Index of allocated slot in `obj_hitbox_enemy`, or -1 if full.
+ */
 int16_t ObjectSystem_InstantiateEnemyHitbox(
     uint16_t id,
     int16_t x,
@@ -641,6 +678,14 @@ int16_t ObjectSystem_InstantiateEnemyHitbox(
     return i;
 }
 
+/**
+ * @brief Instantiates NPC objects defined in a map spawn list.
+ * 
+ * @param list     Pointer to the NPC spawn list.
+ * @param offset_x Map offset X.
+ * @param offset_y Map offset Y.
+ * @return Number of NPCs successfully instantiated.
+ */
 uint16_t ObjectSystem_List_InstantiateNpcs(const struct obj_list_entry_spawns* list, int16_t offset_x, int16_t offset_y)
 {
     while (list->id != OBJID_NULL)
@@ -678,6 +723,12 @@ uint16_t ObjectSystem_List_InstantiateNpcs(const struct obj_list_entry_spawns* l
     return 0;
 }
 
+/**
+ * @brief Instantiates enemy spawner objects defined in a map spawner list.
+ * 
+ * @param list Pointer to the spawner list.
+ * @return Number of spawners successfully instantiated.
+ */
 uint16_t ObjectSystem_List_InstantiateSpawners(const struct obj_list_entry_spawners* list)
 {
     uint16_t temp_total_spawns = 0;
@@ -745,6 +796,12 @@ uint16_t ObjectSystem_List_InstantiateSpawners(const struct obj_list_entry_spawn
     return 0;
 }
 
+/**
+ * @brief Instantiates interactable objects defined in a map interactables list.
+ * 
+ * @param list Pointer to the interactables list.
+ * @return Number of interactable objects successfully instantiated.
+ */
 uint16_t ObjectSystem_List_InstantiateInteractables(const struct obj_list_entry_interactable* list)
 {
     while (list->id != OBJID_NULL)
@@ -786,10 +843,11 @@ uint16_t ObjectSystem_List_InstantiateInteractables(const struct obj_list_entry_
     return 0;
 }
 
-/*! \def ObjectSystem_DestroyStandardObject
-
-    \brief Adds the object whose slot i into the deletion queue.
-*/
+/**
+ * @brief Enqueues a standard game object for deferred destruction at the end of the frame.
+ * 
+ * @param i Index of the object in `obj_general`.
+ */
 void ObjectSystem_DestroyStandardObject(uint16_t i)
 {
     obj_delete_queue[obj_delete_queue_count] = i;
@@ -800,6 +858,11 @@ void ObjectSystem_DestroyStandardObject(uint16_t i)
 }
 
 // Ditto for player hitboxes
+/**
+ * @brief Enqueues a player hitbox for deferred destruction.
+ * 
+ * @param i Index in `obj_hitbox_player`.
+ */
 void ObjectSystem_DestroyPlayerHitbox(uint16_t i)
 {
     obj_hitbox_player_delete_queue[obj_hitbox_player_delete_queue_count] = i;
@@ -810,6 +873,11 @@ void ObjectSystem_DestroyPlayerHitbox(uint16_t i)
 }
 
 // Lastly for enemy hitboxes
+/**
+ * @brief Enqueues an enemy hitbox for deferred destruction.
+ * 
+ * @param i Index in `obj_hitbox_enemy`.
+ */
 void ObjectSystem_DestroyEnemyHitbox(uint16_t i)
 {
     obj_hitbox_enemy_delete_queue[obj_hitbox_enemy_delete_queue_count] = i;
@@ -819,10 +887,9 @@ void ObjectSystem_DestroyEnemyHitbox(uint16_t i)
     return;
 }
 
-/*! \def ObjectSystem_CleanupStandardObjects
-
-    \brief Deletes all objects whose slot i is within the deletion queue.
-*/
+/**
+ * @brief Processes `obj_delete_queue` and recycles destroyed standard object slots into the free list.
+ */
 void ObjectSystem_CleanupStandardObjects()
 {
     uint16_t actual_deletions = 0;
@@ -857,6 +924,9 @@ void ObjectSystem_CleanupStandardObjects()
     return;
 }
 
+/**
+ * @brief Processes `obj_hitbox_player_delete_queue` and recycles free slots.
+ */
 void ObjectSystem_CleanupPlayerHitboxes()
 {
     uint16_t actual_deletions = 0;
@@ -885,6 +955,9 @@ void ObjectSystem_CleanupPlayerHitboxes()
     return;
 }
 
+/**
+ * @brief Processes `obj_hitbox_enemy_delete_queue` and recycles free slots.
+ */
 void ObjectSystem_CleanupEnemyHitboxes()
 {
     uint16_t actual_deletions = 0;
@@ -919,6 +992,11 @@ void ObjectSystem_CleanupEnemyHitboxes()
     return;
 }
 
+/**
+ * @brief Binds execution, drawing, and collision function pointers based on object ID.
+ * 
+ * @param o Pointer to the target game object.
+ */
 void ObjectSystem_SetFunctionPointer(struct game_object * o)
 {
     switch (o->id)
@@ -996,6 +1074,12 @@ void ObjectSystem_SetFunctionPointer(struct game_object * o)
     return;
 }
 
+/**
+ * @brief Loads baseline stats (HP, ATK, DEF, speed, drop rewards) for enemy objects.
+ * 
+ * @param o Pointer to the target game object.
+ * @return true if enemy stats were successfully populated, false otherwise.
+ */
 bool ObjectSystem_GetEnemyData(struct game_object * o)
 {
     struct enemy_data * data_ptr;

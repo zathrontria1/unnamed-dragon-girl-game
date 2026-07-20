@@ -21,7 +21,13 @@
 // These functions are currently separated out for organization purposes
 // Quite a bunch of them are now calls to other more generic functions
 
-// Starting x and y coord, followed by length to clear, linearly (this will not clear columns)
+/**
+ * @brief Clears a linear range of tiles in the text buffer starting at (row, col).
+ * 
+ * @param row Target tilemap row.
+ * @param col Target tilemap column.
+ * @param len Number of tiles to clear.
+ */
 void UserInterface_ClearTextBuffer_Subset(uint16_t row, uint16_t col, uint16_t len)
 {
     if (len == 0)
@@ -58,15 +64,12 @@ void UserInterface_ClearTextBuffer_Subset(uint16_t row, uint16_t col, uint16_t l
     return;
 }
 
-/* 
-    Textbox border drawing and clearing functions
-
-    Note that they always take the full width of the screen.
-
-    Height includes borders (e.g. 4 text rows = h is 6)
-
-    Note: this now calls to the more generic versions
-*/
+/**
+ * @brief Draws a full-width dialog textbox window background across the screen.
+ * 
+ * @param row Starting row offset.
+ * @param h   Height of the textbox in tiles (including borders).
+ */
 void UserInterface_DrawTextbox(uint16_t row, uint16_t h)
 {
     UserInterface_DrawWindowBackground(0, 0, 32, h);
@@ -77,6 +80,12 @@ void UserInterface_DrawTextbox(uint16_t row, uint16_t h)
 }
 
 
+/**
+ * @brief Clears a full-width dialog textbox window background and text.
+ * 
+ * @param row Starting row offset.
+ * @param h   Height of the textbox in tiles.
+ */
 void UserInterface_ClearTextbox(uint16_t row, uint16_t h)
 {
     volatile uint16_t vwf_tile_id_copy = vwf_tile_id_empty;
@@ -91,6 +100,12 @@ void UserInterface_ClearTextbox(uint16_t row, uint16_t h)
     return;
 }
 
+/**
+ * @brief Clears the text portion of a dialog textbox via VRAM fill DMA.
+ * 
+ * @param row Starting row offset.
+ * @param h   Height of the textbox in tiles.
+ */
 void UserInterface_ClearTextboxText(uint16_t row, uint16_t h)
 {
     DmaSystem_SetClear(0x3400 + ((row + 1) << 5), h << 6, 0x00); // Add one extra row for the indicator overhang
@@ -98,6 +113,12 @@ void UserInterface_ClearTextboxText(uint16_t row, uint16_t h)
     return;
 }
 
+/**
+ * @brief Enqueues a full-width dialog textbox tilemap to the DMA transfer queue.
+ * 
+ * @param row Starting row offset.
+ * @param h   Height of the textbox in tiles.
+ */
 void UserInterface_CopyTextboxToVram(uint16_t row, uint16_t h)
 {
     DmaSystem_AddItemToQueue(

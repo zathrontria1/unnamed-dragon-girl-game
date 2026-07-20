@@ -47,9 +47,11 @@ uint16_t crashhandler_stack[16];
 
 uint32_t crashhandler_emulation_mode; // This must be 4 bytes wide to avoid clobbering the next bytes over in case
 
-/*
-    Handle the rest of the crash here. Jump into this from assembly code.
-*/
+/**
+ * @brief Main C processing function that takes over screen display to render the crash diagnostics report.
+ * 
+ * Invoked by assembly exception handlers after saving the register state.
+ */
 void System_CrashHandler_Followup()
 {
     REG_INIDISP = 0x8f; // enable forced blank

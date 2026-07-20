@@ -19,11 +19,12 @@ uint16_t dma_filler_length;
 
 uint8_t dma_filler_val;
 
-/*
-    Clears a block of WRAM.
-
-    Length 0 = 65,536 bytes
-*/
+/**
+ * @brief Clears a block of WRAM by writing zeroes using DMA channel 7.
+ * 
+ * @param dest   Pointer to the destination address in WRAM.
+ * @param length The size of the memory block to clear in bytes. A value of 0 is equivalent to 65,536 bytes.
+ */
 void DmaSystem_ClearWram(
     uint8_t * dest, 
     uint16_t length)
@@ -45,23 +46,26 @@ void DmaSystem_ClearWram(
     return;
 }
 
-/*
-    Performs a block move using DMA.
-
-    Length of 0 = 65,536 bytes.
-
-    Won't work if source is internal WRAM.
-
-    Uses the reserved for main loop channels (i.e. 7) so it can be called anytime
-    though if HDMA is enabled care should be taken to avoid
-    HDMA-DMA collision crashes
-*/
 #if VBCC_ASM == 1
+/**
+ * @brief Copies a block of memory to WRAM using DMA channel 7.
+ * 
+ * @param src    [r0/r1] Pointer to the source data in ROM or WRAM.
+ * @param dest   [r2/r3] Pointer to the destination address in WRAM.
+ * @param length [a] The number of bytes to copy. A value of 0 is equivalent to 65,536 bytes.
+ */
     NO_INLINE void DmaSystem_CopyToWram(
     __reg("r0/r1") uint8_t * src, 
     __reg("r2/r3") uint8_t * dest, 
     __reg("a") uint16_t length)
 #else
+/**
+ * @brief Copies a block of memory to WRAM using DMA channel 7.
+ * 
+ * @param src    Pointer to the source data in ROM or WRAM.
+ * @param dest   Pointer to the destination address in WRAM.
+ * @param length The number of bytes to copy. A value of 0 is equivalent to 65,536 bytes.
+ */
 void DmaSystem_CopyToWram(
     uint8_t * src, 
     uint8_t * dest, 
@@ -119,11 +123,15 @@ void DmaSystem_CopyToWram(
     return;
 }
 
-/*
-    Helper functions for doing small DMA runs to minimize overhead. It's still faster than MVN!
-*/
-
-// Call this before performing any short runs
+/**
+ * @brief Prepares DMA registers for multiple fast small WRAM copies.
+ * 
+ * Sets up DMA parameters (DMAP, BBAD, A1B, and WMADDH) once to reduce overhead 
+ * when calling DmaSystem_CopyToWram_ShortRun iteratively.
+ * 
+ * @param src_bank  Source bank byte.
+ * @param dest_bank Destination bank byte.
+ */
 void DmaSystem_CopyToWram_ShortPrep(
     uint8_t src_bank, 
     uint8_t dest_bank)
@@ -140,11 +148,25 @@ void DmaSystem_CopyToWram_ShortPrep(
 }
 
 #if VBCC_ASM == 1
+/**
+ * @brief Executes a rapid small WRAM copy using pre-configured DMA parameters.
+ * 
+ * @param src    [r0] Source offset address (16-bit) within the prepared bank.
+ * @param dest   [x] Destination offset address (16-bit) within the prepared bank.
+ * @param length [a] The number of bytes to copy.
+ */
     NO_INLINE void DmaSystem_CopyToWram_ShortRun(
     __reg("r0") uint16_t src, 
     __reg("x") uint16_t dest, 
     __reg("a") uint16_t length)
 #else
+/**
+ * @brief Executes a rapid small WRAM copy using pre-configured DMA parameters.
+ * 
+ * @param src    Source offset address (16-bit) within the prepared bank.
+ * @param dest   Destination offset address (16-bit) within the prepared bank.
+ * @param length The number of bytes to copy.
+ */
 void DmaSystem_CopyToWram_ShortRun(
     uint16_t src, 
     uint16_t dest, 
@@ -186,6 +208,15 @@ void DmaSystem_CopyToWram_ShortRun(
     return;
 }
 
+/**
+ * @brief Copies a block of memory from ROM/WRAM to VRAM.
+ * 
+ * Performs an immediate DMA transfer using DMA channel 7.
+ * 
+ * @param src    Pointer to the source data.
+ * @param dest   The destination word address in VRAM.
+ * @param length The number of bytes to copy (must be even).
+ */
 void DmaSystem_CopyToVram(
     uint8_t * src, 
     uint16_t dest, 
@@ -213,6 +244,15 @@ void DmaSystem_CopyToVram(
     return;
 }
 
+/**
+ * @brief Copies a block of memory from VRAM back to WRAM.
+ * 
+ * Performs an immediate DMA transfer using DMA channel 7.
+ * 
+ * @param src    The source word address in VRAM.
+ * @param dest   Pointer to the destination address in WRAM.
+ * @param length The number of bytes to copy.
+ */
 void DmaSystem_CopyFromVramToWram(
     uint16_t src, 
     uint8_t * dest, 
@@ -243,6 +283,11 @@ void DmaSystem_CopyFromVramToWram(
     return;
 }
 
+/**
+ * @brief DMA uploads the shadow OAM buffers to the SNES internal OAM registers.
+ * 
+ * Copies the low and high OAM tables during VBlank or forced blank.
+ */
 void DmaSystem_UploadOam()
 {
     // Update OAM from shadow
@@ -291,6 +336,9 @@ void DmaSystem_UploadOam()
     return;
 }
 
+/**
+ * @brief DMA uploads the entire palette buffer to CGRAM.
+ */
 void DmaSystem_UploadCgram()
 {
     // Update CGRAM from shadow
@@ -337,17 +385,21 @@ void DmaSystem_UploadCgram()
     return;
 }
 
-/*
-    Update CGRAM from shadow for only a given range
-
-    Useful for "additional CPU frame" since HDMA palette changes stick until a full refresh.
-
-    start = the CGRAM palette entry to refresh
-    length = amount of entries
-*/
 #if VBCC_ASM == 1
+/**
+ * @brief DMA uploads a subset of the palette buffer to CGRAM.
+ * 
+ * @param start [r0] The starting index of the palette entry.
+ * @param len   [a] The number of CGRAM color entries (words) to upload.
+ */
     NO_INLINE void DmaSystem_UploadCgram_Subset(uint16_t start, uint16_t len)
 #else
+/**
+ * @brief DMA uploads a subset of the palette buffer to CGRAM.
+ * 
+ * @param start The starting index of the palette entry.
+ * @param len   The number of CGRAM color entries (words) to upload.
+ */
     void DmaSystem_UploadCgram_Subset(uint16_t start, uint16_t len)
 #endif
 {
@@ -403,10 +455,9 @@ void DmaSystem_UploadCgram()
     return;
 }
 
-/*
-    Dedicated routine for copying water tile animations during
-    odd-frame NMI.
-*/
+/**
+ * @brief Performs DMA transfers for background tile data that is intended to be updated on a per-row basis (e.g. water animations)
+ */
 void DmaSystem_UpdateStripTiles()
 {
     #if VBCC_ASM == 1
@@ -459,10 +510,9 @@ void DmaSystem_UpdateStripTiles()
     return;
 }
 
-/*
-    Dedicated routine for copying full height (32px) background rows during
-    odd-frame NMI.
-*/
+/**
+ * @brief Performs DMA transfers for background tile data that makes up a 64px background row (e.g. larger background "object" tiles).
+ */
 void DmaSystem_UpdateFrameTiles()
 {
     #if VBCC_ASM == 1
@@ -525,9 +575,18 @@ NEAR const uint16_t const_lut_dma_split_lookup[6] = {
     (1 << 5) * DMA_QUEUE_OVERHEAD, 
 };
 
-/*
-    Split is 1 << split count
-*/
+/**
+ * @brief Enqueues a DMA transfer request to be processed during the next VBlank.
+ * 
+ * Automatically handles splitting transfers for updates to multiple rows that do not span the entire width (such as sprite tiles arranged in 2D grid).
+ * 
+ * @param src    Pointer to the source data in ROM/WRAM.
+ * @param dest   Word address in VRAM.
+ * @param length The total size of the transfer in bytes.
+ * @param vmain  VRAM address translation mode (VMAIN register settings).
+ * @param split  Split divisor index (used to segment rectangular copies, e.g. 0 to 5).
+ * @return A status code: 0 on success, or 1 if the queue is full or bandwidth limit is exceeded.
+ */
 uint16_t DmaSystem_AddItemToQueue(
     uint8_t * src, 
     uint16_t dest, 
@@ -598,11 +657,9 @@ uint16_t DmaSystem_AddItemToQueue(
     return 0;
 }
 
-/*
-    Call to reset the queue (throw away everything inside).
-
-    Useful when changing from a major loop to another to prevent VRAM corruption.
-*/
+/**
+ * @brief Resets the DMA queue, clearing all pending transfers.
+ */
 void DmaSystem_ResetQueue()
 {
     dma_queue_count = 0;
@@ -612,6 +669,16 @@ void DmaSystem_ResetQueue()
     return;
 }
 
+/**
+ * @brief Configures a constant value VRAM filler operation.
+ * 
+ * Enqueues a DMA clear operation using a single byte value.
+ * 
+ * @param dest   Word address in VRAM.
+ * @param length Number of bytes to fill.
+ * @param val    The byte value to fill the VRAM space with.
+ * @return A status code (0 on success, 1 on queue failure).
+ */
 uint16_t DmaSystem_SetClear(uint16_t dest, uint16_t length, uint8_t val)
 {
     // Check for capacity (count, length) issues
@@ -630,6 +697,11 @@ uint16_t DmaSystem_SetClear(uint16_t dest, uint16_t length, uint8_t val)
     return 0;
 }
 
+/**
+ * @brief Processes and executes all queued DMA transfers.
+ * 
+ * Can only be called during VBlank or Fblank. Iterates through the dma_queue and triggers transfers.
+ */
 void DmaSystem_ProcessQueue() 
 {
     #if VBCC_ASM == 1

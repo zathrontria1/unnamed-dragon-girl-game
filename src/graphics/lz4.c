@@ -7,11 +7,13 @@
 #include "dma.h"
 #include "system.h"
 
-/*
-    Unpacks LZ4 compressed data to WRAM area
-
-    Returns the length of the decompressed data, or 0 if not a valid stream.
-*/
+/**
+ * @brief Unpacks LZ4-compressed data to a WRAM area.
+ * 
+ * @param src  Pointer to the source LZ4 compressed frame in ROM.
+ * @param dest Pointer to the destination buffer in WRAM.
+ * @return The length of the decompressed data in bytes, or 0 if the stream is invalid.
+ */
 uint32_t LZ4_UnpackToWRAM(void * src, void * dest)
 {
     int32_t temp_length = LZ4_GetLength(src);
@@ -29,11 +31,16 @@ uint32_t LZ4_UnpackToWRAM(void * src, void * dest)
     return temp_length;
 }
 
-/*
-    Unpacks LZ4 compressed data to VRAM area
-
-    Returns the length of the decompressed data, or 0 if not a valid stream.
-*/
+/**
+ * @brief Unpacks LZ4-compressed data to a VRAM area.
+ * 
+ * Decompresses the frame into a temporary buffer in WRAM, then performs a DMA 
+ * copy operation to VRAM.
+ * 
+ * @param src  Pointer to the source LZ4 compressed frame in ROM.
+ * @param dest The word address in VRAM.
+ * @return The length of the decompressed data in bytes, or 0 if the stream is invalid.
+ */
 uint32_t LZ4_UnpackToVRAM(void * src, uint16_t dest)
 {
     int32_t temp_length = LZ4_GetLength(src);
@@ -53,11 +60,15 @@ uint32_t LZ4_UnpackToVRAM(void * src, uint16_t dest)
     return temp_length;
 }
 
-/*
-    Get content size of LZ4 frame
-
-    Returns the length of the decompressed data, or -1 (!) if not a valid stream.
-*/
+/**
+ * @brief Extracts the decompressed content size of an LZ4 frame.
+ * 
+ * Validates the LZ4 magic number (0x184D2204) and parses the headers to find the 
+ * decompressed size field.
+ * 
+ * @param src Pointer to the LZ4 compressed frame.
+ * @return The decompressed size of the frame in bytes, or -1 if the frame is invalid/header check fails.
+ */
 int32_t LZ4_GetLength(void * src)
 {
     uint8_t * ptr_c = src;
@@ -82,11 +93,13 @@ int32_t LZ4_GetLength(void * src)
     return (*ptr_dw);
 }
 
-/*
-    Decompress an LZ4 frame at address src to destination dest
-
-    Returns the length of the decompressed data, or 0 if not a valid stream.
-*/
+/**
+ * @brief Decompresses an LZ4 frame into a destination buffer.
+ * 
+ * @param src  Pointer to the source LZ4 compressed frame.
+ * @param dest Pointer to the destination buffer.
+ * @return The length of the decompressed data in bytes, or 0 if the stream is invalid.
+ */
 uint32_t LZ4_DecompressFrame(void * src, void * dest)
 {
     uint8_t * ptr_read = src;

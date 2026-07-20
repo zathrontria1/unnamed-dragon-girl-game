@@ -11,9 +11,12 @@
 
 uint16_t buf_player_prev_frame;
 
-/*
-    Animations item drop gravity, and draw a drop shadow if mid-air
-*/
+/**
+ * @brief Ticks Z-axis drop gravity physics and renders a shadow while airborne.
+ * 
+ * @param o Pointer to the active game object.
+ * @return 1 if the object landed on the ground during this tick; otherwise 0.
+ */
 uint16_t AniSystem_AnimateDropGravity(struct game_object * o)
 {
     uint16_t grounded = 0;
@@ -42,9 +45,11 @@ uint16_t AniSystem_AnimateDropGravity(struct game_object * o)
     return grounded;
 }
 
-/*
-    Callable function to draw a 16px shadow.
-*/
+/**
+ * @brief Draws a 16px drop shadow sprite on the back layer beneath an object.
+ * 
+ * @param o Pointer to the active game object.
+ */
 void AniSystem_DrawDropShadow(struct game_object * o)
 {
     // also draw a shadow if relevant
@@ -64,6 +69,12 @@ void AniSystem_DrawDropShadow(struct game_object * o)
     return;
 }
 
+/**
+ * @brief Computes the player sprite graphics address based on action state and facing direction.
+ * 
+ * @param o Pointer to the player game object.
+ * @return Pointer to the decompressed frame in WRAM.
+ */
 uint8_t * AniSystem_GetPlayerFrame(struct game_object * o)
 {
     // Return player sprite address based on given information
@@ -180,6 +191,12 @@ uint8_t * AniSystem_GetPlayerFrame(struct game_object * o)
     return AniSystem_GetCompressedFrame((const uint8_t *)&data_spr_player_dd, (const uint16_t *)&data_spr_player_lut, (uint8_t *)(LZ4_BUFFER_ADDR+0xc000), temp_tilenum);
 }
 
+/**
+ * @brief Dispatches dynamic frame selection for stateful entities (Slimes, Lizardman).
+ * 
+ * @param o Pointer to the active game object.
+ * @return Pointer to the sprite graphics frame in ROM or WRAM.
+ */
 uint8_t * AniSystem_GetDynamicFrame(struct game_object * o)
 {
     switch (o->id)
@@ -193,6 +210,12 @@ uint8_t * AniSystem_GetDynamicFrame(struct game_object * o)
     }
 }
 
+/**
+ * @brief Dispatches dynamic frame selection for stateless entities (Bubbles, Arrows, Particles).
+ * 
+ * @param o Pointer to the active game object.
+ * @return Pointer to the sprite graphics frame in ROM or WRAM.
+ */
 uint8_t * AniSystem_GetDynamicFrame_Stateless(struct game_object * o)
 {
     switch (o->id)
@@ -208,6 +231,12 @@ uint8_t * AniSystem_GetDynamicFrame_Stateless(struct game_object * o)
     }
 }
 
+/**
+ * @brief Resolves animation frames for Bubble particles.
+ * 
+ * @param o Pointer to the Bubble object.
+ * @return Pointer to the graphics frame.
+ */
 uint8_t * AniSystem_GetDynamicFrame_Bubble(struct game_object * o)
 {
     // use a virtual tilenum system before finalizing.
@@ -220,6 +249,12 @@ uint8_t * AniSystem_GetDynamicFrame_Bubble(struct game_object * o)
     return ((uint8_t *)&data_spr_slime + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
 }
 
+/**
+ * @brief Resolves animation frames and directional flips for Arrow projectiles based on angle.
+ * 
+ * @param o Pointer to the Arrow object.
+ * @return Pointer to the graphics frame address (encodes H-flip and V-flip in highest bits).
+ */
 uint8_t * AniSystem_GetDynamicFrame_Arrow(struct game_object * o)
 {
     // use a virtual tilenum system before finalizing.
@@ -331,12 +366,24 @@ uint8_t * AniSystem_GetDynamicFrame_Arrow(struct game_object * o)
     return (uint8_t *)temp_addr;
 }
 
+/**
+ * @brief Resolves animation frames for Boss attack particles.
+ * 
+ * @param o Pointer to the Boss particle object.
+ * @return Pointer to the graphics frame.
+ */
 uint8_t * AniSystem_GetDynamicFrame_EnemyBossParticle(struct game_object * o)
 {
     uint16_t temp_tilenum = o->struct_data.npc_data.ani.frame;
     return ((uint8_t *)&data_spr_boss_placeholder_addon_attack1 + ((temp_tilenum & 0x07) << 6) + ((temp_tilenum >> 3) << 10));
 }
 
+/**
+ * @brief Resolves animation frames for Slime enemies.
+ * 
+ * @param o Pointer to the Slime object.
+ * @return Pointer to the graphics frame address (encodes horizontal flip in upper bit).
+ */
 uint8_t * AniSystem_GetDynamicFrame_Slime(struct game_object * o)
 {
     // use a virtual tilenum system before finalizing.
@@ -362,6 +409,12 @@ uint8_t * AniSystem_GetDynamicFrame_Slime(struct game_object * o)
     }
 }
 
+/**
+ * @brief Resolves animation frames for Lizardman enemies.
+ * 
+ * @param o Pointer to the Lizardman object.
+ * @return Pointer to the graphics frame address (encodes horizontal flip in upper bit).
+ */
 uint8_t * AniSystem_GetDynamicFrame_Lizardman(struct game_object * o)
 {
     // use a virtual tilenum system before finalizing.
@@ -387,8 +440,15 @@ uint8_t * AniSystem_GetDynamicFrame_Lizardman(struct game_object * o)
     }
 }
 
-// Fetch and build compressed frame in WRAM
-// This will return the index in the lookup table for the purposes of checking prev frames
+/**
+ * @brief Uses DMA channel 7 to copy compressed 128-byte sprite frames into WRAM buffers.
+ * 
+ * @param data   Pointer to the compressed frame binary data in ROM.
+ * @param lookup Pointer to the frame offset lookup table.
+ * @param buffer Target WRAM buffer destination address.
+ * @param frame  Target frame index to unpack.
+ * @return Pointer to the lookup entry value.
+ */
 uint8_t * AniSystem_GetCompressedFrame(const uint8_t * data, const uint16_t * lookup, uint8_t * buffer, uint16_t frame)
 {
     uint16_t lookup_entry_offset = frame << 1; // Each frame is 4 bytes

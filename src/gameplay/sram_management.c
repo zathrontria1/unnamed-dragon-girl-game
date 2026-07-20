@@ -12,11 +12,9 @@ uint8_t sram_available_slots;
 
 // Note: the game is configured with 32KB SRAM, divided into 4 banks of 8KB.
 
-/*  Check each SRAM slot for the verification string.
-    If any mismatch, wipe the SRAM bank (8KB section)
-
-    Also used to determine if there is any SRAM, and if yes, how many banks are there.
-    */
+/**
+ * @brief Probes SRAM chip hardware, verifies bank magic strings, and initializes missing save slots.
+ */
 void Sram_Check()
 {
     uint8_t * p = (uint8_t *)SRAM_ADDR;
@@ -104,9 +102,11 @@ void Sram_Check()
     return;
 }
 
-/*
-    Clears a SRAM slot
-*/
+/**
+ * @brief Formats an 8KB SRAM save bank, wiping data and rewriting header magic strings.
+ * 
+ * @param slot Bank index to format (0 to SRAM_BANKS - 1).
+ */
 void Sram_ClearSlot(uint16_t slot)
 {
     if (slot >= SRAM_BANKS)
@@ -132,11 +132,11 @@ void Sram_ClearSlot(uint16_t slot)
     return;
 }
 
-/*
-    Saves the current game state into SRAM.
-
-    It does take a while, so do it while no gameplay is taking place (e.g. during level changes)
-*/
+/**
+ * @brief Serializes current game state (player position/stats, level ID, global flags) into an SRAM slot.
+ * 
+ * @param slot Target SRAM bank index.
+ */
 void Sram_SaveToSlot(uint16_t slot)
 {
     if (slot >= SRAM_BANKS)
@@ -206,9 +206,12 @@ void Sram_SaveToSlot(uint16_t slot)
     return;
 }
 
-/*
-    Calculates a 16-bit checksum value by adding every byte of the saved game data
-*/
+/**
+ * @brief Computes a 16-bit additive checksum across all serialized game data bytes in a slot.
+ * 
+ * @param slot Target SRAM bank index.
+ * @return 16-bit unsigned checksum word.
+ */
 uint16_t Sram_CalculateChecksum(uint16_t slot)
 {
     uint8_t * p = (uint8_t *)(SRAM_ADDR + SRAM_DATA_OFFSET + (0x00010000 * slot));
@@ -223,11 +226,12 @@ uint16_t Sram_CalculateChecksum(uint16_t slot)
     return checksum;
 }
 
-/*
-    Called to load data from SRAM.
-
-    Returns true if data can be loaded, false otherwise.
-*/
+/**
+ * @brief Validates header magic string, layout version, and checksum before restoring game state from SRAM.
+ * 
+ * @param slot Source SRAM bank index.
+ * @return true if game state was successfully restored, false if corrupted or invalid.
+ */
 bool Sram_LoadFromSlot(uint16_t slot)
 {
     if (slot >= SRAM_BANKS)

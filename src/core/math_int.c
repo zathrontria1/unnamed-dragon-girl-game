@@ -4,16 +4,26 @@
 #include "vars.h"
 #include "math_int.h"
 
-// Random numbers
+/**
+ * @brief LSFR random generator state buffer.
+ */
 int8_t rand_array[3];
+
+/**
+ * @brief Flag indicating if the random number generator has been seeded.
+ */
 uint16_t rand_seeded;
 
-/* 
-    C integer version of atan2 adapted from 
-    Discord: flipphone22/hibber22
-    returns angle from 0-255
-*/
-
+/**
+ * @brief Calculates the 8-bit integer approximation of atan2.
+ * 
+ * Adapted from Discord user: flipphone22/hibber22.
+ * Maps the result angle to a range of 0 to 255.
+ * 
+ * @param y The vertical coordinate offset.
+ * @param x The horizontal coordinate offset.
+ * @return The resulting angle in the range [0, 255].
+ */
 uint8_t Math_GetAtan2_u8(int16_t y, int16_t x)
 {
     if (x == 0 && y == 0) {
@@ -91,9 +101,11 @@ uint16_t Math_GetRandom_u16()
     return 0;
 }
 
-/*
-    Seeds the random value generator LSFR with a 24-bit value (highest 8 bits dropped)
-*/
+/**
+ * @brief Seeds the pseudo-random number generator with a 24-bit seed.
+ * 
+ * @param s A 32-bit seed value (highest 8 bits are discarded).
+ */
 void Math_SeedRandom(uint32_t s)
 {
     if (s == 0)
@@ -115,11 +127,16 @@ void Math_SeedRandom(uint32_t s)
     return;
 }
 
-/*
-    Returns the squared distance (avoid a square root)
-
-    Limited to max 320 on either axis to prevent the LUT from going too large.
-*/
+/**
+ * @brief Calculates the squared distance between two coordinate offsets.
+ * 
+ * Avoids slow square root operations. The offsets on either axis are clamped 
+ * to 320 to avoid exceeding the bounds of the power-of-two lookup table.
+ * 
+ * @param x The horizontal distance offset.
+ * @param y The vertical distance offset.
+ * @return The squared distance (x^2 + y^2).
+ */
 uint32_t Math_GetDistanceSquared(int16_t x, int16_t y)
 {
     // It's pretty fast already. Don't inline this.

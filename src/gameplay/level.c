@@ -22,11 +22,12 @@ const struct level_data * level_data_ptr_next;
 
 // All functions in level.c expect that a valid level pointer is set.
 
-/*
-    Load level data in pointer
-
-    Split into two parts so part of it can be done while the screen is turned on
-*/
+/**
+ * @brief Loads level map layout, instantiates objects, and sets up palette/tileset buffers.
+ * 
+ * @param level Pointer to the level data configuration.
+ * @return true if the level reuses previous VRAM contents without needing a full reload, false otherwise.
+ */
 bool LevelSystem_LoadLevel(const struct level_data * level)
 {
     // Instantiate player if the player isn't already instantiated
@@ -128,9 +129,11 @@ bool LevelSystem_LoadLevel(const struct level_data * level)
     return temp_level_reuses_vram_contents;
 }
 
-/*
-    Map graphics that need to be copied in fblank to VRAM later go here
-*/
+/**
+ * @brief Unpacks map metatiles and tileset graphics into Bank 7F WRAM staging areas.
+ * 
+ * @param level Pointer to the level data configuration.
+ */
 void LevelSystem_LoadLevelGraphics(const struct level_data * level)
 {
     // Load the actual map data - must be done after the player is instantiated first
@@ -145,9 +148,11 @@ void LevelSystem_LoadLevelGraphics(const struct level_data * level)
     return;
 }
 
-/*
-    Reload level tileset, when changing screens or video modes
-*/
+/**
+ * @brief Decompresses sprite, BG map, and UI tilesets into Bank 7F WRAM.
+ * 
+ * @param level Pointer to the level data configuration.
+ */
 void LevelSystem_LoadLevelTileset(const struct level_data * level)
 {
     // Copy fixed sprite graphics
@@ -163,11 +168,11 @@ void LevelSystem_LoadLevelTileset(const struct level_data * level)
     return;
 }
 
-/*
-    Same for the palette
-
-    Must use dedicated function here since using pointer to a table of pointers
-*/
+/**
+ * @brief Loads the level's 16 subpalettes into the CGRAM shadow buffer.
+ * 
+ * @param level Pointer to the level data configuration.
+ */
 void LevelSystem_LoadLevelPalette(const struct level_data * level)
 {
     uint8_t ** pal_ptr = (uint8_t **)level->tileset_palette; // Pointer of pointers

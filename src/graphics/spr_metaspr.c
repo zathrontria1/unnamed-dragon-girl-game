@@ -8,7 +8,14 @@
 
 #include "map.h"
 
-// Draws a metasprite
+/**
+ * @brief Decomposes a metasprite composition into individual cells and appends them to the main depth-sorted queue.
+ * 
+ * Performs bounding box checks against screen limits before adding entries.
+ * 
+ * @param o [a/x]   Pointer to the parent game object causing the render.
+ * @param m [r0/r1] Pointer to the array of metasprite cell definitions.
+ */
 #if VBCC_ASM == 1
 NO_INLINE void SpriteEngine_AddMetaSprite(__reg("a/x") struct game_object * o, __reg("r0/r1") const struct spr_metaspr_definition * m)
 #else
@@ -252,6 +259,12 @@ void SpriteEngine_AddMetaSprite(struct game_object * o, const struct spr_metaspr
     return;
 }
 
+/**
+ * @brief Decomposes a metasprite composition into individual cells and appends them to the back-forced queue (e.g. drop shadow).
+ * 
+ * @param o [a/x]   Pointer to the parent game object causing the render.
+ * @param m [r0/r1] Pointer to the array of metasprite cell definitions.
+ */
 #if VBCC_ASM == 1
 NO_INLINE void SpriteEngine_AddMetaSprite_Back(__reg("a/x") struct game_object * o, __reg("r0/r1") const struct spr_metaspr_definition * m)
 #else

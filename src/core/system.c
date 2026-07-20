@@ -47,13 +47,14 @@ uint16_t input_pad0_new;
     Now using custom startup that does indeed init ZP
 */
 
-/*
-    Initialize all system registers. In case something else was running beforehand
-
-    TODO: if to be released outside of SNES this will need to be #ifdef'd
-*/
+/**
+ * @brief Configures standard CPU registers and hardware states on startup.
+ * 
+ * Turns off the display (forced blank) and configures initial hardware registers.
+ */
 void System_Init_CpuRegs(void)
 {
+    // TODO: if to be released outside of SNES this will need to be #ifdef'd
     // Must do first
     REG_NMITIMEN = 0x00; // Disable interrupts
     REG_HDMAEN = 0x00; // Disable HDMA
@@ -126,7 +127,9 @@ void System_Init_CpuRegs(void)
     return;
 }
 
-// Write out the MVN opcode here so that it can be used ASAP
+/**
+ * @brief Dynamically writes assembly utility routines (such as block moves) to WRAM.
+ */
 void System_Init_WramFunctions()
 {
     system_MVNCodeInWRAM[0] = 0x54;
@@ -135,10 +138,11 @@ void System_Init_WramFunctions()
     return;
 }
 
-/*
-    Throw a splash screen during initialization to prevent extended black screens
-    Put as many init parts as possible here
-*/
+/**
+ * @brief Displays the startup splash screen and initializes resources.
+ * 
+ * Performs core engine startup sequences, loads logo assets, and boots the SPC700 sound engine.
+ */
 void System_DisplayStartupSplash()
 {
     // Set up the PPU regs to what we want.
@@ -236,10 +240,9 @@ void System_DisplayStartupSplash()
     return;
 }
 
-/*
-    Initialization of fixed sprites that touch VRAM must be done in fblank
-    Also for safety, PPU registers that are touched also go here
-*/
+/**
+ * @brief Initializes graphics parameters, VRAM layouts, and regenerates tilemaps.
+ */
 void System_Init_Graphics(void)
 {
     // Write BG1, BG2, BG3 and BG4 scroll to 0 on X and negative 1 on Y axis
@@ -256,11 +259,9 @@ void System_Init_Graphics(void)
     return;
 }
 
-/*
-    Flush the BG1 and BG3 tilemaps with the correct null tiles.
-
-    Requires Fblank
-*/
+/**
+ * @brief Constructs the static tilemap structure for the UI layers.
+ */
 void System_Init_UiTilemap()
 {
     // Start with the shared initial items.
@@ -315,9 +316,11 @@ void System_Init_UiTilemap()
 }
 
 
-/*
-    First part of initialization that doesn't touch graphics (can be done during the splash screen)
-*/
+/**
+ * @brief Performs a full cold reset initialization of the game state.
+ * 
+ * Clears standard objects, resets hitboxes, and resets game state variables.
+ */
 void System_Init()
 {
     // Initialize VRAM slot allocator
@@ -355,9 +358,11 @@ void System_Init()
     return;
 }
 
-/*
-    Call during a live game
-*/
+/**
+ * @brief Performs a partial reset of the game state when reloading levels.
+ * 
+ * Resets standard objects and hitboxes but preserves the active player object state.
+ */
 void System_Init_Partial()
 {
     // Initialize VRAM slot allocator
@@ -398,6 +403,9 @@ void System_Init_Partial()
     return;
 }
 
+/**
+ * @brief Resets background scroll registers for layers BG1, BG2, and BG3.
+ */
 void System_Init_BgScroll(void)
 {
     REG_BG1HOFS = 0;
@@ -421,9 +429,11 @@ void System_Init_BgScroll(void)
     return;
 }
 
-/*
-    Call when the display mode is to be changed
-*/
+/**
+ * @brief Sets display settings (brightness, layer enables) based on the game routine.
+ * 
+ * @param routine The active routine identifier (e.g. ROUTINE_GAMELOOP, ROUTINE_SUBSCREEN).
+ */
 void System_Init_DisplaySettings(uint16_t routine)
 {
     switch (routine)
@@ -449,7 +459,11 @@ void System_Init_DisplaySettings(uint16_t routine)
     return;
 }
 
-// Set background tile entries and tilemap locations
+/**
+ * @brief Sets up screen sizes and tilemap register configurations.
+ * 
+ * @param routine The active routine identifier.
+ */
 void System_Init_TilemapSettings(uint16_t routine)
 {
     switch (routine)
@@ -489,11 +503,9 @@ void System_Init_TilemapSettings(uint16_t routine)
     return;
 }
 
-/*
-    After processing is finished, waits until vblank
-
-    After vblank routine finishes, polls input and checks for soft reset and RNG validity before exiting
-*/
+/**
+ * @brief Blocks execution until VBlank, performing input polling and soft reset checks.
+ */
 void System_WaitUntilVblank()
 {
     System_CheckForActiveDisplayEnd();
@@ -527,9 +539,9 @@ void System_WaitUntilVblank()
 
 // NOTE: the game polls both controllers and merges inputs.
 
-/*
-    Automatic input poll
-*/
+/**
+ * @brief Polls controller buttons via hardware auto-joypad read registers.
+ */
 void System_GetInput()
 {
     #if VBCC_ASM == 1 // Don't bother changing memory bit
@@ -570,11 +582,9 @@ void System_GetInput()
     return;
 }
 
-/*
-    Manual input poll
-
-    Use this when using fblank to prevent any chance of input read issues or lag
-*/
+/**
+ * @brief Manually clocks and reads SNES controller data (used for startup verification or when V-IRQ is used instead of standard NMI).
+ */
 void System_GetInput_Manual()
 {
     #if VBCC_ASM == 1 // Don't bother changing memory bit
@@ -654,13 +664,11 @@ void System_GetInput_Manual()
     return;
 }
 
-/*
-    Returns the controller signature.
-
-    Must be called while no interrupts are enabled, as manual reads will be used.
-
-    A standard controller should be all 0s (i.e. can check if 0 or not)
-*/
+/**
+ * @brief Checks and returns the controller ID signature to verify joypad validity.
+ * 
+ * @return Joypad ID signature (e.g., 0 for a standard controller).
+ */
 uint16_t System_CheckController(void)
 {
     System_GetInput_Manual();
@@ -668,6 +676,12 @@ uint16_t System_CheckController(void)
     return (input_pad0 & 0x0f);
 }
 
+/**
+ * @brief Checks if a specific button was newly pressed in the current frame.
+ * 
+ * @param k The keypad bit flag to query.
+ * @return Non-zero if the key was newly pressed; otherwise zero.
+ */
 uint16_t System_CheckKey(enum KEYPAD_BITS k)
 {
     if (subscreen_transition_state != 0)
@@ -682,6 +696,11 @@ uint16_t System_CheckKey(enum KEYPAD_BITS k)
     return 0;
 }
 
+/**
+ * @brief Checks if any button on the joypad was newly pressed in the current frame.
+ * 
+ * @return Non-zero if any button was newly pressed; otherwise zero.
+ */
 uint16_t System_CheckKeyAny()
 {
     if (subscreen_transition_state != 0)
@@ -696,6 +715,12 @@ uint16_t System_CheckKeyAny()
     return 0;
 }
 
+/**
+ * @brief Checks if a specific button is currently held down.
+ * 
+ * @param k The keypad bit flag to query.
+ * @return Non-zero if the key is currently held; otherwise zero.
+ */
 uint16_t System_CheckKeyHeld(enum KEYPAD_BITS k)
 {
     if (subscreen_transition_state != 0)
@@ -710,6 +735,9 @@ uint16_t System_CheckKeyHeld(enum KEYPAD_BITS k)
     return 0;
 }
 
+/**
+ * @brief Enables VBlank interrupts (NMI) and hardware polling.
+ */
 void System_EnableInterrupts()
 {
     system_use_long_vblank = false;
@@ -726,6 +754,9 @@ void System_EnableInterrupts()
     return;
 }
 
+/**
+ * @brief Disables hardware interrupts (NMI).
+ */
 void System_DisableInterrupts()
 {
     system_use_long_vblank = false;
@@ -742,6 +773,9 @@ void System_DisableInterrupts()
     return;
 }
 
+/**
+ * @brief Enables vertical interrupts (V-IRQ) which allows running the Vblank routine earlier than the standard line.
+ */
 void System_EnableFblankInterrupts()
 {
     system_use_long_vblank = true;
@@ -761,6 +795,9 @@ void System_EnableFblankInterrupts()
     return;
 }
 
+/**
+ * @brief Performs a hard system reset sequence.
+ */
 void System_Reset()
 {
     System_DisableInterrupts();
@@ -778,6 +815,9 @@ void System_Reset()
     return;
 }
 
+/**
+ * @brief Checks if the L+R+Start+Select soft reset combination is held.
+ */
 void System_CheckSoftReset()
 {
     if ((input_pad0 & (KEY_L | KEY_R | KEY_SELECT | KEY_START)) == (KEY_L | KEY_R | KEY_SELECT | KEY_START)) // check soft reset combo
@@ -791,6 +831,9 @@ void System_CheckSoftReset()
     return;
 }
 
+/**
+ * @brief Soft resets the game, resetting the APU sound engine and returning to splash.
+ */
 void System_SoftReset()
 {
     if (snd_apu_booted)
@@ -803,7 +846,9 @@ void System_SoftReset()
     return;
 }
 
-// Call this to align to vblank
+/**
+ * @brief Synchronizes code execution by blocking until the start of VBlank.
+ */
 void System_AlignToVblank()
 {
     #if VBCC_ASM == 1
@@ -835,9 +880,9 @@ void System_AlignToVblank()
     return;
 }
 
-/*
-    Adds all relevant time counters
-*/
+/**
+ * @brief Increments system frame counters and update timing structures.
+ */
 void System_UpdateFrameCounters()
 {
     system_frames_elapsed++;
@@ -864,14 +909,19 @@ void System_UpdateFrameCounters()
     return;
 }
 
-/*
-    Sets Htimer to specified dot on scanline and waits
-
-    This will suppress all interrupts!
-*/
 #if VBCC_ASM == 1
+/**
+ * @brief Inserts a custom delay loop aligned to horizontal sync (H-sync) lines.
+ * 
+ * @param dot The line offset constraint.
+ */
 NO_INLINE void System_Hsync(uint16_t dot)
 #else 
+/**
+ * @brief Inserts a custom delay loop aligned to horizontal sync (H-sync) lines.
+ * 
+ * @param dot The line offset constraint.
+ */
 void System_Hsync(uint16_t dot)
 #endif
 {
@@ -916,9 +966,9 @@ void System_Hsync(uint16_t dot)
     return;
 }
 
-/*
-    Checks that the current line is NOT the final line of active display; if it is, stall until +2 lines
-*/
+/**
+ * @brief Checks if the active display beam has ended for VBlank sync checks.
+ */
 void System_CheckForActiveDisplayEnd()
 {
     #if VBCC_ASM == 1
@@ -1001,15 +1051,17 @@ void System_CheckForActiveDisplayEnd()
     return;
 }
 
-/*
-    Performs a block move using MVN.
-
-    Length of 0 = 65,536 bytes.
-*/
+/**
+ * @brief Quick memory block copy utility.
+ * 
+ * @param src  [r0/r1] Source memory address pointer.
+ * @param dest [r2/r3] Destination memory address pointer.
+ * @param len  [a] Number of bytes to copy. A length of 0 bytes is equal to 65,536 bytes.
+ */
 #if VBCC_ASM == 1
-NO_INLINE void System_CopyBlock(__reg("r0/r1") uint8_t * src, __reg("r2/r3") uint8_t * dest, __reg("a") uint16_t len)
+    NO_INLINE void System_CopyBlock(__reg("r0/r1") uint8_t * src, __reg("r2/r3") uint8_t * dest, __reg("a") uint16_t len)
 #else
-void System_CopyBlock(uint8_t * src, uint8_t * dest, uint16_t len)
+    void System_CopyBlock(uint8_t * src, uint8_t * dest, uint16_t len)
 #endif
 {
     // r0 contains source

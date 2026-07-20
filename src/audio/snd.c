@@ -58,6 +58,12 @@ uint16_t snd_stream_current_block;
     For block transfers, transfer ends are implicit.
 */
 
+/**
+ * @brief Boots the SPC700 sound engine.
+ * 
+ * Handshakes with the stock SPC700 boot ROM, uploads the driver binary payload, 
+ * and jumps to the driver entry point.
+ */
 void SoundInterface_StartSoundEngine()
 {
     // Wait for SPC to become ready
@@ -109,8 +115,20 @@ void SoundInterface_StartSoundEngine()
 }
 
 #if VBCC_ASM == 1
+/**
+ * @brief Uploads a block of data to the SPC700.
+ * 
+ * @param data_ptr  Pointer to the source data in ROM or WRAM.
+ * @param chunk_len The number of bytes to copy.
+ */
     NO_INLINE void SoundInterface_UploadData(uint8_t * data_ptr, uint16_t chunk_len)
 #else
+/**
+ * @brief Uploads a block of data to the SPC700.
+ * 
+ * @param data_ptr  Pointer to the source data in ROM or WRAM.
+ * @param chunk_len The number of bytes to copy.
+ */
     void SoundInterface_UploadData(uint8_t * data_ptr, uint16_t chunk_len)
 #endif
 {
@@ -167,8 +185,20 @@ void SoundInterface_StartSoundEngine()
 }
 
 #if VBCC_ASM == 1
+/**
+ * @brief Uploads a block of data using 2-byte optimized APU ports.
+ * 
+ * @param data_ptr  Pointer to the source data.
+ * @param chunk_len The number of bytes to copy.
+ */
     NO_INLINE void SoundInterface_UploadData_2byte(uint8_t * data_ptr, uint16_t chunk_len)
 #else
+/**
+ * @brief Uploads a block of data using 2-byte optimized APU ports.
+ * 
+ * @param data_ptr  Pointer to the source data.
+ * @param chunk_len The number of bytes to copy.
+ */
     void SoundInterface_UploadData_2byte(uint8_t * data_ptr, uint16_t chunk_len)
 #endif
 {
@@ -241,8 +271,20 @@ void SoundInterface_StartSoundEngine()
 }
 
 #if VBCC_ASM == 1
+/**
+ * @brief Performs 2-byte transfers specifically for feeding loop streams during active playback.
+ * 
+ * @param data_ptr  Pointer to the stream data block.
+ * @param chunk_len Length of the data chunk to upload.
+ */
     NO_INLINE void SoundInterface_UploadData_2byte_StreamLoopBlock(uint8_t * data_ptr, uint16_t chunk_len)
 #else
+/**
+ * @brief Performs 2-byte transfers specifically for feeding loop streams during active playback.
+ * 
+ * @param data_ptr  Pointer to the stream data block.
+ * @param chunk_len Length of the data chunk to upload.
+ */
     void SoundInterface_UploadData_2byte_StreamLoopBlock(uint8_t * data_ptr, uint16_t chunk_len)
 #endif
 {
@@ -329,6 +371,13 @@ void SoundInterface_StartSoundEngine()
     return;
 }
 
+/**
+ * @brief Handshake verification flow control handler.
+ * 
+ * Blocks execution until the APU has confirmed it processed the last request.
+ * 
+ * @param ignore_busy Flag to skip waiting for confirmation in crash scenarios.
+ */
 void SoundInterface_AcknowledgeBusy(bool ignore_busy)
 {
     if (!ignore_busy)
@@ -356,17 +405,22 @@ void SoundInterface_AcknowledgeBusy(bool ignore_busy)
     return;
 }
 
+/**
+ * @brief Pushes a NOP sync command to flush the input buffer.
+ */
 void SoundInterface_AcknowledgeNop()
 {
     REG_APU01 = SND_CMD_NOP;
 }
 
-/*
-    Called to handle positional audio automatically without duplicating code.
-
-    If an SFX is intended to always be played centre, this doesn't need to be used.
-    Use SoundInterface_PlaySfx below instead in that case.
-*/
+/**
+ * @brief Enqueues a sound effect trigger centered on a game object's screen position.
+ * 
+ * Calculates panning values based on the object's offset relative to the camera view.
+ * 
+ * @param o      Pointer to the game object causing the sound.
+ * @param sfx_id The ID of the sound effect.
+ */
 void SoundInterface_PlaySfx_Pre(struct game_object * o, uint8_t sfx_id)
 {        
     int temp_snd_pan;
@@ -393,6 +447,14 @@ void SoundInterface_PlaySfx_Pre(struct game_object * o, uint8_t sfx_id)
     return;
 }
 
+/**
+ * @brief Triggers a standard sound effect at a given pan value.
+ * 
+ * Checks priorities before sending.
+ * 
+ * @param sfx_id The ID of the sound effect.
+ * @param pan    The audio pan value (-128 to 127).
+ */
 void SoundInterface_PlaySfx(uint8_t sfx_id, int8_t pan)
 {
     if (!SoundInterface_IsHigherPriority(sfx_id))
@@ -412,6 +474,12 @@ void SoundInterface_PlaySfx(uint8_t sfx_id, int8_t pan)
     return;
 }
 
+/**
+ * @brief Sends a direct sound trigger command to the APU without priority checks.
+ * 
+ * @param sfx_id The ID of the sound effect.
+ * @param pan    The audio pan value.
+ */
 void SoundInterface_PlaySfx_Internal(uint8_t sfx_id, int8_t pan)
 {
     SoundInterface_AcknowledgeBusy(true);
@@ -426,6 +494,16 @@ void SoundInterface_PlaySfx_Internal(uint8_t sfx_id, int8_t pan)
     return;
 }
 
+/**
+ * @brief Triggers an extended sound effect with left volume, right volume, and pitch modifications.
+ * 
+ * Checks priorities before sending.
+ * 
+ * @param sfx_id  The ID of the sound effect.
+ * @param vol_l   Left channel volume override.
+ * @param vol_r   Right channel volume override.
+ * @param pitch   Playback pitch modifier.
+ */
 void SoundInterface_PlaySfx_Ex(uint8_t sfx_id, int8_t vol_l, int8_t vol_r, int8_t pitch)
 {
     if (!SoundInterface_IsHigherPriority(sfx_id))
@@ -447,6 +525,14 @@ void SoundInterface_PlaySfx_Ex(uint8_t sfx_id, int8_t vol_l, int8_t vol_r, int8_
     return;
 }
 
+/**
+ * @brief Sends an extended sound trigger command to the APU without priority checks.
+ * 
+ * @param sfx_id  The ID of the sound effect.
+ * @param vol_l   Left channel volume override.
+ * @param vol_r   Right channel volume override.
+ * @param pitch   Playback pitch modifier.
+ */
 void SoundInterface_PlaySfx_Ex_Internal(uint8_t sfx_id, int8_t vol_l, int8_t vol_r, int8_t pitch)
 {
     SoundInterface_AcknowledgeBusy(true);
@@ -471,7 +557,11 @@ void SoundInterface_PlaySfx_Ex_Internal(uint8_t sfx_id, int8_t vol_l, int8_t vol
     return;
 }
 
-// stop an SFX
+/**
+ * @brief Requests silencing a specific sound effect.
+ * 
+ * @param sfx_id The ID of the sound effect to silence.
+ */
 void SoundInterface_StopSfx(uint8_t sfx_id)
 {
     snd_defercmd_sfx_stop_enable = false; // Always disable the sfx enablement while changing variables
@@ -483,6 +573,11 @@ void SoundInterface_StopSfx(uint8_t sfx_id)
     return;
 }
 
+/**
+ * @brief Sends a stop sound command directly to the APU.
+ * 
+ * @param sfx_id The ID of the sound effect to silence.
+ */
 void SoundInterface_StopSfx_Internal(uint8_t sfx_id)
 {
     SoundInterface_AcknowledgeBusy(true);
@@ -496,10 +591,12 @@ void SoundInterface_StopSfx_Internal(uint8_t sfx_id)
     return;
 }
 
-/*
-    Set up a DSP register from main CPU by calling this function
-*/
-
+/**
+ * @brief Sets a specific DSP internal register value on the sound processor.
+ * 
+ * @param dsp_reg  The target DSP register address index.
+ * @param dsp_data The byte value to write.
+ */
 void SoundInterface_SetDspRegister(uint8_t dsp_reg, uint8_t dsp_data)
 {
     SoundInterface_AcknowledgeBusy(false);
@@ -521,11 +618,9 @@ void SoundInterface_SetDspRegister(uint8_t dsp_reg, uint8_t dsp_data)
     return;
 }
 
-/*
-    Restarts the SPC into the IPL loader.
-
-    Run this if soft resetting, otherwise game will hang during startup.
-*/
+/**
+ * @brief Soft resets the APU state and blocks until the sound chip is ready to accept commands.
+ */
 void SoundInterface_ResetAPU()
 {
     SoundInterface_AcknowledgeBusy(false);
@@ -542,6 +637,11 @@ void SoundInterface_ResetAPU()
     return;
 }
 
+/**
+ * @brief Uploads a BRR audio sample struct to the sound engine.
+ * 
+ * @param s Pointer to the sample definition structure.
+ */
 void SoundInterface_UploadSample(struct sample_list_entry * s)
 {
     SoundInterface_AcknowledgeBusy(false);
@@ -632,6 +732,11 @@ void SoundInterface_UploadSample(struct sample_list_entry * s)
     return;
 }
 
+/**
+ * @brief Uploads an array of BRR sample definitions to the APU.
+ * 
+ * @param s Pointer to the start of the sample definition array.
+ */
 void SoundInterface_UploadSampleList(struct sample_list_entry * s)
 {
     while (s->len != 0)
@@ -644,6 +749,11 @@ void SoundInterface_UploadSampleList(struct sample_list_entry * s)
     return;
 }
 
+/**
+ * @brief Uploads an instrument structure list defining sound properties to the APU.
+ * 
+ * @param s Pointer to the start of the instrument array definition.
+ */
 void SoundInterface_UploadInstrumentList(struct sample_list_entry_ins * s)
 {
     while (s->len != 0)
@@ -657,6 +767,12 @@ void SoundInterface_UploadInstrumentList(struct sample_list_entry_ins * s)
     return;
 }
 
+/**
+ * @brief Updates the default pitch tuning index for a specific instrument ID.
+ * 
+ * @param ins_id The instrument ID index.
+ * @param tune   The tuning byte value.
+ */
 void SoundInterface_SetSampleTune(uint8_t ins_id, uint8_t tune)
 {
     SoundInterface_AcknowledgeBusy(false);
@@ -677,10 +793,11 @@ void SoundInterface_SetSampleTune(uint8_t ins_id, uint8_t tune)
     return;
 }
 
-/*
-    Convert a BPM into the equivalent in 
-    timer ticks + intervals
-*/
+/**
+ * @brief Adjusts the sequence playback tempo.
+ * 
+ * @param tempo The tempo rate value in BPM.
+ */
 void SoundInterface_SetMusicTempo(uint16_t tempo)
 {
     SoundInterface_AcknowledgeBusy(false);
@@ -722,6 +839,12 @@ void SoundInterface_SetMusicTempo(uint16_t tempo)
     return;
 }
 
+/**
+ * @brief Uploads music sequences to the sound engine's tracks.
+ * 
+ * @param s     Pointer to the sequence commands array.
+ * @param track The target track channel.
+ */
 void SoundInterface_UploadMusicSequence(struct seq_command * s, uint8_t track)
 {
     // Scan the sequence to get its length first
@@ -771,6 +894,9 @@ void SoundInterface_UploadMusicSequence(struct seq_command * s, uint8_t track)
     return;
 }
 
+/**
+ * @brief Starts sequence music playback.
+ */
 void SoundInterface_PlayMusic()
 {
     SoundInterface_AcknowledgeBusy(false);
@@ -789,6 +915,9 @@ void SoundInterface_PlayMusic()
     return;
 }
 
+/**
+ * @brief Pauses sequence music playback.
+ */
 void SoundInterface_PauseMusic()
 {
     SoundInterface_AcknowledgeBusy(false);
@@ -807,6 +936,9 @@ void SoundInterface_PauseMusic()
     return;
 }
 
+/**
+ * @brief Stops sequence music playback.
+ */
 void SoundInterface_StopMusic()
 {
     SoundInterface_AcknowledgeBusy(false);
@@ -825,13 +957,11 @@ void SoundInterface_StopMusic()
     return;
 }
 
-/*
-    Set streaming engine variables
-*/
-
-/*
-    Wrapper for PlayStream
-*/
+/**
+ * @brief Plays a short sound clip.
+ * 
+ * @param clip_id The ID of the clip to play.
+ */
 void SoundInterface_PlayClip(uint16_t clip_id)
 {
     SoundInterface_PlayStream(data_stream_table[clip_id].ptr, data_stream_table[clip_id].len, data_stream_table[clip_id].loop);
@@ -839,6 +969,13 @@ void SoundInterface_PlayClip(uint16_t clip_id)
     return;
 }
 
+/**
+ * @brief Starts streaming raw audio samples.
+ * 
+ * @param ptr  Pointer to the source audio stream block.
+ * @param len  The total size of the stream.
+ * @param loop Whether the stream should restart upon reaching the end.
+ */
 void SoundInterface_PlayStream(uint8_t * ptr, uint16_t len, bool loop)
 {
     SoundInterface_PauseStream();
@@ -855,6 +992,9 @@ void SoundInterface_PlayStream(uint8_t * ptr, uint16_t len, bool loop)
     return;
 }
 
+/**
+ * @brief Resumes active audio stream playback.
+ */
 void SoundInterface_ResumeStream()
 {
     snd_stream_enable = true;
@@ -862,6 +1002,9 @@ void SoundInterface_ResumeStream()
     return;
 }
 
+/**
+ * @brief Pauses active audio stream playback.
+ */
 void SoundInterface_PauseStream()
 {
     snd_stream_enable = false;
@@ -869,6 +1012,9 @@ void SoundInterface_PauseStream()
     return;
 }
 
+/**
+ * @brief Stops active audio stream playback.
+ */
 void SoundInterface_StopStream()
 {
     snd_stream_enable = false;
@@ -879,7 +1025,9 @@ void SoundInterface_StopStream()
     return;
 }
 
-// Call after NMI to upload 72 bytes
+/**
+ * @brief Performs periodic stream data upload transfers to the APU during VBlank.
+ */
 void SoundInterface_NmiAudioUpload()
 {
     SoundInterface_AcknowledgeBusy(true); // hack it here to avoid lockups?
@@ -939,7 +1087,11 @@ void SoundInterface_NmiAudioUpload()
     return;
 }
 
-// Function used to play and stop queued sfx automatically
+/**
+ * @brief Resolves all pending deferred sound commands (triggers and silences).
+ * 
+ * Typically called during interrupts (NMI) to push changes to the APU.
+ */
 void SoundInterface_RunDeferredCommands()
 {
     if (snd_defercmd_sfx_enable)
@@ -972,7 +1124,12 @@ void SoundInterface_RunDeferredCommands()
     return;
 }
 
-// Compare the supplied ID with the currently loaded ID
+/**
+ * @brief Checks if a sound effect ID has higher priority than currently playing effects.
+ * 
+ * @param sfx_id The ID of the incoming sound effect.
+ * @return True if the incoming effect has priority; otherwise false.
+ */
 bool SoundInterface_IsHigherPriority(uint8_t sfx_id)
 {
     // Just make sure this doesn't get dropped

@@ -54,6 +54,13 @@ bool bg_scroll_suppress_interpolation_state_change;
     Sets the map and metatile LUT pointers,
     then loads the tilemap data.
 */
+/**
+ * @brief Loads map grid bytes, dimensions, visual metatile LUTs, and collision tables.
+ * 
+ * @param map Pointer to the map grid array.
+ * @param lut Pointer to the visual metatile lookup table.
+ * @param col Pointer to the collision metatile lookup table.
+ */
 void MapSystem_LoadMap(const uint8_t * map, const uint16_t * lut, const uint8_t * col)
 {
     map_current = map;
@@ -88,6 +95,9 @@ void MapSystem_LoadMap(const uint8_t * map, const uint16_t * lut, const uint8_t 
     Call to build the collision table
     The table will be completely linear, so only ends when it's out of tiles.
 */
+/**
+ * @brief Decompresses map collision metatiles into the WRAM collision matrix `map_collision_buf`.
+ */
 void MapSystem_BuildCollisionTable()
 {
     const uint8_t * ptr = map_current;
@@ -128,6 +138,9 @@ void MapSystem_BuildCollisionTable()
     return;
 }
 
+/**
+ * @brief Rebuilds the entire VRAM tilemap buffer.
+ */
 void MapSystem_Tilemap_RegenerateTilemap()
 {
     const uint8_t * p = (map_current+2);
@@ -179,6 +192,11 @@ void MapSystem_Tilemap_RegenerateTilemap()
     the camera crosses a metatile boundary. This should be suppressed only during 
     initial map load.
 */
+/**
+ * @brief Updates camera scroll coordinates tracking the player position.
+ * 
+ * @param suppress_map_gen If true, skips queuing new VRAM row/column tile updates.
+ */
 void MapSystem_UpdateCameraPosition(bool suppress_map_gen)
 {
     int16_t max_cam_x = map_extent_x - 256;
@@ -306,8 +324,8 @@ void MapSystem_UpdateCameraPosition(bool suppress_map_gen)
         uint8_t angle = (uint8_t)((uint8_t)(Math_GetAtan2_u8(temp_x, temp_y)) + (uint8_t)(128));
 
         // Apply the angle change again
-        int32_t temp_delta_x = data_sine_1[angle] * (2 * V_MUL);
-        int32_t temp_delta_y = data_cosine_1[angle] * (2 * V_MUL);
+        int32_t temp_delta_x = Math_Sin(angle) * (2 * V_MUL);
+        int32_t temp_delta_y = Math_Cos(angle) * (2 * V_MUL);
 
         bg_scroll_x.a += temp_delta_x;
         bg_scroll_y.a += temp_delta_y;
@@ -380,6 +398,9 @@ void MapSystem_UpdateCameraPosition(bool suppress_map_gen)
 }
 
 // Split into its own function to make code neater
+/**
+ * @brief Checks if camera movement crossed a 16px tile boundary and queues row/column updates.
+ */
 void MapSystem_CheckCrossedTilemapEdge()
 {
     if (bg_scroll_x.full.high.a == bg_scroll_x_prev.full.high.a &&
@@ -497,6 +518,16 @@ void MapSystem_CheckCrossedTilemapEdge()
 
     Can also be invoked to force a full refresh during fblank if needed
 */
+/**
+ * @brief Constructs a 32-tile vertical column of 16x16 metatiles in `map_column`.
+ * 
+ * @param p      Pointer to the map grid.
+ * @param lut    Pointer to the visual metatile LUT.
+ * @param tile_x Metatile X coordinate.
+ * @param tile_y Metatile Y coordinate.
+ * @param odd    Odd/even tile phase selector.
+ * @return VRAM destination offset section.
+ */
 bool MapSystem_Tilemap_BuildColumn(const uint8_t * p, const uint16_t * lut, int16_t tile_x, int16_t tile_y, bool odd)
 {
     // tile_x to determine if it's on the odd or even section of the tilemap.
@@ -653,6 +684,15 @@ bool MapSystem_Tilemap_BuildColumn(const uint8_t * p, const uint16_t * lut, int1
 }
 
 // ditto but for rows
+/**
+ * @brief Constructs two 32-tile horizontal rows of 16x16 metatiles in `map_row`.
+ * 
+ * @param p      Pointer to the map grid.
+ * @param lut    Pointer to the visual metatile LUT.
+ * @param tile_x Metatile X coordinate.
+ * @param tile_y Metatile Y coordinate.
+ * @param odd    Odd/even tile phase selector.
+ */
 void MapSystem_Tilemap_BuildRow(const uint8_t * p, const uint16_t * lut, int16_t tile_x, int16_t tile_y, bool odd)
 {
     // tile_x to determine if it's on the odd or even section of the tilemap.

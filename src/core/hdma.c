@@ -43,9 +43,9 @@ uint8_t hdma_cache_scaled_r[CACHE_PALETTE_ENTRIES * 64];
 uint8_t hdma_cache_scaled_g[CACHE_PALETTE_ENTRIES * 64];
 uint8_t hdma_cache_scaled_b[CACHE_PALETTE_ENTRIES * 64];
 
-/*
-    Setup all HDMA and their tables
-*/
+/**
+ * @brief Performs initial setup of all HDMA tables and triggers the first value updates.
+ */
 void HdmaEngine_SetupHdma()
 {
     hdma_scroll_select = 0;
@@ -62,9 +62,9 @@ void HdmaEngine_SetupHdma()
     return;
 }
 
-/*
-    Sets up a gradient to half brightness effect on the water subpalette via HDMA tables
-*/
+/**
+ * @brief Configures CGRAM palette gradients (water & UI textboxes) on DMA channels 1, 2, and 6.
+ */
 void HdmaEngine_SetupPaletteHdma()
 {
     // Is a bit of a misnomer now. Maybe needs a rename.
@@ -128,9 +128,9 @@ void HdmaEngine_SetupPaletteHdma()
     return;
 }
 
-/*
-    Same deal with background scroll HDMA
-*/
+/**
+ * @brief Configures background vertical scroll sine-shaking on DMA channel 3.
+ */
 void HdmaEngine_SetupBgScrollHdma()
 {
     REG_DMAP3 = 0x42;  // BG2HOFS - Indirect, pattern 2
@@ -159,11 +159,9 @@ void HdmaEngine_SetupBgScrollHdma()
     return;
 }
 
-/*
-    Colour math data HDMA
-
-    3.5 lines means 3 followed by 3 + 1 gap
-*/
+/**
+ * @brief Configures color math registers on DMA channel 4.
+ */
 void HdmaEngine_SetupColdataHdma()
 {
     REG_DMAP4 = 0x40;  // COLDATA - Indirect, pattern 1
@@ -264,10 +262,9 @@ void HdmaEngine_SetupColdataHdma()
     return;
 }
 
-/*
-    Call to update background scroll values for the HDMA table.
-    The table values are double-buffered, so also do a table pointer flip here.
-*/
+/**
+ * @brief Updates scroll offsets in the active double-buffered background scroll table.
+ */
 void HdmaEngine_UpdateBgScrollValues()
 {
     #if VBCC_ASM == 1
@@ -361,12 +358,15 @@ void HdmaEngine_UpdateBgScrollValues()
     return;
 }
 
-/*
-    Colour math data is similar.
-*/
 #if VBCC_ASM == 1
+/**
+ * @brief Updates color intensity steps in the active double-buffered color math table.
+ */
 NO_INLINE void HdmaEngine_UpdateColdataValues()
 #else
+/**
+ * @brief Updates color intensity steps in the active double-buffered color math table.
+ */
 void HdmaEngine_UpdateColdataValues()
 #endif
 {
@@ -531,11 +531,9 @@ void HdmaEngine_UpdateColdataValues()
     return;
 }
 
-/*
-    Use this helper function to ensure that HDMAEN is always written at the start of vblank without relying on NMI or interrupts.
-
-    It's safe to directly disable HDMA anytime, so no equivalent function is provided for the reverse.
-*/
+/**
+ * @brief Safely enables active HDMA channels by making sure any activation is done during Vblank.
+ */
 void HdmaEngine_EnableHdma()
 {
     // Check that we're out of vblank first...
@@ -552,12 +550,18 @@ void HdmaEngine_EnableHdma()
     return;
 }
 
-/*
-    Generate HDMA palette entries using fixed point math. Slower, but can cleanly map to any height
-
-    target_color is in SNES RGB555 format
-    alpha is 0-32 unsigned integer
-*/
+/**
+ * @brief Generates HDMA palette entries using fixed-point math and Bresenham interpolation.
+ * 
+ * Used to draw color transitions down the screen.
+ * 
+ * @param table_ptr    Target buffer in WRAM to write HDMA entries.
+ * @param pal_start    Target CGRAM palette index to overwrite.
+ * @param entries      Number of palette entries.
+ * @param target_color Blend destination color in SNES RGB555 format.
+ * @param alpha        Blend alpha coefficient (0 to 32).
+ * @param height       Visual height constraint in scanlines.
+ */
 void HdmaEngine_GeneratePaletteTable(uint16_t * table_ptr, uint16_t pal_start, uint16_t entries, uint16_t target_color, uint16_t alpha, uint16_t height)
 {
     // Cache target colors
@@ -688,6 +692,9 @@ void HdmaEngine_GeneratePaletteTable(uint16_t * table_ptr, uint16_t pal_start, u
     return;
 }
 
+/**
+ * @brief Selects active HDMA channel bits in `shadow_hdmaen` based on the screen/dialog layout.
+ */
 void HdmaEngine_SetHdmaShadow()
 {
     if (hdma_use_gradient == 0xffff)

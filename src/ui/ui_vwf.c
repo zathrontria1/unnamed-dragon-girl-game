@@ -89,13 +89,17 @@ do { \
     } \
 } while (0)
 
-/*
-    Prints text to a VWF buffer in WRAM
-
-    Returns DMA transfer length in bytes.
-
-    Tilemap_dest should be byte-indexed! Word indexing will be handled automatically
-*/
+/**
+ * @brief Instantly renders a string to a local tilemap and tile graphics block in WRAM.
+ * 
+ * @param string       Pointer to the source null-terminated character string.
+ * @param dest         Pointer to the target character graphics buffer in WRAM.
+ * @param tilemap_dest Pointer to the target tilemap buffer in WRAM.
+ * @param col_ext      Horizontal column bounds constraint.
+ * @param row_ext      Vertical row bounds constraint.
+ * @param id_offset    Base tile ID offset in VRAM.
+ * @return The final length of the rendered string in bytes.
+ */
 uint16_t VwfEngine_PrintText(uint8_t * string, uint8_t * dest, uint8_t * tilemap_dest, int col_ext, int row_ext, int id_offset)
 {
     VwfEngine_PrintText_Gradual_Setup(string, dest, tilemap_dest, col_ext, row_ext, id_offset, 896);
@@ -103,11 +107,17 @@ uint16_t VwfEngine_PrintText(uint8_t * string, uint8_t * dest, uint8_t * tilemap
     return vwf_tiledata_run+16;
 }
 
-/*
-    Begin a new text print
-
-    tilemap_length is in amount of entries (words)
-*/
+/**
+ * @brief Configures textbox registers to prepare for a multi-frame gradual text reveal.
+ * 
+ * @param string       Pointer to the source null-terminated character string.
+ * @param dest         Pointer to the target character graphics buffer in WRAM.
+ * @param tilemap_dest Pointer to the target tilemap buffer in WRAM.
+ * @param col_ext      Horizontal column bounds constraint.
+ * @param row_ext      Vertical row bounds constraint.
+ * @param id_offset    Base tile ID offset in VRAM.
+ * @param tilemap_len  Maximum length of the tilemap buffer.
+ */
 void VwfEngine_PrintText_Gradual_Setup(uint8_t * string, uint8_t * dest, uint8_t * tilemap_dest, int col_ext, int row_ext, int id_offset, int tilemap_len)
 {
     vwf_shift = 0;
@@ -149,6 +159,14 @@ void VwfEngine_PrintText_Gradual_Setup(uint8_t * string, uint8_t * dest, uint8_t
     return;
 }
 
+/**
+ * @brief Reveals a specified number of characters in the current frame.
+ * 
+ * Processes control codes (newline, page breaks) and renders glyphs to buffers.
+ * 
+ * @param len The maximum number of characters to reveal in this pass.
+ * @return The updated string pointer after processing.
+ */
 uint8_t * VwfEngine_PrintText_Gradual(int len)
 {
     // Load state from global variables into local variables
@@ -318,7 +336,15 @@ uint8_t * VwfEngine_PrintText_Gradual(int len)
     return write_ptr_start;
 }
 
-
+/**
+ * @brief Core low-level bitplane rendering helper routine.
+ * 
+ * Shifts and projects glyph pixels onto the target destination format.
+ * 
+ * @param glyph_ptr [r4/r5] Pointer to the character glyph source data.
+ * @param write_ptr [r6/r7] Pointer to the target destination buffer in WRAM.
+ * @param mul       [a] Multiplier bitmask from `const_vwf_bitplane_mul`.
+ */
 #if VBCC_ASM == 1
 NO_INLINE void VwfEngine_PrintText_Render(__reg("r4/r5") uint8_t * glyph_ptr, __reg("r6/r7")uint8_t * write_ptr, __reg("a")uint16_t mul)
 #else
@@ -401,9 +427,9 @@ void VwfEngine_PrintText_Render(uint8_t * glyph_ptr, uint8_t * write_ptr, uint16
     return;
 }
 
-/*
-    Called for resetting pointers when rendering multi-page text.
-*/
+/**
+ * @brief Clears the text area to start displaying a new page of text.
+ */
 void VwfEngine_PrintText_StartNewPage()
 {
     vwf_wram_offset = (uint16_t)((uint32_t)vwf_tiledata_ptr_start);
@@ -420,6 +446,12 @@ void VwfEngine_PrintText_StartNewPage()
     return;
 }
 
+/**
+ * @brief Restores a section of the tilemap back to blank tiles.
+ * 
+ * @param ptr Pointer to the start of the tilemap section in WRAM.
+ * @param len The number of tile entries to clear.
+ */
 void VwfEngine_PrintText_ResetTilemap(uint16_t * ptr, int len)
 {
     #if VBCC_ASM == 1

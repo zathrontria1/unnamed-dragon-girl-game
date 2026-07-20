@@ -17,9 +17,17 @@
 
 #include "system.h"
 
+/**
+ * @brief Primary vertical blank interrupt handler.
+ * 
+ * Executed on standard gameplay frames. Manages hardware settings, repoints HDMA 
+ * gradient/scrolling/color-math tables, uploads CGRAM/OAM shadow blocks, processes the 
+ * standard DMA queues, and updates screen scrolls.
+ */
 #if VBCC_ASM == 1
     NO_INLINE void Nmi_Primary()
 #else
+
     void Nmi_Primary()
 #endif
 {
@@ -116,10 +124,12 @@
     return;
 }
 
-/*
-    This special NMI routine is used to only perform the fader for visual consistency
-    during heavy processing elsewhere
-*/
+/**
+ * @brief Alternate vertical blank interrupt handler.
+ * 
+ * Executed during heavy processing phases. Limits processing to visual fader controls 
+ * (brightness, mosaic, color math) to prevent screen tearing. Preferred compared to busy waiting in the main thread.
+ */
 #if VBCC_ASM == 1
     NO_INLINE void Nmi_Alternate()
 #else
@@ -171,9 +181,12 @@
     return;
 }
 
-/*
-    For cutscene use, using fblank
-*/
+/**
+ * @brief Cutscene-specific vertical blank interrupt handler.
+ * 
+ * Invoked during cutscenes. Utilises forced blanking to safely queue and execute 
+ * larger tile data DMA updates.
+ */
 #if VBCC_ASM == 1
     NO_INLINE void Nmi_Cutscene()
 #else

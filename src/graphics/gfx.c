@@ -26,12 +26,9 @@ int16_t gfx_cmath_r;
 int16_t gfx_cmath_g;
 int16_t gfx_cmath_b;
 
-/*
-    Manage mosaic function
-
-    mosaic layer is set directly
-    mosaic intensity and change can be tweaked to adjust both speed and size at runtime too
-*/
+/**
+ * @brief Advances active mosaic scaling transitions and updates `shadow_mosaic`.
+ */
 void Gfx_ProcessMosaic()
 {
     if (gfx_mosaic_change != 0)
@@ -73,6 +70,9 @@ void Gfx_ProcessMosaic()
     return;
 }
 
+/**
+ * @brief Advances active color math transitions and updates COLDATA registers in shadow WRAM.
+ */
 void Gfx_ProcessColorMath()
 {
     if (gfx_cmath_change != 0)
@@ -124,6 +124,14 @@ void Gfx_ProcessColorMath()
     return;
 }
 
+/**
+ * @brief Immediately sets target RGB color math values and enables gradient modes.
+ * 
+ * @param r        Red intensity target (0 to 31).
+ * @param g        Green intensity target (0 to 31).
+ * @param b        Blue intensity target (0 to 31).
+ * @param gradient Enable HDMA color math gradient transitions down scanlines.
+ */
 void Gfx_SetColorMath(int16_t r, int16_t g, int16_t b, bool gradient)
 {
     gfx_cmath_r = r << 8;
@@ -135,9 +143,12 @@ void Gfx_SetColorMath(int16_t r, int16_t g, int16_t b, bool gradient)
     return;
 }
 
-/*
-    Call to emit smoke effects.
-*/
+/**
+ * @brief Spawns smoke particles centered on a game object's position with random velocity offsets.
+ * 
+ * @param o      Pointer to the game object emitting smoke.
+ * @param offset Vertical Y pixel offset relative to the object base.
+ */
 void Gfx_EmitSmoke(struct game_object * o, int offset)
 {
     if (snd_firecrackle_timeout == 0)

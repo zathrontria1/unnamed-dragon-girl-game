@@ -27,6 +27,13 @@ NEAR struct spr_queue_entry spr_queue_normal[SPR_COUNT_MAX_SORTED]; // depth sor
     It is the responsibility of the caller select the right queue and 
     to ensure that the written sprite is valid
 */
+/**
+ * @brief Renders a single UI sprite cell directly.
+ * 
+ * @param x          Screen X coordinate.
+ * @param y          Screen Y coordinate.
+ * @param tileattrib VRAM tile attribute word (palette, priority, flip).
+ */
 void SpriteEngine_DrawUISprite(int16_t x, int16_t y, uint16_t tileattrib)
 {
     struct spr_queue_entry s;
@@ -56,6 +63,12 @@ void SpriteEngine_DrawUISprite(int16_t x, int16_t y, uint16_t tileattrib)
     return;
 }
 
+/**
+ * @brief Adds a sprite object to the front-forced unsorted queue.
+ * 
+ * @param o          [a/x] Pointer to the source game object.
+ * @param tileattrib Tile attribute word.
+ */
 #if VBCC_ASM == 1
 NO_INLINE void SpriteEngine_AddToFrontLayer(__reg("a/x") struct game_object * o, uint16_t tileattrib)
 #else
@@ -166,7 +179,12 @@ void SpriteEngine_AddToFrontLayer(struct game_object * o, uint16_t tileattrib)
     return;
 }
 
-
+/**
+ * @brief Adds a sprite object to the depth-sorted main sprite queue.
+ * 
+ * @param o          [a/x] Pointer to the source game object.
+ * @param tileattrib Tile attribute word.
+ */
 #if VBCC_ASM == 1
 NO_INLINE void SpriteEngine_AddToSortedLayer(__reg("a/x") struct game_object * o, uint16_t tileattrib)
 #else
@@ -278,6 +296,12 @@ void SpriteEngine_AddToSortedLayer(struct game_object * o, uint16_t tileattrib)
     return;
 }
 
+/**
+ * @brief Adds a sprite object to the back-forced unsorted queue (e.g. drop shadow).
+ * 
+ * @param o          [a/x] Pointer to the source game object.
+ * @param tileattrib Tile attribute word.
+ */
 #if VBCC_ASM == 1
 NO_INLINE void SpriteEngine_AddToBackLayer(__reg("a/x") struct game_object * o, uint16_t tileattrib)
 #else
@@ -387,10 +411,9 @@ void SpriteEngine_AddToBackLayer(struct game_object * o, uint16_t tileattrib)
     return;
 }
 
-/*
-    Initialize the sprite VRAM slot array
-*/
-
+/**
+ * @brief Initializes the dynamic VRAM tile slot allocation table.
+ */
 void SpriteEngine_InitVramSlot()
 {
     for (int i = 0; i < 48; i++)
@@ -411,7 +434,12 @@ void SpriteEngine_InitVramSlot()
     return;
 }
 
-// for 16x16px sprite slots
+/**
+ * @brief Allocates a 16x16 sprite tile slot in VRAM.
+ * 
+ * @param i Preferred slot index.
+ * @return The allocated VRAM tile word address offset.
+ */
 uint16_t SpriteEngine_GetVramSlot16(uint16_t i)
 {
     for (int j = 48; j < 128; j++)
@@ -427,7 +455,12 @@ uint16_t SpriteEngine_GetVramSlot16(uint16_t i)
     return 128;
 }
 
-// for 32x32px sprite slots
+/**
+ * @brief Allocates a 32x32 sprite tile slot in VRAM.
+ * 
+ * @param i Preferred slot index.
+ * @return The allocated VRAM tile word address offset.
+ */
 uint16_t SpriteEngine_GetVramSlot32(uint16_t i)
 {
     for (int j = 48; j < 128; j += 4)
@@ -449,6 +482,12 @@ uint16_t SpriteEngine_GetVramSlot32(uint16_t i)
     return 128;
 }
 
+/**
+ * @brief Releases allocated VRAM sprite tile slots back to the pool.
+ * 
+ * @param i          Starting slot index.
+ * @param slot_count Number of slots to free.
+ */
 void SpriteEngine_ReleaseVramSlot(uint16_t i, uint16_t slot_count)
 {
     if (slot_count < 1)
@@ -471,15 +510,12 @@ void SpriteEngine_ReleaseVramSlot(uint16_t i, uint16_t slot_count)
     return;
 }
 
-/*
-    Boss sprites take entire second page.
-
-    This should prevent anything from attempting to use the reserved VRAM
-
-    Boss-reserved slots are 0xfffe (compare with 0xffff, which is free)
-*/
+/**
+ * @brief Reserves high-capacity VRAM pages specifically for boss sprite graphics.
+ */
 void SpriteEngine_GetVramForBoss()
 {
+    // Boss-reserved slots are 0xfffe (compare with 0xffff, which is free)
     for (int i = 64; i < 128; i++)
     {
         spr_vram_slots[i] = 0xfffe;
@@ -487,6 +523,10 @@ void SpriteEngine_GetVramForBoss()
 
     return;
 }
+
+/**
+ * @brief Releases reserved boss VRAM sprite pages back to the allocation pool.
+ */
 void SpriteEngine_ReleaseVramForBoss()
 {
     for (int i = 64; i < 128; i++)
@@ -496,8 +536,12 @@ void SpriteEngine_ReleaseVramForBoss()
 
     return;
 }
-/*
-    Processes sprite lists and writes to OAM shadow buffer*/
+
+/**
+ * @brief Main sprite rendering pipeline coordinator.
+ * 
+ * Sorts queued sprite entries and outputs them to the shadow OAM tables.
+ */
 void SpriteEngine_ProcessSpriteLists()
 {
     SpriteEngine_ProcessSpriteLists_WriteFrontSprites();
@@ -515,7 +559,9 @@ void SpriteEngine_ProcessSpriteLists()
     return;
 }
 
-// Frontmost sprites
+/**
+ * @brief Sub-phase: Outputs front-layer unsorted sprites to shadow OAM.
+ */
 void SpriteEngine_ProcessSpriteLists_WriteFrontSprites()
 {
     #if VBCC_ASM == 1
@@ -556,7 +602,9 @@ void SpriteEngine_ProcessSpriteLists_WriteFrontSprites()
     return;
 }
 
-// Clear the depth buffer
+/**
+ * @brief Sub-phase: Clears depth buffer counts before bucket sorting.
+ */
 void SpriteEngine_ProcessSpriteLists_ClearDepthBuffer()
 {
     #if VBCC_ASM == 1
@@ -599,7 +647,9 @@ void SpriteEngine_ProcessSpriteLists_ClearDepthBuffer()
     return;
 }
 
-// Tally up sprites on each Y
+/**
+ * @brief Sub-phase: Tallies sprite counts per depth line.
+ */
 void SpriteEngine_ProcessSpriteLists_TallySprites()
 {
     #if VBCC_ASM == 1
@@ -655,8 +705,11 @@ void SpriteEngine_ProcessSpriteLists_TallySprites()
     return;
 }
 
-// then calculate the OAM offset for sprites
-// Correct, but must be assembly optimized
+/**
+ * @brief Sub-phase: Computes starting offsets for bucket sorting entries.
+ * 
+ * @note compiler is very unoptimized for this, so we use inline assembly to speed it up.
+ */
 void SpriteEngine_ProcessSpriteLists_CalculateOffsets()
 {
     #if VBCC_ASM == 1
@@ -742,7 +795,9 @@ void SpriteEngine_ProcessSpriteLists_CalculateOffsets()
     return;
 }
 
-// Write out the sprites
+/**
+ * @brief Sub-phase: Outputs depth-sorted main sprites to shadow OAM.
+ */
 void SpriteEngine_ProcessSpriteLists_WriteSortedSprites()
 {
     #if VBCC_ASM == 1
@@ -827,7 +882,9 @@ void SpriteEngine_ProcessSpriteLists_WriteSortedSprites()
     return;
 }
 
-// For backmost sprites
+/**
+ * @brief Sub-phase: Outputs back-layer unsorted sprites to shadow OAM.
+ */
 void SpriteEngine_ProcessSpriteLists_WriteBackSprites()
 {
     #if VBCC_ASM == 1
@@ -868,10 +925,13 @@ void SpriteEngine_ProcessSpriteLists_WriteBackSprites()
     return;
 }
 
-/*
-    Draws a sprite immediately. Normally invoked internally from another function.
-*/
-
+/**
+ * @brief Low-level sprite drawing primitive.
+ * 
+ * Writes an entry into the shadow OAM low and high tables.
+ * 
+ * @param s [r0/r1] Pointer to the queued sprite entry.
+ */
 #if VBCC_ASM == 1
     NO_INLINE void SpriteEngine_DrawSprite(__reg("r0/r1") struct spr_queue_entry * s)
 #else
@@ -923,6 +983,9 @@ void SpriteEngine_ProcessSpriteLists_WriteBackSprites()
     return;
 }
 
+/**
+ * @brief Compacts the 128-entry shadow OAM high table into 32 hardware-packed bytes.
+ */
 void SpriteEngine_PackOamHighTable()
 {
     // Packs high OAM bytes into the 32 bytes following the low OAM
@@ -1025,9 +1088,9 @@ void SpriteEngine_PackOamHighTable()
     return;
 }
 
-/* 
-    Clears all unused sprites from OAM
-*/
+/**
+ * @brief Resets shadow OAM buffers, moving all unused sprites off-screen (Y = 240).
+ */
 void SpriteEngine_ResetOam()
 {
     #if VBCC_ASM == 1

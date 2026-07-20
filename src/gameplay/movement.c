@@ -22,9 +22,12 @@
 
 #include "gfx.h"
 
-/*
-    Moves an object in the game world respecting all collision
-*/
+/**
+ * @brief Moves an object according to its delta velocity while testing map metatile collisions and camera bounds.
+ * 
+ * @param o Pointer to the target game object.
+ * @return Collision flag bitmask.
+ */
 uint16_t ObjectSystem_Move(struct game_object * o)
 {
     int32_t delta_x = o->delta.x.a;
@@ -170,11 +173,11 @@ uint16_t ObjectSystem_Move(struct game_object * o)
     return 0;
 }
 
-/*
-    Move an object ignoring everything
-    Useful for light objects that do not need to test anything.
-    optionally also ignoring map edge
-*/
+/**
+ * @brief Moves an object by adding deltas to its position and updating bounding box right/bottom edges, bypassing collisions.
+ * 
+ * @param o [a/x] Pointer to the target game object.
+ */
 #if VBCC_ASM == 1
     NO_INLINE void ObjectSystem_MoveWithoutCollision(__reg("a/x") struct game_object * o)
 #else
@@ -230,13 +233,11 @@ uint16_t ObjectSystem_Move(struct game_object * o)
     return;
 }
 
-/*
-    Move an object ignoring everything
-    Useful for light objects that do not need to test anything.
-    optionally also ignoring map edge
-
-    This version will not update edges, so should be used for no-collision checking objects only
-*/
+/**
+ * @brief High-speed movement routine for purely visual objects/particles that updates positions without recomputing bounding box edges.
+ * 
+ * @param o [a/x] Pointer to the target game object.
+ */
 #if VBCC_ASM == 1
     NO_INLINE void ObjectSystem_MoveWithoutCollision_Fast(__reg("a/x") struct game_object * o)
 #else

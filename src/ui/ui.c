@@ -49,6 +49,11 @@ uint32_t ui_display_money;
 uint16_t ui_show_message_ttl;
 bool ui_show_message_cleared;
 
+/**
+ * @brief Main UI engine processing routine.
+ * 
+ * Ticks HUD counters and triggers DMA uploads when stats change.
+ */
 void UserInterface_Process()
 {
     if (ui_force_update)
@@ -85,6 +90,9 @@ void UserInterface_Process()
     return;
 }
 
+/**
+ * @brief Redraws the player HP heart/gauge bar into the UI tilemap buffer.
+ */
 void UserInterface_UpdateHealthCounters()
 {
     // Copy these values
@@ -295,9 +303,11 @@ void UserInterface_UpdateHealthCounters()
     return;
 }
 
-/*
-    Set up the drawing for the HP gauge
-*/
+/**
+ * @brief Renders an overhead health bar sprite above an enemy object.
+ * 
+ * @param o Pointer to the target enemy game object.
+ */
 void UserInterface_DrawEnemyHealthBar(struct game_object * o)
 {
     // get fraction of health if it's not changed
@@ -353,6 +363,9 @@ void UserInterface_DrawEnemyHealthBar(struct game_object * o)
     return;
 }
 
+/**
+ * @brief Redraws the player money counter into the UI tilemap buffer.
+ */
 void UserInterface_UpdateMoneyCounters()
 {
     // Copy these values
@@ -454,6 +467,12 @@ void UserInterface_UpdateMoneyCounters()
 }
 
 
+/**
+ * @brief Formats a 16-bit unsigned integer into a 3-digit ASCII string buffer.
+ * 
+ * @param buf Target string buffer.
+ * @param val Value to format.
+ */
 void UserInterface_Internal_Format3U(char *buf, uint16_t val)
 {
     if (val > 999)
@@ -482,6 +501,9 @@ void UserInterface_Internal_Format3U(char *buf, uint16_t val)
     }
 }
 
+/**
+ * @brief Redraws the level enemy kill count into the UI tilemap buffer.
+ */
 void UserInterface_UpdateEnemyCounters()
 {
     // Copy these values
@@ -541,9 +563,14 @@ void UserInterface_UpdateEnemyCounters()
     return;
 }
 
-/*
-    Prints monospaced text to the screen and queues DMA for it
-*/
+
+/**
+ * @brief Prints an 8x8 fixed-width text string directly into the UI tilemap buffer.
+ * 
+ * @param string_ptr Pointer to the null-terminated string.
+ * @param row        Target tilemap row.
+ * @param col        Target tilemap column.
+ */
 void UserInterface_PrintText(uint8_t * string_ptr, uint16_t row, uint16_t col)
 {
     int i = 0;
@@ -586,10 +613,13 @@ void UserInterface_PrintText(uint8_t * string_ptr, uint16_t row, uint16_t col)
     return;
 }
 
-/*
-    Prints monospaced text to the screen and queues DMA for it, for mode 3 
-    (where 4bpp and UI tilemap is located in a different location)
-*/
+/**
+ * @brief Prints an 8x8 fixed-width text string in Mode 3 configuration.
+ * 
+ * @param string_ptr Pointer to the null-terminated string.
+ * @param row        Target tilemap row.
+ * @param col        Target tilemap column.
+ */
 void UserInterface_PrintText_Mode3(uint8_t * string_ptr, uint16_t row, uint16_t col)
 {
     uint16_t i = 0;
@@ -629,10 +659,11 @@ void UserInterface_PrintText_Mode3(uint8_t * string_ptr, uint16_t row, uint16_t 
     return;
 }
 
-/*
-    These functions clear the entirety of BG1 and BG3 UI buffers.
-    Always call these before drawing any genericized UI windows or text
-*/
+/**
+ * @brief Clears the UI window background tilemap buffer.
+ * 
+ * @param use_clear_tile If true, fills the buffer with clear tile IDs; if false, clears to zero.
+ */
 void UserInterface_ClearWindowBuffer(bool use_clear_tile)
 {
     volatile uint16_t vwf_tile_id_copy = vwf_tile_id_empty;
@@ -652,11 +683,9 @@ void UserInterface_ClearWindowBuffer(bool use_clear_tile)
     return;
 }
 
-/*
-    This function clears the entire text buffer.
-
-    To clear a subsection, use UserInterface_ClearTextBuffer_Subset()
-*/
+/**
+ * @brief Clears the UI text tilemap buffer (`ui_window_text`).
+ */
 void UserInterface_ClearTextBuffer()
 {
     volatile uint16_t vwf_tile_id_copy = vwf_tile_id_empty;
@@ -666,6 +695,12 @@ void UserInterface_ClearTextBuffer()
 
     return;
 }
+
+/**
+ * @brief Clears a single row of tiles in the UI text buffer.
+ * 
+ * @param y Target tilemap row index.
+ */
 void UserInterface_ClearTextBuffer_Line(uint16_t y)
 {
     volatile uint16_t vwf_tile_id_copy = vwf_tile_id_empty;
@@ -676,9 +711,15 @@ void UserInterface_ClearTextBuffer_Line(uint16_t y)
     return;
 }
 
-/*
-    This function can draw a window anywhere, but if starting from scratch, must flush the old background
-*/
+
+/**
+ * @brief Draws a bordered, more graphically decorated window box.
+ * 
+ * @param x Column origin.
+ * @param y Row origin.
+ * @param w Width in tiles.
+ * @param h Height in tiles.
+ */
 void UserInterface_DrawWindowBackground(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 {
     // Sanity checks
@@ -771,7 +812,14 @@ void UserInterface_DrawWindowBackground(uint16_t x, uint16_t y, uint16_t w, uint
     }
 }
 
-// Draws a simple box to the background layer
+/**
+ * @brief Draws a solid window background fill rectangle into the UI buffer.
+ * 
+ * @param x Column origin.
+ * @param y Row origin.
+ * @param w Width in tiles.
+ * @param h Height in tiles.
+ */
 void UserInterface_DrawWindowBox(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 {
     // Sanity checks
@@ -842,11 +890,13 @@ void UserInterface_DrawWindowBox(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
     }
 }
 
-/*
-    Call this to draw a string to the text buffer.
-
-    Text will newline if it hits a screen edge, and terminate at the last block
-*/
+/**
+ * @brief Draws window text at specified tile coordinates.
+ * 
+ * @param string_ptr Pointer to the null-terminated string.
+ * @param x          Column tile offset.
+ * @param y          Row tile offset.
+ */
 void UserInterface_DrawWindowText(char * string_ptr, uint16_t x, uint16_t y)
 {
     // Sanity check
@@ -887,9 +937,9 @@ void UserInterface_DrawWindowText(char * string_ptr, uint16_t x, uint16_t y)
     return;
 }
 
-/*
-    Call this to copy the entire UI buffer.
-*/
+/**
+ * @brief Enqueues UI background and text tilemap buffers into the DMA transfer queue for VRAM update.
+ */
 void UserInterface_CopyUiBuffers()
 {
     if (DmaSystem_AddItemToQueue(
@@ -917,6 +967,11 @@ void UserInterface_CopyUiBuffers()
     return;
 }
 
+/**
+ * @brief Enqueues a single row of the UI text buffer for DMA transfer to VRAM.
+ * 
+ * @param y Target row index.
+ */
 void UserInterface_CopyTextBuffer_Line(uint16_t y)
 {
     if (DmaSystem_AddItemToQueue(
@@ -933,6 +988,9 @@ void UserInterface_CopyTextBuffer_Line(uint16_t y)
     return;
 }
 
+/**
+ * @brief Directly copies UI tileset graphics into VRAM.
+ */
 void UserInterface_CopyUiGraphicsToVram()
 {
     DmaSystem_AddItemToQueue((uint8_t *)((uint32_t)&data_ui_dynamic_textadvance + ((uint16_t)((system_frames_elapsed >> 2) & 0x03) << 5)), 0x4300, 32, VRAM_INCHIGH, 0);
