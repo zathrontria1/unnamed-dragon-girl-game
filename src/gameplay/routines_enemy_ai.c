@@ -28,48 +28,48 @@
 */
 bool Routines_Enemy_Ai_Process(struct game_object * o, uint32_t dist, int16_t x, int16_t y, uint32_t dist_min, bool allow_flipflop, uint16_t attack_delay)
 {
+    struct game_data_npc * npc = &o->struct_data.npc_data;
     bool temp_invalidate_animation_frame = false;
     uint16_t temp_interrupted = 0;
+    uint16_t ai_state = npc->ai_state;
 
     // Do some AI interruption given some conditions
-    if (
-        (((dist <= dist_min) && o->struct_data.npc_data.ai_state != AI_STATE_IDLE) ||
-        (o->struct_data.npc_data.status == STATUS_BURNING)) && (o->struct_data.npc_data.ai_state != AI_STATE_ATTACK)
-        )
+    if (ai_state != AI_STATE_ATTACK)
     {
-        // If AI gets too close to the player AND the AI isn't idling (i.e. moving)
-        // OR if the AI is on fire, HOWEVER
-        // Do not let the AI get interrupted if mid-attack
-        o->struct_data.npc_data.ai_timer = 0;
-        temp_interrupted = 1;
-    }
-
-    if (!allow_flipflop && (o->struct_data.npc_data.ai_state != AI_STATE_ATTACK))
-    {
-        if (dist < dist_min)
+        if (((dist <= dist_min) && (ai_state == AI_STATE_MOVE_TOWARDS)) || (npc->status == STATUS_BURNING))
         {
-            // If AI gets too close to the player and flipflopping is disallowed
-            o->struct_data.npc_data.ai_timer = 0;
+            // If AI gets too close to the player while moving towards
+            // OR if the AI is on fire, HOWEVER
+            // Do not let the AI get interrupted if mid-attack
+            npc->ai_timer = 0;
             temp_interrupted = 1;
         }
-
-        if (dist > dist_min)
+        else if (!allow_flipflop)
         {
-            // If AI gets too far from the player and flipflopping is disallowed
-            o->struct_data.npc_data.ai_timer = 0;
+            if ((dist < dist_min) && (ai_state == AI_STATE_MOVE_TOWARDS))
+            {
+                // If AI gets too close to the player while moving towards and flipflopping is disallowed
+                npc->ai_timer = 0;
+                temp_interrupted = 1;
+            }
+            else if ((dist > dist_min) && (ai_state == AI_STATE_MOVE_AWAY))
+            {
+                // If AI gets too far from the player while moving away and flipflopping is disallowed
+                npc->ai_timer = 0;
+            }
         }
     }
 
-    if (o->struct_data.npc_data.ai_timer == 0) // Only process AI state changes when this timer hits 0
+    if (npc->ai_timer == 0) // Only process AI state changes when this timer hits 0
     {
         uint8_t temp_rand = (uint8_t)Math_GetRandom_u16();
         
-        // If the AI is idling, attacked the player, or gets interrupted by the player while not attacking...
-        if (o->struct_data.npc_data.ai_state == AI_STATE_IDLE || (temp_interrupted && (o->struct_data.npc_data.ai_state != AI_STATE_ATTACK)))
+        // If the AI is idling, or gets interrupted by the player while not attacking...
+        if (ai_state == AI_STATE_IDLE || (temp_interrupted && (ai_state != AI_STATE_ATTACK)))
         {
             // Object has finished idling, time to move once more.
             // Check if a minimum distance is met or not
-            if ((dist > dist_min) && (o->struct_data.npc_data.status != STATUS_BURNING))
+            if ((dist > dist_min) && (npc->status != STATUS_BURNING))
             {
                 // Enemy is far away from player, and should move closer if allowed
                 uint8_t temp_angle = Math_GetAtan2_u8(y, x) + (temp_rand & 0x0f) - 8;
@@ -79,7 +79,7 @@ bool Routines_Enemy_Ai_Process(struct game_object * o, uint32_t dist, int16_t x,
                 o->delta.x.a = Math_Cos(temp_angle) * V_MUL;
                 o->delta.y.a = Math_Sin(temp_angle) * V_MUL;
 
-                o->struct_data.npc_data.ai_state = AI_STATE_MOVE_TOWARDS;
+                npc->ai_state = AI_STATE_MOVE_TOWARDS;
                 if ((o->state == STATE_HURT_BURN || o->state == STATE_HURT_BURN_MOVE))
                 {
                     o->state = STATE_HURT_BURN_MOVE;
@@ -93,7 +93,7 @@ bool Routines_Enemy_Ai_Process(struct game_object * o, uint32_t dist, int16_t x,
 
                 temp_invalidate_animation_frame = true;
             }
-            else if (o->struct_data.npc_data.ai_state != AI_STATE_MOVE_AWAY) // don't recalc for anything already moving away.
+            else if (ai_state != AI_STATE_MOVE_AWAY) // don't recalc for anything already moving away.
             {
                 // Enemy is close to player, and should move away
                 uint8_t temp_angle = (Math_GetAtan2_u8(y, x)) + (temp_rand & 0x0f) - 136;
@@ -103,7 +103,7 @@ bool Routines_Enemy_Ai_Process(struct game_object * o, uint32_t dist, int16_t x,
                 o->delta.x.a = Math_Cos(temp_angle) * V_MUL;
                 o->delta.y.a = Math_Sin(temp_angle) * V_MUL;
 
-                o->struct_data.npc_data.ai_state = AI_STATE_MOVE_AWAY;
+                npc->ai_state = AI_STATE_MOVE_AWAY;
 
                 if ((o->state == STATE_HURT_BURN || o->state == STATE_HURT_BURN_MOVE))
                 {
@@ -119,15 +119,15 @@ bool Routines_Enemy_Ai_Process(struct game_object * o, uint32_t dist, int16_t x,
                 temp_invalidate_animation_frame = true;
             }
 
-            o->struct_data.npc_data.ai_timer = (30 + (temp_rand & 0x1f)) / V_MUL;
+            npc->ai_timer = (30 + (temp_rand & 0x1f)) / V_MUL;
         }
-        else if ((o->struct_data.npc_data.ai_state == AI_STATE_MOVE_TOWARDS) || (o->struct_data.npc_data.ai_state == AI_STATE_MOVE_AWAY))
+        else if ((ai_state == AI_STATE_MOVE_TOWARDS) || (ai_state == AI_STATE_MOVE_AWAY))
         {
             // Object has finished its movement time and should decide on a possible action.
             o->delta.x.a = 0;
             o->delta.y.a = 0;
 
-            if (o->struct_data.npc_data.ai_state == AI_STATE_MOVE_AWAY)
+            if (ai_state == AI_STATE_MOVE_AWAY)
             {
                 o->angle = (o->angle) + 128;
                 o->facing = Routines_Enemy_GetFacing(o);
@@ -140,7 +140,7 @@ bool Routines_Enemy_Ai_Process(struct game_object * o, uint32_t dist, int16_t x,
                 // During this situation, check the previous state
                 // to pick the correct attack for the range.
 
-                if (o->struct_data.npc_data.ai_state == AI_STATE_MOVE_TOWARDS)
+                if (ai_state == AI_STATE_MOVE_TOWARDS)
                 {
                     if (dist <= dist_min)
                     {
@@ -157,16 +157,16 @@ bool Routines_Enemy_Ai_Process(struct game_object * o, uint32_t dist, int16_t x,
                 }
 
                 // For now, duplicate of the other case.
-                o->struct_data.npc_data.ai_state = AI_STATE_ATTACK;
+                npc->ai_state = AI_STATE_ATTACK;
                 
-                o->struct_data.npc_data.ai_timer = attack_delay;
+                npc->ai_timer = attack_delay;
 
-                o->struct_data.npc_data.ai_makeattack = 1;
+                npc->ai_makeattack = 1;
             }
             else
             {
                 // Not attacking. Fix the state so the animation makes sense.
-                o->struct_data.npc_data.ai_state = AI_STATE_IDLE;
+                npc->ai_state = AI_STATE_IDLE;
 
                 if ((o->state == STATE_HURT_BURN || o->state == STATE_HURT_BURN_MOVE))
                 {
@@ -177,15 +177,15 @@ bool Routines_Enemy_Ai_Process(struct game_object * o, uint32_t dist, int16_t x,
                     o->state = STATE_IDLE;
                 }
 
-                o->struct_data.npc_data.ai_timer = (30 + (temp_rand & 0x1f)) / V_MUL;
+                npc->ai_timer = (30 + (temp_rand & 0x1f)) / V_MUL;
             } 
 
             temp_invalidate_animation_frame = true;
         }
-        else if (o->struct_data.npc_data.ai_state == AI_STATE_ATTACK)
+        else if (ai_state == AI_STATE_ATTACK)
         {
             // Reset the AI to idle
-            o->struct_data.npc_data.ai_state = AI_STATE_IDLE;
+            npc->ai_state = AI_STATE_IDLE;
 
             if ((o->state == STATE_HURT_BURN || o->state == STATE_HURT_BURN_MOVE))
             {
@@ -196,13 +196,13 @@ bool Routines_Enemy_Ai_Process(struct game_object * o, uint32_t dist, int16_t x,
                 o->state = STATE_IDLE;
             }
 
-            o->struct_data.npc_data.ai_timer = (30 + (temp_rand & 0x1f)) / V_MUL;
+            npc->ai_timer = (30 + (temp_rand & 0x1f)) / V_MUL;
 
             temp_invalidate_animation_frame = true;
         }
     }
 
-    Routines_Enemy_Ai_Idle(o); // tick down the timer
+    npc->ai_timer--;
 
     return temp_invalidate_animation_frame;
 }
