@@ -116,3 +116,5 @@ old-calypsi/*
 
 # Other support files (internal use only)
 reorganize.bat
+compression_analysis_results.md
+tools/compression_analyzer.py
