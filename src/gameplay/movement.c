@@ -22,6 +22,118 @@
 
 #include "gfx.h"
 
+#define CORNER_NUDGE_THRESHOLD 4
+
+static bool ObjectSystem_Move_TryNudgeCornerX(struct game_object * o, uint16_t q, uint16_t q2, uint16_t temp_x, uint16_t shiftcount)
+{
+    uint8_t c1 = map_collision_buf[q];
+    uint8_t c2 = map_collision_buf[q2];
+
+    if ((c1 < 128) != (c2 < 128))
+    {
+        uint16_t orig_y = o->pos.y.lh.h + 1;
+        if (c1 < 128)
+        {
+            // Top corner blocked, bottom corner open -> nudge 1px DOWN (+Y)
+            uint16_t overlap = 16 - (orig_y & 0x000f);
+            if (overlap <= CORNER_NUDGE_THRESHOLD)
+            {
+                o->pos.y.lh.h += 1;
+                o->b = o->pos.y.lh.h + o->h;
+                uint16_t new_temp_y = (o->pos.y.lh.h + 1) >> 4;
+                uint16_t new_shift_y;
+                if (shiftcount == 6) {
+                    new_shift_y = new_temp_y << 6;
+                } else if (shiftcount == 5) {
+                    new_shift_y = new_temp_y << 5;
+                } else if (shiftcount == 7) {
+                    new_shift_y = new_temp_y << 7;
+                } else if (shiftcount == 4) {
+                    new_shift_y = new_temp_y << 4;
+                } else {
+                    new_shift_y = new_temp_y << shiftcount;
+                }
+                if (map_collision_buf[new_shift_y + temp_x] >= 128)
+                {
+                    return true;
+                }
+            }
+        }
+        else
+        {
+            // Bottom corner blocked, top corner open -> nudge 1px UP (-Y)
+            uint16_t overlap = ((orig_y + 13) & 0x000f) + 1;
+            if (overlap <= CORNER_NUDGE_THRESHOLD)
+            {
+                o->pos.y.lh.h -= 1;
+                o->b = o->pos.y.lh.h + o->h;
+                uint16_t new_temp_y2 = (o->pos.y.lh.h + 1 + 13) >> 4;
+                uint16_t new_shift_y2;
+                if (shiftcount == 6) {
+                    new_shift_y2 = new_temp_y2 << 6;
+                } else if (shiftcount == 5) {
+                    new_shift_y2 = new_temp_y2 << 5;
+                } else if (shiftcount == 7) {
+                    new_shift_y2 = new_temp_y2 << 7;
+                } else if (shiftcount == 4) {
+                    new_shift_y2 = new_temp_y2 << 4;
+                } else {
+                    new_shift_y2 = new_temp_y2 << shiftcount;
+                }
+                if (map_collision_buf[new_shift_y2 + temp_x] >= 128)
+                {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+static bool ObjectSystem_Move_TryNudgeCornerY(struct game_object * o, uint16_t q, uint16_t q2, uint16_t shift_temp_y)
+{
+    uint8_t c1 = map_collision_buf[q];
+    uint8_t c2 = map_collision_buf[q2];
+
+    if ((c1 < 128) != (c2 < 128))
+    {
+        uint16_t orig_x = o->pos.x.lh.h + 1;
+        if (c1 < 128)
+        {
+            // Left corner blocked, right corner open -> nudge 1px RIGHT (+X)
+            uint16_t overlap = 16 - (orig_x & 0x000f);
+            if (overlap <= CORNER_NUDGE_THRESHOLD)
+            {
+                o->pos.x.lh.h += 1;
+                o->r = o->pos.x.lh.h + o->w;
+                uint16_t new_temp_x = (o->pos.x.lh.h + 1) >> 4;
+                if (map_collision_buf[shift_temp_y + new_temp_x] >= 128)
+                {
+                    return true;
+                }
+            }
+        }
+        else
+        {
+            // Right corner blocked, left corner open -> nudge 1px LEFT (-X)
+            uint16_t overlap = ((orig_x + 13) & 0x000f) + 1;
+            if (overlap <= CORNER_NUDGE_THRESHOLD)
+            {
+                o->pos.x.lh.h -= 1;
+                o->r = o->pos.x.lh.h + o->w;
+                uint16_t new_temp_x2 = (o->pos.x.lh.h + 1 + 13) >> 4;
+                if (map_collision_buf[shift_temp_y + new_temp_x2] >= 128)
+                {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
 /**
  * @brief Moves an object according to its delta velocity while testing map metatile collisions and camera bounds.
  * 
@@ -78,7 +190,10 @@ uint16_t ObjectSystem_Move(struct game_object * o)
 
         if ((map_collision_buf[q] < 128) || (map_collision_buf[q2] < 128))
         {
-            delta_x = 0;
+            if (o != obj_player_pointer || !ObjectSystem_Move_TryNudgeCornerX(o, q, q2, temp_x, shiftcount))
+            {
+                delta_x = 0;
+            }
         }
 
         if (bg_scroll_x_bounds_min.full.high.a != -32768)
@@ -126,9 +241,12 @@ uint16_t ObjectSystem_Move(struct game_object * o)
         uint16_t q = shift_temp_y + temp_x;
         uint16_t q2 = shift_temp_y + temp_x_2;
 
-        if (map_collision_buf[q] < 128 || map_collision_buf[q2] < 128)
+        if ((map_collision_buf[q] < 128) || (map_collision_buf[q2] < 128))
         {
-            delta_y = 0;
+            if (o != obj_player_pointer || !ObjectSystem_Move_TryNudgeCornerY(o, q, q2, shift_temp_y))
+            {
+                delta_y = 0;
+            }
         }
 
         if (bg_scroll_y_bounds_min.full.high.a != -32768)
