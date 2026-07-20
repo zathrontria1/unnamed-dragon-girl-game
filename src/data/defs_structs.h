@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+typedef struct cutscene_data
 {
     void * frame;
     void * palette;
