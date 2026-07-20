@@ -1,0 +1,67 @@
+CompileFlags:
+  Add:
+    # Target 16-bit MSP430 architecture to match 65816 target integer sizes:
+    # - char is 8-bit, short is 16-bit, int is 16-bit, long is 32-bit.
+    - "--target=msp430"
+    - "-std=c11"
+
+    # Define compiler identification flag used by the codebase for VBCC targets.
+    - "-D__VBCC__"
+    - "-DFASTROM=1"
+
+    # Mock VBCC-specific extension keywords so they parse cleanly under clangd:
+    # __reg(...) is used for register parameter passing
+    - "-D__reg(x)="
+    # __near, __huge, __zpage are memory bank pointers
+    - "-D__near="
+    - "-D__huge="
+    - "-D__zpage="
+    # __noinline is function-inlining inhibitor
+    - "-D__noinline=__attribute__((noinline))"
+    # __interrupt is mapped to empty to bypass target-specific interrupt attribute checks
+    - "-D__interrupt="
+    # __section(...) is custom relocation section
+    - "-D__section(x)="
+
+    # Undefine Windows-specific macros to prevent clangd from compiling Win32-only code paths
+    # (since the codebase compiles exclusively for the SNES).
+    - "-U_WIN32"
+    - "-U_WIN64"
+    - "-U_MSC_VER"
+
+    # Search the local stdlib/stdio shim directory first to satisfy target-agnostic 
+    # C standard library includes without pulling in host Visual Studio/MSVC headers.
+    - "-I./.clangd_shims"
+
+    # Local project search directories
+    - "-I."
+    - "-I./src/core"
+    - "-I./src/gameplay"
+    - "-I./src/graphics"
+    - "-I./src/ui"
+    - "-I./src/audio"
+    - "-I./src/data"
+
+    # Force-include basic types universally so headers are self-contained for static analysis.
+    - "-include"
+    - "stdint.h"
+    - "-include"
+    - "stdbool.h"
+
+    # Suppress non-critical diagnostic warnings
+    - "-Wno-unknown-attributes"
+    - "-Wno-missing-declarations"
+    - "-Wno-main-return-type"
+
+Diagnostics:
+  # Disable noisy diagnostics warning about unused includes, which trigger on transitively 
+  # included platform headers (like snes/console.h).
+  UnusedIncludes: None
+  Suppress:
+    # Suppress unknown argument warning in case the host compiler has driver differences
+    - "drv_unknown_argument"
+
+Index:
+  # Enable background indexing of the entire codebase so syntax/semantic errors are 
+  # reported universally in the Problems panel.
+  Background: Build
