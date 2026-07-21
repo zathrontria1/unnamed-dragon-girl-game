@@ -46,6 +46,12 @@ static bool Routines_Enemy_Ai_CheckRawTileLOS(int16_t ex, int16_t ey, int16_t px
     int16_t curr_x = ex;
     int16_t curr_y = ey;
 
+    if (curr_x == px && curr_y == py)
+    {
+        // Immediately return true if the starting tile is the same as the target tile
+        return true; // Reached target tile safely
+    }
+
     for (uint8_t step = 0; step < 20; step++)
     {
         if (step > 0)
@@ -58,7 +64,8 @@ static bool Routines_Enemy_Ai_CheckRawTileLOS(int16_t ex, int16_t ey, int16_t px
 
             if (curr_x == px && curr_y == py)
             {
-                break; // Reached target tile safely
+                return true; // Reached target tile safely
+                //break; // Reached target tile safely
             }
         }
 
@@ -93,7 +100,8 @@ static bool Routines_Enemy_Ai_CheckRawTileLOS(int16_t ex, int16_t ey, int16_t px
         curr_y = next_y;
     }
 
-    return true;
+    // Player is too far away (beyond 20 tiles) to be seen by enemy
+    return false;
 }
 
 /*
