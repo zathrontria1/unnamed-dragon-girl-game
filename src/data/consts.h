@@ -188,6 +188,11 @@
 #define STATUS_NORMAL 0
 #define STATUS_BURNING 1
 
+// Map Collision Tiers & Flags (map_collision_buf values)
+#define MAP_COLL_OVERHEAD 0x20    // Bit 5: Overhead BG visually overlaps objects (does not imply walkable/sight)
+#define MAP_COLL_PASS_SIGHT 0x40  // Bit 6: Allows line of sight to pass through this tile
+#define MAP_COLL_BLOCK_MOVE 0x80  // Bit 7: Walkable ground (passes movement)
+
 #define AI_STATE_IDLE 0
 #define AI_STATE_MOVE_TOWARDS 1
 #define AI_STATE_MOVE_AWAY 2
