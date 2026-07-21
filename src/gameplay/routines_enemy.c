@@ -664,6 +664,8 @@ void Routines_Enemy_InvisibleHit(struct game_object * o)
 */
 uint16_t Routines_Enemy_GetFacing(struct game_object * o)
 {
+    return data_facing_lut[(uint8_t)o->angle];
+}
 
 /**
  * @brief Handles drop spawning and defeat tracking when an enemy fails to spawn safely.
