@@ -266,17 +266,31 @@ void Routines_Interactable_Blocker(struct game_object * o)
                 // y needs to be shifted an amount of times
                 uint16_t q = (o->tile.y << map_extent_tiles_x_shiftcount) + o->tile.x;
                 uint16_t q2;
-                map_collision_buf[q] = 0x00;
+                map_collision_buf[q] = 0x00; // Block entirely
 
                 switch (o->id)
                 {
                     case OBJID_INTERACTABLE_BLOCKER_DOOR_NS:
-                        q2 = (o->tile.y << map_extent_tiles_x_shiftcount) + o->tile.x + 1;
-                        map_collision_buf[q2] = 0x00;
+                        if (o->tile.x < map_extent_tiles_x - 1) // Prevent overflow
+                        {
+                            q2 = (o->tile.y << map_extent_tiles_x_shiftcount) + o->tile.x + 1;
+                            map_collision_buf[q2] = 0x00; // Block entirely
+                        }
+                        else
+                        {
+                            // Prevent overflow, do not modify the map_collision_buf for this tile
+                        }
                         break;
                     case OBJID_INTERACTABLE_BLOCKER_DOOR_EW:
-                        q2 = ((o->tile.y - 1) << map_extent_tiles_x_shiftcount) + o->tile.x;
-                        map_collision_buf[q2] = 0x00;
+                        if (o->tile.y > 0) // Prevent underflow
+                        {
+                            q2 = ((o->tile.y - 1) << map_extent_tiles_x_shiftcount) + o->tile.x;
+                            map_collision_buf[q2] = 0x00; // Block entirely
+                        }
+                        else
+                        {
+                            // Prevent underflow, do not modify the map_collision_buf for this tile
+                        }
                         break;
                 }
             }
@@ -287,17 +301,31 @@ void Routines_Interactable_Blocker(struct game_object * o)
                 // y needs to be shifted an amount of times
                 uint16_t q = (o->tile.y << map_extent_tiles_x_shiftcount) + o->tile.x;
                 uint16_t q2;
-                map_collision_buf[q] = 0xff;
+                map_collision_buf[q] = (MAP_COLL_ALLOW_MOVE | MAP_COLL_PASS_SIGHT); // Allow both sight and movement
 
                 switch (o->id)
                 {
                     case OBJID_INTERACTABLE_BLOCKER_DOOR_NS:
-                        q2 = (o->tile.y << map_extent_tiles_x_shiftcount) + o->tile.x + 1;
-                        map_collision_buf[q2] = 0xff;
+                        if (o->tile.x < map_extent_tiles_x - 1) // Prevent overflow
+                        {
+                            q2 = (o->tile.y << map_extent_tiles_x_shiftcount) + o->tile.x + 1;
+                            map_collision_buf[q2] = (MAP_COLL_ALLOW_MOVE | MAP_COLL_PASS_SIGHT); // Allow both sight and movement
+                        }
+                        else
+                        {
+                            // Prevent overflow, do not modify the map_collision_buf for this tile
+                        }
                         break;
                     case OBJID_INTERACTABLE_BLOCKER_DOOR_EW:
-                        q2 = ((o->tile.y - 1) << map_extent_tiles_x_shiftcount) + o->tile.x;
-                        map_collision_buf[q2] = 0xff;
+                        if (o->tile.y > 0) // Prevent underflow
+                        {
+                            q2 = ((o->tile.y - 1) << map_extent_tiles_x_shiftcount) + o->tile.x;
+                            map_collision_buf[q2] = (MAP_COLL_ALLOW_MOVE | MAP_COLL_PASS_SIGHT); // Allow both sight and movement
+                        }
+                        else
+                        {
+                            // Prevent underflow, do not modify the map_collision_buf for this tile
+                        }
                         break;
                 }
             }
@@ -353,16 +381,33 @@ void Routines_LevelWarp(struct game_object * o)
             uint16_t q2;
             uint16_t q3;
             uint16_t q4;
-            map_collision_buf[q] = 0xff;
+            map_collision_buf[q] = (MAP_COLL_ALLOW_MOVE | MAP_COLL_PASS_SIGHT); // Allow both sight and movement
 
-            q2 = (o->tile.y << map_extent_tiles_x_shiftcount) + o->tile.x + 1;
-            map_collision_buf[q2] = 0xff;
+            bool can_write_right;
+            if (o->tile.x < map_extent_tiles_x - 1) can_write_right = true;
+            else can_write_right = false;
 
-            q3 = ((o->tile.y - 1) << map_extent_tiles_x_shiftcount) + o->tile.x;
-            map_collision_buf[q3] = 0xff;
+            bool can_write_above;
+            if (o->tile.y > 0) can_write_above = true;
+            else can_write_above = false;
 
-            q4 = ((o->tile.y - 1) << map_extent_tiles_x_shiftcount) + o->tile.x + 1;
-            map_collision_buf[q4] = 0xff;
+            if (can_write_right) // Prevent overflow
+            {
+                q2 = (o->tile.y << map_extent_tiles_x_shiftcount) + o->tile.x + 1;
+                map_collision_buf[q2] = (MAP_COLL_ALLOW_MOVE | MAP_COLL_PASS_SIGHT); // Allow both sight and movement
+            }
+            
+            if (can_write_above) // Prevent underflow
+            {
+                q3 = ((o->tile.y - 1) << map_extent_tiles_x_shiftcount) + o->tile.x;
+                map_collision_buf[q3] = (MAP_COLL_ALLOW_MOVE | MAP_COLL_PASS_SIGHT); // Allow both sight and movement
+            }
+
+            if (can_write_above && can_write_right) // Prevent underflow and overflow
+            {
+                q4 = ((o->tile.y - 1) << map_extent_tiles_x_shiftcount) + o->tile.x + 1;
+                map_collision_buf[q4] = (MAP_COLL_ALLOW_MOVE | MAP_COLL_PASS_SIGHT); // Allow both sight and movement
+            }
 
             warp_open = true;
         }

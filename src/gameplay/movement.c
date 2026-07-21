@@ -155,15 +155,54 @@ uint16_t ObjectSystem_Move(struct game_object * o)
     {
         temp_xl.a = o->pos.x.a + delta_x;
         
-        uint16_t temp_x_pixel = temp_xl.lh.h + 1;
-        uint16_t temp_y = o->pos.y.lh.h + 1;
+        int16_t temp_x_pixel_preclamp = temp_xl.lh.h + 1;
+
+        if (temp_x_pixel_preclamp < 0)
+        {
+            temp_x_pixel_preclamp = 0;
+        }
+        else if (temp_x_pixel_preclamp >= map_extent_x - 1)
+        {
+            temp_x_pixel_preclamp = map_extent_x - 1;
+        }
+
+        uint16_t temp_x_pixel = temp_x_pixel_preclamp;
+
+        int16_t temp_y_preclamp = o->pos.y.lh.h + 1;
+
+        if (temp_y_preclamp < 0)
+        {
+            temp_y_preclamp = 0;
+        }
+        else if (temp_y_preclamp >= map_extent_y - 1)
+        {
+            temp_y_preclamp = map_extent_y - 1;
+        }
+
+        uint16_t temp_y = temp_y_preclamp;
         
         if (delta_x > 0)
         {
             temp_x_pixel += 13;
+
+            if (temp_x_pixel >= map_extent_x)
+            {
+                temp_x_pixel = map_extent_x - 1;
+            }
         }
 
-        uint16_t temp_y_2 = (temp_y + 13) >> 4; // Lower edge
+        int16_t temp_y_2_preclamp = (temp_y + 13) >> 4; // Lower edge
+
+        if (temp_y_2_preclamp < 0)
+        {
+            temp_y_2_preclamp = 0;
+        }
+        else if (temp_y_2_preclamp >= map_extent_tiles_y)
+        {
+            temp_y_2_preclamp = map_extent_tiles_y - 1;
+        }
+
+        uint16_t temp_y_2 = temp_y_2_preclamp;
         uint16_t temp_x = temp_x_pixel >> 4;
         temp_y >>= 4;
 
@@ -224,12 +263,40 @@ uint16_t ObjectSystem_Move(struct game_object * o)
     {
         temp_yl.a = o->pos.y.a + delta_y;
         
-        uint16_t temp_x = o->pos.x.lh.h + 1;
-        uint16_t temp_y_pixel = temp_yl.lh.h + 1;
+        int16_t temp_x_preclamp = o->pos.x.lh.h + 1;
+
+        if (temp_x_preclamp < 0)
+        {
+            temp_x_preclamp = 0;
+        }
+        else if (temp_x_preclamp >= map_extent_x - 1)
+        {
+            temp_x_preclamp = map_extent_x - 1;
+        }
+
+        uint16_t temp_x = temp_x_preclamp;
+
+        int16_t temp_y_pixel_preclamp = temp_yl.lh.h + 1;
+
+        if (temp_y_pixel_preclamp < 0)
+        {
+            temp_y_pixel_preclamp = 0;
+        }
+        else if (temp_y_pixel_preclamp >= map_extent_y - 1)
+        {
+            temp_y_pixel_preclamp = map_extent_y - 1;
+        }
+
+        uint16_t temp_y_pixel = temp_y_pixel_preclamp;
         
         if (delta_y > 0)
         {
             temp_y_pixel += 13;
+
+            if (temp_y_pixel >= map_extent_y)
+            {
+                temp_y_pixel = map_extent_y - 1;
+            }
         }
 
         uint16_t temp_y = temp_y_pixel >> 4;
