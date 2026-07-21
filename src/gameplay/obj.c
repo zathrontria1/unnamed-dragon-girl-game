@@ -890,7 +890,7 @@ uint16_t ObjectSystem_List_InstantiateInteractables(const struct obj_list_entry_
             return 1;
         }
 
-        uint16_t index = ObjectSystem_InstantiateObject(temp_objid, temp_x, temp_y, temp_flag);
+        int16_t index = ObjectSystem_InstantiateObject(temp_objid, temp_x, temp_y, temp_flag);
         if (index == -1)
         {
             return 1;
