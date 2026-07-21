@@ -126,6 +126,8 @@ bool LevelSystem_LoadLevel(const struct level_data * level)
         }
     }
 
+    level_data_ptr_prev = level_data_ptr;
+
     return temp_level_reuses_vram_contents;
 }
 
