@@ -240,9 +240,12 @@ typedef struct game_data_npc
     uint32_t money; // held money
 
     // AI data
-    uint16_t ai_state;
+    uint8_t ai_state;
+    uint8_t ai_flags;
     uint16_t ai_timer;
     uint16_t ai_makeattack;
+    uint8_t ai_tactic_dir;
+    uint8_t ai_stuck_count;
 } game_data_npc_t;
 
 typedef struct game_data_interactable
