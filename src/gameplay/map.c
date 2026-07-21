@@ -198,7 +198,7 @@ bool MapSystem_IsPositionSolid(int16_t x, int16_t y, int16_t w, int16_t h)
         for (int16_t tx = tx1; tx <= tx2; tx++)
         {
             uint16_t idx = shift_y + (uint16_t)tx;
-            if (map_collision_buf[idx] < MAP_COLL_BLOCK_MOVE)
+            if (map_collision_buf[idx] < MAP_COLL_ALLOW_MOVE)
             {
                 return true;
             }
