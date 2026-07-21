@@ -1,3 +1,11 @@
+#ifndef VARS_EXTERN_H
+#define VARS_EXTERN_H
+
+#include <stdint.h>
+#include "consts.h"
+#include "defs_structs.h"
+#include "spr_metaspr.h"
+
 // Sound engine and data
 #include "vars_extern_snd.h"
 #include "vars_extern_cutscenes.h"
@@ -127,3 +135,6 @@ extern const struct spr_metaspr_definition data_metaspr_boss_generic_hands_hflip
 
 extern const struct spr_metaspr_definition data_metaspr_shadow_hands[];
 extern const struct spr_metaspr_definition data_metaspr_shadow_hands_hflip[];
+
+#endif // VARS_EXTERN_H
+

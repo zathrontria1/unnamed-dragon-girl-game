@@ -6,9 +6,15 @@
 -D__near=
 -D__huge=
 -D__zpage=
+-DNEAR=
+-DHUGE=
+-DZP=
 -D__noinline=__attribute__((noinline))
+-DNO_INLINE=__attribute__((noinline))
 -D__interrupt=
+-DINTERRUPT=
 -D__section(x)=
+-DNULL=((void*)0)
 -U_WIN32
 -U_WIN64
 -U_MSC_VER

@@ -1,3 +1,8 @@
+#ifndef DATA_STRINGS_H
+#define DATA_STRINGS_H
+
+#include "consts.h"
+
 /*extern HUGE const char STR_MSG_TEST_SINGLELINE[];
 extern HUGE const char STR_MSG_TEST_MULTILINE[];
 extern HUGE const char STR_MSG_TEST_MULTIPAGE[];*/
@@ -91,3 +96,6 @@ extern HUGE const char STR_TITLE_START[];
 extern HUGE const char STR_GAME_OVER[];
 
 extern HUGE const char STR_CRASH_FORMATSTR[];
+
+#endif // DATA_STRINGS_H
+

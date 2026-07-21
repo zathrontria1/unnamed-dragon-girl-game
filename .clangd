@@ -16,12 +16,18 @@ CompileFlags:
     - "-D__near="
     - "-D__huge="
     - "-D__zpage="
+    - "-DNEAR="
+    - "-DHUGE="
+    - "-DZP="
     # __noinline is function-inlining inhibitor
     - "-D__noinline=__attribute__((noinline))"
+    - "-DNO_INLINE=__attribute__((noinline))"
     # __interrupt is mapped to empty to bypass target-specific interrupt attribute checks
     - "-D__interrupt="
+    - "-DINTERRUPT="
     # __section(...) is custom relocation section
     - "-D__section(x)="
+    - "-DNULL=((void*)0)"
 
     # Undefine Windows-specific macros to prevent clangd from compiling Win32-only code paths
     # (since the codebase compiles exclusively for the SNES).

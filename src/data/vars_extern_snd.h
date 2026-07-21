@@ -1,3 +1,9 @@
+#ifndef VARS_EXTERN_SND_H
+#define VARS_EXTERN_SND_H
+
+#include <stdint.h>
+#include "consts.h"
+#include "defs_structs.h"
 
 extern HUGE const uint8_t data_soundengine_binary[];
 
@@ -75,3 +81,6 @@ extern HUGE const uint8_t data_snd_stream_hiss[];
 
 // Streamed audio table to make it easier to refer to them
 extern HUGE const struct sound_stream_data data_stream_table[];
+
+#endif // VARS_EXTERN_SND_H
+
