@@ -139,6 +139,70 @@ void MapSystem_BuildCollisionTable()
 }
 
 /**
+ * @brief Evaluates map collision for overhead background tiles across an object's width and height, returning the sprite priority mask.
+ * 
+ * @param o                   Pointer to the game object.
+ * @param width               Width of the metasprite in pixels.
+ * @param height_check_offset Height offset (negative) from base Y to check for overhead structures.
+ * @return uint16_t           0x2000 (Priority 2, behind) or 0x3000 (Priority 3, in front).
+ */
+uint16_t MapSystem_GetMetaspritePriority(struct game_object * o, int16_t width, int16_t height_check_offset)
+{
+    int16_t bx = o->pos.x.lh.h;
+    int16_t by = o->pos.y.lh.h; // Ground Y position (shadow Y)
+    
+    int16_t top_y = by + height_check_offset;
+    if (top_y < 0)
+    {
+        top_y = 0;
+    }
+    
+    uint16_t start_tile_y = (uint16_t)top_y >> 4;
+    uint16_t end_tile_y = (uint16_t)by >> 4;
+    
+    int16_t max_offset = (width > 16) ? (width - 16) : 0;
+    int16_t offset_x;
+    
+    for (offset_x = 0; offset_x <= max_offset; offset_x += 16)
+    {
+        int16_t test_x = bx + offset_x;
+        if (test_x >= 0)
+        {
+            uint16_t tile_x = (uint16_t)test_x >> 4;
+            uint16_t ty;
+            
+            for (ty = start_tile_y; ty <= end_tile_y && ty < 64; ty++)
+            {
+                uint16_t idx = ((ty & 63) << 6) | (tile_x & 63);
+                
+                if (map_collision_buf[idx] & MAP_COLL_OVERHEAD)
+                {
+                    uint16_t scan_y = ty;
+                    while (scan_y < 64)
+                    {
+                        uint16_t scan_idx = ((scan_y & 63) << 6) | (tile_x & 63);
+                        if (!(map_collision_buf[scan_idx] & MAP_COLL_OVERHEAD))
+                        {
+                            break;
+                        }
+                        scan_y++;
+                    }
+                    
+                    uint16_t structure_base_y = scan_y << 4;
+                    
+                    if (by < (int16_t)structure_base_y)
+                    {
+                        return 0x2000;
+                    }
+                }
+            }
+        }
+    }
+
+    return 0x3000;
+}
+
+/**
  * @brief Rebuilds the entire VRAM tilemap buffer.
  */
 void MapSystem_Tilemap_RegenerateTilemap()

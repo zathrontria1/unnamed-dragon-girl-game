@@ -28,6 +28,7 @@
 #include "hittest.h"
 
 #include "gfx.h"
+#include "map.h"
 
 #include "movement.h"
 
@@ -655,29 +656,29 @@ void Routines_Boss_Test_Hands_DrawShadow(struct game_object * o, bool flip)
 */
 void Routines_Boss_Test_Draw(struct game_object * o, bool flip)
 {
+    uint16_t priority_mask = MapSystem_GetMetaspritePriority(o, 64, -80);
+
     // Inner hand
     if (obj_boss_hands_show)
     {
         if (flip)
         {
-            SpriteEngine_AddMetaSprite(o, (struct spr_metaspr_definition *)&data_metaspr_boss_generic_hands_hflip_r);
-
+            SpriteEngine_AddMetaSprite_Priority(o, (struct spr_metaspr_definition *)&data_metaspr_boss_generic_hands_hflip_r, priority_mask);
         }
         else
         {
-            SpriteEngine_AddMetaSprite(o, (struct spr_metaspr_definition *)&data_metaspr_boss_generic_hands_l);
+            SpriteEngine_AddMetaSprite_Priority(o, (struct spr_metaspr_definition *)&data_metaspr_boss_generic_hands_l, priority_mask);
         }
     }
 
     // Body - done this way to avoid depth sort issues
     if (flip)
     {
-        SpriteEngine_AddMetaSprite(o, (const struct spr_metaspr_definition *)&data_metaspr_boss_generic_64x96_hflip);
-
+        SpriteEngine_AddMetaSprite_Priority(o, (const struct spr_metaspr_definition *)&data_metaspr_boss_generic_64x96_hflip, priority_mask);
     }
     else
     {
-        SpriteEngine_AddMetaSprite(o, (const struct spr_metaspr_definition *)&data_metaspr_boss_generic_64x96);
+        SpriteEngine_AddMetaSprite_Priority(o, (const struct spr_metaspr_definition *)&data_metaspr_boss_generic_64x96, priority_mask);
     }
 
     // Body shadow
@@ -691,12 +692,11 @@ void Routines_Boss_Test_Draw(struct game_object * o, bool flip)
     {
         if (flip)
         {
-            SpriteEngine_AddMetaSprite(o, (struct spr_metaspr_definition *)&data_metaspr_boss_generic_hands_hflip_l);
-
+            SpriteEngine_AddMetaSprite_Priority(o, (struct spr_metaspr_definition *)&data_metaspr_boss_generic_hands_hflip_l, priority_mask);
         }
         else
         {
-            SpriteEngine_AddMetaSprite(o, (struct spr_metaspr_definition *)&data_metaspr_boss_generic_hands_r);
+            SpriteEngine_AddMetaSprite_Priority(o, (struct spr_metaspr_definition *)&data_metaspr_boss_generic_hands_r, priority_mask);
         }
 
         // Hand shadows for both

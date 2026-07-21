@@ -9,3 +9,5 @@ NO_INLINE void SpriteEngine_AddMetaSprite_Back(__reg("a/x") struct game_object *
 #else
 void SpriteEngine_AddMetaSprite_Back(struct game_object * o, const struct spr_metaspr_definition * m);
 #endif
+
+void SpriteEngine_AddMetaSprite_Priority(struct game_object * o, const struct spr_metaspr_definition * m, uint16_t priority_mask);

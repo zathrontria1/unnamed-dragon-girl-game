@@ -37,6 +37,7 @@ extern bool bg_scroll_suppress_interpolation_state_change;
 
 void MapSystem_LoadMap(const uint8_t * map, const uint16_t * lut, const uint8_t * col);
 void MapSystem_BuildCollisionTable();
+uint16_t MapSystem_GetMetaspritePriority(struct game_object * o, int16_t width, int16_t height_check_offset);
 
 void MapSystem_UpdateCameraPosition(bool suppress_map_gen);
 void MapSystem_CheckCrossedTilemapEdge();
