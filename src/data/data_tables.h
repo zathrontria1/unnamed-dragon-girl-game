@@ -1,4 +1,15 @@
+#ifndef DATA_TABLES_H
+#define DATA_TABLES_H
+
+#include <stdint.h>
+#include <stdbool.h>
+
+#include "consts.h"
 #include "consts_snd.h"
+#include "defs_objects.h"
+#include "defs_structs.h"
+#include "vars_extern.h"
+#include "vars_extern_snd.h"
 
 #include "data_strings.h"
 
@@ -300,3 +311,6 @@ const struct level_data data_level_test_2 = {
 
     (void *)&STR_LEVELNAME_DEBUG_B3F
 };
+
+#endif // DATA_TABLES_H
+

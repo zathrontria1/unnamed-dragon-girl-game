@@ -1,3 +1,10 @@
+#ifndef DATA_CUTSCENES_H
+#define DATA_CUTSCENES_H
+
+#include <stdint.h>
+#include "defs_structs.h"
+#include "vars_extern_cutscenes.h"
+
 // Cutscene data
 /*const struct cutscene_data data_cs_bbb[] = 
 {
@@ -78,3 +85,6 @@ const struct cutscene_data data_cs_intro[] =
         65535
     }, // Last entry should be all invalid values so the cutscene engine knows when to return control.
 };
+
+#endif // DATA_CUTSCENES_H
+

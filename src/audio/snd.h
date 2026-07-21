@@ -1,3 +1,10 @@
+#ifndef SND_H
+#define SND_H
+
+#include <stdint.h>
+#include <stdbool.h>
+#include "defs_structs.h"
+
 extern bool snd_apu_booted;
 extern bool snd_settings_mono;
 
@@ -86,3 +93,6 @@ void SoundInterface_AcknowledgeBusy(bool ignore_busy);
 void SoundInterface_AcknowledgeNop();
 
 bool SoundInterface_IsHigherPriority(uint8_t sfx_id);
+
+#endif // SND_H
+

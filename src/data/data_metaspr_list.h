@@ -1,3 +1,12 @@
+#ifndef DATA_METASPR_LIST_H
+#define DATA_METASPR_LIST_H
+
+#include <stdint.h>
+#include <stdbool.h>
+#include "defs_objects.h"
+#include "defs_structs.h"
+#include "spr_metaspr.h"
+
 // Terminate metasprites with a 0xffff for size
 const struct spr_metaspr_definition data_metaspr_door_ns_closed[] = {
     {0x8c | PAL_INTERACTABLE_BLOCKER_DOOR << 9 | 2 << 12, 0, -16, 1},
@@ -139,3 +148,6 @@ const struct spr_metaspr_definition data_metaspr_shadow_hands_hflip[] = {
 
     {0, 0, 0, 0xffff},
 };
+
+#endif // DATA_METASPR_LIST_H
+

@@ -1,3 +1,6 @@
+#ifndef HDMA_H
+#define HDMA_H
+
 #include <stdint.h>
 #include <stdbool.h>
 #include "consts.h"
@@ -55,4 +58,7 @@ void HdmaEngine_GeneratePaletteTable(uint16_t * table_ptr, uint16_t pal_start, u
 void HdmaEngine_EnableHdma();
 
 void HdmaEngine_SetHdmaShadow();
+
+#endif // HDMA_H
+
 

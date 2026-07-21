@@ -1,3 +1,6 @@
+#ifndef CONSTS_SND_H
+#define CONSTS_SND_H
+
 #define SND_SIG_CLEAR 0x00
 #define SND_SIG_BUSY 0xff
 
@@ -243,3 +246,6 @@
 
 //#define STREAM_VOICE_TREASURE_1 7
 //#define STREAM_VOICE_TREASURE_2 8
+
+#endif // CONSTS_SND_H
+

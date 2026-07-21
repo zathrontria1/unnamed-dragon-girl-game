@@ -1,3 +1,9 @@
+#ifndef VARS_EXTERN_CUTSCENES_H
+#define VARS_EXTERN_CUTSCENES_H
+
+#include <stdint.h>
+#include "defs_structs.h"
+
 // Cutscene data
 
 /*extern const uint8_t data_cs_bbb_0_f[];
@@ -42,3 +48,6 @@ extern const uint8_t data_cs_intro_1_t[];
 
 ///=extern const struct cutscene_data data_cs_bbb[];
 extern const struct cutscene_data data_cs_intro[];
+
+#endif // VARS_EXTERN_CUTSCENES_H
+

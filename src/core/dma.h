@@ -1,3 +1,6 @@
+#ifndef DMA_H
+#define DMA_H
+
 #include <stdint.h>
 #include <stdbool.h>
 #include "consts.h"
@@ -81,3 +84,6 @@ void DmaSystem_ProcessQueue();
 
 void DmaSystem_UpdateStripTiles();
 void DmaSystem_UpdateFrameTiles();
+
+#endif // DMA_H
+

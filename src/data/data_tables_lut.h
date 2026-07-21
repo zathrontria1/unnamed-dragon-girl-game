@@ -1,3 +1,7 @@
+#ifndef DATA_TABLES_LUT_H
+#define DATA_TABLES_LUT_H
+
+#include <stdint.h>
 
 // Sine and cosine tables
 /** Generated using Dr LUT - Free Lookup Table Generator
@@ -298,3 +302,6 @@ const uint8_t data_facing_lut[256] = {
     2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
     2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2
 };
+
+#endif // DATA_TABLES_LUT_H
+

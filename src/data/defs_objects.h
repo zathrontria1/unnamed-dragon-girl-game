@@ -1,3 +1,6 @@
+#ifndef DEFS_OBJECTS_H
+#define DEFS_OBJECTS_H
+
 // Place this in order from highest expected frequency
 // to lowest.
 
@@ -90,3 +93,6 @@
 #define PAL_INTERACTABLE_SWITCH_FLOOR 7
 #define PAL_INTERACTABLE_BLOCKER_FLOOR 7
 #define PAL_INTERACTABLE_BLOCKER_DOOR 7
+
+#endif // DEFS_OBJECTS_H
+
