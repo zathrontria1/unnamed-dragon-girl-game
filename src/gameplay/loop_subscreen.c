@@ -49,55 +49,57 @@ static void * subscreen_current_func_ptr;
 static void * subscreen_next_func_ptr;
 uint16_t subscreen_transition_state;
 
-void Subscreen_Transition_Loop()
+void Loop_Subscreen_Transition_Init()
 {
-    if (subscreen_transition_state == TRANSITION_STATE_FADE_OUT)
-    {
-        void (*current_func)() = (void (*)())subscreen_current_func_ptr;
-        if (subscreen_current_func_ptr == Main_GetFunctionPointer(ROUTINE_GAMELOOP))
-        {
-            Loop_Game_Partial();
-        }
-        else
-        {
-            current_func();
-        }
+    subscreen_transition_state = TRANSITION_STATE_INITIALIZE;
 
-        shadow_brightness -= (256 * V_MUL);
-        if (shadow_brightness <= 0)
-        {
-            shadow_brightness = 0;
-            subscreen_rendered = 0;
-            subscreen_transition_state = TRANSITION_STATE_INITIALIZE;
-        }
-    }
-    else if (subscreen_transition_state == TRANSITION_STATE_INITIALIZE)
+    while (shadow_brightness != 0x00)
     {
-        void (*next_func)() = (void (*)())subscreen_next_func_ptr;
+        ; // Wait for fade out via alternate NMI
+    }
+
+    subscreen_rendered = 0;
+
+    void (*next_func)() = (void (*)())subscreen_next_func_ptr;
+
+    if (subscreen_next_func_ptr == Main_GetFunctionPointer(ROUTINE_GAMELOOP))
+    {
+        ;//Loop_Game_Partial();
+    }
+    else
+    {
         next_func();
-
-        shadow_brightness = 0;
-        subscreen_transition_state = TRANSITION_STATE_FADE_IN;
     }
-    else if (subscreen_transition_state == TRANSITION_STATE_FADE_IN)
-    {
-        void (*next_func)() = (void (*)())subscreen_next_func_ptr;
-        if (subscreen_next_func_ptr == Main_GetFunctionPointer(ROUTINE_GAMELOOP))
-        {
-            Loop_Game_Partial();
-        }
-        else
-        {
-            next_func();
-        }
 
-        shadow_brightness += (256 * V_MUL);
-        if (shadow_brightness >= (15 << 8))
-        {
-            shadow_brightness = (15 << 8);
-            system_loop_func_ptr = subscreen_next_func_ptr;
-            subscreen_transition_state = TRANSITION_STATE_NONE;
-        }
+    system_use_alternate_nmi = false;
+    shadow_brightness_change = 0;
+
+    subscreen_transition_state = TRANSITION_STATE_FADE_IN;
+    system_loop_func_ptr = (void *)&Loop_Subscreen_Transition_FadeIn;
+
+    return;
+}
+
+void Loop_Subscreen_Transition_FadeIn()
+{
+    void (*next_func)() = (void (*)())subscreen_next_func_ptr;
+
+    if (subscreen_next_func_ptr == Main_GetFunctionPointer(ROUTINE_GAMELOOP))
+    {
+        ;//Loop_Game_Partial();
+    }
+    else
+    {
+        next_func();
+    }
+
+    shadow_brightness += (128 * V_MUL);
+    
+    if (shadow_brightness >= (15 << 8))
+    {
+        shadow_brightness = (15 << 8);
+        system_loop_func_ptr = subscreen_next_func_ptr;
+        subscreen_transition_state = TRANSITION_STATE_NONE;
     }
 
     return;
@@ -105,10 +107,15 @@ void Subscreen_Transition_Loop()
 
 void Subscreen_Transition_Start(void * next_func)
 {
-    subscreen_current_func_ptr = system_loop_func_ptr;
     subscreen_next_func_ptr = next_func;
+
+    shadow_brightness = 15 << 8;
+    shadow_brightness_change = -(128 * V_MUL);
+
+    system_use_alternate_nmi = true;
     subscreen_transition_state = TRANSITION_STATE_FADE_OUT;
-    system_loop_func_ptr = (void *)&Subscreen_Transition_Loop;
+
+    system_loop_func_ptr = (void *)&Loop_Subscreen_Transition_Init;
 
     return;
 }

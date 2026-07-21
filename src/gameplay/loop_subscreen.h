@@ -75,5 +75,6 @@ void Subscreen_ResetConfirmation();
 void Subscreen_Internal_UpdateNavigation(const struct menu_item * item_array);
 
 void Subscreen_Transition_Start(void * next_func);
-void Subscreen_Transition_Loop();
+void Loop_Subscreen_Transition_Init();
+void Loop_Subscreen_Transition_FadeIn();
 void Subscreen_Transition_Exit();
