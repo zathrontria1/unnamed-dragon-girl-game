@@ -22,7 +22,7 @@
 
 #include "gfx.h"
 
-#define CORNER_NUDGE_THRESHOLD 4
+#define CORNER_NUDGE_THRESHOLD 5
 
 static bool ObjectSystem_Move_TryNudgeCornerX(struct game_object * o, uint16_t q, uint16_t q2, uint16_t temp_x, uint16_t shiftcount)
 {
@@ -190,9 +190,20 @@ uint16_t ObjectSystem_Move(struct game_object * o)
 
         if ((map_collision_buf[q] < 128) || (map_collision_buf[q2] < 128))
         {
-            if (o != obj_player_pointer || !ObjectSystem_Move_TryNudgeCornerX(o, q, q2, temp_x, shiftcount))
+            if (!ObjectSystem_Move_TryNudgeCornerX(o, q, q2, temp_x, shiftcount))
             {
                 delta_x = 0;
+                if (o->delta.x.a > 0)
+                {
+                    temp_xl.lh.h = (temp_x << 4) - 15;
+                }
+                else
+                {
+                    temp_xl.lh.h = ((temp_x + 1) << 4) - 1;
+                }
+                temp_xl.lh.l = 0;
+                o->pos.x.a = temp_xl.a;
+                o->r = temp_xl.lh.h + o->w;
             }
         }
 
@@ -243,9 +254,20 @@ uint16_t ObjectSystem_Move(struct game_object * o)
 
         if ((map_collision_buf[q] < 128) || (map_collision_buf[q2] < 128))
         {
-            if (o != obj_player_pointer || !ObjectSystem_Move_TryNudgeCornerY(o, q, q2, shift_temp_y))
+            if (!ObjectSystem_Move_TryNudgeCornerY(o, q, q2, shift_temp_y))
             {
                 delta_y = 0;
+                if (o->delta.y.a > 0)
+                {
+                    temp_yl.lh.h = (temp_y << 4) - 15;
+                }
+                else
+                {
+                    temp_yl.lh.h = ((temp_y + 1) << 4) - 1;
+                }
+                temp_yl.lh.l = 0;
+                o->pos.y.a = temp_yl.a;
+                o->b = temp_yl.lh.h + o->h;
             }
         }
 
