@@ -74,6 +74,8 @@ extern const uint32_t data_pow_2[];
 
 extern const uint32_t data_upgrade_costs[];
 
+extern const uint8_t data_facing_lut[];
+
 // Level sub-data
 extern const struct level_palette_list data_palette_list_0;
 
