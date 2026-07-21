@@ -613,7 +613,10 @@ void Subscreen_Upgrade_Hp()
         obj_player_pointer->struct_data.npc_data.money -= obj_player_upgrades_cost_hp;
         ui_display_money = obj_player_pointer->struct_data.npc_data.money;
 
-        obj_player_upgrades_bought_hp++;
+        if (obj_player_upgrades_bought_hp < 255)
+        {
+            obj_player_upgrades_bought_hp++;
+        }
 
         subscreen_selection_profile = subscreen_selection;
 
@@ -636,7 +639,10 @@ void Subscreen_Upgrade_Attack()
         obj_player_pointer->struct_data.npc_data.money -= obj_player_upgrades_cost_attack;
         ui_display_money = obj_player_pointer->struct_data.npc_data.money;
 
-        obj_player_upgrades_bought_attack++;
+        if (obj_player_upgrades_bought_attack < 255)
+        {
+            obj_player_upgrades_bought_attack++;
+        }
 
         subscreen_selection_profile = subscreen_selection;
 
@@ -659,7 +665,10 @@ void Subscreen_Upgrade_Defense()
         obj_player_pointer->struct_data.npc_data.money -= obj_player_upgrades_cost_defense;
         ui_display_money = obj_player_pointer->struct_data.npc_data.money;
 
-        obj_player_upgrades_bought_defense++;
+        if (obj_player_upgrades_bought_defense < 255)
+        {
+            obj_player_upgrades_bought_defense++;
+        }
 
         subscreen_selection_profile = subscreen_selection;
 
