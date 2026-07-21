@@ -368,7 +368,9 @@ bool Routines_Boss_Test_RunPhase(struct game_object * o)
     if (!obj_boss_moving)
     {
         // Pick a spot to move to.
-        uint16_t select = (Math_GetRandom_u16() % 9) << 1;
+        // 16-entry LUT avoids a 16-bit division by 9. Positions 0-6 appear twice (2/16), 7-8 appear once (1/16).
+        static const uint8_t boss_pos_select_lut[16] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 0, 1, 2, 3, 4, 5, 6};
+        uint16_t select = (uint16_t)boss_pos_select_lut[Math_GetRandom_u16() & 0x0f] << 1;
 
         int32_t dest_x = (int32_t)const_boss_positions_0[select] << 16;
         int32_t dest_y = (int32_t)const_boss_positions_0[select+1] << 16;
@@ -557,15 +559,16 @@ bool Routines_Boss_Test_Movement(struct game_object * o, int32_t x, int32_t y)
     int32_t diff_x = x - o->pos.x.a;
     int32_t diff_y = y - o->pos.y.a;
 
-    // Now calculate the correct object delta
-    int32_t delta_x = diff_x / (5 * FPS);
-    int32_t delta_y = diff_y / (5 * FPS);
+    // Use arithmetic right shift by 7 (divide by 128) instead of dividing by 5*FPS (150).
+    // Movement timer is also set to 128 so total displacement remains approximately diff.
+    int32_t delta_x = diff_x >> 7;
+    int32_t delta_y = diff_y >> 7;
 
     // Set the delta
     o->delta.x.a = delta_x;
     o->delta.y.a = delta_y;
 
-    obj_boss_timer_movement = 5 * FPS; // Move for 5 seconds.
+    obj_boss_timer_movement = 128; // ~4.3 seconds at 30fps
 
     return temp_invalidate_animation_frame;
 }
