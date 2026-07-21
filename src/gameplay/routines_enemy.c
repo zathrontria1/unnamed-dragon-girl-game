@@ -664,24 +664,63 @@ void Routines_Enemy_InvisibleHit(struct game_object * o)
 */
 uint16_t Routines_Enemy_GetFacing(struct game_object * o)
 {
-    if (o->angle < 32)
+
+/**
+ * @brief Handles drop spawning and defeat tracking when an enemy fails to spawn safely.
+ * 
+ * @param o Pointer to the enemy game object.
+ */
+void Routines_Enemy_HandleFailedSpawn(struct game_object * o)
+{
+    int16_t drop_x = o->pos.x.lh.h;
+    int16_t drop_y = o->pos.y.lh.h;
+
+    int16_t valid_x = 0;
+    int16_t valid_y = 0;
+    if (ObjectSystem_FindValidSpawnPosition(drop_x, drop_y, 16, 16, &valid_x, &valid_y))
     {
-        return FACING_RIGHT;
+        drop_x = valid_x;
+        drop_y = valid_y;
     }
-    else if (o->angle < 96)
+    else if ((obj_player_pointer != NULL) && ObjectSystem_FindValidSpawnPosition(obj_player_pointer->pos.x.lh.h, obj_player_pointer->pos.y.lh.h, 16, 16, &valid_x, &valid_y))
     {
-        return FACING_DOWN;
+        drop_x = valid_x;
+        drop_y = valid_y;
     }
-    else if (o->angle < 160)
+
+    int16_t k = -1;
+    if (((int16_t)(Math_GetRandom_u16()) > -24576) && (obj_player_recovery_drop_pity != 0))
     {
-        return FACING_LEFT;
-    }
-    else if (o->angle < 224)
-    {
-        return FACING_UP;
+        obj_player_recovery_drop_pity--;
+
+        k = ObjectSystem_InstantiateObject(OBJID_DROP_MONEY, drop_x, drop_y, 0);
+
+        if (k >= 0)
+        {
+            struct game_object * q = &obj_general[k];
+
+            q->struct_data.npc_data.money = o->struct_data.npc_data.money;
+
+            q->pos.z.a = 0;
+            q->delta.z.a = (4 * V_S_ONE);
+        }
     }
     else
-    {
-        return FACING_RIGHT;
+    {   
+        obj_player_recovery_drop_pity = ENEMY_DROP_REC_PITY;
+        k = ObjectSystem_InstantiateObject(OBJID_DROP_REC_MEAT, drop_x, drop_y, 0);
+
+        if (k >= 0)
+        {
+            struct game_object * q = &obj_general[k];
+
+            q->struct_data.npc_data.hp = ENEMY_DROP_REC_AMOUNT;
+
+            q->pos.z.a = 0;
+            q->delta.z.a = (4 * V_S_ONE);
+        }
     }
+
+    obj_enemies_defeated++;
+    return;
 }

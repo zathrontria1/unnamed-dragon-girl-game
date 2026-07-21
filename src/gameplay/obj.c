@@ -331,6 +331,55 @@ void ObjectSystem_ResetEnemyHitboxes()
 }
 
 /**
+ * @brief Checks if a spawn position is solid and searches nearby tiles for a valid open floor tile if needed.
+ * 
+ * @param x Target spawn X coordinate.
+ * @param y Target spawn Y coordinate.
+ * @param w Object width.
+ * @param h Object height.
+ * @param out_x Pointer to receive valid X coordinate.
+ * @param out_y Pointer to receive valid Y coordinate.
+ * @return true if a valid spawn position was found (stored in out_x/out_y), false if fully enclosed.
+ */
+bool ObjectSystem_FindValidSpawnPosition(int16_t x, int16_t y, int16_t w, int16_t h, int16_t * out_x, int16_t * out_y)
+{
+    if (!MapSystem_IsPositionSolid(x, y, w, h))
+    {
+        *out_x = x;
+        *out_y = y;
+        return true;
+    }
+
+    // Search pattern offsets in pixels (1-tile and 2-tile radius search around target)
+    static const int8_t offset_x[] = {
+        0, 16, -16, 0, 16, -16, 16, -16,
+        0, 32, -32, 0, 32, -32, 32, -32, 16, 16, -16, -16, 32, 32, -32, -32
+    };
+    static const int8_t offset_y[] = {
+        -16, 0, 0, 16, -16, -16, 16, 16,
+        -32, 0, 0, 32, -32, -32, 32, 32, -32, 32, -32, 32, -16, 16, -16, 16
+    };
+
+    uint16_t count = sizeof(offset_x) / sizeof(offset_x[0]);
+    for (uint16_t i = 0; i < count; i++)
+    {
+        int16_t cand_x = x + offset_x[i];
+        int16_t cand_y = y + offset_y[i];
+
+        if (!MapSystem_IsPositionSolid(cand_x, cand_y, w, h))
+        {
+            *out_x = cand_x;
+            *out_y = cand_y;
+            return true;
+        }
+    }
+
+    *out_x = x;
+    *out_y = y;
+    return false;
+}
+
+/**
  * @brief Instantiates a new standard game object.
  * 
  * @param id               Object type ID (`OBJID_*`).
@@ -464,6 +513,30 @@ int16_t ObjectSystem_InstantiateObject(
     // enemy and set things
     if (ObjectSystem_GetEnemyData(p))
     {
+        int16_t valid_x = 0;
+        int16_t valid_y = 0;
+        if (!ObjectSystem_FindValidSpawnPosition(x, y, p->w, p->h, &valid_x, &valid_y))
+        {
+            // Position is solid / offscreen and no valid open tile nearby - handle failed spawn drops & defeat counter
+            Routines_Enemy_HandleFailedSpawn(p);
+
+            if (((id >= OBJID_START_OF_DMA_SPRITES) && (id <= OBJID_END_OF_DMA_SPRITES)) ||
+                ((id >= OBJID_START_OF_DMA_LIGHT_SPRITES) && (id <= OBJID_END_OF_DMA_LIGHT_SPRITES)))
+            {
+                SpriteEngine_ReleaseVramSlot(i, 1);
+            }
+            p->id = OBJID_NULL;
+            p->next_free = obj_first_available;
+            obj_first_available = i;
+            p->func_ptr = (void *)&Routines_Dummy;
+            return -1;
+        }
+
+        x = valid_x;
+        y = valid_y;
+        p->pos.x.lh.h = x;
+        p->pos.y.lh.h = y;
+
         p->struct_data.npc_data.ani.last_address = 0;
         p->struct_data.npc_data.ani.last_dmafailed = 0;
         p->struct_data.npc_data.hp_tile_offset = 0;
