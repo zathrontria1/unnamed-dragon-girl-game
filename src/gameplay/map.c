@@ -139,6 +139,76 @@ void MapSystem_BuildCollisionTable()
 }
 
 /**
+ * @brief Checks whether a given bounding box position overlaps a solid map tile or map boundary.
+ * 
+ * @param x Origin X coordinate.
+ * @param y Origin Y coordinate.
+ * @param w Width of bounding box.
+ * @param h Height of bounding box.
+ * @return true if position overlaps solid tile or boundary, false if clear.
+ */
+bool MapSystem_IsPositionSolid(int16_t x, int16_t y, int16_t w, int16_t h)
+{
+    if (w <= 0)
+    {
+        w = 16;
+    }
+    if (h <= 0)
+    {
+        h = 16;
+    }
+
+    if (bg_scroll_x_bounds_min.full.high.a != -32768)
+    {
+        int16_t min_x = bg_scroll_x_bounds_min.full.high.a;
+        int16_t max_x = bg_scroll_x_bounds_max.full.high.a + 256;
+        int16_t min_y = bg_scroll_y_bounds_min.full.high.a;
+        int16_t max_y = bg_scroll_y_bounds_max.full.high.a + 224;
+
+        if ((x < min_x) || (x + w > max_x) || (y < min_y) || (y + h > max_y))
+        {
+            return true;
+        }
+    }
+
+    int16_t tx1 = (x + 1) >> 4;
+    int16_t tx2 = (x + w - 2) >> 4;
+    int16_t ty1 = (y + 1) >> 4;
+    int16_t ty2 = (y + h - 2) >> 4;
+
+    if (tx2 < tx1)
+    {
+        tx2 = tx1;
+    }
+    if (ty2 < ty1)
+    {
+        ty2 = ty1;
+    }
+
+    if ((tx1 < 0) || (tx2 >= (int16_t)map_extent_tiles_x) || (ty1 < 0) || (ty2 >= (int16_t)map_extent_tiles_y))
+    {
+        return true;
+    }
+
+    uint16_t shiftcount = map_extent_tiles_x_shiftcount;
+
+    for (int16_t ty = ty1; ty <= ty2; ty++)
+    {
+        uint16_t shift_y = (uint16_t)ty << shiftcount;
+        for (int16_t tx = tx1; tx <= tx2; tx++)
+        {
+            uint16_t idx = shift_y + (uint16_t)tx;
+            if (map_collision_buf[idx] < MAP_COLL_BLOCK_MOVE)
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+/**
  * @brief Evaluates map collision for overhead background tiles across an object's width and height, returning the sprite priority mask.
  * 
  * @param o                   Pointer to the game object.
