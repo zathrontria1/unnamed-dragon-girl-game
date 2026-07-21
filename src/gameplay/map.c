@@ -437,23 +437,8 @@ void MapSystem_UpdateCameraPosition(bool suppress_map_gen)
         }
 
         // Get the angle between the intended scroll position and the current scroll position.
-        // The values if no adjustment were done like normal cases
-        int16_t unadjusted_bg_scroll_x = target_x;
-        int16_t unadjusted_bg_scroll_y = target_y;
-
-        int16_t temp_x;
-        int16_t temp_y;
-
-        if (bounds_min_x != -32768)
-        {
-            temp_x = temp_x_camadjust - unadjusted_bg_scroll_x;
-            temp_y = temp_y_camadjust - unadjusted_bg_scroll_y;
-        }
-        else
-        {
-            temp_x = unadjusted_bg_scroll_x - bg_scroll_x.full.high.a;
-            temp_y = unadjusted_bg_scroll_y - bg_scroll_y.full.high.a;
-        }
+        int16_t temp_x = temp_x_camadjust - bg_scroll_x.full.high.a;
+        int16_t temp_y = temp_y_camadjust - bg_scroll_y.full.high.a;
 
         uint8_t angle = (uint8_t)((uint8_t)(Math_GetAtan2_u8(temp_x, temp_y)) + (uint8_t)(128));
 
