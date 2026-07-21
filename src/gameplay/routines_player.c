@@ -390,7 +390,7 @@ void Routines_Player(struct game_object * o)
                 obj_player_attack_interval--;
             }
 
-            if ((o->delta.x.a || o->delta.y.a) != 0)
+            if (o->delta.x.a != 0 || o->delta.y.a != 0)
             {
                 ObjectSystem_Move(o);
 
