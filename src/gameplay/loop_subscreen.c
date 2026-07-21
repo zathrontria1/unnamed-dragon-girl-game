@@ -618,6 +618,8 @@ void Subscreen_Upgrade_Hp()
             obj_player_upgrades_bought_hp++;
         }
 
+        obj_player_health_regen_limit = obj_player_pointer->struct_data.npc_data.hp_max >> PLAYER_HEALTH_REGEN_LIMITSHIFT;
+
         subscreen_selection_profile = subscreen_selection;
 
         subscreen_skip_window_redraw = true;
