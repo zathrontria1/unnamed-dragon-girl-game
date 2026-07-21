@@ -1,7 +1,7 @@
 @echo off
 REM Compile using VBCC 
 set cmd_asm1=src/core/interrupt.c
-set cmd_code=src/gameplay/main.c src/core/system.c src/core/crash_handler.c src/core/crash_handler.asm src/core/interrupt.asm src/core/interrupt_sub.c src/gameplay/sram_management.c src/core/dma.c src/core/hdma.c src/core/asm.c src/core/math_int.c src/gameplay/level.c src/gameplay/loop.c src/gameplay/loop_subscreen.c src/gameplay/loop_cutscene.c src/gameplay/loop_title.c src/gameplay/loop_gameover.c src/gameplay/map.c src/gameplay/obj.c src/gameplay/movement.c src/gameplay/routines.c src/gameplay/routines_player.c src/gameplay/routines_enemy.c src/gameplay/routines_enemy_ai.c src/gameplay/routines_boss.c src/gameplay/hittest.c src/graphics/ani.c src/graphics/ani_bg.c src/graphics/ani_fixedspr.c src/graphics/ani_pal.c src/graphics/spr.c src/graphics/spr_metaspr.c src/ui/ui.c src/ui/ui_messagebox.c src/ui/ui_vwf.c src/audio/snd.c src/graphics/lz4.c src/graphics/gfx.c src/core/errorhandling.c src/core/vbcc-header-hi-ntsc.c
+set cmd_code=src/main.c src/core/system.c src/core/crash_handler.c src/core/crash_handler.asm src/core/interrupt.asm src/core/interrupt_sub.c src/gameplay/sram_management.c src/core/dma.c src/core/hdma.c src/core/asm.c src/core/math_int.c src/gameplay/level.c src/gameplay/loop.c src/gameplay/loop_subscreen.c src/gameplay/loop_cutscene.c src/gameplay/loop_title.c src/gameplay/loop_gameover.c src/gameplay/map.c src/gameplay/obj.c src/gameplay/movement.c src/gameplay/routines.c src/gameplay/routines_player.c src/gameplay/routines_enemy.c src/gameplay/routines_enemy_ai.c src/gameplay/routines_boss.c src/gameplay/hittest.c src/graphics/ani.c src/graphics/ani_bg.c src/graphics/ani_fixedspr.c src/graphics/ani_pal.c src/graphics/spr.c src/graphics/spr_metaspr.c src/ui/ui.c src/ui/ui_messagebox.c src/ui/ui_vwf.c src/audio/snd.c src/graphics/lz4.c src/graphics/gfx.c src/core/errorhandling.c src/core/vbcc-header-hi-ntsc.c
 set cmd_data=src/core/vars_memory.c src/core/vars_memory_aligned.asm src/data/data_strings.c src/data/data_palette.asm src/data/data_sprite.asm src/data/data_bg.asm src/data/data_ui.asm src/data/data_snd.asm src/data/data_samples.asm src/data/data_csdata.asm
 REM set cmd_data=vars_memory.c data_strings.c data_binary.asm
 set sfc_name=main
@@ -11,13 +11,13 @@ vasm6502_oldstyle -816 -quiet -nowarn=62 -opt-branch -ldots -Fvobj -o .\src\core
 
 REM the below was a workaround for broken interrupt assembly code generation
 REM uncomment if the source code is changed, then comment it back after editing the assembly code to fix a crash bug
-REM vc +vlink-config -I. -Isrc/core -Isrc/gameplay -Isrc/graphics -Isrc/ui -Isrc/audio -Isrc/data -O4 -speed -msfp4 -lms4 --DFASTROM=1 -S %cmd_asm1% 
+REM vc +vlink-config -I. -Isrc -Isrc/core -Isrc/gameplay -Isrc/graphics -Isrc/ui -Isrc/audio -Isrc/data -O4 -speed -msfp4 -lms4 --DFASTROM=1 -S %cmd_asm1% 
 
 REM the below uses the custom startup code, which should let the game start faster
-vc +vlink-config -I. -Isrc/core -Isrc/gameplay -Isrc/graphics -Isrc/ui -Isrc/audio -Isrc/data -O4 -size -msfp4 -lms4 --Mmapfile --DFASTROM=1 "--symfmt %%06x:%%s" "--symfile %sfc_name%.sym" %cmd_code% %cmd_data% -o %sfc_name%_temp.sfc
+vc +vlink-config -I. -Isrc -Isrc/core -Isrc/gameplay -Isrc/graphics -Isrc/ui -Isrc/audio -Isrc/data -O4 -size -msfp4 -lms4 --Mmapfile --DFASTROM=1 "--symfmt %%06x:%%s" "--symfile %sfc_name%.sym" %cmd_code% %cmd_data% -o %sfc_name%_temp.sfc
 
 REM the below uses the stock startup code provided by VBCC
-REM vc +vlink-config-stockstartup -I. -Isrc/core -Isrc/gameplay -Isrc/graphics -Isrc/ui -Isrc/audio -Isrc/data -O4 -size -msfp4 -lms4 -no-inline-peephole %cmd_code% %cmd_data% -o %sfc_name%_temp.sfc
+REM vc +vlink-config-stockstartup -I. -Isrc -Isrc/core -Isrc/gameplay -Isrc/graphics -Isrc/ui -Isrc/audio -Isrc/data -O4 -size -msfp4 -lms4 -no-inline-peephole %cmd_code% %cmd_data% -o %sfc_name%_temp.sfc
 
 REM Also compile using calypsi for testing purposes
 REM this will invoke make.
