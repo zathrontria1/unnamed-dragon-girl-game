@@ -628,7 +628,7 @@ void Routines_Enemy_Lizardman_Arrow(struct game_object * o)
         temp.pos.z.a = 0;
 
         uint16_t temp_tileattrib;
-        temp_tileattrib = 0x80 + (temp_selected_tile) | PAL_FX_SHADOW << 9 | 2 << 12 | hflip << 14 | vflip << 15;
+        temp_tileattrib = (0x80 + (temp_selected_tile)) | (PAL_FX_SHADOW << 9) | (2 << 12) | (hflip << 14) | (vflip << 15);
 
         SpriteEngine_AddToBackLayer(&temp, temp_tileattrib);
     }
