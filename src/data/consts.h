@@ -128,14 +128,14 @@
 // Distance defines (squared)
 // Note that they are in pixel distance squared.
 // Must directly specify these numbers as otherwise odd issues happen
-#define DIST_TILE_1 8 * 8
-#define DIST_TILE_2 16 * 16
-#define DIST_TILE_4 32 * 32
-#define DIST_TILE_8 64 * 64
-#define DIST_TILE_16 128l * 128l
-#define DIST_TILE_32 256l * 256l
-#define DIST_TILE_40 320l * 320l
-#define DIST_TILE_48 384l * 384l
+#define DIST_TILE_1  (8 * 8)
+#define DIST_TILE_2  (16 * 16)
+#define DIST_TILE_4  (32 * 32)
+#define DIST_TILE_8  (64 * 64)
+#define DIST_TILE_16 (128l * 128l)
+#define DIST_TILE_32 (256l * 256l)
+#define DIST_TILE_40 (320l * 320l)
+#define DIST_TILE_48 (384l * 384l)
 
 #define DIST_MELEE DIST_TILE_2
 #define DIST_NORMAL DIST_TILE_4
