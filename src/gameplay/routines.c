@@ -410,9 +410,7 @@ void Routines_EnemySpawner(struct game_object * o)
         // Check if the player is within the designated box
         if (CollisionCheck_Aabb_Direct_Rectangle(x1, o->struct_data.interactable_data.spawn_area_x, y1, o->struct_data.interactable_data.spawn_area_y, 16, o->struct_data.interactable_data.spawn_area_w, 16, o->struct_data.interactable_data.spawn_area_h) == 0)
         {
-            ObjectSystem_List_InstantiateNpcs((struct obj_list_entry_spawns *)o->data_ptr, o->pos.x.lh.h, o->pos.y.lh.h);
-
-            // Set the camera bounds
+            // Set the camera bounds FIRST so spawn position validation knows the locked room boundaries
             bg_scroll_x_bounds_min.full.high.a = o->struct_data.interactable_data.screen_x;
             bg_scroll_y_bounds_min.full.high.a = o->struct_data.interactable_data.screen_y;
 
@@ -430,6 +428,8 @@ void Routines_EnemySpawner(struct game_object * o)
 
             bg_scroll_use_interpolation = true;
             bg_scroll_suppress_interpolation_state_change = 2; // intentional
+
+            ObjectSystem_List_InstantiateNpcs((struct obj_list_entry_spawns *)o->data_ptr, o->pos.x.lh.h, o->pos.y.lh.h);
 
             ObjectSystem_DestroyStandardObject(o->array_index);
         }
