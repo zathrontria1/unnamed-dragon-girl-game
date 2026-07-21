@@ -774,10 +774,11 @@ uint16_t ObjectSystem_List_InstantiateNpcs(const struct obj_list_entry_spawns* l
 
         if (list->random_spread != 0)
         {
-            int16_t temp_rand = (((int16_t)Math_GetRandom_u16()) % list->random_spread) - (list->random_spread >> 1);
+            int16_t temp_rand   = (((int16_t)Math_GetRandom_u16()) % list->random_spread) - (list->random_spread >> 1);
+            int16_t temp_rand_y = (((int16_t)Math_GetRandom_u16()) % list->random_spread) - (list->random_spread >> 1);
 
-            temp_x = list->x + temp_rand + offset_x;
-            temp_y = list->y + temp_rand + offset_y;
+            temp_x = list->x + temp_rand   + offset_x;
+            temp_y = list->y + temp_rand_y + offset_y;
         }
         else
         {
