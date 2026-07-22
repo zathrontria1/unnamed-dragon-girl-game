@@ -23,6 +23,14 @@
 
 #include "gfx.h"
 
+static bool Routines_Enemy_Ai_IsTileInBounds(int16_t x, int16_t y)
+{
+    return x >= 0 &&
+           y >= 0 &&
+           x < (int16_t)map_extent_tiles_x &&
+           y < (int16_t)map_extent_tiles_y;
+}
+
 /*
     Gameplay AI for non-player entities
 */
@@ -46,6 +54,11 @@ static bool Routines_Enemy_Ai_CheckRawTileLOS(int16_t ex, int16_t ey, int16_t px
     int16_t curr_x = ex;
     int16_t curr_y = ey;
 
+    if (!Routines_Enemy_Ai_IsTileInBounds(curr_x, curr_y))
+    {
+        return false; // Out of bounds
+    }
+
     if (curr_x == px && curr_y == py)
     {
         // Immediately return true if the starting tile is the same as the target tile
@@ -65,7 +78,6 @@ static bool Routines_Enemy_Ai_CheckRawTileLOS(int16_t ex, int16_t ey, int16_t px
             if (curr_x == px && curr_y == py)
             {
                 return true; // Reached target tile safely
-                //break; // Reached target tile safely
             }
         }
 
@@ -87,6 +99,11 @@ static bool Routines_Enemy_Ai_CheckRawTileLOS(int16_t ex, int16_t ey, int16_t px
         // Super-cover corner check: if stepping diagonally, check orthogonal corner tiles to prevent corner-cutting
         if (next_x != curr_x && next_y != curr_y)
         {
+            if (!Routines_Enemy_Ai_IsTileInBounds(next_x, curr_y) || !Routines_Enemy_Ai_IsTileInBounds(curr_x, next_y))
+            {
+                return false; // Out of bounds
+            }
+
             uint16_t corner1_idx = (curr_y << shiftcount) + next_x;
             uint16_t corner2_idx = (next_y << shiftcount) + curr_x;
 
@@ -98,6 +115,11 @@ static bool Routines_Enemy_Ai_CheckRawTileLOS(int16_t ex, int16_t ey, int16_t px
 
         curr_x = next_x;
         curr_y = next_y;
+
+        if (!Routines_Enemy_Ai_IsTileInBounds(curr_x, curr_y))
+        {
+            return false; // Out of bounds
+        }
     }
 
     // Player is too far away (beyond 20 tiles) to be seen by enemy
