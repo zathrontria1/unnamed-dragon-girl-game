@@ -67,6 +67,12 @@ bool LevelSystem_LoadLevel(const struct level_data * level)
         obj_player_pointer->pos.x.lh.l = 0;
         obj_player_pointer->pos.y.lh.l = 0;
     }
+
+    // Load the target map now that obj_player_pointer is valid
+    MapSystem_LoadMap(
+        level->map_cells,
+        level->map_lut,
+        level->map_lut_col);
     
     // Reset local event flags
     for (int i = 0; i < 16; i++)
@@ -107,10 +113,10 @@ bool LevelSystem_LoadLevel(const struct level_data * level)
         else
         {
             // Just load the new map cells
-            MapSystem_LoadMap(
+            /*MapSystem_LoadMap(
             level->map_cells, 
             level->map_lut, 
-            level->map_lut_col);
+            level->map_lut_col);*/
 
             temp_level_reuses_vram_contents = true; // Flag to avoid VRAM DMA if not needed
         }
@@ -148,10 +154,10 @@ void LevelSystem_LoadLevelGraphics(const struct level_data * level)
 {
     // Load the actual map data - must be done after the player is instantiated first
     // so it knows what tilemap to load. Also specify the metatile LUT.
-    MapSystem_LoadMap(
+    /*MapSystem_LoadMap(
         level->map_cells, 
         level->map_lut, 
-        level->map_lut_col);
+        level->map_lut_col);*/
 
     LevelSystem_LoadLevelTileset(level); 
     
