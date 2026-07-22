@@ -34,6 +34,7 @@ extern bool bg_scroll_use_interpolation;
 extern bool bg_scroll_x_at_final;
 extern bool bg_scroll_y_at_final;
 extern bool bg_scroll_suppress_interpolation_state_change;
+extern bool map_tilemap_recovery_pending;
 
 void MapSystem_LoadMap(const uint8_t * map, const uint16_t * lut, const uint8_t * col);
 void MapSystem_BuildCollisionTable();
@@ -44,5 +45,8 @@ void MapSystem_UpdateCameraPosition(bool suppress_map_gen);
 void MapSystem_CheckCrossedTilemapEdge();
 
 void MapSystem_Tilemap_RegenerateTilemap(void);
+void MapSystem_Tilemap_RequestEmergencyRecovery(void);
+void MapSystem_Tilemap_StartEmergencyRecovery(void);
+void MapSystem_Tilemap_EmergencyRecovery(void);
 bool MapSystem_Tilemap_BuildColumn(const uint8_t * p, const uint16_t * lut, int16_t tile_x, int16_t tile_y, bool odd);
 void MapSystem_Tilemap_BuildRow(const uint8_t * p, const uint16_t * lut, int16_t tile_x, int16_t tile_y, bool odd);

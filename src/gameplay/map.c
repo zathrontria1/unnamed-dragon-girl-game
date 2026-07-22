@@ -50,6 +50,9 @@ bool bg_scroll_x_at_final;
 bool bg_scroll_y_at_final;
 bool bg_scroll_suppress_interpolation_state_change;
 
+static uint8_t map_tilemap_recovery_state;
+bool map_tilemap_recovery_pending;
+
 /*
     Sets the map and metatile LUT pointers,
     then loads the tilemap data.
@@ -315,6 +318,61 @@ void MapSystem_Tilemap_RegenerateTilemap()
     return;
 }
 
+void MapSystem_Tilemap_RequestEmergencyRecovery()
+{
+    map_tilemap_recovery_pending = true;
+
+    return;
+}
+
+void MapSystem_Tilemap_StartEmergencyRecovery()
+{
+    if (!map_tilemap_recovery_pending || map_tilemap_recovery_state != 0)
+    {
+        return;
+    }
+
+    map_tilemap_recovery_pending = false;
+    map_tilemap_recovery_state = 1;
+    system_game_paused = true;
+    system_dont_count_lag = true;
+    system_use_alternate_nmi = true;
+    shadow_brightness_change = 128 * V_MUL;
+    system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_MAP_RECOVERY);
+
+    return;
+}
+
+void MapSystem_Tilemap_EmergencyRecovery()
+{
+    if (map_tilemap_recovery_state == 1)
+    {
+        if (shadow_brightness < (15 << 8))
+        {
+            return;
+        }
+
+        REG_INIDISP = DSP_FORCEVBL | 0x0f;
+        shadow_fblank_enable = DSP_FORCEVBL;
+        DmaSystem_ResetQueue();
+        MapSystem_Tilemap_RegenerateTilemap();
+
+        map_tilemap_recovery_state = 2;
+        shadow_brightness_change = (128 * V_MUL);
+        shadow_fblank_enable = 0;
+    }
+    else if (map_tilemap_recovery_state == 2 && shadow_brightness <= 0)
+    {
+        map_tilemap_recovery_state = 0;
+        system_game_paused = false;
+        system_dont_count_lag = false;
+        system_use_alternate_nmi = false;
+        system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_GAMELOOP);
+    }
+
+    return;
+}
+
 /*
     Adjust the camera based on the player position.
 
@@ -530,8 +588,17 @@ void MapSystem_CheckCrossedTilemapEdge()
 
     int16_t temp_x_tile_offset_8 = (uint16_t)bg_scroll_x.full.high.a >> 3;
     int16_t temp_x_tile_offset_prev_8 = (uint16_t)bg_scroll_x_prev.full.high.a >> 3;
+    int16_t temp_x_tile_offset_delta_8 = temp_x_tile_offset_8 - temp_x_tile_offset_prev_8;
 
-    if (temp_x_tile_offset_8 != temp_x_tile_offset_prev_8)
+    if ((temp_x_tile_offset_delta_8 > 1) || (temp_x_tile_offset_delta_8 < -1))
+    {
+        MapSystem_Tilemap_RequestEmergencyRecovery();
+        bg_scroll_x_prev.full.high.a = bg_scroll_x.full.high.a;
+        bg_scroll_y_prev.full.high.a = bg_scroll_y.full.high.a;
+        return;
+    }
+
+    if (temp_x_tile_offset_delta_8 != 0)
     {
         const uint8_t * p = map_current + 2;
         bool temp_x_odd = temp_x_tile_offset_8 & 0x0001;
@@ -548,11 +615,17 @@ void MapSystem_CheckCrossedTilemapEdge()
 
                 if (!temp_x_odd)
                 {
-                    DmaSystem_AddItemToQueue((uint8_t *)&map_column[0], (TILEMAP_ADDR_GAME_MAP+(temp_section * 1024)+temp_x_wrap), 64, (VRAM_INCHIGH|VRAM_ADRSTINC_32), 0);
+                    if (DmaSystem_AddItemToQueue((uint8_t *)&map_column[0], (TILEMAP_ADDR_GAME_MAP+(temp_section * 1024)+temp_x_wrap), 64, (VRAM_INCHIGH|VRAM_ADRSTINC_32), 0))
+                    {
+                        MapSystem_Tilemap_RequestEmergencyRecovery();
+                    }
                 }
                 else
                 {
-                    DmaSystem_AddItemToQueue((uint8_t *)&map_column[0], (TILEMAP_ADDR_GAME_MAP+(temp_section * 1024)+temp_x_wrap+1), 64, (VRAM_INCHIGH|VRAM_ADRSTINC_32), 0);
+                    if (DmaSystem_AddItemToQueue((uint8_t *)&map_column[0], (TILEMAP_ADDR_GAME_MAP+(temp_section * 1024)+temp_x_wrap+1), 64, (VRAM_INCHIGH|VRAM_ADRSTINC_32), 0))
+                    {
+                        MapSystem_Tilemap_RequestEmergencyRecovery();
+                    }
                 }
             }
         }
@@ -566,11 +639,17 @@ void MapSystem_CheckCrossedTilemapEdge()
 
                 if (!temp_x_odd)
                 {
-                    DmaSystem_AddItemToQueue((uint8_t *)&map_column[0], (TILEMAP_ADDR_GAME_MAP+(temp_section * 1024)+temp_x_wrap), 64, (VRAM_INCHIGH|VRAM_ADRSTINC_32), 0);
+                    if (DmaSystem_AddItemToQueue((uint8_t *)&map_column[0], (TILEMAP_ADDR_GAME_MAP+(temp_section * 1024)+temp_x_wrap), 64, (VRAM_INCHIGH|VRAM_ADRSTINC_32), 0))
+                    {
+                        MapSystem_Tilemap_RequestEmergencyRecovery();
+                    }
                 }
                 else
                 {
-                    DmaSystem_AddItemToQueue((uint8_t *)&map_column[0], (TILEMAP_ADDR_GAME_MAP+(temp_section * 1024)+temp_x_wrap+1), 64, (VRAM_INCHIGH|VRAM_ADRSTINC_32), 0);
+                    if (DmaSystem_AddItemToQueue((uint8_t *)&map_column[0], (TILEMAP_ADDR_GAME_MAP+(temp_section * 1024)+temp_x_wrap+1), 64, (VRAM_INCHIGH|VRAM_ADRSTINC_32), 0))
+                    {
+                        MapSystem_Tilemap_RequestEmergencyRecovery();
+                    }
                 }
             }
         }
@@ -581,8 +660,16 @@ void MapSystem_CheckCrossedTilemapEdge()
     // Now to test the Y axis
     int16_t temp_y_tile_offset_8 = (uint16_t)bg_scroll_y.full.high.a >> 3;
     int16_t temp_y_tile_offset_prev_8 = (uint16_t)bg_scroll_y_prev.full.high.a >> 3;
+    int16_t temp_y_tile_offset_delta_8 = temp_y_tile_offset_8 - temp_y_tile_offset_prev_8;
 
-    if (temp_y_tile_offset_8 != temp_y_tile_offset_prev_8)
+    if (temp_y_tile_offset_delta_8 > 1 || temp_y_tile_offset_delta_8 < -1)
+    {
+        MapSystem_Tilemap_RequestEmergencyRecovery();
+        bg_scroll_y_prev.full.high.a = bg_scroll_y.full.high.a;
+        return;
+    }
+
+    if (temp_y_tile_offset_delta_8 != 0)
     {
         const uint8_t * p = map_current + 2;
         bool temp_y_odd = temp_y_tile_offset_8 & 0x0001;
@@ -598,13 +685,25 @@ void MapSystem_CheckCrossedTilemapEdge()
             // Sections are not important for rows as both maps will be updated.
             if (!temp_y_odd)
             {
-                DmaSystem_AddItemToQueue((uint8_t *)&map_row[0][0], (TILEMAP_ADDR_GAME_MAP+temp_y_wrap), 64, VRAM_INCHIGH, 0);
-                DmaSystem_AddItemToQueue((uint8_t *)&map_row[1][0], (TILEMAP_ADDR_GAME_MAP+1024+temp_y_wrap), 64, VRAM_INCHIGH, 0);
+                if (DmaSystem_AddItemToQueue((uint8_t *)&map_row[0][0], (TILEMAP_ADDR_GAME_MAP+temp_y_wrap), 64, VRAM_INCHIGH, 0))
+                {
+                    MapSystem_Tilemap_RequestEmergencyRecovery();
+                }
+                if (DmaSystem_AddItemToQueue((uint8_t *)&map_row[1][0], (TILEMAP_ADDR_GAME_MAP+1024+temp_y_wrap), 64, VRAM_INCHIGH, 0))
+                {
+                    MapSystem_Tilemap_RequestEmergencyRecovery();
+                }
             }
             else
             {
-                DmaSystem_AddItemToQueue((uint8_t *)&map_row[0][0], (TILEMAP_ADDR_GAME_MAP+32+temp_y_wrap), 64, VRAM_INCHIGH, 0);
-                DmaSystem_AddItemToQueue((uint8_t *)&map_row[1][0], (TILEMAP_ADDR_GAME_MAP+32+1024+temp_y_wrap), 64, VRAM_INCHIGH, 0);
+                if (DmaSystem_AddItemToQueue((uint8_t *)&map_row[0][0], (TILEMAP_ADDR_GAME_MAP+32+temp_y_wrap), 64, VRAM_INCHIGH, 0))
+                {
+                    MapSystem_Tilemap_RequestEmergencyRecovery();
+                }
+                if (DmaSystem_AddItemToQueue((uint8_t *)&map_row[1][0], (TILEMAP_ADDR_GAME_MAP+32+1024+temp_y_wrap), 64, VRAM_INCHIGH, 0))
+                {
+                    MapSystem_Tilemap_RequestEmergencyRecovery();
+                }
             }
         }
         else
@@ -616,13 +715,25 @@ void MapSystem_CheckCrossedTilemapEdge()
             // Sections are not important for rows as both maps will be updated.
             if (!temp_y_odd)
             {
-                DmaSystem_AddItemToQueue((uint8_t *)&map_row[0][0], (TILEMAP_ADDR_GAME_MAP+temp_y_wrap), 64, VRAM_INCHIGH, 0);
-                DmaSystem_AddItemToQueue((uint8_t *)&map_row[1][0], (TILEMAP_ADDR_GAME_MAP+1024+temp_y_wrap), 64, VRAM_INCHIGH, 0);
+                if (DmaSystem_AddItemToQueue((uint8_t *)&map_row[0][0], (TILEMAP_ADDR_GAME_MAP+temp_y_wrap), 64, VRAM_INCHIGH, 0))
+                {
+                    MapSystem_Tilemap_RequestEmergencyRecovery();
+                }
+                if (DmaSystem_AddItemToQueue((uint8_t *)&map_row[1][0], (TILEMAP_ADDR_GAME_MAP+1024+temp_y_wrap), 64, VRAM_INCHIGH, 0))
+                {
+                    MapSystem_Tilemap_RequestEmergencyRecovery();
+                }
             }
             else
             {
-                DmaSystem_AddItemToQueue((uint8_t *)&map_row[0][0], (TILEMAP_ADDR_GAME_MAP+32+temp_y_wrap), 64, (VRAM_INCHIGH), 0);
-                DmaSystem_AddItemToQueue((uint8_t *)&map_row[1][0], (TILEMAP_ADDR_GAME_MAP+32+1024+temp_y_wrap), 64, (VRAM_INCHIGH), 0);
+                if (DmaSystem_AddItemToQueue((uint8_t *)&map_row[0][0], (TILEMAP_ADDR_GAME_MAP+32+temp_y_wrap), 64, (VRAM_INCHIGH), 0))
+                {
+                    MapSystem_Tilemap_RequestEmergencyRecovery();
+                }
+                if (DmaSystem_AddItemToQueue((uint8_t *)&map_row[1][0], (TILEMAP_ADDR_GAME_MAP+32+1024+temp_y_wrap), 64, (VRAM_INCHIGH), 0))
+                {
+                    MapSystem_Tilemap_RequestEmergencyRecovery();
+                }
             }
         }
     }

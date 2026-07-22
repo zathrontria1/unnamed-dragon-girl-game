@@ -265,6 +265,12 @@ void Loop_Game()
 
     ObjectSystem_ProcessObjects();
 
+    if (map_tilemap_recovery_pending)
+    {
+        MapSystem_Tilemap_StartEmergencyRecovery();
+        return;
+    }
+
     SpriteEngine_ProcessSpriteLists();
 
     ObjectSystem_CleanupStandardObjects();
