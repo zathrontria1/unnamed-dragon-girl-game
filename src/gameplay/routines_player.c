@@ -411,6 +411,11 @@ void Routines_Player(struct game_object * o)
 
             MapSystem_UpdateCameraPosition(0);
 
+            if (map_tilemap_recovery_pending)
+            {
+                return;
+            }
+
             uint16_t temp_invalidate_animation_frame = 0;
 
             if ((o->uid & 0x0001) == ((uint16_t)system_frames_elapsed & 0x0001))
