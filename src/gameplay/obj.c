@@ -199,6 +199,10 @@ void ObjectSystem_ProcessObjects()
                 void (*func)(struct game_object *) = ptr->func_ptr;
                 func(ptr);
 #endif
+                if (map_tilemap_recovery_pending)
+                {
+                    return;
+                }
                 processed++;
                 if (processed >= obj_active_count)
                 {
@@ -227,6 +231,10 @@ void ObjectSystem_ProcessObjects()
                 void (*func)(struct game_object *) = ptr->func_ptr;
                 func(ptr);
 #endif
+                if (map_tilemap_recovery_pending)
+                {
+                    return;
+                }
                 processed++;
                 if (processed >= obj_hitbox_count_player)
                 {
@@ -261,6 +269,10 @@ void ObjectSystem_ProcessObjects()
                 void (*func)(struct game_object *) = ptr->func_ptr;
                 func(ptr);
 #endif
+                if (map_tilemap_recovery_pending)
+                {
+                    return;
+                }
                 processed++;
                 if (processed >= obj_hitbox_count_enemy)
                 {
