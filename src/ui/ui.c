@@ -316,6 +316,11 @@ void UserInterface_DrawEnemyHealthBar(struct game_object * o)
         uint32_t temp_hp = o->struct_data.npc_data.hp;
         uint32_t temp_hp_max = o->struct_data.npc_data.hp_max;
 
+        if (temp_hp_max == 0)
+        {
+            temp_hp_max = 65535;
+        }
+
         while (temp_hp_max >= 0x10000)
         {
             temp_hp >>= 8;
