@@ -9,6 +9,7 @@
 #include "sram_management.h"
 
 uint8_t sram_available_slots;
+sram_slot_status_t sram_slot_status[SRAM_BANKS];
 
 // Note: the game is configured with 32KB SRAM, divided into 4 banks of 8KB.
 
@@ -27,27 +28,24 @@ void Sram_Check()
     {
         if (*str_bank0 != const_sram_verify_str[i])
         {
-            Sram_ClearSlot(0);
-
-            // Check if it's possible to write the new string
-            // so immediately check the string again
-
-            uint8_t * str_bank0_retest = p;
-            for (int k = 0; k < 8; k++)
+            uint8_t old_probe_value = p[8];
+            uint8_t new_probe_value = (uint8_t)~old_probe_value;
+            p[8] = new_probe_value;
+            if (p[8] != new_probe_value)
             {
-                if (*str_bank0_retest != const_sram_verify_str[k])
-                {
-                    temp_no_sram_found = 1;
-                    break;
-                }
-
-                str_bank0_retest++;
+                temp_no_sram_found = 1;
             }
-
+            p[8] = old_probe_value;
+            sram_slot_status[0] = SRAM_SLOT_CORRUPT;
             break;
         }
 
         str_bank0++;
+    }
+
+    if (!temp_no_sram_found && sram_slot_status[0] == SRAM_SLOT_EMPTY)
+    {
+        sram_slot_status[0] = SRAM_SLOT_VALID;
     }
 
     if (temp_no_sram_found)
@@ -56,12 +54,9 @@ void Sram_Check()
         return;
     }
 
-    str_bank0 = p + 8;
-    *str_bank0 = 0;
-
     p = (uint8_t *)SRAM_ADDR + 0x00010000 * (SRAM_BANKS - 1);
 
-    // Clear the other slots
+    // Inspect the other slots without modifying them.
     for (int slot = SRAM_BANKS-1; slot > 0; slot--)
     {
         uint8_t * str_bankother = p;
@@ -69,35 +64,33 @@ void Sram_Check()
         {
             if (*str_bankother != const_sram_verify_str[i])
             {
-                Sram_ClearSlot(slot);
+                sram_slot_status[slot] = SRAM_SLOT_CORRUPT;
                 break;
             }
 
             str_bankother++;
         }
 
-        str_bankother = p + 8;
-        *str_bankother = (uint8_t)slot;
+        if (sram_slot_status[slot] == SRAM_SLOT_EMPTY)
+        {
+            sram_slot_status[slot] = SRAM_SLOT_VALID;
+        }
 
         p = (uint8_t *)((uint32_t)p - 0x00010000);
     }
 
-    // Finally scan the memory area to determine the highest available bank
-    uint8_t temp_highestbank = 0;
-
-    p = (uint8_t *)SRAM_ADDR+8;
-
+    sram_available_slots = 0;
     for (int i = 0; i < SRAM_BANKS; i++)
     {
-        if (*p > temp_highestbank)
+        if (sram_slot_status[i] != SRAM_SLOT_EMPTY)
         {
-            temp_highestbank = *p;
+            sram_slot_status[i] = Sram_GetSlotStatus(i);
+            if (sram_slot_status[i] == SRAM_SLOT_VALID)
+            {
+                sram_available_slots++;
+            }
         }
-
-        p = (uint8_t *)((uint32_t)p + 0x00010000);
     }
-
-    sram_available_slots = temp_highestbank + 1;
 
     return;
 }
@@ -144,50 +137,14 @@ void Sram_SaveToSlot(uint16_t slot)
         return; // if slot count is invalid ignore it
     }
 
-    void * p = (uint8_t *)(SRAM_ADDR + SRAM_DATA_OFFSET + (0x00010000 * slot));
+    sram_save_data_t state;
+    Sram_CaptureState(&state);
 
-    // Data to be copied:
-    // Current level ID
-    // Player object blob
-    // Global event flags
-
-    // First, map the current level pointer to a Level ID
-    uint16_t level_id = LEVEL_ID_INVALID;
-    for (uint16_t i = 0; i < LEVEL_ID_COUNT; i++)
+    uint8_t * p = (uint8_t *)(SRAM_ADDR + SRAM_DATA_OFFSET + (0x00010000 * slot));
+    uint8_t * source = (uint8_t *)&state;
+    for (uint16_t i = 0; i < sizeof(sram_save_data_t); i++)
     {
-        if (const_level_pointer_table[i] == level_data_ptr)
-        {
-            level_id = i;
-            break;
-        }
-    }
-
-    // Save the level ID as a 16-bit integer
-    uint16_t * temp_id = p;
-    *temp_id = level_id;
-    temp_id++;
-    p = (void *) temp_id;
-
-    // Then the object data
-    uint8_t * temp_playerdata = p; // BEWARE: not a pointer of pointer! Data must be copied
-    uint8_t * temp_livedata = (uint8_t *)&obj_general[obj_player_index];
-
-    for (int i = 0; i < sizeof(struct game_object); i++)
-    {
-        *temp_playerdata = *temp_livedata;
-        temp_playerdata++;
-        temp_livedata++;
-    }
-    
-    p = (void *) temp_playerdata;
-
-    // Lastly the event flags
-    uint8_t * temp_ef = p;
-    
-    for (int i = 0; i < EVENT_FLAG_GLOBAL_MAX; i++)
-    {
-        *temp_ef = event_flags_global[i];
-        temp_ef++;
+        p[i] = source[i];
     }
 
     // Compute and save checksum validation details
@@ -203,6 +160,8 @@ void Sram_SaveToSlot(uint16_t slot)
     uint8_t * p_version = (uint8_t *)(SRAM_ADDR + 13 + (0x00010000 * slot));
     *p_version = SRAM_LAYOUT_VERSION;
 
+    sram_slot_status[slot] = SRAM_SLOT_VALID;
+
     return;
 }
 
@@ -217,8 +176,7 @@ uint16_t Sram_CalculateChecksum(uint16_t slot)
     uint8_t * p = (uint8_t *)(SRAM_ADDR + SRAM_DATA_OFFSET + (0x00010000 * slot));
     uint16_t checksum = 0;
     
-    // Total size of the data saved to the slot
-    for (uint16_t i = 0; i < sizeof(uint16_t) + sizeof(struct game_object) + EVENT_FLAG_GLOBAL_MAX; i++)
+    for (uint16_t i = 0; i < sizeof(sram_save_data_t); i++)
     {
         checksum += p[i];
     }
@@ -275,47 +233,116 @@ bool Sram_LoadFromSlot(uint16_t slot)
         return false; // Saved game data is corrupted
     }
 
-    // Integrity verified, so what's left is to validate the map ID itself
-    void * p = (uint8_t *)(SRAM_ADDR + SRAM_DATA_OFFSET + (0x00010000 * slot));
-
-    // Restore level pointer via ID lookup
-    uint16_t * temp_id = p;
-    uint16_t loaded_level_id = *temp_id;
-    temp_id++;
-    p = (void *) temp_id;
-
-    if (loaded_level_id >= LEVEL_ID_COUNT)
+    sram_save_data_t state;
+    uint8_t * source = (uint8_t *)(SRAM_ADDR + SRAM_DATA_OFFSET + (0x00010000 * slot));
+    uint8_t * destination = (uint8_t *)&state;
+    for (uint16_t i = 0; i < sizeof(sram_save_data_t); i++)
     {
-        return false; // Invalid or unknown level ID
+        destination[i] = source[i];
     }
 
-    level_data_ptr = const_level_pointer_table[loaded_level_id];
-
-    // Restore player object data
-    uint8_t * temp_playerdata = p;
-    uint8_t * temp_livedata = (uint8_t *)&obj_general[obj_player_index];
-    for (int i = 0; i < sizeof(struct game_object); i++)
+    if (!Sram_ValidateState(&state))
     {
-        *temp_livedata = *temp_playerdata;
-        temp_playerdata++;
-        temp_livedata++;
-    }
-    p = (void *) temp_playerdata;
-
-    // Restore event flags
-    uint8_t * temp_ef = p;
-    for (int i = 0; i < EVENT_FLAG_GLOBAL_MAX; i++)
-    {
-        event_flags_global[i] = *temp_ef;
-        temp_ef++;
+        sram_slot_status[slot] = SRAM_SLOT_CORRUPT;
+        return false;
     }
 
-    // Re-resolve the player's function pointers based on its ID to handle linker shifts
-    struct game_object * player = &obj_general[obj_player_index];
-    ObjectSystem_SetFunctionPointer(player);
-    player->data_ptr = 0; // Reset runtime pointer to prevent bad references
+    level_data_ptr = const_level_pointer_table[state.level_id];
+    obj_general[obj_player_index].pos.x.a = state.player_x;
+    obj_general[obj_player_index].pos.y.a = state.player_y;
+    obj_general[obj_player_index].pos.z.a = state.player_z;
+    obj_general[obj_player_index].struct_data.npc_data.hp = state.player_hp;
+    obj_general[obj_player_index].struct_data.npc_data.money = state.player_money;
+    obj_player_upgrades_bought_hp = state.upgrades_hp;
+    obj_player_upgrades_bought_attack = state.upgrades_attack;
+    obj_player_upgrades_bought_defense = state.upgrades_defense;
+
+    for (uint16_t i = 0; i < EVENT_FLAG_GLOBAL_MAX; i++)
+    {
+        event_flags_global[i] = state.event_flags[i];
+    }
+
+    ObjectSystem_SetFunctionPointer(&obj_general[obj_player_index]);
+    obj_general[obj_player_index].data_ptr = 0;
+    sram_slot_status[slot] = SRAM_SLOT_VALID;
 
     return true;
+}
+
+void Sram_CaptureState(sram_save_data_t * state)
+{
+    state->level_id = LEVEL_ID_INVALID;
+    for (uint16_t i = 0; i < LEVEL_ID_COUNT; i++)
+    {
+        if (const_level_pointer_table[i] == level_data_ptr)
+        {
+            state->level_id = i;
+            break;
+        }
+    }
+
+    state->player_x = obj_general[obj_player_index].pos.x.a;
+    state->player_y = obj_general[obj_player_index].pos.y.a;
+    state->player_z = obj_general[obj_player_index].pos.z.a;
+    state->player_hp = obj_general[obj_player_index].struct_data.npc_data.hp;
+    state->player_money = obj_general[obj_player_index].struct_data.npc_data.money;
+    state->upgrades_hp = obj_player_upgrades_bought_hp;
+    state->upgrades_attack = obj_player_upgrades_bought_attack;
+    state->upgrades_defense = obj_player_upgrades_bought_defense;
+
+    for (uint16_t i = 0; i < EVENT_FLAG_GLOBAL_MAX; i++)
+    {
+        state->event_flags[i] = event_flags_global[i];
+    }
+}
+
+bool Sram_ValidateState(const sram_save_data_t * state)
+{
+    if (state->level_id >= LEVEL_ID_COUNT || state->player_hp < 0 || state->player_hp > 0x0000ffffl)
+    {
+        return false;
+    }
+
+    if (state->upgrades_hp > 255 || state->upgrades_attack > 255 || state->upgrades_defense > 255)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool Sram_ReadSlotData(uint16_t slot, sram_save_data_t * state)
+{
+    if (slot >= SRAM_BANKS || sram_slot_status[slot] != SRAM_SLOT_VALID)
+    {
+        return false;
+    }
+
+    uint8_t * source = (uint8_t *)(SRAM_ADDR + SRAM_DATA_OFFSET + (0x00010000 * slot));
+    uint8_t * destination = (uint8_t *)state;
+    for (uint16_t i = 0; i < sizeof(sram_save_data_t); i++)
+    {
+        destination[i] = source[i];
+    }
+
+    return Sram_ValidateState(state);
+}
+
+sram_slot_status_t Sram_GetSlotStatus(uint16_t slot)
+{
+    sram_save_data_t state;
+
+    if (slot >= SRAM_BANKS)
+    {
+        return SRAM_SLOT_CORRUPT;
+    }
+
+    if (sram_slot_status[slot] == SRAM_SLOT_EMPTY)
+    {
+        return SRAM_SLOT_EMPTY;
+    }
+
+    return Sram_ReadSlotData(slot, &state) ? SRAM_SLOT_VALID : SRAM_SLOT_CORRUPT;
 }
 
 const uint8_t const_sram_verify_str[] = "EIEIMUN!"; // Can use any 8 character string that isn't all 0x00 or 0xff. Will occupy 9 bytes in ROM
