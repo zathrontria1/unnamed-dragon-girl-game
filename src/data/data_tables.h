@@ -187,11 +187,14 @@ const struct obj_list_entry_interactable data_interactables_debug0[] =
 
     {OBJID_INTERACTABLE_LEVEL_WARP, 496, 32, (void *)&data_level_test_1}, 
 
+#if defined(DEBUG_ALL)
+    // Debug/cheat treasures for testing upgrades, money counters, and subscreens.
     {OBJID_INTERACTABLE_TREASURECHEST, 312, 320, (void *)5000l}, 
     {OBJID_INTERACTABLE_TREASURECHEST, 312, 320-32, (void *)100000l}, 
     {OBJID_INTERACTABLE_TREASURECHEST, 312-32, 320, (void *)500000l}, 
     {OBJID_INTERACTABLE_TREASURECHEST, 312+32, 320, (void *)10000000l}, 
     {OBJID_INTERACTABLE_TREASURECHEST, 312, 320+32, (void *)50000000l}, 
+#endif
     {OBJID_NULL, 0, 0, 0}, 
 };
 
