@@ -802,6 +802,11 @@ void SoundInterface_SetMusicTempo(uint16_t tempo)
 {
     SoundInterface_AcknowledgeBusy(false);
 
+    if (tempo == 0)
+    {
+        tempo = 1; // Avoid division by zero
+    }
+
     uint32_t val = 120000ul / tempo;
     uint16_t temp_interval = 1;
 
