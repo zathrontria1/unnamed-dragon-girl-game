@@ -26,6 +26,15 @@ uint16_t rand_seeded;
  */
 uint8_t Math_GetAtan2_u8(int16_t y, int16_t x)
 {
+    if (y == -32768)
+    {
+        y = -32767; // INT16_MIN isn't defined (yet)?
+    }
+    if (x == -32768)
+    {
+        x = -32767;
+    }
+
     if (x == 0 && y == 0) {
         return 0;
     }
@@ -94,8 +103,7 @@ uint16_t Math_GetRandom_u16()
         rand_array[1] = (int8_t)r1_new2;
         rand_array[2] = (int8_t)r2_new2;
 
-        uint16_t * val = (uint16_t *)(&rand_array[0]);
-        return *val;
+        return (uint16_t)r0_new | ((uint16_t)r1_new2 << 8);
     #endif
     
     return 0;
@@ -139,6 +147,15 @@ void Math_SeedRandom(uint32_t s)
  */
 uint32_t Math_GetDistanceSquared(int16_t x, int16_t y)
 {
+    if (x == -32768)
+    {
+        x = -32767; // INT16_MIN isn't defined (yet)?
+    }
+    if (y == -32768)
+    {
+        y = -32767;
+
+    }
     // It's pretty fast already. Don't inline this.
     // c^2 = a^2 + b^2
     uint16_t abs_y = (y < 0) ? -y : y;
