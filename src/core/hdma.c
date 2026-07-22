@@ -610,10 +610,10 @@ void HdmaEngine_GeneratePaletteTable(uint16_t * table_ptr, uint16_t pal_start, u
         }
     }
 
-    // Initialize Bresenham / fractional step parameters for the weight ramp
+    // Initialize Bresenham/fractional step parameters for the weight ramp
     // Q represents the weight value (starts at 32, decreases to 0)
     // R is the division remainder
-    // val2 = Q_inv * alpha (starts at 0, increases by alpha whenever Q decrements / Q_inv increments)
+    // val2 = Q_inv * alpha (starts at 0, increases by alpha whenever Q decrements or Q_inv increments)
     Q = 32;
     R = 0;
     val2 = 0;

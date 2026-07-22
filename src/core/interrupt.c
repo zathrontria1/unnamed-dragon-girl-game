@@ -120,7 +120,7 @@ NEAR INTERRUPT void __irq_cop6502(void)
 #endif
 
 /**
- * @brief External Interrupt / Break Vector Handler (6502 Emulation Mode).
+ * @brief External Interrupt/Break Vector Handler (6502 Emulation Mode).
  * 
  * Triggered by IRQ/BRK in emulation mode. Diverts execution to the emulation crash handler.
  */
