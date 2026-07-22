@@ -22,6 +22,7 @@
 
 #include "main.h"
 #include "dma.h"
+#include "map.h"
 
 #include "sram_management.h"
 
@@ -134,6 +135,9 @@ void * Main_GetFunctionPointer(uint16_t routine)
             break;
         case ROUTINE_FADEOUT:
             return (void *)&Loop_Fade_Out;
+            break;
+        case ROUTINE_MAP_RECOVERY:
+            return (void *)&MapSystem_Tilemap_EmergencyRecovery;
             break;
         case ROUTINE_SUBSCREEN:
             return (void *)&Subscreen_Top;
