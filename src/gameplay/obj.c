@@ -923,7 +923,7 @@ uint16_t ObjectSystem_List_InstantiateSpawners(const struct obj_list_entry_spawn
     {
         if (obj_active_count >= OBJ_GENERAL_MAX_COUNT)
         {
-            break;
+            return 1;
         }
 
         uint16_t temp_objid = list->id;
@@ -940,7 +940,7 @@ uint16_t ObjectSystem_List_InstantiateSpawners(const struct obj_list_entry_spawn
 
         if (index == -1)
         {
-            break;
+            return 1;
         }
 
         obj_general[index].struct_data.interactable_data.spawn_area_x = list->x;
@@ -1079,6 +1079,11 @@ uint16_t ObjectSystem_List_InstantiateInteractables(const struct obj_list_entry_
  */
 void ObjectSystem_DestroyStandardObject(uint16_t i)
 {
+    if (obj_delete_queue_count >= OBJ_GENERAL_MAX_COUNT)
+    {
+        return;
+    }
+
     obj_delete_queue[obj_delete_queue_count] = i;
 
     obj_delete_queue_count++;
@@ -1094,6 +1099,11 @@ void ObjectSystem_DestroyStandardObject(uint16_t i)
  */
 void ObjectSystem_DestroyPlayerHitbox(uint16_t i)
 {
+    if (obj_hitbox_player_delete_queue_count >= OBJ_PLAYERHITBOX_MAX_COUNT)
+    {
+        return;
+    }
+    
     obj_hitbox_player_delete_queue[obj_hitbox_player_delete_queue_count] = i;
 
     obj_hitbox_player_delete_queue_count++;
@@ -1109,6 +1119,11 @@ void ObjectSystem_DestroyPlayerHitbox(uint16_t i)
  */
 void ObjectSystem_DestroyEnemyHitbox(uint16_t i)
 {
+    if (obj_hitbox_enemy_delete_queue_count >= OBJ_ENEMYHITBOX_MAX_COUNT)
+    {
+        return;
+    }
+    
     obj_hitbox_enemy_delete_queue[obj_hitbox_enemy_delete_queue_count] = i;
 
     obj_hitbox_enemy_delete_queue_count++;
@@ -1125,6 +1140,12 @@ void ObjectSystem_CleanupStandardObjects()
     for (int i = 0; i < obj_delete_queue_count; i++)
     {
         uint16_t index_of_deletee = obj_delete_queue[i];
+        
+        if (index_of_deletee >= OBJ_GENERAL_MAX_COUNT)
+        {
+            continue;
+        }
+
         if (obj_general[index_of_deletee].id == OBJID_NULL)
         {
             continue;
@@ -1162,6 +1183,12 @@ void ObjectSystem_CleanupPlayerHitboxes()
     for (int i = 0; i < obj_hitbox_player_delete_queue_count; i++)
     {
         uint16_t index_of_deletee = obj_hitbox_player_delete_queue[i];
+        
+        if (index_of_deletee >= OBJ_PLAYERHITBOX_MAX_COUNT)
+        {
+            continue;
+        }
+
         if (obj_hitbox_player[index_of_deletee].id == OBJID_NULL)
         {
             continue;
@@ -1193,6 +1220,11 @@ void ObjectSystem_CleanupEnemyHitboxes()
     for (int i = 0; i < obj_hitbox_enemy_delete_queue_count; i++)
     {
         uint16_t index_of_deletee = obj_hitbox_enemy_delete_queue[i];
+        if (index_of_deletee >= OBJ_ENEMYHITBOX_MAX_COUNT)
+        {
+            continue;
+        }
+        
         if (obj_hitbox_enemy[index_of_deletee].id == OBJID_NULL)
         {
             continue;
