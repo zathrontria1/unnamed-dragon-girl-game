@@ -16,6 +16,8 @@
 #include "dma.h"
 #include "lz4.h"
 
+#include "crash_handler.h"
+
 const struct level_data * level_data_ptr;
 const struct level_data * level_data_ptr_prev;
 const struct level_data * level_data_ptr_next;
@@ -30,14 +32,9 @@ const struct level_data * level_data_ptr_next;
  */
 bool LevelSystem_LoadLevel(const struct level_data * level)
 {
-    // Instantiate player if the player isn't already instantiated
-
-    // TODO: behaviorial differences with Calypsi here that causes the game to be unable to
-    // switch levels here. If the player is outright re-initialized, it does work.
-
     bool temp_level_reuses_vram_contents = false;
 
-    // Suspect: pointer errors
+    // Instantiate player if the player isn't already instantiated
     if (obj_player_index == -1)
     {
         obj_player_index = ObjectSystem_InstantiateObject(
@@ -45,6 +42,11 @@ bool LevelSystem_LoadLevel(const struct level_data * level)
             level->player_start_x, 
             level->player_start_y, 
             0); 
+
+        if (obj_player_index == -1)
+        {
+            System_CrashHandler();
+        }
 
         obj_player_prev_facing = FACING_DOWN;
 
@@ -73,9 +75,15 @@ bool LevelSystem_LoadLevel(const struct level_data * level)
     }
 
     // Instantiate enemies
-    ObjectSystem_List_InstantiateSpawners((const struct obj_list_entry_spawners*)level->spawner_ptr);
+    if (ObjectSystem_List_InstantiateSpawners((const struct obj_list_entry_spawners*)level->spawner_ptr))
+    {
+        System_CrashHandler();
+    }
 
-    ObjectSystem_List_InstantiateInteractables((const struct obj_list_entry_interactable*)level->interactable_ptr);
+    if (ObjectSystem_List_InstantiateInteractables((const struct obj_list_entry_interactable*)level->interactable_ptr))
+    {
+        System_CrashHandler();
+    }
 
     // initialize coin DMA tile animation
     ani_bg_addr_coin = (uint8_t *)&data_spr_drop_coin;

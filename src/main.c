@@ -27,6 +27,8 @@
 
 #include "errorhandling.h"
 
+#include "crash_handler.h"
+
 int main()
 {
     System_Init_CpuRegs(); // Display will be turned off within this
@@ -80,6 +82,12 @@ int main()
         System_WaitUntilVblank();
 
         void (*func)() = system_loop_func_ptr;
+
+        if (func == NULL)
+        {
+            System_CrashHandler();
+        }
+
         func();
 
         HdmaEngine_SetHdmaShadow();

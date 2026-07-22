@@ -23,6 +23,8 @@
 
 #include "gfx.h"
 
+#include "crash_handler.h"
+
 ZP struct game_object * obj_player_pointer;
 
 ZP uint16_t obj_first_available;
@@ -890,6 +892,12 @@ uint16_t ObjectSystem_List_InstantiateNpcs(const struct obj_list_entry_spawns* l
             temp_y = list->y + offset_y;
         }
 
+        if (temp_x < 0 || temp_x >= map_extent_x ||
+            temp_y < 0 || temp_y >= map_extent_y) 
+        {
+            System_CrashHandler();
+        }
+
         if (ObjectSystem_InstantiateObject(temp_objid, temp_x, temp_y, 0) == -1)
         {
             return 1;
@@ -921,6 +929,12 @@ uint16_t ObjectSystem_List_InstantiateSpawners(const struct obj_list_entry_spawn
         uint16_t temp_objid = list->id;
         int16_t temp_x = list->x;
         int16_t temp_y = list->y;
+
+        if (temp_x < 0 || temp_x >= map_extent_x ||
+            temp_y < 0 || temp_y >= map_extent_y)
+        {
+            System_CrashHandler();
+        }
 
         int16_t index = ObjectSystem_InstantiateObject(temp_objid, temp_x, temp_y, 0);
 
@@ -988,6 +1002,43 @@ uint16_t ObjectSystem_List_InstantiateInteractables(const struct obj_list_entry_
         int16_t temp_x = list->x;
         int16_t temp_y = list->y;
         uint16_t temp_flag = (uint16_t)((uint32_t)(list->flag));
+
+        bool needs_event_flag = 
+            (temp_objid == OBJID_INTERACTABLE_SWITCH_WALL) ||
+            (temp_objid == OBJID_INTERACTABLE_SWITCH_FLOOR) ||
+            (temp_objid == OBJID_INTERACTABLE_BLOCKER_FLOOR) ||
+            (temp_objid == OBJID_INTERACTABLE_BLOCKER_DOOR_NS) ||
+            (temp_objid == OBJID_INTERACTABLE_BLOCKER_DOOR_EW);
+
+
+        if (needs_event_flag && temp_flag >= EVENT_FLAG_LOCAL_MAX)
+        {
+            System_CrashHandler();
+        }
+        
+        if (temp_x < 0 || temp_x >= map_extent_x ||
+            temp_y < 0 || temp_y >= map_extent_y)
+        {
+            System_CrashHandler();
+        }
+
+        // Check if the interactable is placed on a valid tile (e.g., not outside the map bounds)
+        uint16_t tile_x = (uint16_t)temp_x >> 4;
+        uint16_t tile_y = (uint16_t)temp_y >> 4;
+
+        if ((temp_objid == OBJID_INTERACTABLE_BLOCKER_DOOR_NS ||
+            temp_objid == OBJID_INTERACTABLE_LEVEL_WARP) &&
+            tile_x >= map_extent_tiles_x - 1)
+        {
+            System_CrashHandler();
+        }
+
+        if ((temp_objid == OBJID_INTERACTABLE_BLOCKER_DOOR_EW ||
+            temp_objid == OBJID_INTERACTABLE_LEVEL_WARP) &&
+            tile_y == 0)
+        {
+            System_CrashHandler();
+        }
 
         if (obj_active_count >= OBJ_GENERAL_MAX_COUNT)
         {
