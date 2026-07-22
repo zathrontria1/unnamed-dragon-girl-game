@@ -37,6 +37,7 @@ call python .\tools\check_rom_size.py %sfc_name%.sfc
 
 REM Fix symbols.
 call python .\tools\reprocess_symbols.py %sfc_name%.sym
+call python .\tools\record_build.py %sfc_name%.sfc release
 
 set sfc_name=main_debug
 set debug_define=-DDEBUG_ALL=1
@@ -45,5 +46,6 @@ call python .\tools\checksum.py --hirom --pad %sfc_name%_temp.sfc -o %sfc_name%.
 DEL %sfc_name%_temp.sfc
 call python .\tools\check_rom_size.py %sfc_name%.sfc
 call python .\tools\reprocess_symbols.py %sfc_name%.sym
+call python .\tools\record_build.py %sfc_name%.sfc debug
 
 if not defined skip_pause pause

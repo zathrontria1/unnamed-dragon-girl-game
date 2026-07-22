@@ -105,6 +105,8 @@ build_assets.bat
 
 # unpatched header ROM
 main_temp.sfc
+.build-history/
+*.sfc.build.json
 
 # some emulators dump files in the same folder as the output ROM
 /*.sym
@@ -118,3 +120,4 @@ old-calypsi/*
 reorganize.bat
 compression_analysis_results.md
 tools/compression_analyzer.py
+tools/__pycache__/
