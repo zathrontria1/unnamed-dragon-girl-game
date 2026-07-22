@@ -9,6 +9,9 @@
 
 #include "map.h"
 #include "dma.h"
+#include "main.h"
+
+#include "crash_handler.h"
 
 #include "math_int.h"
 
@@ -86,6 +89,12 @@ void MapSystem_LoadMap(const uint8_t * map, const uint16_t * lut, const uint8_t 
     }
 
     // Generate the collision map
+    if (map_extent_tiles_x > 64 || map_extent_tiles_y > 64)
+    {
+        // Maps currently should not exceed 64x64 tiles (1024x1024 pixels) in size. This is a hard limit for now.
+        System_CrashHandler();
+    }
+
     MapSystem_BuildCollisionTable();
 
     // Ensure that the camera is at a valid position
