@@ -41,6 +41,7 @@ CompileFlags:
 
     # Local project search directories
     - "-I."
+    - "-I./src"
     - "-I./src/core"
     - "-I./src/gameplay"
     - "-I./src/graphics"
