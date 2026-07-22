@@ -60,6 +60,14 @@ uint32_t LZ4_UnpackToVRAM(void * src, uint16_t dest)
     return temp_length;
 }
 
+static uint32_t LZ4_ReadU32LE(const uint8_t *ptr)
+{
+    return (uint32_t)ptr[0] |
+           ((uint32_t)ptr[1] << 8) |
+           ((uint32_t)ptr[2] << 16) |
+           ((uint32_t)ptr[3] << 24);
+}
+
 /**
  * @brief Extracts the decompressed content size of an LZ4 frame.
  * 
@@ -72,9 +80,8 @@ uint32_t LZ4_UnpackToVRAM(void * src, uint16_t dest)
 int32_t LZ4_GetLength(void * src)
 {
     uint8_t * ptr_c = src;
-    uint32_t * ptr_dw = src;
 
-    if ((*ptr_dw) != 0x184D2204)
+    if (LZ4_ReadU32LE(ptr_c) != 0x184D2204)
     {
         // Magic ID check failure
         return -1;
@@ -89,8 +96,7 @@ int32_t LZ4_GetLength(void * src)
     }
 
     ptr_c += 2;
-    ptr_dw = (uint32_t *)ptr_c;
-    return (*ptr_dw);
+    return LZ4_ReadU32LE(ptr_c);
 }
 
 /**
@@ -111,7 +117,7 @@ uint32_t LZ4_DecompressFrame(void * src, void * dest)
         DmaSystem_CopyToWram_ShortPrep(((uint32_t)ptr_read) >> 16, ((uint32_t)ptr_write) >> 16);
     }
 
-    if ((*((uint32_t *)ptr_read)) != 0x184D2204)
+    if (LZ4_ReadU32LE(ptr_read) != 0x184D2204)
     {
         // Magic ID check failure
         return 0;
@@ -137,12 +143,12 @@ uint32_t LZ4_DecompressFrame(void * src, void * dest)
 
     // data block section start
     // if the 4-byte header is not all zeroes, it's a valid block
-    while ((*((uint32_t *)ptr_read)) != 0x00000000)
+    while (LZ4_ReadU32LE(ptr_read) != 0x00000000)
     {
         uint32_t temp_block_start_offset = (uint32_t) ptr_read;
-        uint32_t temp_data_size = ((*((uint32_t *)ptr_read)) & 0x7fffffff);
+        uint32_t temp_data_size = (LZ4_ReadU32LE(ptr_read) & 0x7fffffff);
 
-        if (((*((uint32_t *)ptr_read)) & 0x80000000) == (0x80000000))
+        if ((LZ4_ReadU32LE(ptr_read) & 0x80000000) == (0x80000000))
         {
             // block is uncompressed
             ptr_read += 4;
@@ -203,7 +209,7 @@ uint32_t LZ4_DecompressFrame(void * src, void * dest)
                 }
 
                 // Now to start decoding for real
-                uint16_t temp_offset = (uint16_t)(*((uint32_t *)ptr_read));
+                uint16_t temp_offset = (uint16_t)(LZ4_ReadU32LE(ptr_read));
 
                 if (temp_offset == 0)
                 {
@@ -213,7 +219,7 @@ uint32_t LZ4_DecompressFrame(void * src, void * dest)
 
                 uint8_t * temp_past_ptr_read = ptr_write;
 
-                temp_past_ptr_read -= (uint16_t)(*((uint32_t *)ptr_read));
+                temp_past_ptr_read -= (uint16_t)(LZ4_ReadU32LE(ptr_read));
 
                 ptr_read += 2; // get over the offset section
 
