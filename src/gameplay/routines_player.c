@@ -439,14 +439,20 @@ void Routines_Player(struct game_object * o)
                         // If player is currently not invulnerable, trigger the damage
                         //int32_t temp_dmg = (p->struct_data.npc_data.attack - o->struct_data.npc_data.defense);
                         // debugging: make player invuln but still do the reads.
+#if defined(DEBUG_PLAYER_IMMORTAL) || defined(DEBUG_ALL)
                         volatile int32_t temp_dmg = (p->struct_data.npc_data.attack - o->struct_data.npc_data.defense);
+#else
+                        int32_t temp_dmg = (p->struct_data.npc_data.attack - o->struct_data.npc_data.defense);
+#endif
                         
                         if (temp_dmg <= 0)
                         {
                             temp_dmg = 1;
                         }
 
+#if defined(DEBUG_PLAYER_IMMORTAL) || defined(DEBUG_ALL)
                         temp_dmg = 0; // debug
+#endif
 
                         o->struct_data.npc_data.hp -= temp_dmg;
 

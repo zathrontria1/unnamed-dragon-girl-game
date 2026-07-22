@@ -66,4 +66,5 @@ def analyze_rom(rom_path, verbose=False):
 
 if __name__ == '__main__':
     verbose = '--verbose' in sys.argv or '-v' in sys.argv
-    analyze_rom('main.sfc', verbose)
+    rom_path = next((argument for argument in sys.argv[1:] if not argument.startswith('-')), 'main.sfc')
+    analyze_rom(rom_path, verbose)

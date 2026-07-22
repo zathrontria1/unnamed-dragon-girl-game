@@ -75,6 +75,86 @@ uint16_t obj_hitbox_enemy_delete_queue[OBJ_ENEMYHITBOX_MAX_COUNT];
 uint16_t obj_hitbox_enemy_delete_queue_count;
 uint16_t obj_hitbox_count_enemy;
 
+#if defined(PROFILE_OBJECT_CALLS) || defined(DEBUG_ALL)
+volatile uint16_t obj_profile_dispatch_barrier;
+
+NO_INLINE void ObjectSystem_ProcessObjectProfiled(struct game_object * o)
+{
+    switch (o->id)
+    {
+        case OBJID_SYS_IMPACT:
+            Routines_Fx_Impact(o);
+            break;
+        case OBJID_FX_SMOKE:
+            Routines_Fx_Smoke(o);
+            break;
+        case OBJID_HITBOX_INVISIBLE:
+            Routines_Player_InvisibleHit(o);
+            break;
+        case OBJID_HITBOX_INVISIBLE_E:
+            Routines_Enemy_InvisibleHit(o);
+            break;
+        case OBJID_FIREBALL:
+            Routines_Player_Fireball(o);
+            break;
+        case OBJID_BUBBLE_E:
+            Routines_Enemy_Slime_Bubble(o);
+            break;
+        case OBJID_ARROW_E:
+            Routines_Enemy_Lizardman_Arrow(o);
+            break;
+        case OBJID_DROP_MONEY:
+            Routines_Drops_Money(o);
+            break;
+        case OBJID_DROP_REC_MEAT:
+            Routines_Drops_Recovery_Meat(o);
+            break;
+        case OBJID_SLIME:
+            Routines_Enemy_Slime(o);
+            break;
+        case OBJID_LIZARDMAN:
+            Routines_Enemy_Lizardman(o);
+            break;
+        case OBJID_PLAYER:
+            Routines_Player(o);
+            break;
+        case OBJID_BOSS_TEST1:
+            Routines_Boss_Test(o);
+            break;
+        case OBJID_BOSS_TEST1_ATTACK1:
+            Routines_Boss_Test_Attack_Particle(o);
+            break;
+        case OBJID_INTERACTABLE_SWITCH_WALL:
+        case OBJID_INTERACTABLE_SWITCH_FLOOR:
+            Routines_Interactables_Switch(o);
+            break;
+        case OBJID_INTERACTABLE_BLOCKER_FLOOR:
+        case OBJID_INTERACTABLE_BLOCKER_DOOR_NS:
+        case OBJID_INTERACTABLE_BLOCKER_DOOR_EW:
+            Routines_Interactable_Blocker(o);
+            break;
+        case OBJID_INTERACTABLE_LEVEL_WARP:
+            Routines_LevelWarp(o);
+            break;
+        case OBJID_INTERACTABLE_SIGN_WALL:
+            Routines_Interactable_Sign(o);
+            break;
+        case OBJID_SPAWNER_ENEMY:
+            Routines_EnemySpawner(o);
+            break;
+        case OBJID_INTERACTABLE_TREASURECHEST:
+            Routines_TreasureChest(o);
+            break;
+        case OBJID_NULL:
+        default:
+            Routines_Dummy(o);
+            break;
+    }
+
+    obj_profile_dispatch_barrier = o->id; // Prevent compiler from optimizing out the function call
+}
+#endif
+
 /**
  * @brief Main object engine processing loop.
  * 
@@ -113,8 +193,12 @@ void ObjectSystem_ProcessObjects()
         {
             if (ptr->id != OBJID_NULL)
             {
-                void (*func)(struct game_object *) = ptr->func_ptr; 
+#if defined(PROFILE_OBJECT_CALLS) || defined(DEBUG_ALL)
+                ObjectSystem_ProcessObjectProfiled(ptr);
+#else
+                void (*func)(struct game_object *) = ptr->func_ptr;
                 func(ptr);
+#endif
                 processed++;
                 if (processed >= obj_active_count)
                 {
@@ -137,8 +221,12 @@ void ObjectSystem_ProcessObjects()
         {
             if (ptr->id != OBJID_NULL)
             {
-                void (*func)(struct game_object *) = ptr->func_ptr; 
+#if defined(PROFILE_OBJECT_CALLS) || defined(DEBUG_ALL)
+                ObjectSystem_ProcessObjectProfiled(ptr);
+#else
+                void (*func)(struct game_object *) = ptr->func_ptr;
                 func(ptr);
+#endif
                 processed++;
                 if (processed >= obj_hitbox_count_player)
                 {
@@ -167,8 +255,12 @@ void ObjectSystem_ProcessObjects()
         {
             if (ptr->id != OBJID_NULL)
             {
-                void (*func)(struct game_object *) = ptr->func_ptr; 
+#if defined(PROFILE_OBJECT_CALLS) || defined(DEBUG_ALL)
+                ObjectSystem_ProcessObjectProfiled(ptr);
+#else
+                void (*func)(struct game_object *) = ptr->func_ptr;
                 func(ptr);
+#endif
                 processed++;
                 if (processed >= obj_hitbox_count_enemy)
                 {
