@@ -53,6 +53,7 @@ extern uint16_t obj_hitbox_count_enemy;
 extern const uint16_t const_obj_vram_slot_to_tilenum[128];
 
 void ObjectSystem_ProcessObjects();
+bool ObjectSystem_IsEnemyAiScheduled(const struct game_object * o);
 
 void ObjectSystem_ResetStandardObjects(int start_index);
 void ObjectSystem_ResetPlayerHitboxes();
@@ -93,3 +94,5 @@ void ObjectSystem_CleanupEnemyHitboxes(void);
 
 bool ObjectSystem_GetEnemyData(struct game_object * o);
 bool ObjectSystem_FindValidSpawnPosition(int16_t x, int16_t y, int16_t w, int16_t h, int16_t * out_x, int16_t * out_y);
+
+void ObjectSystem_ScheduleEnemyAi(void);

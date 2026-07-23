@@ -57,7 +57,12 @@ void Routines_Enemy_CommonUpdate(struct game_object * o, const enemy_standard_cf
             {
                 event_in_combat = 1;
                 
-                temp_invalidate_animation_frame = Routines_Enemy_Ai_Process(o, temp_dist, temp_x, temp_y, cfg->dist_min, cfg->allow_flipflop, cfg->attack_delay, cfg->archetype);
+                if (ObjectSystem_IsEnemyAiScheduled(o))
+                {
+                    temp_invalidate_animation_frame = Routines_Enemy_Ai_Process(o, temp_dist, temp_x, temp_y, cfg->dist_min, cfg->allow_flipflop, cfg->attack_delay, cfg->archetype);
+                }
+
+                Routines_Enemy_Ai_UpdateTimer(o);
 
                 int32_t target_dx = o->delta.x.a;
                 int32_t target_dy = o->delta.y.a;

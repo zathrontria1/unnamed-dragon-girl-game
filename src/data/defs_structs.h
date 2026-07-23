@@ -246,6 +246,7 @@ typedef struct game_data_npc
     uint16_t ai_makeattack;
     uint8_t ai_tactic_dir;
     uint8_t ai_stuck_count;
+    uint32_t ai_scheduled_token;
 } game_data_npc_t;
 
 typedef struct game_data_interactable

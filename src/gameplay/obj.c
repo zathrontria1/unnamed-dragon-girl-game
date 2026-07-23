@@ -157,6 +157,86 @@ NO_INLINE void ObjectSystem_ProcessObjectProfiled(struct game_object * o)
 }
 #endif
 
+// A generation number used to mark the small set of enemies allowed to run
+// their expensive decision-making routine this frame. An enemy is scheduled
+// when its stored token matches this value; advancing the generation makes
+// every mark from the previous frame stale without clearing the whole pool.
+static uint32_t obj_enemy_ai_schedule_token;
+
+// Start each scan after the previous scan's stopping point so one object near
+// the start of the pool cannot monopolize the per-frame AI budget.
+static uint16_t obj_enemy_ai_next_index;
+
+/**
+ * Selects nearby, active enemies for full AI processing this frame.
+ *
+ * Enemy routines still run for every visible enemy, but only enemies marked
+ * with the current schedule token call Routines_Enemy_Ai_Process(). The scan
+ * is capped by ENEMY_AI_MAX_PER_FRAME and wraps once around the object pool.
+ */
+void ObjectSystem_ScheduleEnemyAi(void)
+{
+    // Start a new generation before marking any objects. Old marks then fail
+    // ObjectSystem_IsEnemyAiScheduled() automatically.
+    obj_enemy_ai_schedule_token++;
+    if (obj_enemy_ai_schedule_token == 0xffffffffl)
+    {
+        // Avoid using the sentinel value assigned to newly created objects.
+        obj_enemy_ai_schedule_token = 0;
+    }
+
+    // Object processing can begin before the player has been instantiated.
+    if (obj_player_pointer == 0)
+    {
+        return;
+    }
+
+    uint16_t selected = 0;
+    uint16_t index = obj_enemy_ai_next_index;
+
+    // Check at most one complete pass. This prevents an empty or sparse pool
+    // from making the scheduler loop indefinitely while it seeks a target.
+    for (uint16_t checked = 0; checked < OBJ_GENERAL_MAX_COUNT && selected < ENEMY_AI_MAX_PER_FRAME; checked++)
+    {
+        struct game_object * o = &obj_general[index];
+
+        // Spawning and dying enemies are handled by their state transitions;
+        // only normal slime/lizardman objects are candidates for AI work.
+        if ((o->id == OBJID_SLIME || o->id == OBJID_LIZARDMAN) &&
+            o->state != STATE_DIE && o->state != STATE_SPAWNING)
+        {
+            int16_t x = o->pos.x.lh.h - obj_player_pointer->pos.x.lh.h;
+            int16_t y = o->pos.y.lh.h - obj_player_pointer->pos.y.lh.h;
+
+            // Use squared distance to avoid a square root. The same range is
+            // checked by the enemy update routine before consuming this mark.
+            if (Math_GetDistanceSquared(x, y) < DIST_AI_MAX)
+            {
+                o->struct_data.npc_data.ai_scheduled_token = obj_enemy_ai_schedule_token;
+                selected++;
+            }
+        }
+
+        index++;
+        if (index >= OBJ_GENERAL_MAX_COUNT)
+        {
+            index = 0;
+        }
+    }
+
+    // Resume at the first unchecked slot next frame. If the budget was met,
+    // this is immediately after the selected enemy; otherwise it is where the
+    // complete pass ended, which preserves the round-robin behavior.
+    obj_enemy_ai_next_index = index;
+}
+
+bool ObjectSystem_IsEnemyAiScheduled(const struct game_object * o)
+{
+    // Token comparison gives O(1) membership testing without clearing every
+    // NPC's scheduling field at the start of each frame.
+    return o->struct_data.npc_data.ai_scheduled_token == obj_enemy_ai_schedule_token;
+}
+
 /**
  * @brief Main object engine processing loop.
  * 
@@ -183,6 +263,11 @@ void ObjectSystem_ProcessObjects()
             SoundInterface_StopSfx(SFX_ATK_FIRE_BREATH);
             snd_flame_playing = 0;
         }
+    }
+
+    if (!system_game_paused)
+    {
+        ObjectSystem_ScheduleEnemyAi();
     }
 
     // New implementation
@@ -552,6 +637,7 @@ int16_t ObjectSystem_InstantiateObject(
     p->pos.y.lh.l = 0;
 
     p->struct_data.npc_data.ttl = 0; // always reset
+    p->struct_data.npc_data.ai_scheduled_token = 0xffffffffl;
 
     p->struct_data.npc_data.ani.frame = 0;
 
@@ -895,6 +981,7 @@ uint16_t ObjectSystem_List_InstantiateNpcs(const struct obj_list_entry_spawns* l
         if (temp_x < 0 || temp_x >= map_extent_x ||
             temp_y < 0 || temp_y >= map_extent_y) 
         {
+            crashhandler_error_code = CRASHHANDLER_ERROR_NPC_OUT_OF_BOUNDS;
             System_CrashHandler();
         }
 
@@ -933,6 +1020,7 @@ uint16_t ObjectSystem_List_InstantiateSpawners(const struct obj_list_entry_spawn
         if (temp_x < 0 || temp_x >= map_extent_x ||
             temp_y < 0 || temp_y >= map_extent_y)
         {
+            crashhandler_error_code = CRASHHANDLER_ERROR_SPAWNER_OUT_OF_BOUNDS;
             System_CrashHandler();
         }
 
@@ -1013,12 +1101,14 @@ uint16_t ObjectSystem_List_InstantiateInteractables(const struct obj_list_entry_
 
         if (needs_event_flag && temp_flag >= EVENT_FLAG_LOCAL_MAX)
         {
+            crashhandler_error_code = CRASHHANDLER_ERROR_INVALID_EVENT_FLAG;
             System_CrashHandler();
         }
         
         if (temp_x < 0 || temp_x >= map_extent_x ||
             temp_y < 0 || temp_y >= map_extent_y)
         {
+            crashhandler_error_code = CRASHHANDLER_ERROR_INTERACTABLE_OUT_OF_BOUNDS;
             System_CrashHandler();
         }
 
@@ -1030,6 +1120,7 @@ uint16_t ObjectSystem_List_InstantiateInteractables(const struct obj_list_entry_
             temp_objid == OBJID_INTERACTABLE_LEVEL_WARP) &&
             tile_x >= map_extent_tiles_x - 1)
         {
+            crashhandler_error_code = CRASHHANDLER_ERROR_INVALID_NS_DOOR_WARP;
             System_CrashHandler();
         }
 
@@ -1037,6 +1128,7 @@ uint16_t ObjectSystem_List_InstantiateInteractables(const struct obj_list_entry_
             temp_objid == OBJID_INTERACTABLE_LEVEL_WARP) &&
             tile_y == 0)
         {
+            crashhandler_error_code = CRASHHANDLER_ERROR_INVALID_EW_DOOR_WARP;
             System_CrashHandler();
         }
 
