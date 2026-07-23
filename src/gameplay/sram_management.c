@@ -346,9 +346,3 @@ sram_slot_status_t Sram_GetSlotStatus(uint16_t slot)
 }
 
 const uint8_t const_sram_verify_str[] = "EIEIMUN!"; // Can use any 8 character string that isn't all 0x00 or 0xff. Will occupy 9 bytes in ROM
-
-const struct level_data * const_level_pointer_table[LEVEL_ID_COUNT] = {
-    (void *)&data_level_test_0,
-    (void *)&data_level_test_1,
-    (void *)&data_level_test_2
-};

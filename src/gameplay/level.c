@@ -45,6 +45,7 @@ bool LevelSystem_LoadLevel(const struct level_data * level)
 
         if (obj_player_index == -1)
         {
+            crashhandler_error_code = CRASHHANDLER_ERROR_PLAYER_INSTANTIATION;
             System_CrashHandler();
         }
 
@@ -83,16 +84,18 @@ bool LevelSystem_LoadLevel(const struct level_data * level)
     // Instantiate enemies
     if (ObjectSystem_List_InstantiateSpawners((const struct obj_list_entry_spawners*)level->spawner_ptr))
     {
+        crashhandler_error_code = CRASHHANDLER_ERROR_SPAWNER_LIST_INSTANTIATION;
         System_CrashHandler();
     }
 
     if (ObjectSystem_List_InstantiateInteractables((const struct obj_list_entry_interactable*)level->interactable_ptr))
     {
+        crashhandler_error_code = CRASHHANDLER_ERROR_INTERACTABLE_LIST_INSTANTIATION;
         System_CrashHandler();
     }
 
     // initialize coin DMA tile animation
-    ani_bg_addr_coin = (uint8_t *)&data_spr_drop_coin;
+    ani_fixedspr_addr_coin = (uint8_t *)&data_spr_drop_coin;
 
     // If the pointers point to the same thing, assume that a full reload is needed
     if (level_data_ptr_prev == level_data_ptr)
@@ -204,3 +207,9 @@ void LevelSystem_LoadLevelPalette(const struct level_data * level)
 
     return;
 }
+
+const struct level_data * const_level_pointer_table[LEVEL_ID_COUNT] = {
+    (void *)&data_level_test_0,
+    (void *)&data_level_test_1,
+    (void *)&data_level_test_2
+};
