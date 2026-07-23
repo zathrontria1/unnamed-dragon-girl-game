@@ -121,7 +121,6 @@ reorganize.bat
 compression_analysis_results.md
 tools/compression_analyzer.py
 tools/__pycache__/
-tools/asset_watcher.ps1
 tools/asset_watcher_report.txt
 tools/schedule_watcher.ps1
 tools/unschedule_watcher.ps1
