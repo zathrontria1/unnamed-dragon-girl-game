@@ -454,18 +454,13 @@ bool Routines_Enemy_Ai_Process(struct game_object * o, uint32_t dist, int16_t x,
         }
     }
 
-    if (npc->ai_timer > 0)
-    {
-        npc->ai_timer--;
-    }
-
     return temp_invalidate_animation_frame;
 }
 
 /*
     Simple function that only reduces AI delay timer
 */
-void Routines_Enemy_Ai_Idle(struct game_object * o)
+void Routines_Enemy_Ai_UpdateTimer(struct game_object * o)
 {
     if (o->struct_data.npc_data.ai_timer > 0)
     {
