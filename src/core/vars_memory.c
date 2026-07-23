@@ -24,7 +24,6 @@ const uint32_t const_zero[] =
 {
     0, 0, 0, 0, 0, 0, 0, 0
 };
-const uint8_t const_sprite_offscreen = 0xf0;
 
 // System general shadows and variables
 ZP bool system_in_vblank;

@@ -9,7 +9,6 @@
 
 // For DMA/HDMA copies
 extern const uint32_t const_zero[8];
-extern const uint8_t const_sprite_offscreen;
 
 // System general shadows and variables
 extern ZP bool system_in_vblank;
