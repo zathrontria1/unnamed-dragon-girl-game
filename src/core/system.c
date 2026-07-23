@@ -336,6 +336,7 @@ void System_Init()
     ObjectSystem_ResetStandardObjects(0); // The first time this is done, reset all objects
     ObjectSystem_ResetPlayerHitboxes(); // also reset hitbox list
     ObjectSystem_ResetEnemyHitboxes();
+    Gfx_ResetSmoke();
     
     obj_player_index = -1;
 
@@ -378,6 +379,7 @@ void System_Init_Partial()
     ObjectSystem_ResetStandardObjects(1); // Reset all except player
     ObjectSystem_ResetPlayerHitboxes(); // also reset hitbox list
     ObjectSystem_ResetEnemyHitboxes();
+    Gfx_ResetSmoke();
     
     // Initialize BG scroll systems. Must be done before the map is loaded.
     bg_scroll_x_bounds_min.full.high.a = -32768;
