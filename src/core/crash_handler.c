@@ -46,6 +46,23 @@ uint32_t crashhandler_regs_float[4];
 uint16_t crashhandler_stack[16];
 
 uint32_t crashhandler_emulation_mode; // This must be 4 bytes wide to avoid clobbering the next bytes over in case
+uint8_t crashhandler_error_code;
+
+static HUGE const char * crashhandler_error_messages[] =
+{
+    (char *)&STR_CRASH_ERROR_UNKNOWN,
+    (char *)&STR_CRASH_ERROR_MAIN_LOOP_NULL,
+    (char *)&STR_CRASH_ERROR_PLAYER_INSTANTIATION,
+    (char *)&STR_CRASH_ERROR_SPAWNER_LIST_INSTANTIATION,
+    (char *)&STR_CRASH_ERROR_INTERACTABLE_LIST_INSTANTIATION,
+    (char *)&STR_CRASH_ERROR_MAP_TOO_LARGE,
+    (char *)&STR_CRASH_ERROR_NPC_OUT_OF_BOUNDS,
+    (char *)&STR_CRASH_ERROR_SPAWNER_OUT_OF_BOUNDS,
+    (char *)&STR_CRASH_ERROR_INVALID_EVENT_FLAG,
+    (char *)&STR_CRASH_ERROR_INTERACTABLE_OUT_OF_BOUNDS,
+    (char *)&STR_CRASH_ERROR_INVALID_NS_DOOR_WARP,
+    (char *)&STR_CRASH_ERROR_INVALID_EW_DOOR_WARP
+};
 
 /**
  * @brief Main C processing function that takes over screen display to render the crash diagnostics report.
@@ -54,6 +71,13 @@ uint32_t crashhandler_emulation_mode; // This must be 4 bytes wide to avoid clob
  */
 void System_CrashHandler_Followup()
 {
+    uint16_t error_code = crashhandler_error_code;
+
+    if (error_code >= CRASHHANDLER_ERROR_COUNT)
+    {
+        error_code = CRASHHANDLER_ERROR_UNKNOWN;
+    }
+
     REG_INIDISP = 0x8f; // enable forced blank
 
     // Now we should have free reign in video memory. Re-init.
@@ -80,9 +104,10 @@ void System_CrashHandler_Followup()
     UserInterface_ClearWindowBuffer(false);
     UserInterface_ClearTextBuffer();
 
-    char temp_error_string[512] = "";
+    char temp_error_string[640] = "";
 
-    snprintf((char *)&temp_error_string, 512, (char *)&STR_CRASH_FORMATSTR, 
+    snprintf((char *)&temp_error_string, 640, (char *)&STR_CRASH_FORMATSTR,
+    crashhandler_error_messages[error_code],
     crashhandler_a, crashhandler_x, crashhandler_y, crashhandler_flags, (uint8_t)crashhandler_emulation_mode, 
     crashhandler_sp, crashhandler_directpage, crashhandler_pc, crashhandler_databank, 
     crashhandler_regs[0], crashhandler_regs[1],

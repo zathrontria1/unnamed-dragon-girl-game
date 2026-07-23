@@ -86,6 +86,7 @@ int main()
 
         if (func == NULL)
         {
+            crashhandler_error_code = CRASHHANDLER_ERROR_MAIN_LOOP_NULL;
             System_CrashHandler();
         }
 

@@ -260,8 +260,24 @@ destination.";
 HUGE const char STR_TITLE_START[] = "PRESS START BUTTON";
 HUGE const char STR_GAME_OVER[] = "GAME OVER";
 
+HUGE const char STR_CRASH_ERROR_UNKNOWN[] = "Unknown error";
+HUGE const char STR_CRASH_ERROR_MAIN_LOOP_NULL[] = "Main loop is null";
+HUGE const char STR_CRASH_ERROR_PLAYER_INSTANTIATION[] = "Player instantiation failed";
+HUGE const char STR_CRASH_ERROR_SPAWNER_LIST_INSTANTIATION[] = "Spawner list failed";
+HUGE const char STR_CRASH_ERROR_INTERACTABLE_LIST_INSTANTIATION[] = "Interactable list failed";
+HUGE const char STR_CRASH_ERROR_MAP_TOO_LARGE[] = "Map is too large";
+HUGE const char STR_CRASH_ERROR_NPC_OUT_OF_BOUNDS[] = "NPC spawn out of bounds";
+HUGE const char STR_CRASH_ERROR_SPAWNER_OUT_OF_BOUNDS[] = "Spawner out of bounds";
+HUGE const char STR_CRASH_ERROR_INVALID_EVENT_FLAG[] = "Invalid event flag";
+HUGE const char STR_CRASH_ERROR_INTERACTABLE_OUT_OF_BOUNDS[] = "Interactable out of bounds";
+HUGE const char STR_CRASH_ERROR_INVALID_NS_DOOR_WARP[] = "Invalid NS door/warp";
+HUGE const char STR_CRASH_ERROR_INVALID_EW_DOOR_WARP[] = "Invalid EW door/warp";
+
 HUGE const char STR_CRASH_FORMATSTR[] = "\
 CRASH HANDLER\n\
+\n\
+Error:\n\
+%s\n\
 \n\
 A %04x X %04x Y %04x P %02x:E%1x\n\
 S %04x D %04x PC %06lx B %02x\n\
@@ -274,7 +290,6 @@ R16 %08lx    R18 %08lx\n\
 R20 %08lx    R22 %08lx\n\
 R24 %08lx    R26 %08lx\n\
 R28 %08lx    R30 %08lx\n\
-\n\
 B0  %08lx    B1  %08lx\n\
 B2  %08lx    B3  %08lx\n\
 \n\
