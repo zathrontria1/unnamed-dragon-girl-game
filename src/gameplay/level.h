@@ -1,5 +1,3 @@
-struct level_data;
-
 typedef enum {
     LEVEL_ID_TEST_0 = 0,
     LEVEL_ID_TEST_1,
