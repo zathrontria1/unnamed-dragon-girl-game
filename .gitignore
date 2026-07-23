@@ -102,6 +102,7 @@ sound/*.zip
 
 # asset build batch file
 build_assets.bat
+build_full.bat
 
 # unpatched header ROM
 main_temp.sfc
@@ -122,7 +123,10 @@ compression_analysis_results.md
 tools/compression_analyzer.py
 tools/__pycache__/
 tools/asset_watcher_report.txt
+tools/asset_watcher.ps1
 tools/schedule_watcher.ps1
 tools/unschedule_watcher.ps1
 .github/copilot-instructions.md
-build_full.bat
+
+# Old planning and data
+archived-data
