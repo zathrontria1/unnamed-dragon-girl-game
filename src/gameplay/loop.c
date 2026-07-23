@@ -277,6 +277,8 @@ void Loop_Game()
     ObjectSystem_CleanupPlayerHitboxes();
     ObjectSystem_CleanupEnemyHitboxes();
 
+    Gfx_ProcessSmoke();
+
     // Don't bother checking for input if the player is dying
     if (obj_player_pointer->state != STATE_DIE)
     {
