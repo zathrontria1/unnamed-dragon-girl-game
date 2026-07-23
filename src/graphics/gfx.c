@@ -26,6 +26,59 @@ int16_t gfx_cmath_r;
 int16_t gfx_cmath_g;
 int16_t gfx_cmath_b;
 
+#define GFX_SMOKE_QUEUE_MAX_COUNT OBJ_GENERAL_MAX_COUNT
+
+static pos_lh32_t gfx_smoke_queue[GFX_SMOKE_QUEUE_MAX_COUNT];
+static uint8_t gfx_smoke_queue_first;
+static uint8_t gfx_smoke_queue_count;
+
+void Gfx_ResetSmoke()
+{
+    gfx_smoke_queue_first = 0;
+    gfx_smoke_queue_count = 0;
+
+    return;
+}
+
+/**
+ * @brief Attempts to spawn one queued smoke particle for the current frame.
+ */
+void Gfx_ProcessSmoke()
+{
+    if (gfx_smoke_queue_count == 0)
+    {
+        return;
+    }
+
+    if (obj_first_available == 0xffff)
+    {
+        Gfx_ResetSmoke();
+        return;
+    }
+
+    pos_lh32_t * request = &gfx_smoke_queue[gfx_smoke_queue_first];
+    int16_t k = ObjectSystem_InstantiateObject(OBJID_FX_SMOKE, request->l, request->h, 0);
+
+    if (k >= 0)
+    {
+        struct game_object * q = &obj_general[k];
+        int32_t temp = ((int32_t)Math_GetRandom_u16() - 16384);
+
+        q->delta.x.a = temp;
+        q->delta.y.a = -V_S_ONE;
+        q->struct_data.npc_data.ttl = FX_SMOKE_TTL;
+
+        gfx_smoke_queue_first++;
+        if (gfx_smoke_queue_first == GFX_SMOKE_QUEUE_MAX_COUNT)
+        {
+            gfx_smoke_queue_first = 0;
+        }
+        gfx_smoke_queue_count--;
+    }
+
+    return;
+}
+
 /**
  * @brief Advances active mosaic scaling transitions and updates `shadow_mosaic`.
  */
@@ -180,18 +233,18 @@ void Gfx_EmitSmoke(struct game_object * o, int offset)
     {
         int16_t temp_x = o->pos.x.lh.h + (o->w >> 1) - 8 + (((int)Math_GetRandom_u16() - 16384) % 16);
         int16_t temp_y = o->pos.y.lh.h - offset;
-        int16_t k = ObjectSystem_InstantiateObject(OBJID_FX_SMOKE, temp_x, temp_y, 0);
-        
-        if (k >= 0)
+
+        if ((obj_first_available != 0xffff) && (gfx_smoke_queue_count < GFX_SMOKE_QUEUE_MAX_COUNT))
         {
-            struct game_object * q = &obj_general[k];
+            uint8_t queue_last = gfx_smoke_queue_first + gfx_smoke_queue_count;
+            if (queue_last >= GFX_SMOKE_QUEUE_MAX_COUNT)
+            {
+                queue_last -= GFX_SMOKE_QUEUE_MAX_COUNT;
+            }
 
-            int32_t temp = ((int32_t)Math_GetRandom_u16() - 16384);
-
-            q->delta.x.a = temp;
-            q->delta.y.a = -V_S_ONE;
-
-            q->struct_data.npc_data.ttl = FX_SMOKE_TTL;
+            gfx_smoke_queue[queue_last].l = temp_x;
+            gfx_smoke_queue[queue_last].h = temp_y;
+            gfx_smoke_queue_count++;
         }
     }
 
