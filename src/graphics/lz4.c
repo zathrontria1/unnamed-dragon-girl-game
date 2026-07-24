@@ -7,6 +7,31 @@
 #include "dma.h"
 #include "system.h"
 
+#ifndef LZ4_DIRECT_CAST
+// If this is undefined, the default is to use the direct cast method to read 32-bit values from memory.
+// Build scripts by default define this to 1, but if you are having issues with data alignment, you can undefine it to use the byte-by-byte method instead.
+#define LZ4_DIRECT_CAST 1 
+#endif
+
+/*
+    This exists because data alignment may become an issue with certain compilers;
+
+    If possible, use the direct cast method to read the 32-bit value, as it is faster than the byte-by-byte method.
+
+    Only use the byte-by-byte method if you are having issues with data alignment, or if you are using a compiler that does not support the direct cast method.
+*/
+uint32_t LZ4_ReadU32LE(const uint8_t * ptr)
+{
+#if LZ4_DIRECT_CAST
+    return *((const uint32_t *)ptr);
+#else
+    return (uint32_t)ptr[0] |
+           ((uint32_t)ptr[1] << 8) |
+           ((uint32_t)ptr[2] << 16) |
+           ((uint32_t)ptr[3] << 24);
+#endif
+}
+
 /**
  * @brief Unpacks LZ4-compressed data to a WRAM area.
  * 
@@ -58,14 +83,6 @@ uint32_t LZ4_UnpackToVRAM(void * src, uint16_t dest)
     }
 
     return temp_length;
-}
-
-static uint32_t LZ4_ReadU32LE(const uint8_t *ptr)
-{
-    return (uint32_t)ptr[0] |
-           ((uint32_t)ptr[1] << 8) |
-           ((uint32_t)ptr[2] << 16) |
-           ((uint32_t)ptr[3] << 24);
 }
 
 /**
@@ -209,7 +226,7 @@ uint32_t LZ4_DecompressFrame(void * src, void * dest)
                 }
 
                 // Now to start decoding for real
-                uint16_t temp_offset = (uint16_t)(LZ4_ReadU32LE(ptr_read));
+                uint16_t temp_offset = (uint16_t)LZ4_ReadU32LE(ptr_read);
 
                 if (temp_offset == 0)
                 {
@@ -219,7 +236,7 @@ uint32_t LZ4_DecompressFrame(void * src, void * dest)
 
                 uint8_t * temp_past_ptr_read = ptr_write;
 
-                temp_past_ptr_read -= (uint16_t)(LZ4_ReadU32LE(ptr_read));
+                temp_past_ptr_read -= (uint16_t)LZ4_ReadU32LE(ptr_read);
 
                 ptr_read += 2; // get over the offset section
 
