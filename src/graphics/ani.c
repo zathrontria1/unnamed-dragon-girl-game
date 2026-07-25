@@ -23,15 +23,16 @@ uint16_t AniSystem_AnimateDropGravity(struct game_object * o)
 
     if (!((o->pos.z.a == 0) && (o->delta.z.a == 0)))
     {
-        
-        o->pos.z.a += o->delta.z.a;
-        o->delta.z.a -= (V_GRAVITY >> 1);
+        o->struct_data.npc_data.ani.frame++;
+        uint16_t t = o->struct_data.npc_data.ani.frame;
 
-        if (o->pos.z.a <= 0)
+        int32_t z = AniSystem_CalculateDropGravityZ(t, o->delta.z.a);
+        o->pos.z.a = z;
+
+        if (z == 0 && t > 0)
         {
-            o->pos.z.a = 0;
             o->delta.z.a = 0;
-
+            o->struct_data.npc_data.ani.frame = 0;
             grounded = 1;
         }
     }
@@ -39,10 +40,35 @@ uint16_t AniSystem_AnimateDropGravity(struct game_object * o)
     if (o->pos.z.a != 0)
     {
         AniSystem_DrawDropShadow(o);
-        
     }
 
     return grounded;
+}
+
+/**
+ * @brief Calculates the Z-axis height offset (in 16.16 fixed point) for gravity drop physics at a given frame.
+ * 
+ * @param elapsed Number of frames elapsed since launch.
+ * @param init_v Initial upward velocity in 16.16 fixed point (e.g. 3 * V_S_ONE).
+ * @return 32-bit fixed point Z height offset (0 if grounded or elapsed == 0).
+ */
+int32_t AniSystem_CalculateDropGravityZ(uint16_t elapsed, int32_t init_v)
+{
+    if (elapsed == 0)
+    {
+        return 0;
+    }
+
+    int32_t t = (int32_t)elapsed;
+    int32_t g = (V_GRAVITY >> 1);
+    int32_t z = (t * init_v) - ((g * t * (t - 1)) >> 1);
+
+    if (z <= 0)
+    {
+        z = 0;
+    }
+
+    return z;
 }
 
 /**

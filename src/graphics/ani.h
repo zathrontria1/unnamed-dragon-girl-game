@@ -7,7 +7,10 @@ extern const uint16_t const_ani_lut_frame_byteoffsets_16[512];
 
 extern uint16_t buf_player_prev_frame;
 
+struct game_object;
+
 uint16_t AniSystem_AnimateDropGravity(struct game_object * o);
+int32_t AniSystem_CalculateDropGravityZ(uint16_t elapsed, int32_t init_v);
 
 void AniSystem_DrawDropShadow(struct game_object * o);
 

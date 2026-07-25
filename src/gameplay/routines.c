@@ -235,24 +235,10 @@ void Routines_TreasureChest(struct game_object * o)
                 if (o->struct_data.interactable_data.ttl >= 90 / V_MUL)
                 {
                     // Calculate elapsed frames since chest was opened
-                    int elapsed = (180 / V_MUL) - o->struct_data.interactable_data.ttl;
+                    uint16_t elapsed = (180 / V_MUL) - o->struct_data.interactable_data.ttl;
 
-                    // Simulate Z-axis gravity drop/bounce physics matching AniSystem_AnimateDropGravity
-                    int32_t bounce_z = 0;
-                    int32_t dz = (3 * V_S_ONE);
-
-                    for (int i = 0; i < elapsed; i++)
-                    {
-                        bounce_z += dz;
-                        dz -= (V_GRAVITY >> 1);
-
-                        if (bounce_z <= 0)
-                        {
-                            bounce_z = 0;
-                            dz = 0;
-                            break;
-                        }
-                    }
+                    // Obtain Z-axis height offset using shared gravity physics function
+                    int32_t bounce_z = AniSystem_CalculateDropGravityZ(elapsed, 3 * V_S_ONE);
 
                     // Apply resting height offset (+16px above chest origin) plus bounce height
                     c.pos.z.a += (8l << 16) + bounce_z;
