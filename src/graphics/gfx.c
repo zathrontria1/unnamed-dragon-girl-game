@@ -26,8 +26,6 @@ int16_t gfx_cmath_r;
 int16_t gfx_cmath_g;
 int16_t gfx_cmath_b;
 
-#define GFX_SMOKE_QUEUE_MAX_COUNT OBJ_GENERAL_MAX_COUNT
-
 static pos_lh32_t gfx_smoke_queue[GFX_SMOKE_QUEUE_MAX_COUNT];
 static uint8_t gfx_smoke_queue_first;
 static uint8_t gfx_smoke_queue_count;
@@ -161,17 +159,17 @@ void Gfx_ProcessColorMath()
     // CGWSUB and CGADSUB shadows can be set directly
     if ((gfx_cmath_r | gfx_cmath_g | gfx_cmath_b) == 0x00)
     {
-        shadow_coldata_r = 0x20;
-        shadow_coldata_g = 0x40;
-        shadow_coldata_b = 0x80;
+        shadow_coldata_r = CM_APPLY_RED;
+        shadow_coldata_g = CM_APPLY_GREEN;
+        shadow_coldata_b = CM_APPLY_BLUE;
 
         hdma_coldata_usegradient = false;
     }
     else
     {
-        shadow_coldata_r = 0x20 | (gfx_cmath_r >> 8);
-        shadow_coldata_g = 0x40 | (gfx_cmath_g >> 8);
-        shadow_coldata_b = 0x80 | (gfx_cmath_b >> 8);
+        shadow_coldata_r = CM_APPLY_RED | (gfx_cmath_r >> 8);
+        shadow_coldata_g = CM_APPLY_GREEN | (gfx_cmath_g >> 8);
+        shadow_coldata_b = CM_APPLY_BLUE | (gfx_cmath_b >> 8);
     }
 
     return;

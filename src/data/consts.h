@@ -263,6 +263,8 @@
 #define TILEMAP_ADDR_CS_FRAME_B 0x5c00
 
 #define LZ4_BUFFER_ADDR 0x007f0000
+#define ANI_BG_STRIP_ADDR 0x007f0000
+#define ANI_BG_FRAME_ADDR 0x007f4000
 
 /*
     HDMA channel setup:

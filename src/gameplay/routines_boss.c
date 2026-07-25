@@ -37,8 +37,6 @@
 #include "system.h"
 #include "map.h"
 
-#define BOSS_POS_CENTER 456
-
 uint16_t obj_boss_state; // Boss state machine variable
 bool obj_boss_palette_swap;
 
@@ -60,8 +58,6 @@ uint16_t obj_boss_hands_prev_frame;
 bool obj_boss_hands_vram_stale;
 
 int obj_boss_hands_timer_attack;
-
-#define BOSS_ATTACK_BASETIME_1 ((5 * FPS) >> 1) - 1
 
 /*
     Call this when instantiating a boss object to ensure 

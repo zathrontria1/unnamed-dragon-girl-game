@@ -416,36 +416,6 @@ uint8_t * AniSystem_GetCompressedFrame(const uint8_t * data, const uint16_t * lo
 }
 
 // Lookup tables for animations
-/*
-    For reference:
-
-    #define STATE_IDLE 0
-
-    #define STATE_MOVE_WALK 1 // Yes, there is overlap
-    #define STATE_MOVE_RUN 2
-
-    #define STATE_ATTACK_BASIC 3
-    #define STATE_ATTACK_BASIC_MOVE 4
-
-    #define STATE_ATTACK_SPECIAL 5
-    #define STATE_ATTACK_SPECIAL_MOVE 6
-
-    #define STATE_HURT_NORMAL 7
-    #define STATE_HURT_NORMAL_MOVE 8
-    #define STATE_HURT_NORMAL_MOVE_RUN 9
-
-    #define STATE_HURT_BURN 10
-    #define STATE_HURT_BURN_MOVE 11
-
-    #define STATE_SPAWNING 12
-    #define STATE_DIE 13
-
-    #define FACING_DOWN 0
-    #define FACING_UP 1
-    #define FACING_RIGHT 2
-    #define FACING_LEFT 3
-*/
-
 // With flipping
 // Used for the slime and any other enemy with similar set up
 const uint16_t const_ani_lut_basic[56] = 

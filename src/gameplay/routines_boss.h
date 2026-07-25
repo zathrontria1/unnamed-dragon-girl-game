@@ -1,3 +1,8 @@
+#include "consts.h"
+
+#define BOSS_POS_CENTER 456
+#define BOSS_ATTACK_BASETIME_1 ((5 * FPS) >> 1) - 1
+
 extern uint16_t obj_boss_state;
 extern bool obj_boss_palette_swap;
 

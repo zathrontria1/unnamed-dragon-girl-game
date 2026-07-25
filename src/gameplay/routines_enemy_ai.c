@@ -23,7 +23,7 @@
 
 #include "gfx.h"
 
-static bool Routines_Enemy_Ai_IsTileInBounds(int16_t x, int16_t y)
+bool Routines_Enemy_Ai_IsTileInBounds(int16_t x, int16_t y)
 {
     return x >= 0 &&
            y >= 0 &&
@@ -38,7 +38,7 @@ static bool Routines_Enemy_Ai_IsTileInBounds(int16_t x, int16_t y)
 /*
     Metatile Bresenham tile raycast (returns true if path is clear of solid tiles)
 */
-static bool Routines_Enemy_Ai_CheckRawTileLOS(int16_t ex, int16_t ey, int16_t px, int16_t py)
+bool Routines_Enemy_Ai_CheckRawTileLOS(int16_t ex, int16_t ey, int16_t px, int16_t py)
 {
     int16_t dx = px - ex;
     int16_t dy = py - ey;

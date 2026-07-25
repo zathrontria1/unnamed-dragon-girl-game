@@ -1,3 +1,5 @@
+#include "snes/console.h"
+
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -337,7 +339,7 @@ void ObjectSystem_ProcessObjects()
         Gfx_SetColorMath(obj_player_active_fireballs,0,0, true);
         gfx_cmath_change = -64 * V_MUL;
         shadow_cgwsub = 0x00;
-        shadow_cgadsub = 0x32;
+        shadow_cgadsub = CM_MSCR_BACK | CM_MSCR_PAL47 | CM_MSCR_BG2;
     }
 
     // Finally repeat for enemies

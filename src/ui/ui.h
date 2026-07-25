@@ -1,3 +1,33 @@
+#ifndef UI_H
+#define UI_H
+
+#include <stdint.h>
+#include <stdbool.h>
+
+#include "snes/console.h"
+#include "consts.h"
+
+struct game_object;
+
+#define MENUACTION_NO 0
+#define MENUACTION_YES 1
+
+#define MENUACTION_OPTION_0 0
+#define MENUACTION_OPTION_1 1
+#define MENUACTION_OPTION_2 2
+#define MENUACTION_OPTION_3 3
+
+#define MENUACTION_OPENSUBSCREEN 128
+#define MENUACTION_EXITSUBSCREEN 129
+#define MENUACTION_CHANGEROUTINE 130
+#define MENUACTION_OPENMAPSCREEN 131
+#define MENUACTION_CALLFUNCTION 255
+
+#define TRANSITION_STATE_NONE 0
+#define TRANSITION_STATE_FADE_OUT 1
+#define TRANSITION_STATE_INITIALIZE 2
+#define TRANSITION_STATE_FADE_IN 3
+
 extern ZP bool ui_in_subscreen;
 extern bool ui_in_bg2;
 
@@ -51,3 +81,5 @@ void UserInterface_DrawEnemyHealthBar(struct game_object * o);
 void UserInterface_CopyUiGraphicsToVram(void);
 
 void UserInterface_Internal_Format3U(char *buf, uint16_t val);
+
+#endif /* UI_H */

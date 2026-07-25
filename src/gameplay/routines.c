@@ -543,7 +543,7 @@ void Routines_Drops_Recovery_Meat(struct game_object * o)
                 Gfx_SetColorMath(0,4,0, false);
                 gfx_cmath_change = -64 * V_MUL;
                 shadow_cgwsub = 0x00;
-                shadow_cgadsub = 0x32;
+                shadow_cgadsub = CM_MSCR_BACK | CM_MSCR_PAL47 | CM_MSCR_BG2;
                 
                 ObjectSystem_DestroyStandardObject(o->array_index);
             }

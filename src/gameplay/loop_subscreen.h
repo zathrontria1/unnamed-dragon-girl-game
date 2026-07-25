@@ -1,23 +1,10 @@
+#ifndef LOOP_SUBSCREEN_H
+#define LOOP_SUBSCREEN_H
+
 #include <stdint.h>
+#include <stdbool.h>
 
-#define MENUACTION_NO 0
-#define MENUACTION_YES 1
-
-#define MENUACTION_OPTION_0 0
-#define MENUACTION_OPTION_1 1
-#define MENUACTION_OPTION_2 2
-#define MENUACTION_OPTION_3 3
-
-#define MENUACTION_OPENSUBSCREEN 128
-#define MENUACTION_EXITSUBSCREEN 129
-#define MENUACTION_CHANGEROUTINE 130
-#define MENUACTION_OPENMAPSCREEN 131
-#define MENUACTION_CALLFUNCTION 255
-
-#define TRANSITION_STATE_NONE 0
-#define TRANSITION_STATE_FADE_OUT 1
-#define TRANSITION_STATE_INITIALIZE 2
-#define TRANSITION_STATE_FADE_IN 3
+#include "ui.h"
 
 struct menu_item {
     int16_t x;
@@ -78,3 +65,6 @@ void Subscreen_Transition_Start(void * next_func);
 void Loop_Subscreen_Transition_Init();
 void Loop_Subscreen_Transition_FadeIn();
 void Subscreen_Transition_Exit();
+
+#endif /* LOOP_SUBSCREEN_H */
+

@@ -22,9 +22,7 @@
 
 #include "gfx.h"
 
-#define CORNER_NUDGE_THRESHOLD 5
-
-static bool ObjectSystem_Move_TryNudgeCornerX(struct game_object * o, uint16_t q, uint16_t q2, uint16_t temp_x, uint16_t shiftcount)
+bool ObjectSystem_Move_TryNudgeCornerX(struct game_object * o, uint16_t q, uint16_t q2, uint16_t temp_x, uint16_t shiftcount)
 {
     uint8_t c1 = map_collision_buf[q];
     uint8_t c2 = map_collision_buf[q2];
@@ -91,7 +89,7 @@ static bool ObjectSystem_Move_TryNudgeCornerX(struct game_object * o, uint16_t q
     return false;
 }
 
-static bool ObjectSystem_Move_TryNudgeCornerY(struct game_object * o, uint16_t q, uint16_t q2, uint16_t shift_temp_y)
+bool ObjectSystem_Move_TryNudgeCornerY(struct game_object * o, uint16_t q, uint16_t q2, uint16_t shift_temp_y)
 {
     uint8_t c1 = map_collision_buf[q];
     uint8_t c2 = map_collision_buf[q2];

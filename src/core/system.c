@@ -118,9 +118,9 @@ void System_Init_CpuRegs(void)
     REG_TMW = 0;
     REG_TSW = 0;
 
-    REG_CGWSEL = 0x30;
+    REG_CGWSEL = CM_NEVER_ENABLE;
     REG_CGADSUB = 0;
-    REG_COLDATA = 0xe0;
+    REG_COLDATA = CM_APPLY_BLUE | CM_APPLY_GREEN | CM_APPLY_RED;
 
     REG_SETINI = 0;
 
