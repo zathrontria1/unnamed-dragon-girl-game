@@ -88,7 +88,7 @@ void SoundInterface_StartSoundEngine()
     }
 
     // Address is now set
-    SoundInterface_UploadData((uint8_t *)&data_soundengine_binary, 2560);
+    SoundInterface_UploadData((uint8_t *)&data_soundengine_binary, data_soundengine_binary_size);
 
     // Start the engine
     // Write start address

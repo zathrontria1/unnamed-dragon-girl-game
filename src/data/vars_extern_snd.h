@@ -6,6 +6,7 @@
 #include "defs_structs.h"
 
 extern HUGE const uint8_t data_soundengine_binary[];
+extern const uint16_t data_soundengine_binary_size;
 
 // Sequence data
 extern HUGE const struct seq_command data_seq_test_t1[];
