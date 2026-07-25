@@ -209,7 +209,7 @@ void LevelSystem_LoadLevelPalette(const struct level_data * level)
 }
 
 const struct level_data * const_level_pointer_table[LEVEL_ID_COUNT] = {
-    (void *)&data_level_test_0,
-    (void *)&data_level_test_1,
-    (void *)&data_level_test_2
+    (void *)&data_map_debug0_header,
+    (void *)&data_map_debug1_header,
+    (void *)&data_map_debug2_header
 };

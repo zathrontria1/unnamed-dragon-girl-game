@@ -1,4 +1,4 @@
-const uint8_t data_map_debug1[4098] = { 
+const uint8_t data_map_debug1_cells[4098] = { 
 4, 4, 
 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 

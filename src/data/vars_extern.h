@@ -87,27 +87,27 @@ extern const uint8_t data_facing_lut[];
 // Level sub-data
 extern const struct level_palette_list data_palette_list_0;
 
-extern const struct obj_list_entry_interactable data_interactables_debug0[];
-extern const struct obj_list_entry_interactable data_interactables_debug1[];
-extern const struct obj_list_entry_interactable data_interactables_debug2[];
+extern const struct obj_list_entry_interactable data_map_debug0_interactables[];
+extern const struct obj_list_entry_interactable data_map_debug1_interactables[];
+extern const struct obj_list_entry_interactable data_map_debug2_interactables[];
 
 extern const struct obj_list_entry_spawns data_spawnlist_debug0[];
 extern const struct obj_list_entry_spawns data_spawnlist_debug1[];
 extern const struct obj_list_entry_spawns data_spawnlist_debug2[];
 extern const struct obj_list_entry_spawns data_spawnlist_boss[];
 
-extern const struct obj_list_entry_spawners data_spawners_debug0[];
-extern const struct obj_list_entry_spawners data_spawners_debug1[];
-extern const struct obj_list_entry_spawners data_spawners_debug2[];
+extern const struct obj_list_entry_spawners data_map_debug0_spawners[];
+extern const struct obj_list_entry_spawners data_map_debug1_spawners[];
+extern const struct obj_list_entry_spawners data_map_debug2_spawners[];
 
 // Level data
-extern const uint8_t data_map_debug0[];
-extern const uint8_t data_map_debug1[];
-extern const uint8_t data_map_debug2[];
+extern const uint8_t data_map_debug0_cells[];
+extern const uint8_t data_map_debug1_cells[];
+extern const uint8_t data_map_debug2_cells[];
 
-extern const struct level_data data_level_test_0;
-extern const struct level_data data_level_test_1;
-extern const struct level_data data_level_test_2;
+extern const struct level_data data_map_debug0_header;
+extern const struct level_data data_map_debug1_header;
+extern const struct level_data data_map_debug2_header;
 
 // The lookup table for maps
 extern const uint16_t data_map_lut_dungeon[1024];
