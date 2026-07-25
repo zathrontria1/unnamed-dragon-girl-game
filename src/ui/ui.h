@@ -62,8 +62,8 @@ void UserInterface_UpdateHealthCounters(void);
 void UserInterface_UpdateMoneyCounters(void);
 void UserInterface_UpdateEnemyCounters(void);
 
-void UserInterface_PrintText(uint8_t * string_ptr, uint16_t row, uint16_t col);
-void UserInterface_PrintText_Mode3(uint8_t * string_ptr, uint16_t row, uint16_t col);
+void UserInterface_PrintText(char * string_ptr, uint16_t row, uint16_t col);
+void UserInterface_PrintText_Mode3(char * string_ptr, uint16_t row, uint16_t col);
 
 // Genericized window drawing functions
 void UserInterface_ClearWindowBuffer(bool use_clear_tile);

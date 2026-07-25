@@ -127,7 +127,7 @@ void Routines_Interactables_Switch(struct game_object * o)
                 }
                 else
                 {
-                    UserInterface_PrintText((uint8_t *)&STR_MSG_INCOMBAT, UI_MSGBOX_SL_START, UI_MARGIN_LEFT);
+                    UserInterface_PrintText((char *)&STR_MSG_INCOMBAT, UI_MSGBOX_SL_START, UI_MARGIN_LEFT);
                 }
             }
         }
@@ -170,7 +170,7 @@ void Routines_Interactable_Sign(struct game_object * o)
                 }
                 else
                 {
-                    UserInterface_PrintText((uint8_t *)&STR_MSG_INCOMBAT, UI_MSGBOX_SL_START, UI_MARGIN_LEFT);
+                    UserInterface_PrintText((char *)&STR_MSG_INCOMBAT, UI_MSGBOX_SL_START, UI_MARGIN_LEFT);
                 }
             }
         }
@@ -213,7 +213,7 @@ void Routines_TreasureChest(struct game_object * o)
                 }
                 else
                 {
-                    UserInterface_PrintText((uint8_t *)&STR_MSG_INCOMBAT, UI_MSGBOX_SL_START, UI_MARGIN_LEFT);
+                    UserInterface_PrintText((char *)&STR_MSG_INCOMBAT, UI_MSGBOX_SL_START, UI_MARGIN_LEFT);
                 }
             }
         }
