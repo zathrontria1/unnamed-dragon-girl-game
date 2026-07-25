@@ -3,11 +3,6 @@
 
 #include "vars.h"
 
-#include "maps/map_lut_dungeon.h"
-#include "maps/map_lut_dungeon_col.h"
-#include "maps/map_debug0.h"
-#include "maps/map_debug1.h"
-
 #include "sprites/spr_player_lut.h"
 #include "sprites/boss/spr_boss_placeholder_lut.h"
 
