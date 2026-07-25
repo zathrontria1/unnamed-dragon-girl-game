@@ -30,6 +30,107 @@
 
 #include "crash_handler.h"
 
+#if defined(PROFILE_OBJECT_CALLS) || defined(DEBUG_ALL)
+volatile uint16_t main_profile_dispatch_barrier;
+
+NO_INLINE void Main_ProcessRoutineProfiled(void)
+{
+    void (*func)() = system_loop_func_ptr;
+
+    if (func == NULL)
+    {
+        crashhandler_error_code = CRASHHANDLER_ERROR_MAIN_LOOP_NULL;
+        System_CrashHandler();
+    }
+
+    if (func == (void *)&Loop_Game)
+    {
+        Loop_Game();
+    }
+    else if (func == (void *)&Cs_Loop)
+    {
+        Cs_Loop();
+    }
+    else if (func == (void *)&Cs_StartCutscene)
+    {
+        Cs_StartCutscene();
+    }
+    else if (func == (void *)&Loop_Fade_In)
+    {
+        Loop_Fade_In();
+    }
+    else if (func == (void *)&Loop_Fade_Out)
+    {
+        Loop_Fade_Out();
+    }
+    else if (func == (void *)&Loop_Game_ReloadScene)
+    {
+        Loop_Game_ReloadScene();
+    }
+    else if (func == (void *)&Loop_Game_Pause)
+    {
+        Loop_Game_Pause();
+    }
+    else if (func == (void *)&Loop_Game_NewLevel)
+    {
+        Loop_Game_NewLevel();
+    }
+    else if (func == (void *)&Loop_Subscreen_MapDisplay)
+    {
+        Loop_Subscreen_MapDisplay();
+    }
+    else if (func == (void *)&Loop_Subscreen_MapDisplay_Init)
+    {
+        Loop_Subscreen_MapDisplay_Init();
+    }
+    else if (func == (void *)&Loop_Game_Messagebox)
+    {
+        Loop_Game_Messagebox();
+    }
+    else if (func == (void *)&MapSystem_Tilemap_EmergencyRecovery)
+    {
+        MapSystem_Tilemap_EmergencyRecovery();
+    }
+    else if (func == (void *)&Subscreen_Top)
+    {
+        Subscreen_Top();
+    }
+    else if (func == (void *)&Subscreen_Help)
+    {
+        Subscreen_Help();
+    }
+    else if (func == (void *)&Loop_Subscreen_Transition_Init)
+    {
+        Loop_Subscreen_Transition_Init();
+    }
+    else if (func == (void *)&Loop_Subscreen_Transition_FadeIn)
+    {
+        Loop_Subscreen_Transition_FadeIn();
+    }
+    else if (func == (void *)&Title_Loop)
+    {
+        Title_Loop();
+    }
+    else if (func == (void *)&GameOver_Loop)
+    {
+        GameOver_Loop();
+    }
+    else if (func == (void *)&Main_Reset)
+    {
+        Main_Reset();
+    }
+    else
+    {
+        func();
+    }
+
+    main_profile_dispatch_barrier = system_current_routine;
+    (void)main_profile_dispatch_barrier;
+
+    return;
+}
+#endif
+
 int main()
 {
     System_Init_CpuRegs(); // Display will be turned off within this
@@ -64,9 +165,7 @@ int main()
     System_DisplayStartupSplash(); // A good amount of init is here.
     
     system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_CUTSCENE_INIT);
-    //system_target_routine = ROUTINE_GAMELOOP;
-
-    // WIP: attempt to integrate the cutscene engine
+    
     system_target_routine = ROUTINE_CUTSCENE_INIT;
 
     cs_current = (struct cutscene_data *)&data_cs_intro;
@@ -82,6 +181,9 @@ int main()
     {   
         System_WaitUntilVblank();
 
+#if defined(PROFILE_OBJECT_CALLS) || defined(DEBUG_ALL)
+        Main_ProcessRoutineProfiled();
+#else
         void (*func)() = system_loop_func_ptr;
 
         if (func == NULL)
@@ -91,6 +193,7 @@ int main()
         }
 
         func();
+#endif
 
         HdmaEngine_SetHdmaShadow();
     }
