@@ -125,20 +125,4 @@ typedef enum SUPERSCOPE_BITS
 #define REG_JOYOUT (*(vuint8 *)0x4016)
 #define REG_JOYSERx(a) (((vuint8 *)0x4016)[(a)])
 
-/*!	\fn  padsCurrent(value)
-    \brief Return current value of selected pad
-    \param value pad index to use (0-1 or 0-4 if multiplayer 5 connected)
-    \return unsigned short of the current pad value
-*/
-// unsigned short padsCurrent(u16 value);
-#define padsCurrent(value) (pad_keys[value])
-
-/*!	\fn padsDown(value)
-    \brief Return value of down keys for selected pad
-    \param value pad index to use (0-1 or 0-4 if multiplayer 5 connected)
-    \return unsigned short of the newly pressed down keys (0 -> 1 transition)
-*/
-// unsigned short padsDown(u16 value);
-#define padsDown(value) (pad_keysdown[value])
-
 #endif // SNES_PADS_INCLUDE

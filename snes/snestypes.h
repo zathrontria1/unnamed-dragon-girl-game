@@ -43,8 +43,8 @@ typedef signed char s8;
 typedef unsigned char u8;
 typedef signed short s16;
 typedef unsigned short u16;
-typedef signed long long s32;
-typedef unsigned long long u32;
+typedef signed long s32;
+typedef unsigned long u32;
 
 #ifdef __VBCC__
 typedef __near volatile unsigned char vuint8;
@@ -65,15 +65,5 @@ typedef volatile long vint32;
 // Handy function pointer typedefs
 //! a function pointer that takes no arguments and doesn't return anything.
 typedef void (*VoidFn)(void);
-
-//! boolean definitions
-/*typedef unsigned char bool;
-#define FALSE 0
-#define TRUE 0xff
-#define false 0
-#define true 0xff*/
-
-// stdio definitions
-// #define NULL 0
 
 #endif

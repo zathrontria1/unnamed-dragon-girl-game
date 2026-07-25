@@ -33,10 +33,6 @@
 
 #include "snes/snestypes.h"
 
-#include "snes/background.h"
-#include "snes/sprite.h"
-#include "snes/video.h"
-
 /*!	\brief Bit defines for the HDMA channels */
 #define HDMA_CHANNEL0			(1 << 0)
 #define HDMA_CHANNEL1			(1 << 1)
@@ -47,29 +43,6 @@
 #define HDMA_CHANNEL6			(1 << 6)
 #define HDMA_CHANNEL7			(1 << 7)
 #define HDMA_CHANNELALL			(HDMA_CHANNEL0 | HDMA_CHANNEL1 | HDMA_CHANNEL2 | HDMA_CHANNEL3 | HDMA_CHANNEL4 | HDMA_CHANNEL5 | HDMA_CHANNEL6 | HDMA_CHANNEL7)
-
-/*!	\brief Bit defines for the window area main screen effect */
-#define MSWIN_BG1               (1 << 0) /*!< \brief Main Screen BG1 disable background */
-#define MSWIN_BG2               (1 << 1) /*!< \brief Main Screen BG2 disable background */
-#define MSWIN_BG3               (1 << 2) /*!< \brief Main Screen BG3 disable background */
-#define MSWIN_BG4               (1 << 3) /*!< \brief Main Screen BG4 disable background */
-
-#define MSWIN1_BG1MSKOUT        (1 << 0) /*!< \brief Window 1 area BG1 inside (0) outside(1) */
-#define MSWIN1_BG1MSKENABLE     (2 << 0) /*!< \brief Window 1 area BG1 enable */
-#define MSWIN2_BG1MSKOUT        (1 << 2) /*!< \brief Window 2 area BG1 inside (0) outside(1) */
-#define MSWIN2_BG1MSKENABLE     (2 << 2) /*!< \brief Window 2 area BG1 enable */
-#define MSWIN1_BG2MSKOUT        (1 << 4) /*!< \brief Window 1 area BG2 inside (0) outside(1) */
-#define MSWIN1_BG2MSKENABLE     (2 << 4) /*!< \brief Window 1 area BG2 enable */
-#define MSWIN2_BG2MSKOUT        (1 << 4) /*!< \brief Window 2 area BG2 inside (0) outside(1) */
-#define MSWIN2_BG2MSKENABLE     (2 << 4) /*!< \brief Window 2 area BG2 enable */
-#define MSWIN1_BG3MSKOUT        (1 << 0) /*!< \brief Window 1 area BG3 inside (0) outside(1) */
-#define MSWIN1_BG3MSKENABLE     (2 << 0) /*!< \brief Window 1 area BG3 enable */
-#define MSWIN2_BG3MSKOUT        (1 << 2) /*!< \brief Window 2 area BG3 inside (0) outside(1) */
-#define MSWIN2_BG3MSKENABLE     (2 << 2) /*!< \brief Window 2 area BG3 enable */
-#define MSWIN1_BG4MSKOUT        (1 << 4) /*!< \brief Window 1 area BG4 inside (0) outside(1) */
-#define MSWIN1_BG4MSKENABLE     (2 << 4) /*!< \brief Window 1 area BG4 enable */
-#define MSWIN2_BG4MSKOUT        (1 << 4) /*!< \brief Window 2 area BG4 inside (0) outside(1) */
-#define MSWIN2_BG4MSKENABLE     (2 << 4) /*!< \brief Window 2 area BG4 enable */
 
 /*!	\brief Bit defines for the DMA control registers */
 #define DMA_ENABLE 1
@@ -229,13 +202,13 @@
 #define REG_DAS6LH (*(vuint16 *)0x4365)
 #define REG_DAS7LH (*(vuint16 *)0x4375)
 
-#define REG_DASB0 (*(vuint16 *)0x4307)
-#define REG_DASB1 (*(vuint16 *)0x4317)
-#define REG_DASB2 (*(vuint16 *)0x4327)
-#define REG_DASB3 (*(vuint16 *)0x4337)
-#define REG_DASB4 (*(vuint16 *)0x4347)
-#define REG_DASB5 (*(vuint16 *)0x4357)
-#define REG_DASB6 (*(vuint16 *)0x4367)
-#define REG_DASB7 (*(vuint16 *)0x4377)
+#define REG_DASB0 (*(vuint8 *)0x4307)
+#define REG_DASB1 (*(vuint8 *)0x4317)
+#define REG_DASB2 (*(vuint8 *)0x4327)
+#define REG_DASB3 (*(vuint8 *)0x4337)
+#define REG_DASB4 (*(vuint8 *)0x4347)
+#define REG_DASB5 (*(vuint8 *)0x4357)
+#define REG_DASB6 (*(vuint8 *)0x4367)
+#define REG_DASB7 (*(vuint8 *)0x4377)
 
 #endif // SNES_DMA_INCLUDE

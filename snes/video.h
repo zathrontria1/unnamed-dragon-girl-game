@@ -55,14 +55,33 @@ typedef enum
     VRAM_ADRSTINC_128 = (2 << 0) /*!< \brief Address Increment Step (0..3 = Increment Word-Address by 1,32,128,128) */
 } VideoControl;
 
-#define FADE_IN 2
-#define FADE_OUT 1
-#define MOSAIC_IN 2
-#define MOSAIC_OUT 1
 #define MOSAIC_BG1 (1 << 0)
 #define MOSAIC_BG2 (1 << 1)
 #define MOSAIC_BG3 (1 << 2)
 #define MOSAIC_BG4 (1 << 3)
+
+/*!	\brief Bit defines for the window area main screen effect */
+#define MSWIN_BG1               (1 << 0) /*!< \brief Main Screen BG1 disable background */
+#define MSWIN_BG2               (1 << 1) /*!< \brief Main Screen BG2 disable background */
+#define MSWIN_BG3               (1 << 2) /*!< \brief Main Screen BG3 disable background */
+#define MSWIN_BG4               (1 << 3) /*!< \brief Main Screen BG4 disable background */
+
+#define MSWIN1_BG1MSKOUT        (1 << 0) /*!< \brief Window 1 area BG1 inside (0) outside(1) */
+#define MSWIN1_BG1MSKENABLE     (2 << 0) /*!< \brief Window 1 area BG1 enable */
+#define MSWIN2_BG1MSKOUT        (1 << 2) /*!< \brief Window 2 area BG1 inside (0) outside(1) */
+#define MSWIN2_BG1MSKENABLE     (2 << 2) /*!< \brief Window 2 area BG1 enable */
+#define MSWIN1_BG2MSKOUT        (1 << 4) /*!< \brief Window 1 area BG2 inside (0) outside(1) */
+#define MSWIN1_BG2MSKENABLE     (2 << 4) /*!< \brief Window 1 area BG2 enable */
+#define MSWIN2_BG2MSKOUT        (1 << 4) /*!< \brief Window 2 area BG2 inside (0) outside(1) */
+#define MSWIN2_BG2MSKENABLE     (2 << 4) /*!< \brief Window 2 area BG2 enable */
+#define MSWIN1_BG3MSKOUT        (1 << 0) /*!< \brief Window 1 area BG3 inside (0) outside(1) */
+#define MSWIN1_BG3MSKENABLE     (2 << 0) /*!< \brief Window 1 area BG3 enable */
+#define MSWIN2_BG3MSKOUT        (1 << 2) /*!< \brief Window 2 area BG3 inside (0) outside(1) */
+#define MSWIN2_BG3MSKENABLE     (2 << 2) /*!< \brief Window 2 area BG3 enable */
+#define MSWIN1_BG4MSKOUT        (1 << 4) /*!< \brief Window 1 area BG4 inside (0) outside(1) */
+#define MSWIN1_BG4MSKENABLE     (2 << 4) /*!< \brief Window 1 area BG4 enable */
+#define MSWIN2_BG4MSKOUT        (1 << 4) /*!< \brief Window 2 area BG4 inside (0) outside(1) */
+#define MSWIN2_BG4MSKENABLE     (2 << 4) /*!< \brief Window 2 area BG4 enable */
 
 #define CM_DIRCOLOR (1 << 0) /*!< \brief  Color Math Control Register A & B bits */
 #define CM_SUBBGOBJ_ENABLE (1 << 1)
@@ -70,15 +89,15 @@ typedef enum
 #define CM_MATWIN_ENABLE (1 << 4)
 #define CM_NOMATWIN_ENABLE (2 << 4)
 #define CM_NEVER_ENABLE (3 << 4)
-#define CM_SCBLK_ALWAYS_ENABLE (0 << 6)
-#define CM_SCBLK_MATWIN_ENABLE (1 << 6)
-#define CM_SCBLK_NOMATWIN_ENABLE (2 << 6)
-#define CM_SCBLK_NEVER_ENABLE (3 << 6)
+#define CM_SCBLK_NEVER_ENABLE (0 << 6)
+#define CM_SCBLK_NOMATWIN_ENABLE (1 << 6)
+#define CM_SCBLK_MATWIN_ENABLE (2 << 6)
+#define CM_SCBLK_ALWAYS_ENABLE (3 << 6)
 
 #define CM_SUB_MAINSUB (1 << 7)
 #define CM_DIV2_DIVIDE (1 << 6)
 #define CM_MSCR_BACK (1 << 5)
-#define CM_MSCR_PAL47 (1 << 4)
+#define CM_MSCR_PAL47 (1 << 4) /*!< \brief Color Math for OBJ using Palette 4-7 */
 #define CM_MSCR_BG4 (1 << 3)
 #define CM_MSCR_BG3 (1 << 2)
 #define CM_MSCR_BG2 (1 << 1)

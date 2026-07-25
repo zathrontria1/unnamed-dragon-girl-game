@@ -169,15 +169,4 @@ The H/V-IRQ flag in Bit7 of TIMEUP, Port 4211h gets set when the V-Counter gets 
 */
 #define REG_HVBJOY (*(vuint8 *)0x4212)
 
-/**
- *  \brief 
- *      Wait for VBL flag to be OK<br>
-*/
-#define WaitVBLFlag                   \
-    while ((REG_HVBJOY & VBL_READY))  \
-        ;                             \
-    while (!(REG_HVBJOY & VBL_READY)) \
-    {                                 \
-    };
-
 #endif // SNES_INTERRUPTS_INCLUDE

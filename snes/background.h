@@ -35,7 +35,6 @@
 
 #include "snes/snestypes.h"
 
-#include "snes/dma.h"
 #include "snes/interrupt.h"
 #include "snes/video.h"
 
@@ -76,10 +75,6 @@
 #define BG4_ENABLE (1 << 3)
 #define OBJ_ENABLE (1 << 4)
 
-#define BG_4COLORS0 32
-#define BG_4COLORS 4
-#define BG_16COLORS 16
-#define BG_256COLORS 256
 #define BG3_MODE1_PRIORITY_HIGH (1 << 3)
 
 /** \def REG_BGMODE
