@@ -60,6 +60,7 @@ dkms.conf
 # listing
 *.lst
 mapfile
+mapfile_debug
 rommap.svg
 rammap.svg
 *~
@@ -106,7 +107,7 @@ build_full.bat
 
 # unpatched header ROM
 main_temp.sfc
-.build-history/
+.build/
 *.sfc.build.json
 
 # some emulators dump files in the same folder as the output ROM
