@@ -182,7 +182,18 @@ void Routines_Player(struct game_object * o)
                     o->delta.y.a *= 2;
 
                     temp_is_dashing = 1;
+
+                    #if defined(DEBUG_ALL)
+                    // In debug builds, hold B+R to move at a speed that will break tilemap generation
+                    if (System_CheckKeyHeld(KEY_R))
+                    {
+                        // Speed up the player if the player isn't attacking
+                        o->delta.x.a *= 3; // Make it 3x of what it normally would have been
+                        o->delta.y.a *= 3;
+                    }
+                    #endif
                 }
+                
             }
 
             // Test for what attack the player is trying 

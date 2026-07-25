@@ -347,7 +347,7 @@ void MapSystem_Tilemap_StartEmergencyRecovery()
     system_game_paused = true;
     system_dont_count_lag = true;
     system_use_alternate_nmi = true;
-    shadow_brightness_change = 128 * V_MUL;
+    shadow_brightness_change = -128 * V_MUL;
     system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_MAP_RECOVERY);
 
     return;
@@ -357,12 +357,12 @@ void MapSystem_Tilemap_EmergencyRecovery()
 {
     if (map_tilemap_recovery_state == 1)
     {
-        if (shadow_brightness < (15 << 8))
+        while (shadow_brightness > 0)
         {
-            return;
+            ; // Wait for the brightness to reach the target value
         }
 
-        REG_INIDISP = DSP_FORCEVBL | 0x0f;
+        REG_INIDISP = DSP_FORCEVBL | 0x00;
         shadow_fblank_enable = DSP_FORCEVBL;
         DmaSystem_ResetQueue();
         MapSystem_Tilemap_RegenerateTilemap();
@@ -370,13 +370,21 @@ void MapSystem_Tilemap_EmergencyRecovery()
         map_tilemap_recovery_state = 2;
         shadow_brightness_change = (128 * V_MUL);
         shadow_fblank_enable = 0;
+        shadow_brightness = 0;
     }
-    else if (map_tilemap_recovery_state == 2 && shadow_brightness <= 0)
+    else if (map_tilemap_recovery_state == 2)
     {
+        while (shadow_brightness < (15 << 8))
+        {
+            ; // Wait for the brightness to reach the target value
+        }
+
+        system_use_alternate_nmi = false;
+
         map_tilemap_recovery_state = 0;
         system_game_paused = false;
         system_dont_count_lag = false;
-        system_use_alternate_nmi = false;
+        
         system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_GAMELOOP);
     }
 
