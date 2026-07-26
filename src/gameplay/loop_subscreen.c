@@ -122,6 +122,9 @@ void Subscreen_Transition_Start(void * next_func)
 
 void Subscreen_Transition_Exit()
 {
+    // Disable HDMA gradients
+    hdma_use_gradient = 0x0000;
+    
     // Restore CGADSUB
     shadow_cgadsub = subscreen_cgadsub_copy; 
 
