@@ -1,3 +1,6 @@
+#ifndef LOOP_CUTSCENE_H
+#define LOOP_CUTSCENE_H
+
 extern struct cutscene_data * cs_current;
 extern uint16_t cs_timer;
 
@@ -7,3 +10,6 @@ extern uint16_t cs_preload_subsection;
 void Cs_Loop();
 void Cs_StartCutscene();
 void Cs_PreloadNextFrame();
+
+#endif // LOOP_CUTSCENE_H
+

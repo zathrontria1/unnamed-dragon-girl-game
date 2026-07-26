@@ -1,3 +1,6 @@
+#ifndef MAP_H
+#define MAP_H
+
 struct game_object;
 
 extern uint16_t map_column[32]; // one contiguous column
@@ -52,3 +55,6 @@ void MapSystem_Tilemap_StartEmergencyRecovery(void);
 void MapSystem_Tilemap_EmergencyRecovery(void);
 bool MapSystem_Tilemap_BuildColumn(const uint8_t * p, const uint16_t * lut, int16_t tile_x, int16_t tile_y, bool odd);
 void MapSystem_Tilemap_BuildRow(const uint8_t * p, const uint16_t * lut, int16_t tile_x, int16_t tile_y, bool odd);
+
+#endif // MAP_H
+

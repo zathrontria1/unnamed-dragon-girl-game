@@ -1,3 +1,6 @@
+#ifndef GFX_H
+#define GFX_H
+
 #include "consts.h"
 
 extern uint16_t gfx_mosaic_layers;
@@ -21,3 +24,6 @@ void Gfx_ResetSmoke();
 void Gfx_SetColorMath(int16_t r, int16_t g, int16_t b, bool gradient);
 
 void Gfx_EmitSmoke(struct game_object * o, int offset);
+
+#endif // GFX_H
+

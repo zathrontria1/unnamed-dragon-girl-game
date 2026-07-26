@@ -1,3 +1,6 @@
+#ifndef ROUTINES_H
+#define ROUTINES_H
+
 struct game_object;
 
 void Routines_Fx_Impact(struct game_object * o);
@@ -23,3 +26,6 @@ void Routines_Shared_CheckIfDead(struct game_object * o);
 
 void Routines_Shared_Draw(struct game_object * o, uint8_t * spr_addr, uint16_t pal_shifted, int layer, bool always_flicker, bool is_player);
 void Routines_Shared_DrawFixed(struct game_object * o, uint16_t tileattrib, int layer, bool always_flicker);
+
+#endif // ROUTINES_H
+

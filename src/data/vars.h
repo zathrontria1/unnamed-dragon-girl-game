@@ -1,3 +1,6 @@
+#ifndef VARS_H
+#define VARS_H
+
 #include <stdint.h>
 #include <stdbool.h> // DO NOT REMOVE THIS
 
@@ -70,3 +73,6 @@ extern uint16_t event_in_combat;
 extern uint16_t event_in_combat_shadow;
 
 extern uint16_t event_tutorial_shown;
+
+#endif // VARS_H
+

@@ -1,3 +1,6 @@
+#ifndef ROUTINES_ENEMY_H
+#define ROUTINES_ENEMY_H
+
 struct game_object;
 
 typedef struct enemy_standard_cfg
@@ -25,3 +28,6 @@ void Routines_Enemy_InvisibleHit(struct game_object * o);
 uint16_t Routines_Enemy_GetFacing(struct game_object * o);
 
 void Routines_Enemy_HandleFailedSpawn(struct game_object * o);
+
+#endif // ROUTINES_ENEMY_H
+

@@ -1,3 +1,12 @@
+#ifndef SPR_H
+#define SPR_H
+
+#include <stdint.h>
+#include "consts.h"
+#include "defs_structs.h"
+
+struct game_object;
+
 extern uint16_t spr_sprite_count; // Rendered sprites this frame
 extern uint16_t spr_sprite_count_prev; // previous
 
@@ -48,3 +57,6 @@ void SpriteEngine_ReleaseVramForBoss();
 
 void SpriteEngine_PackOamHighTable();
 void SpriteEngine_ResetOam();
+
+#endif // SPR_H
+

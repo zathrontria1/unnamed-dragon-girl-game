@@ -1,3 +1,11 @@
+#ifndef SPR_METASPR_H
+#define SPR_METASPR_H
+
+#include <stdint.h>
+
+struct game_object;
+struct spr_metaspr_definition;
+
 #if VBCC_ASM == 1
 NO_INLINE void SpriteEngine_AddMetaSprite(__reg("a/x") struct game_object * o, __reg("r0/r1") const struct spr_metaspr_definition * m);
 #else
@@ -11,3 +19,6 @@ void SpriteEngine_AddMetaSprite_Back(struct game_object * o, const struct spr_me
 #endif
 
 void SpriteEngine_AddMetaSprite_Priority(struct game_object * o, const struct spr_metaspr_definition * m, uint16_t priority_mask);
+
+#endif // SPR_METASPR_H
+

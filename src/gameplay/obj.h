@@ -1,3 +1,6 @@
+#ifndef OBJ_H
+#define OBJ_H
+
 #include "consts.h"
 #include "defs_structs.h"
 
@@ -103,3 +106,6 @@ bool ObjectSystem_GetEnemyData(struct game_object * o);
 bool ObjectSystem_FindValidSpawnPosition(int16_t x, int16_t y, int16_t w, int16_t h, int16_t * out_x, int16_t * out_y);
 
 void ObjectSystem_ScheduleEnemyAi(void);
+
+#endif // OBJ_H
+

@@ -1,3 +1,6 @@
+#ifndef MATH_INT_H
+#define MATH_INT_H
+
 #include <stdint.h>
 #include <stdbool.h>
 #include "consts.h"
@@ -18,3 +21,6 @@ uint32_t Math_GetDistanceSquared(int16_t x, int16_t y);
 
 #define Math_Sin(angle) (data_sine_1[(uint8_t)(angle)])
 #define Math_Cos(angle) (data_sine_1[(uint8_t)((angle) + 64)])
+
+#endif // MATH_INT_H
+

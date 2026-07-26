@@ -1,3 +1,6 @@
+#ifndef SYSTEM_H
+#define SYSTEM_H
+
 #include "snes/console.h"
 
 extern uint8_t system_MVNCodeInWRAM[4];
@@ -56,3 +59,6 @@ NO_INLINE void System_CopyBlock(__reg("r0/r1") uint8_t * src, __reg("r2/r3") uin
 #else
 void System_CopyBlock(uint8_t * src, uint8_t * dest, uint16_t len);
 #endif
+
+#endif // SYSTEM_H
+

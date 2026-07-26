@@ -1,3 +1,6 @@
+#ifndef INTERRUPT_SUB_H
+#define INTERRUPT_SUB_H
+
 #include "consts.h"
 
 #if VBCC_ASM == 1
@@ -9,3 +12,6 @@
     void Nmi_Alternate();
     void Nmi_Cutscene();
 #endif
+
+#endif // INTERRUPT_SUB_H
+

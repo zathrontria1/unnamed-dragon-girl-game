@@ -1,3 +1,6 @@
+#ifndef ROUTINES_BOSS_H
+#define ROUTINES_BOSS_H
+
 #include "consts.h"
 
 struct game_object;
@@ -54,3 +57,6 @@ void Routines_Boss_Test_Hands_DrawShadow(struct game_object * o, bool flip);
 void Routines_Boss_Test_Hands_DmaFrame(struct game_object * o);
 
 void Routines_Boss_Test_Draw(struct game_object * o, bool flip);
+
+#endif // ROUTINES_BOSS_H
+

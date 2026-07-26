@@ -1,3 +1,6 @@
+#ifndef ANI_PAL_H
+#define ANI_PAL_H
+
 extern uint16_t pal_ani_entries[8][2];
 extern uint16_t pal_ani_sel;
 
@@ -12,3 +15,6 @@ void AniSystem_Pal_PrecalcPaletteChanges(void);
 
 void AniSystem_Pal_CycleSubpalette(uint16_t subpal);
 void AniSystem_Pal_CopyCycledSubpaletteToMainSubpalette(uint16_t src_subpal, uint16_t dest_subpal, uint16_t start, uint16_t len);
+
+#endif // ANI_PAL_H
+

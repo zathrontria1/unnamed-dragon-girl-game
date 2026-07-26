@@ -1,3 +1,6 @@
+#ifndef UI_VWF_H
+#define UI_VWF_H
+
 extern const uint8_t const_ui_vwf_offsets[];
 
 extern uint16_t vwf_shift;
@@ -49,3 +52,6 @@ void VwfEngine_PrintText_Render(uint8_t * glyph_ptr, uint8_t * write_ptr, uint16
 void VwfEngine_PrintText_StartNewPage();
 
 void VwfEngine_PrintText_ResetTilemap(uint16_t * ptr, int len);
+
+#endif // UI_VWF_H
+

@@ -1,4 +1,7 @@
 
+#ifndef ANI_H
+#define ANI_H
+
 // Lookup tables for animations
 // With flipping
 extern const uint16_t const_ani_lut_basic[56];
@@ -26,3 +29,6 @@ uint8_t * AniSystem_GetDynamicFrame_EnemyBossParticle(struct game_object * o);
 uint8_t * AniSystem_GetDynamicFrame_Arrow(struct game_object * o);
 
 uint8_t * AniSystem_GetCompressedFrame(const uint8_t * data, const uint16_t * lookup, uint8_t * buffer, uint16_t frame);
+
+#endif // ANI_H
+

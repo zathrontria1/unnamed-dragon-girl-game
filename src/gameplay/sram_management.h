@@ -1,3 +1,6 @@
+#ifndef SRAM_MANAGEMENT_H
+#define SRAM_MANAGEMENT_H
+
 #include "consts.h"
 
 #define SRAM_LAYOUT_VERSION 2
@@ -39,5 +42,8 @@ bool Sram_ReadSlotData(uint16_t slot, sram_save_data_t * state);
 sram_slot_status_t Sram_GetSlotStatus(uint16_t slot);
 
 uint16_t Sram_CalculateChecksum(uint16_t slot);
+
+#endif // SRAM_MANAGEMENT_H
+
 
 

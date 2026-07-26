@@ -1,3 +1,6 @@
+#ifndef ANI_BG_H
+#define ANI_BG_H
+
 #include "consts.h"
 
 // These are locations the game uses to decompress graphics data.
@@ -28,3 +31,6 @@ void AniSystem_BgTile_SetStripPointer(uint8_t * ptr);
 void AniSystem_BgTile_SetFramePointer(uint8_t * ptr);
 
 void AniSystem_BgTile_Setup(uint8_t * ptr_strip, uint8_t * ptr_frame);
+
+#endif // ANI_BG_H
+
