@@ -31,13 +31,13 @@ void DmaSystem_ClearWram(
 {
     REG_DMAP7 = 0x08; // byte reg write, fixed
 
-    REG_A1T7LH = (uint16_t)((uint32_t)&const_zero);
-    REG_A1B7 = (uint8_t)((uint32_t)&const_zero >> 16);
+    REG_A1T7LH = ADDR_LOWORD(&const_zero);
+    REG_A1B7 = ADDR_BANK(&const_zero);
 
     REG_BBAD7 = 0x80; // WMDATA
 
-    REG_WMADDLM = (uint16_t)((uint32_t)dest);
-    REG_WMADDH = (uint8_t)((uint32_t)dest >> 16);
+    REG_WMADDLM = ADDR_LOWORD(dest);
+    REG_WMADDH = ADDR_BANK(dest);
     
     REG_DAS7LH = length;
 
@@ -107,13 +107,13 @@ void DmaSystem_CopyToWram(
         // Copies A-bus address to WRAM
         REG_DMAP7 = 0x00; // byte reg write
 
-        REG_A1T7LH = (uint16_t)((uint32_t)src);
-        REG_A1B7 = (uint8_t)((uint32_t)src >> 16);
+        REG_A1T7LH = ADDR_LOWORD(src);
+        REG_A1B7 = ADDR_BANK(src);
 
         REG_BBAD7 = 0x80; // WMDATA
 
-        REG_WMADDLM = (uint16_t)((uint32_t)dest);
-        REG_WMADDH = (uint8_t)((uint32_t)dest >> 16);
+        REG_WMADDLM = ADDR_LOWORD(dest);
+        REG_WMADDH = ADDR_BANK(dest);
         
         REG_DAS7LH = length;
 
@@ -228,8 +228,8 @@ void DmaSystem_CopyToVram(
 
     REG_DMAP0 = 0x01; // word reg write
 
-    REG_A1T0LH = (uint16_t)((uint32_t)src);
-    REG_A1B0 = (uint8_t)((uint32_t)src >> 16);
+    REG_A1T0LH = ADDR_LOWORD(src);
+    REG_A1B0 = ADDR_BANK(src);
 
     REG_VMAIN = VRAM_INCHIGH;
 
@@ -264,8 +264,8 @@ void DmaSystem_CopyFromVramToWram(
 
     REG_DMAP0 = 0x81; // word reg write, reverse
 
-    REG_A1T0LH = (uint16_t)((uint32_t)dest);
-    REG_A1B0 = (uint8_t)((uint32_t)dest >> 16);
+    REG_A1T0LH = ADDR_LOWORD(dest);
+    REG_A1B0 = ADDR_BANK(dest);
 
     REG_VMAIN = VRAM_INCHIGH;
 
@@ -323,8 +323,8 @@ void DmaSystem_UploadOam()
 
         REG_DMAP0 = 0x00; //byte reg write
 
-        REG_A1T0LH = (uint16_t)(((uint32_t)&shadow_oam));
-        REG_A1B0 = (uint8_t)(((uint32_t)&shadow_oam >> 16));
+        REG_A1T0LH = ADDR_LOWORD(&shadow_oam);
+        REG_A1B0 = ADDR_BANK(&shadow_oam);
         
         REG_BBAD0 = 0x04; // OAMDATA
 
@@ -372,8 +372,8 @@ void DmaSystem_UploadCgram()
 
         REG_DMAP0 = 0x00; //byte reg write
 
-        REG_A1T0LH = (uint16_t)(((uint32_t)&shadow_cgram));
-        REG_A1B0 = (uint8_t)(((uint32_t)&shadow_cgram >> 16));
+        REG_A1T0LH = ADDR_LOWORD(&shadow_cgram);
+        REG_A1B0 = ADDR_BANK(&shadow_cgram);
 
         REG_BBAD0 = 0x22; // CGDATA
 
@@ -442,8 +442,8 @@ void DmaSystem_UploadCgram()
 
         REG_DMAP0 = 0x00; //byte reg write
 
-        REG_A1T0LH = (uint16_t)(((uint32_t)&shadow_cgram)) + (start << 1);
-        REG_A1B0 = (uint8_t)(((uint32_t)&shadow_cgram >> 16));
+        REG_A1T0LH = ADDR_LOWORD(&shadow_cgram) + (start << 1);
+        REG_A1B0 = ADDR_BANK(&shadow_cgram);
 
         REG_BBAD0 = 0x22; // CGDATA
 
@@ -499,8 +499,8 @@ void DmaSystem_UpdateStripTiles()
         REG_VMAIN = 0x80;
         REG_VMADDLH = ani_bg_dest_water;
 
-        REG_A1T0LH = (uint16_t)((uint32_t)ani_bg_addr_water);
-        REG_A1B0 = (uint8_t)(((uint32_t)ani_bg_addr_water) >> 16);
+        REG_A1T0LH = ADDR_LOWORD(ani_bg_addr_water);
+        REG_A1B0 = ADDR_BANK(ani_bg_addr_water);
 
         REG_DAS0LH = 512;
 
@@ -554,8 +554,8 @@ void DmaSystem_UpdateFrameTiles()
         REG_VMAIN = 0x80;
         REG_VMADDLH = ani_bg_dest_tallbg;
 
-        REG_A1T0LH = (uint16_t)((uint32_t)ani_bg_addr_tallbg);
-        REG_A1B0 = (uint8_t)(((uint32_t)ani_bg_addr_tallbg) >> 16);
+        REG_A1T0LH = ADDR_LOWORD(ani_bg_addr_tallbg);
+        REG_A1B0 = ADDR_BANK(ani_bg_addr_tallbg);
 
         REG_DAS0LH = 2048; // 512 bytes x 4 rows of 8px = 2048
 
@@ -761,8 +761,8 @@ void DmaSystem_ProcessQueue()
             REG_VMAIN = dma_queue[i].vmain;
             REG_VMADDLH = dma_queue[i].dest;
 
-            REG_A1T0LH = (uint16_t)((uint32_t)dma_queue[i].src);
-            REG_A1B0 = (uint8_t)(((uint32_t)dma_queue[i].src) >> 16);
+            REG_A1T0LH = ADDR_LOWORD(dma_queue[i].src);
+            REG_A1B0 = ADDR_BANK(dma_queue[i].src);
 
             REG_DAS0LH = dma_queue[i].length;
 
@@ -781,8 +781,8 @@ void DmaSystem_ProcessQueue()
 
         REG_VMADDLH = dma_filler_dest;
 
-        REG_A1T0LH = (uint16_t)((uint32_t)&dma_filler_val);
-        REG_A1B0 = (uint8_t)(((uint32_t)&dma_filler_val) >> 16);
+        REG_A1T0LH = ADDR_LOWORD(&dma_filler_val);
+        REG_A1B0 = ADDR_BANK(&dma_filler_val);
 
         REG_DAS0LH = dma_filler_length;
 

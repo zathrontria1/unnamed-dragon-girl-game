@@ -76,46 +76,46 @@ void HdmaEngine_SetupPaletteHdma()
     REG_BBAD2 = (uint8_t)((uint32_t)&REG_CGADD);
     REG_BBAD6 = (uint8_t)((uint32_t)&REG_TM);
 
-    REG_A1T1LH = (uint16_t)((uint32_t)&hdma_bgpalette_tables[0]);
-    REG_A1T2LH = (uint16_t)((uint32_t)&hdma_windowbackground_tables[0]);
-    REG_A1T6LH = (uint16_t)((uint32_t)&const_hdma_tm_msgbox[0]);
+    REG_A1T1LH = ADDR_LOWORD(&hdma_bgpalette_tables[0]);
+    REG_A1T2LH = ADDR_LOWORD(&hdma_windowbackground_tables[0]);
+    REG_A1T6LH = ADDR_LOWORD(&const_hdma_tm_msgbox[0]);
 
-    REG_A1B1 = (uint8_t)((uint32_t)&hdma_bgpalette_tables[0] >> 16);
-    REG_A1B2 = (uint8_t)((uint32_t)&hdma_windowbackground_tables[0] >> 16);
-    REG_A1B6 = (uint8_t)((uint32_t)&const_hdma_tm_msgbox[0] >> 16);
+    REG_A1B1 = ADDR_BANK(&hdma_bgpalette_tables[0]);
+    REG_A1B2 = ADDR_BANK(&hdma_windowbackground_tables[0]);
+    REG_A1B6 = ADDR_BANK(&const_hdma_tm_msgbox[0]);
 
-    REG_DAS1LH = (uint16_t)((uint32_t)&hdma_bgpalette_data[0]);
-    REG_DAS2LH = (uint16_t)((uint32_t)&hdma_windowbackground_data[0]);
+    REG_DAS1LH = ADDR_LOWORD(&hdma_bgpalette_data[0]);
+    REG_DAS2LH = ADDR_LOWORD(&hdma_windowbackground_data[0]);
 
-    REG_DASB1 = (uint8_t)((uint32_t)&hdma_bgpalette_data[0] >> 16);
-    REG_DASB2 = (uint8_t)((uint32_t)&hdma_windowbackground_data[0] >> 16);
+    REG_DASB1 = ADDR_BANK(&hdma_bgpalette_data[0]);
+    REG_DASB2 = ADDR_BANK(&hdma_windowbackground_data[0]);
 
     hdma_bgpalette_tables[0].count = 0x80 | 112;
-    hdma_bgpalette_tables[0].addr = (uint16_t)((uint32_t)&hdma_bgpalette_data[0]);
+    hdma_bgpalette_tables[0].addr = ADDR_LOWORD(&hdma_bgpalette_data[0]);
 
     hdma_bgpalette_tables[1].count = 0x80 | 112;
-    hdma_bgpalette_tables[1].addr = (uint16_t)((uint32_t)&hdma_bgpalette_data[0] + 448);
+    hdma_bgpalette_tables[1].addr = ADDR_LOWORD(&hdma_bgpalette_data[0]) + 448;
 
     hdma_bgpalette_tables[2].count = 0;
     
     // background UI window, textbox ver
     hdma_windowbackground_tables[0][0].count = (UI_MSGBOX_ML_START * 4);
-    hdma_windowbackground_tables[0][0].addr = (uint16_t)((uint32_t)&hdma_windowbackground_data[0]);
+    hdma_windowbackground_tables[0][0].addr = ADDR_LOWORD(&hdma_windowbackground_data[0]);
 
     hdma_windowbackground_tables[0][1].count = (UI_MSGBOX_ML_START * 4);
-    hdma_windowbackground_tables[0][1].addr = (uint16_t)((uint32_t)&hdma_windowbackground_data[0]);
+    hdma_windowbackground_tables[0][1].addr = ADDR_LOWORD(&hdma_windowbackground_data[0]);
 
     hdma_windowbackground_tables[0][2].count = 0x80 | ((UI_MSGBOX_HEIGHT * 8) + 4); // Text box height plus reset entries
-    hdma_windowbackground_tables[0][2].addr = (uint16_t)((uint32_t)&hdma_windowbackground_data[0]);
+    hdma_windowbackground_tables[0][2].addr = ADDR_LOWORD(&hdma_windowbackground_data[0]);
     
     hdma_windowbackground_tables[0][3].count = 0;
 
     // Fullscreen ver
     hdma_windowbackground_tables[1][0].count = 0x80 | 112;
-    hdma_windowbackground_tables[1][0].addr = (uint16_t)((uint32_t)&hdma_windowbackground_data[1][0]);
+    hdma_windowbackground_tables[1][0].addr = ADDR_LOWORD(&hdma_windowbackground_data[1][0]);
 
     hdma_windowbackground_tables[1][1].count = 0x80 | 112;
-    hdma_windowbackground_tables[1][1].addr = (uint16_t)((uint32_t)&hdma_windowbackground_data[1][0] + 448);
+    hdma_windowbackground_tables[1][1].addr = ADDR_LOWORD(&hdma_windowbackground_data[1][0]) + 448;
 
     hdma_windowbackground_tables[1][2].count = 0;
 
@@ -123,7 +123,7 @@ void HdmaEngine_SetupPaletteHdma()
     HdmaEngine_GeneratePaletteTable((uint16_t *)&hdma_windowbackground_data[0], 0x04, 4, RGB5(0,0,0), 26, 48); // UI message box using alpha towards black
     HdmaEngine_GeneratePaletteTable((uint16_t *)&hdma_windowbackground_data[1], 0x04, 4, RGB5(0,0,0), 26, 224); // UI full height using alpha towards black
 
-    hdma_gradient_ptr = (uint16_t)((uint32_t)&hdma_windowbackground_tables[0][0]);
+    hdma_gradient_ptr = ADDR_LOWORD(&hdma_windowbackground_tables[0][0]);
 
     return;
 }
@@ -137,20 +137,20 @@ void HdmaEngine_SetupBgScrollHdma()
 
     REG_BBAD3 = (uint8_t)((uint32_t)&REG_BG2VOFS); // One register, write twice
 
-    REG_A1T3LH = (uint16_t)((uint32_t)&hdma_scroll_tables[0]);
+    REG_A1T3LH = ADDR_LOWORD(&hdma_scroll_tables[0]);
 
-    REG_A1B3 = (uint8_t)((uint32_t)&hdma_scroll_tables[0] >> 16);
+    REG_A1B3 = ADDR_BANK(&hdma_scroll_tables[0]);
 
-    REG_DAS3LH = (uint16_t)((uint32_t)&hdma_scroll_data[0]);
+    REG_DAS3LH = ADDR_LOWORD(&hdma_scroll_data[0]);
 
-    REG_DASB3 = (uint8_t)((uint32_t)&hdma_scroll_data[0] >> 16);
+    REG_DASB3 = ADDR_BANK(&hdma_scroll_data[0]);
 
     for (int i = 0; i < 2; i++)
     {
         for (int j = 0; j < 7; j++)
         {
             hdma_scroll_tables[i][j].count = 0x80 | 32;
-            hdma_scroll_tables[i][j].addr = (uint16_t)((uint32_t)&hdma_scroll_data[i]);
+            hdma_scroll_tables[i][j].addr = ADDR_LOWORD(&hdma_scroll_data[i]);
         }
 
         hdma_scroll_tables[i][7].count = 0;
@@ -168,20 +168,20 @@ void HdmaEngine_SetupColdataHdma()
 
     REG_BBAD4 = (uint8_t)((uint32_t)&REG_COLDATA); // One register
 
-    REG_A1T4LH = (uint16_t)((uint32_t)&hdma_coldata_tables[0]);
+    REG_A1T4LH = ADDR_LOWORD(&hdma_coldata_tables[0]);
 
-    REG_A1B4 = (uint8_t)((uint32_t)&hdma_coldata_tables[0] >> 16);
+    REG_A1B4 = ADDR_BANK(&hdma_coldata_tables[0]);
 
-    REG_DAS4LH = (uint16_t)((uint32_t)&hdma_coldata_data[0]);
+    REG_DAS4LH = ADDR_LOWORD(&hdma_coldata_data[0]);
 
-    REG_DASB4 = (uint8_t)((uint32_t)&hdma_coldata_data[0] >> 16);
+    REG_DASB4 = ADDR_BANK(&hdma_coldata_data[0]);
 
     // The indirect table is 64 entries large.
     // Set up the tables so that the max intensity is the first entry (last data)
     // and go backwards, then mirror it.
 
     struct hdma_indirect_table_entry *table_base = &hdma_coldata_tables[0][0];
-    uint16_t element_base_addr = (uint16_t)((uint32_t)&hdma_coldata_data[0][0][0]);
+    uint16_t element_base_addr = ADDR_LOWORD(&hdma_coldata_data[0][0][0]);
 
     for (int i = 0; i < 2; i++)
     {
@@ -345,7 +345,7 @@ void HdmaEngine_UpdateBgScrollValues()
         }
 
         hdma_scroll_select = temp_table_to_write;
-        hdma_scroll_ptr = (uint16_t)((uint32_t)&hdma_scroll_tables[hdma_scroll_select]);
+        hdma_scroll_ptr = ADDR_LOWORD(&hdma_scroll_tables[hdma_scroll_select]);
     #endif
     
     hdma_scroll_sine_index += (1 * V_MUL) >> 1;
@@ -525,7 +525,7 @@ void HdmaEngine_UpdateColdataValues()
         }
 
         hdma_coldata_select = temp_table_to_write;
-        hdma_coldata_ptr = (uint16_t)((uint32_t)&hdma_coldata_tables[hdma_coldata_select]);
+        hdma_coldata_ptr = ADDR_LOWORD(&hdma_coldata_tables[hdma_coldata_select]);
     #endif
 
     return;

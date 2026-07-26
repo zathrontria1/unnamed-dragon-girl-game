@@ -62,6 +62,9 @@
         #define INTERRUPT
     #endif
 #endif
+    // Address / Far Pointer utility macros
+#define ADDR_LOWORD(ptr) ((uint16_t)((uint32_t)(ptr)))
+#define ADDR_BANK(ptr)   ((uint8_t)(((uint32_t)(ptr)) >> 16))
 
 // SRAM defines
 #define SRAM_TOTAL_SIZE 32768l

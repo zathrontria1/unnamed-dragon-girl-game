@@ -212,7 +212,7 @@ uint32_t LZ4_DecompressFrame(void * src, void * dest)
                         // This should be fine as it's always ROM to RAM
 
                         // This branch is cheap all things considered, so it's OK to leave it here.
-                        DmaSystem_CopyToWram_ShortRun((uint16_t)((uint32_t)ptr_read), (uint16_t)((uint32_t)ptr_write), temp_literal_count);
+                        DmaSystem_CopyToWram_ShortRun(ADDR_LOWORD(ptr_read), ADDR_LOWORD(ptr_write), temp_literal_count);
                     }
                     else
                     {

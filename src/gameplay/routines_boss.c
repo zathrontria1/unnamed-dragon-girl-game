@@ -239,14 +239,14 @@ uint8_t * Routines_Boss_Test_GetCompressedFrame(const uint8_t * data, const uint
         ptr_array[i] = data_addr_lo + *data_offset++;
     }
 
-    // Use the DMA unit to speed things up. Channel 7 is reserved for active display DMA.
-    // Align read
-    REG_DMAP7 = 0x00; // byte reg write
-    REG_BBAD7 = 0x80; // WMDATA
-    
-    REG_WMADDH = (uint8_t)((uint32_t)buffer >> 16);
+        // Use the DMA unit to speed things up. Channel 7 is reserved for active display DMA.
+        // Align read
+        REG_DMAP7 = 0x00; // byte reg write
+        REG_BBAD7 = 0x80; // WMDATA
+        
+        REG_WMADDH = ADDR_BANK(buffer);
 
-    REG_A1B7 = (uint8_t)((uint32_t)data >> 16);
+        REG_A1B7 = ADDR_BANK(data);
 
     int i = 0;
 
@@ -255,7 +255,7 @@ uint8_t * Routines_Boss_Test_GetCompressedFrame(const uint8_t * data, const uint
         for (int y = 0; y < 6; y++)
         {
             System_Hsync(156); // This is enough
-            REG_WMADDLM = (uint16_t)((uint32_t)buffer + (s << 8) + (y << 9));
+            REG_WMADDLM = ADDR_LOWORD(buffer + (s << 8) + (y << 9));
 
             for (int x = 0; x < 4; x++)
             {

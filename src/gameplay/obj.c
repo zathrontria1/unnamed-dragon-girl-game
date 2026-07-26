@@ -417,13 +417,13 @@ void ObjectSystem_ResetStandardObjects(int start_index)
     REG_DMAP7 = 0x08; // byte reg write, fixed
     REG_BBAD7 = 0x80; // WMDATA
 
-    REG_A1B7 = (uint8_t)((uint32_t)&const_zero >> 16);
+    REG_A1B7 = ADDR_BANK(&const_zero);
     
-    REG_WMADDH = (uint8_t)((uint32_t)&obj_general[start_index] >> 16);
+    REG_WMADDH = ADDR_BANK(&obj_general[start_index]);
 
-    REG_WMADDLM = (uint16_t)((uint32_t)&obj_general[start_index]);
+    REG_WMADDLM = ADDR_LOWORD(&obj_general[start_index]);
 
-    REG_A1T7LH = (uint16_t)((uint32_t)&const_zero);
+    REG_A1T7LH = ADDR_LOWORD(&const_zero);
     REG_DAS7LH = ((OBJ_GENERAL_MAX_COUNT - start_index) * (uint16_t)sizeof(struct game_object));
 
     System_Hsync(0);
@@ -456,13 +456,13 @@ void ObjectSystem_ResetPlayerHitboxes()
     REG_DMAP7 = 0x08; // byte reg write, fixed
     REG_BBAD7 = 0x80; // WMDATA
 
-    REG_A1B7 = (uint8_t)((uint32_t)&const_zero >> 16);
+    REG_A1B7 = ADDR_BANK(&const_zero);
     
-    REG_WMADDH = (uint8_t)((uint32_t)&obj_hitbox_player[0] >> 16);
+    REG_WMADDH = ADDR_BANK(&obj_hitbox_player[0]);
 
-    REG_WMADDLM = (uint16_t)((uint32_t)&obj_hitbox_player[0]);
+    REG_WMADDLM = ADDR_LOWORD(&obj_hitbox_player[0]);
 
-    REG_A1T7LH = (uint16_t)((uint32_t)&const_zero);
+    REG_A1T7LH = ADDR_LOWORD(&const_zero);
     REG_DAS7LH = (OBJ_PLAYERHITBOX_MAX_COUNT * (uint16_t)sizeof(struct game_object));
 
     System_Hsync(0);
@@ -495,13 +495,13 @@ void ObjectSystem_ResetEnemyHitboxes()
     REG_DMAP7 = 0x08; // byte reg write, fixed
     REG_BBAD7 = 0x80; // WMDATA
 
-    REG_A1B7 = (uint8_t)((uint32_t)&const_zero >> 16);
+    REG_A1B7 = ADDR_BANK(&const_zero);
     
-    REG_WMADDH = (uint8_t)((uint32_t)&obj_hitbox_enemy[0] >> 16);
+    REG_WMADDH = ADDR_BANK(&obj_hitbox_enemy[0]);
 
-    REG_WMADDLM = (uint16_t)((uint32_t)&obj_hitbox_enemy[0]);
+    REG_WMADDLM = ADDR_LOWORD(&obj_hitbox_enemy[0]);
 
-    REG_A1T7LH = (uint16_t)((uint32_t)&const_zero);
+    REG_A1T7LH = ADDR_LOWORD(&const_zero);
     REG_DAS7LH = (OBJ_ENEMYHITBOX_MAX_COUNT * (uint16_t)sizeof(struct game_object));
 
     System_Hsync(0);
@@ -1091,7 +1091,7 @@ uint16_t ObjectSystem_List_InstantiateInteractables(const struct obj_list_entry_
         uint16_t temp_objid = list->id;
         int16_t temp_x = list->x;
         int16_t temp_y = list->y;
-        uint16_t temp_flag = (uint16_t)((uint32_t)(list->flag));
+        uint16_t temp_flag = ADDR_LOWORD(list->flag);
 
         bool needs_event_flag = 
             (temp_objid == OBJID_INTERACTABLE_SWITCH_WALL) ||

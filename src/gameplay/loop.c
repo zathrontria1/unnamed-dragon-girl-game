@@ -103,7 +103,7 @@ void Loop_Game_Messagebox()
     system_dont_count_lag = true;
 
     hdma_use_gradient = 0xffff;
-    hdma_gradient_ptr = (uint16_t)((uint32_t)&hdma_windowbackground_tables[0][0]);
+    hdma_gradient_ptr = ADDR_LOWORD(&hdma_windowbackground_tables[0][0]);
 
     ObjectSystem_ProcessObjects();
 

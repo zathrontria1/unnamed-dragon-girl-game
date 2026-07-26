@@ -139,7 +139,7 @@ void VwfEngine_PrintText_Gradual_Setup(uint8_t * string, uint8_t * dest, uint8_t
     vwf_tiledata_ptr_start = dest;
     vwf_text_rendered = false;
 
-    vwf_wram_offset = (uint16_t)((uint32_t)vwf_tiledata_ptr_start);
+    vwf_wram_offset = ADDR_LOWORD(vwf_tiledata_ptr_start);
     vwf_vram_offset = 0x0008;
 
     vwf_tiledata_run = 16;
@@ -432,7 +432,7 @@ void VwfEngine_PrintText_Render(uint8_t * glyph_ptr, uint8_t * write_ptr, uint16
  */
 void VwfEngine_PrintText_StartNewPage()
 {
-    vwf_wram_offset = (uint16_t)((uint32_t)vwf_tiledata_ptr_start);
+    vwf_wram_offset = ADDR_LOWORD(vwf_tiledata_ptr_start);
     vwf_vram_offset = 0x0008;
 
     vwf_tiledata_ptr = vwf_tiledata_ptr_start+16;

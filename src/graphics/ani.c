@@ -412,11 +412,11 @@ uint8_t * AniSystem_GetCompressedFrame(const uint8_t * data, const uint16_t * lo
     REG_DMAP7 = 0x00; // byte reg write
     REG_BBAD7 = 0x80; // WMDATA
 
-    REG_WMADDLM = (uint16_t)((uint32_t)buffer);
-    REG_WMADDH = (uint8_t)((uint32_t)buffer >> 16);
+    REG_WMADDLM = ADDR_LOWORD(buffer);
+    REG_WMADDH = ADDR_BANK(buffer);
 
-    REG_A1T7LH = (uint16_t)((uint32_t)ptr_read_0);
-    REG_A1B7 = (uint8_t)((uint32_t)ptr_read_0 >> 16);
+    REG_A1T7LH = ADDR_LOWORD(ptr_read_0);
+    REG_A1B7 = ADDR_BANK(ptr_read_0);
     
     REG_DAS7LH = 64;
 
@@ -431,9 +431,9 @@ uint8_t * AniSystem_GetCompressedFrame(const uint8_t * data, const uint16_t * lo
     }
     REG_MDMAEN = 0x80;
 
-    REG_A1T7LH = (uint16_t)((uint32_t)ptr_read_1);
+    REG_A1T7LH = ADDR_LOWORD(ptr_read_1);
 
-    REG_WMADDLM = (uint16_t)((uint32_t)buffer+512);
+    REG_WMADDLM = ADDR_LOWORD(buffer + 512);
 
     REG_DAS7LH = 64;
     REG_MDMAEN = 0x80;

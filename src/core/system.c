@@ -265,8 +265,8 @@ void System_Init_Graphics(void)
 void System_Init_UiTilemap()
 {
     // Start with the shared initial items.
-    REG_A1T0LH = (uint16_t)((uint32_t)&dma_filler_val);
-    REG_A1B0 = (uint8_t)(((uint32_t)&dma_filler_val) >> 16);
+    REG_A1T0LH = ADDR_LOWORD(&dma_filler_val);
+    REG_A1B0 = ADDR_BANK(&dma_filler_val);
     
     // BG1, high byte
     REG_DMAP0 = 0x08; // byte reg write, fixed increment
