@@ -20,6 +20,8 @@ extern bool obj_boss_moving;
 extern int obj_boss_timer_attack;
 
 extern uint16_t obj_boss_prev_frame;
+extern uint16_t obj_boss_target_frame;
+extern uint8_t obj_boss_copy_progress;
 extern bool obj_boss_vram_stale;
 
 extern bool obj_boss_hands_show;

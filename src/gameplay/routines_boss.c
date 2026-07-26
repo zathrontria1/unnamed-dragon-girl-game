@@ -49,6 +49,8 @@ bool obj_boss_moving;
 int obj_boss_timer_attack;
 
 uint16_t obj_boss_prev_frame;
+uint16_t obj_boss_target_frame;
+uint8_t obj_boss_copy_progress;
 bool obj_boss_vram_stale;
 
 // For the hands parts
@@ -75,6 +77,8 @@ void Routines_Boss_Init()
     obj_boss_moving = false;
 
     obj_boss_prev_frame = 0xffff;
+    obj_boss_target_frame = 0xffff;
+    obj_boss_copy_progress = 0;
     obj_boss_vram_stale = true;
 
     obj_boss_hands_show = true;
@@ -221,23 +225,40 @@ uint8_t * Routines_Boss_Test_GetCompressedFrame(const uint8_t * data, const uint
 
     uint8_t * ptr_return_val = (uint8_t *)(lookup + lookup_entry_offset);
 
-    if (frame == obj_boss_prev_frame)
+    bool force_complete_rebuild = false;
+
+    if (frame != obj_boss_target_frame)
+    {
+        if (obj_boss_copy_progress > 0 && obj_boss_copy_progress < 4)
+        {
+            force_complete_rebuild = true;
+        }
+
+        obj_boss_target_frame = frame;
+        obj_boss_copy_progress = 0;
+    }
+
+    if (obj_boss_copy_progress >= 4)
     {
         return ptr_return_val;
     }
 
-    obj_boss_prev_frame = frame;
+    int chunks_to_process = force_complete_rebuild ? 4 : 1;
+    uint16_t data_addr_lo = ADDR_LOWORD(data);
 
-    uint16_t * data_offset = (uint16_t *)ptr_return_val;
-
-    uint16_t data_addr_lo = (uint16_t)((uint32_t)(data));
-
-    uint16_t ptr_array[48];
-
-    for (int i = 0; i < 48; i++)
+    for (int chunk_iter = 0; chunk_iter < chunks_to_process; chunk_iter++)
     {
-        ptr_array[i] = data_addr_lo + *data_offset++;
-    }
+        uint16_t * data_offset = (uint16_t *)ptr_return_val;
+
+        int start_k = obj_boss_copy_progress * 3;
+        data_offset += start_k * 4;
+
+        uint16_t ptr_array[12];
+
+        for (int i = 0; i < 12; i++)
+        {
+            ptr_array[i] = data_addr_lo + *data_offset++;
+        }
 
         // Use the DMA unit to speed things up. Channel 7 is reserved for active display DMA.
         // Align read
@@ -248,12 +269,14 @@ uint8_t * Routines_Boss_Test_GetCompressedFrame(const uint8_t * data, const uint
 
         REG_A1B7 = ADDR_BANK(data);
 
-    int i = 0;
+        int i = 0;
 
-    for (int s = 0; s < 2; s++)
-    {
-        for (int y = 0; y < 6; y++)
+        for (int j = 0; j < 3; j++)
         {
+            int k = start_k + j;
+            int s = k / 6;
+            int y = k % 6;
+
             System_Hsync(156); // This is enough
             REG_WMADDLM = ADDR_LOWORD(buffer + (s << 8) + (y << 9));
 
@@ -266,9 +289,15 @@ uint8_t * Routines_Boss_Test_GetCompressedFrame(const uint8_t * data, const uint
                 i++;
             }
         }
+
+        obj_boss_copy_progress++;
     }
 
-    obj_boss_vram_stale = true;
+    if (obj_boss_copy_progress >= 4)
+    {
+        obj_boss_vram_stale = true;
+        obj_boss_prev_frame = frame;
+    }
 
     return ptr_return_val;
 }
