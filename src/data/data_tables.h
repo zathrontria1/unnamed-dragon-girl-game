@@ -175,10 +175,10 @@ const struct obj_list_entry_spawns data_spawnlist_debug0[] = {
     {OBJID_SLIME, 20+56, 48, 16},
     {OBJID_SLIME, 20+112, 48, 16},
     {OBJID_SLIME, 20+168, 48, 16},
-    /*{OBJID_SLIME, 20+0, 64, 16},
+    {OBJID_SLIME, 20+0, 64, 16},
     {OBJID_SLIME, 20+56, 64, 16},
     {OBJID_SLIME, 20+112, 64, 16},
-    {OBJID_SLIME, 20+168, 64, 16},*/
+    {OBJID_SLIME, 20+168, 64, 16},
     {OBJID_NULL, 0, 0, 0},
 };
 
