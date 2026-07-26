@@ -42,6 +42,8 @@ void Routines_Enemy_CommonUpdate(struct game_object * o, const enemy_standard_cf
 
         if ((o->state != STATE_DIE) && (o->state != STATE_SPAWNING))
         {
+            obj_has_active_ai_enemies = true;
+
             if (o->struct_data.npc_data.hp_display_time > 0)
             {
                 UserInterface_DrawEnemyHealthBar(o);
