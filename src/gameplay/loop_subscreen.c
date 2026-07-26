@@ -156,13 +156,7 @@ void Subscreen_Top()
     subscreen_cgadsub_copy = shadow_cgadsub;
     shadow_cgadsub = 0x00; // Disable colour math
 
-    system_game_paused = true;
-    system_dont_count_lag = true;
-
-    hdma_use_gradient = 0xffff;
-    hdma_gradient_ptr = (uint16_t)((uint32_t)&hdma_windowbackground_tables[1][0]);
-
-    ui_in_subscreen = true;
+    Subscreen_Internal_InitState();
 
     // Silence the fire noise
     if (snd_flame_playing == 1)
@@ -176,16 +170,7 @@ void Subscreen_Top()
         AniSystem_Pal_LoadSubpalette((uint8_t *)&data_palette_player_portrait, 8);
 
         subscreen_selection = 0;
-        subscreen_bottom_entry = 0;
-
-        for (int i = 0; i < 256; i++)
-        {
-            if ((subscreen_items_toplevel[i].x == 255) && (subscreen_items_toplevel[i].y == 255))
-            {
-                subscreen_bottom_entry = i-1;
-                break;
-            }
-        }
+        Subscreen_Internal_FindBottomEntry((const struct menu_item *)&subscreen_items_toplevel);
 
         SpriteEngine_ProcessSpriteLists();
 
@@ -246,63 +231,13 @@ void Subscreen_Top()
 
         Subscreen_Top_DrawTime();
 
-        bool temp_exit_subscreen = false;
-
-        if (System_CheckKey(KEY_A))
+        uint16_t action_res = Subscreen_Internal_HandleMenuAction((const struct menu_item *)&subscreen_items_toplevel);
+        if (action_res == SUBSCREEN_ACTIONSTATE_RETURN)
         {
-            if (subscreen_items_toplevel[subscreen_selection].action == MENUACTION_OPENSUBSCREEN)
-            {
-                SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
-                if (subscreen_items_toplevel[subscreen_selection].ptr != 0)
-                {
-                    Subscreen_Transition_Start(subscreen_items_toplevel[subscreen_selection].ptr);
-
-                    return;
-                }
-                else
-                {
-                    ;// Pointer is invalid, do nothing
-                }
-            }
-            else if (subscreen_items_toplevel[subscreen_selection].action == MENUACTION_OPENMAPSCREEN)
-            {
-                // Open the map screen.
-                SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
-
-                shadow_brightness = 15 << 8;
-                shadow_brightness_change = -(128 * V_MUL);
-
-                system_use_alternate_nmi = true;
-
-                system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_MAPDISPLAY_INIT);
-                system_target_routine = ROUTINE_MAPDISPLAY_INIT;
-
-                // Restore CGADSUB
-                shadow_cgadsub = subscreen_cgadsub_copy; 
-
-                return;
-            }
-            else if (subscreen_items_toplevel[subscreen_selection].action == MENUACTION_CALLFUNCTION)
-            {
-                SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
-                if (subscreen_items_toplevel[subscreen_selection].ptr != 0)
-                {
-                    // Directly call the function without changing the subscreen
-                    void (*func)() = subscreen_items_toplevel[subscreen_selection].ptr;
-                    func();
-
-                    return;
-                }
-                else
-                {
-                    ;// Pointer is invalid, do nothing
-                }
-            }
-            else if (subscreen_items_toplevel[subscreen_selection].action == MENUACTION_EXITSUBSCREEN)
-            {
-                temp_exit_subscreen = true;
-            }
+            return;
         }
+
+        bool temp_exit_subscreen = (action_res == SUBSCREEN_ACTIONSTATE_EXIT);
 
         if (System_CheckKey(KEY_X) || System_CheckKey(KEY_B) || temp_exit_subscreen)
         {
@@ -316,18 +251,12 @@ void Subscreen_Top()
 
 void Subscreen_Upgrade()
 {
-    system_game_paused = true;
-    system_dont_count_lag = true;
-
-    hdma_use_gradient = 0xffff;
-    hdma_gradient_ptr = (uint16_t)((uint32_t)&hdma_windowbackground_tables[1][0]);
-
-    ui_in_subscreen = true;
+    Subscreen_Internal_InitState();
 
     if (!subscreen_rendered)
     {
         subscreen_selection = subscreen_selection_profile;
-        subscreen_bottom_entry = 0;
+        Subscreen_Internal_FindBottomEntry((const struct menu_item *)&subscreen_items_profile);
 
         // Copy the contents of the last 8KB of VRAM to WRAM first
         // Wait for a transition from non-vblank to vblank.
@@ -356,15 +285,6 @@ void Subscreen_Upgrade()
             subscreen_is_in_profile = true;
         }
 
-        for (int i = 0; i < 256; i++)
-        {
-            if ((subscreen_items_profile[i].x == 255) && (subscreen_items_profile[i].y == 255))
-            {
-                subscreen_bottom_entry = i-1;
-                break;
-            }
-        }
-        
         if (!subscreen_skip_window_redraw)
         {
             UserInterface_ClearWindowBuffer(false);
@@ -417,44 +337,23 @@ void Subscreen_Upgrade()
 
         SpriteEngine_ProcessSpriteLists();
 
-        bool temp_exit_subscreen = false;
-
-        if (System_CheckKey(KEY_A))
+        uint16_t action_res = Subscreen_Internal_HandleMenuAction((const struct menu_item *)&subscreen_items_profile);
+        if (action_res == SUBSCREEN_ACTIONSTATE_RETURN)
         {
-            if (subscreen_items_profile[subscreen_selection].action == MENUACTION_CALLFUNCTION)
-            {
-                SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
-                if (subscreen_items_profile[subscreen_selection].ptr != 0)
-                {
-                    // Directly call the function without changing the subscreen
-                    void (*func)() = subscreen_items_profile[subscreen_selection].ptr;
-                    func();
-
-                    return;
-                }
-                else
-                {
-                    ;// Pointer is invalid, do nothing
-                }
-            }
-            else if (subscreen_items_profile[subscreen_selection].action == MENUACTION_EXITSUBSCREEN)
-            {
-                temp_exit_subscreen = true;
-            }
+            return;
         }
+
+        bool temp_exit_subscreen = (action_res == SUBSCREEN_ACTIONSTATE_EXIT);
 
         if (System_CheckKey(KEY_B) || temp_exit_subscreen)
         {
-            SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
-
             subscreen_restore_sprite_page = true;
             subscreen_is_in_profile = false;
             subscreen_skip_window_redraw = false;
 
             subscreen_selection_profile = 0;
             
-            Subscreen_Transition_Start(Main_GetFunctionPointer(ROUTINE_SUBSCREEN));
-            system_target_routine = ROUTINE_SUBSCREEN;
+            Subscreen_Internal_GoBackToTop();
         }
     }
 
@@ -689,27 +588,12 @@ void Subscreen_Upgrade_Defense()
 
 void Subscreen_Help()
 {
-    system_game_paused = true;
-    system_dont_count_lag = true;
-
-    hdma_use_gradient = 0xffff;
-    hdma_gradient_ptr = (uint16_t)((uint32_t)&hdma_windowbackground_tables[1][0]);
-
-    ui_in_subscreen = true;
+    Subscreen_Internal_InitState();
 
     if (!subscreen_rendered)
     {
         subscreen_selection = 0;
-        subscreen_bottom_entry = 0;
-
-        for (int i = 0; i < 256; i++)
-        {
-            if ((subscreen_items_help[i].x == 255) && (subscreen_items_help[i].y == 255))
-            {
-                subscreen_bottom_entry = i-1;
-                break;
-            }
-        }
+        Subscreen_Internal_FindBottomEntry((const struct menu_item *)&subscreen_items_help);
         
         UserInterface_ClearWindowBuffer(false);
         UserInterface_ClearTextBuffer();
@@ -749,9 +633,7 @@ void Subscreen_Help()
 
         if (System_CheckKey(KEY_B))
         {
-            SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
-            Subscreen_Transition_Start(Main_GetFunctionPointer(ROUTINE_SUBSCREEN));
-            system_target_routine = ROUTINE_SUBSCREEN;
+            Subscreen_Internal_GoBackToTop();
         }
     }
 
@@ -789,27 +671,12 @@ void Subscreen_Help_DrawText(bool copy_result)
 */
 void Subscreen_Options()
 {
-    system_game_paused = true;
-    system_dont_count_lag = true;
-
-    hdma_use_gradient = 0xffff;
-    hdma_gradient_ptr = (uint16_t)((uint32_t)&hdma_windowbackground_tables[1][0]);
-
-    ui_in_subscreen = true;
+    Subscreen_Internal_InitState();
 
     if (!subscreen_rendered)
     {
         subscreen_selection = 0;
-        subscreen_bottom_entry = 0;
-
-        for (int i = 0; i < 256; i++)
-        {
-            if ((subscreen_items_options[i].x == 255) && (subscreen_items_options[i].y == 255))
-            {
-                subscreen_bottom_entry = i-1;
-                break;
-            }
-        }
+        Subscreen_Internal_FindBottomEntry((const struct menu_item *)&subscreen_items_options);
         
         UserInterface_ClearWindowBuffer(false);
         UserInterface_ClearTextBuffer();
@@ -853,31 +720,20 @@ void Subscreen_Options()
         {
             if (subscreen_items_options[subscreen_selection].action == MENUACTION_CALLFUNCTION)
             {
-                SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
-                if (subscreen_items_options[subscreen_selection].ptr != 0)
-                {
-                    // Directly call the function without changing the subscreen
-                    void (*func)() = subscreen_items_options[subscreen_selection].ptr;
-                    func();
 
-                    return;
-                }
-                else
-                {
-                    ;// Pointer is invalid, do nothing
-                }
-            }
-            else if (subscreen_items_options[subscreen_selection].action == MENUACTION_EXITSUBSCREEN)
-            {
-                temp_exit_subscreen = true;
-            }
+        SpriteEngine_ProcessSpriteLists();
+
+        uint16_t action_res = Subscreen_Internal_HandleMenuAction((const struct menu_item *)&subscreen_items_options);
+        if (action_res == SUBSCREEN_ACTIONSTATE_RETURN)
+        {
+            return;
         }
+
+        bool temp_exit_subscreen = (action_res == SUBSCREEN_ACTIONSTATE_EXIT);
 
         if (System_CheckKey(KEY_B) || temp_exit_subscreen)
         {
-            SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
-            Subscreen_Transition_Start(Main_GetFunctionPointer(ROUTINE_SUBSCREEN));
-            system_target_routine = ROUTINE_SUBSCREEN;
+            Subscreen_Internal_GoBackToTop();
         }
     }
 
@@ -991,27 +847,12 @@ void Subscreen_Top_DrawTime()
 
 void Subscreen_ResetConfirmation()
 {
-    system_game_paused = true;
-    system_dont_count_lag = true;
-
-    hdma_use_gradient = 0xffff;
-    hdma_gradient_ptr = (uint16_t)((uint32_t)&hdma_windowbackground_tables[1][0]);
-
-    ui_in_subscreen = true;
+    Subscreen_Internal_InitState();
 
     if (!subscreen_rendered)
     {
         subscreen_selection = 1;
-        subscreen_bottom_entry = 0;
-
-        for (int i = 0; i < 256; i++)
-        {
-            if ((subscreen_items_resetconfirm[i].x == 255) && (subscreen_items_resetconfirm[i].y == 255))
-            {
-                subscreen_bottom_entry = i-1;
-                break;
-            }
-        }
+        Subscreen_Internal_FindBottomEntry((const struct menu_item *)&subscreen_items_resetconfirm);
         
         UserInterface_ClearWindowBuffer(false);
         UserInterface_ClearTextBuffer();
@@ -1034,39 +875,110 @@ void Subscreen_ResetConfirmation()
 
         SpriteEngine_ProcessSpriteLists();
 
-        bool temp_exit_subscreen = false;
-
-        if (System_CheckKey(KEY_A))
+        uint16_t action_res = Subscreen_Internal_HandleMenuAction((const struct menu_item *)&subscreen_items_resetconfirm);
+        if (action_res == SUBSCREEN_ACTIONSTATE_RETURN)
         {
-            if (subscreen_items_resetconfirm[subscreen_selection].action == MENUACTION_CALLFUNCTION)
-            {
-                SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
-                if (subscreen_items_resetconfirm[subscreen_selection].ptr != 0)
-                {
-                    // Directly call the function without changing the subscreen
-                    void (*func)() = subscreen_items_resetconfirm[subscreen_selection].ptr;
-                    func();
-
-                    return;
-                }
-                else
-                {
-                    ;// Pointer is invalid, do nothing
-                }
-            }
-            else if (subscreen_items_resetconfirm[subscreen_selection].action == MENUACTION_EXITSUBSCREEN)
-            {
-                temp_exit_subscreen = true;
-            }
+            return;
         }
+
+        bool temp_exit_subscreen = (action_res == SUBSCREEN_ACTIONSTATE_EXIT);
 
         if (System_CheckKey(KEY_B) || temp_exit_subscreen)
         {
-            SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
-            Subscreen_Transition_Start(Main_GetFunctionPointer(ROUTINE_SUBSCREEN));
-            system_target_routine = ROUTINE_SUBSCREEN;
+            Subscreen_Internal_GoBackToTop();
         }
     }
+
+    return;
+}
+
+void Subscreen_Internal_InitState()
+{
+    system_game_paused = true;
+    system_dont_count_lag = true;
+
+    hdma_use_gradient = 0xffff;
+    hdma_gradient_ptr = ADDR_LOWORD(&hdma_windowbackground_tables[1][0]);
+
+    ui_in_subscreen = true;
+
+    return;
+}
+
+void Subscreen_Internal_FindBottomEntry(const struct menu_item * item_array)
+{
+    subscreen_bottom_entry = 0;
+
+    for (int i = 0; i < 256; i++)
+    {
+        if ((item_array[i].x == 255) && (item_array[i].y == 255))
+        {
+            subscreen_bottom_entry = i - 1;
+            break;
+        }
+    }
+
+    return;
+}
+
+uint16_t Subscreen_Internal_HandleMenuAction(const struct menu_item * item_array)
+{
+    if (System_CheckKey(KEY_A))
+    {
+        uint16_t action = item_array[subscreen_selection].action;
+        void * ptr = item_array[subscreen_selection].ptr;
+
+        if (action == MENUACTION_OPENSUBSCREEN)
+        {
+            SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
+            if (ptr != 0)
+            {
+                Subscreen_Transition_Start(ptr);
+                return SUBSCREEN_ACTIONSTATE_RETURN;
+            }
+        }
+        else if (action == MENUACTION_OPENMAPSCREEN)
+        {
+            SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
+
+            shadow_brightness = 15 << 8;
+            shadow_brightness_change = -(128 * V_MUL);
+
+            system_use_alternate_nmi = true;
+
+            system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_MAPDISPLAY_INIT);
+            system_target_routine = ROUTINE_MAPDISPLAY_INIT;
+
+            // Restore CGADSUB
+            shadow_cgadsub = subscreen_cgadsub_copy;
+
+            return SUBSCREEN_ACTIONSTATE_RETURN;
+        }
+        else if (action == MENUACTION_CALLFUNCTION)
+        {
+            SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
+            if (ptr != 0)
+            {
+                void (*func)() = (void (*)())ptr;
+                func();
+
+                return SUBSCREEN_ACTIONSTATE_RETURN;
+            }
+        }
+        else if (action == MENUACTION_EXITSUBSCREEN)
+        {
+            return SUBSCREEN_ACTIONSTATE_EXIT;
+        }
+    }
+
+    return SUBSCREEN_ACTIONSTATE_NONE;
+}
+
+void Subscreen_Internal_GoBackToTop()
+{
+    SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
+    Subscreen_Transition_Start(Main_GetFunctionPointer(ROUTINE_SUBSCREEN));
+    system_target_routine = ROUTINE_SUBSCREEN;
 
     return;
 }

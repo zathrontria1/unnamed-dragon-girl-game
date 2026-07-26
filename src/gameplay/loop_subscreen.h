@@ -6,6 +6,20 @@
 
 #include "ui.h"
 
+#define MENUACTION_OPENSUBSCREEN 128
+#define MENUACTION_EXITSUBSCREEN 129
+#define MENUACTION_OPENMAPSCREEN 131
+#define MENUACTION_CALLFUNCTION 255
+
+#define TRANSITION_STATE_NONE 0
+#define TRANSITION_STATE_FADE_OUT 1
+#define TRANSITION_STATE_INITIALIZE 2
+#define TRANSITION_STATE_FADE_IN 3
+
+#define SUBSCREEN_ACTIONSTATE_NONE 0
+#define SUBSCREEN_ACTIONSTATE_RETURN 1
+#define SUBSCREEN_ACTIONSTATE_EXIT 2
+
 struct menu_item {
     int16_t x;
     int16_t y;
@@ -58,6 +72,11 @@ void Subscreen_Help_DrawText(bool copy_result);
 void Subscreen_Options();
 
 void Subscreen_ResetConfirmation();
+
+void Subscreen_Internal_InitState();
+void Subscreen_Internal_FindBottomEntry(const struct menu_item * item_array);
+uint16_t Subscreen_Internal_HandleMenuAction(const struct menu_item * item_array);
+void Subscreen_Internal_GoBackToTop();
 
 void Subscreen_Internal_UpdateNavigation(const struct menu_item * item_array);
 
