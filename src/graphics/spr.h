@@ -10,7 +10,8 @@ struct game_object;
 extern uint16_t spr_sprite_count; // Rendered sprites this frame
 extern uint16_t spr_sprite_count_prev; // previous
 
-extern uint16_t spr_vram_slots[128]; // VRAM slots in sprite page
+extern uint16_t spr_vram_free_mask[5];
+extern uint16_t spr_vram_owner_slot[256];
 
 extern uint16_t spr_front_count; // Rendered non-UI unsorted front-forced sprites this frame
 NEAR extern struct spr_queue_entry spr_queue_front[SPR_COUNT_MAX_FRONT];
