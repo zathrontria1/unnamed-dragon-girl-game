@@ -492,7 +492,7 @@ void Subscreen_Internal_SaveLastSpritePage()
 void Subscreen_Upgrade_UploadProfilePicture()
 {
     // First decompress the image
-    LZ4_UnpackToWRAM(&data_spr_player_portrait_lz4, (void *)(LZ4_BUFFER_ADDR+0x6000));
+    LZ4_UnpackToWRAM((void *)&data_spr_player_portrait_lz4, (void *)(LZ4_BUFFER_ADDR+0x6000));
 
     // TODO: This is very hacky. Consider making a third NMI routine for this so APU playback isn't a factor.
     if (snd_stream_enable)

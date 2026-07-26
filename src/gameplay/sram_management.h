@@ -1,3 +1,5 @@
+#include "consts.h"
+
 #define SRAM_LAYOUT_VERSION 2
 
 struct level_data;

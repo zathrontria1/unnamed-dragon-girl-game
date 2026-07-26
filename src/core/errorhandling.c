@@ -77,8 +77,8 @@ void ErrorHandler_Internal_Setup()
 
 void ErrorHandler_Internal_Display(uint8_t * string_ptr)
 {
-    uint16_t transfer_length_1 = LZ4_UnpackToWRAM(&data_bg_error_back_lz4, (uint8_t *)LZ4_BUFFER_ADDR);
-    LZ4_UnpackToWRAM(&data_tilemap_error_back_lz4, (uint8_t *)(LZ4_BUFFER_ADDR+0xc800));
+    uint16_t transfer_length_1 = LZ4_UnpackToWRAM((void *)&data_bg_error_back_lz4, (uint8_t *)LZ4_BUFFER_ADDR);
+    LZ4_UnpackToWRAM((void *)&data_tilemap_error_back_lz4, (uint8_t *)(LZ4_BUFFER_ADDR+0xc800));
     uint16_t transfer_length_2 = VwfEngine_PrintText(string_ptr, (uint8_t *)(LZ4_BUFFER_ADDR+0x8000), (uint8_t *)(LZ4_BUFFER_ADDR+0xc000), 1, 1, 0);
     
     // Copy the palette

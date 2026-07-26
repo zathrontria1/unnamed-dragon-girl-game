@@ -54,7 +54,10 @@ void Sram_Check()
         return;
     }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warray-bounds"
     p = (uint8_t *)SRAM_ADDR + 0x00010000 * (SRAM_BANKS - 1);
+#pragma clang diagnostic pop
 
     // Inspect the other slots without modifying them.
     for (int slot = SRAM_BANKS-1; slot > 0; slot--)

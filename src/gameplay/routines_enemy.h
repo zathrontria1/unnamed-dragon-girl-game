@@ -1,3 +1,5 @@
+struct game_object;
+
 typedef struct enemy_standard_cfg
 {
     uint32_t dist_min;           /* squared distance threshold for AI */

@@ -1,3 +1,5 @@
+struct game_object;
+
 void Routines_Fx_Impact(struct game_object * o);
 void Routines_Fx_Smoke(struct game_object * o);
 

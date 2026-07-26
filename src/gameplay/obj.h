@@ -1,3 +1,10 @@
+#include "consts.h"
+#include "defs_structs.h"
+
+struct obj_list_entry_spawns;
+struct obj_list_entry_spawners;
+struct obj_list_entry_interactable;
+
 extern ZP struct game_object * obj_player_pointer;
 
 extern ZP uint16_t obj_first_available;

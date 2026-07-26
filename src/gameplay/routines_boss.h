@@ -1,5 +1,7 @@
 #include "consts.h"
 
+struct game_object;
+
 #define BOSS_POS_CENTER 456
 #define BOSS_ATTACK_BASETIME_1 ((5 * FPS) >> 1) - 1
 

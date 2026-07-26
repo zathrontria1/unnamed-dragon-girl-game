@@ -6,31 +6,61 @@
 #endif
 
 #ifdef __VBCC__
-    #define NEAR __near
-    #define HUGE __huge
-    #define ZP __zpage
-    #define NO_INLINE __noinline
-    #define INTERRUPT __interrupt
+    #ifndef NEAR
+        #define NEAR __near
+    #endif
+    #ifndef HUGE
+        #define HUGE __huge
+    #endif
+    #ifndef ZP
+        #define ZP __zpage
+    #endif
+    #ifndef NO_INLINE
+        #define NO_INLINE __noinline
+    #endif
+    #ifndef INTERRUPT
+        #define INTERRUPT __interrupt
+    #endif
     #define CPU_65816 1
     #define VBCC_ASM INLINE_ASM
 #endif
 
 #ifdef __CALYPSI__
-    #define NEAR 
-    #define HUGE 
-    #define ZP 
-    #define NO_INLINE 
-    #define INTERRUPT
+    #ifndef NEAR
+        #define NEAR 
+    #endif
+    #ifndef HUGE
+        #define HUGE 
+    #endif
+    #ifndef ZP
+        #define ZP 
+    #endif
+    #ifndef NO_INLINE
+        #define NO_INLINE 
+    #endif
+    #ifndef INTERRUPT
+        #define INTERRUPT
+    #endif
     #define CPU_65816 1
     #define CALYPSI_ASM INLINE_ASM
 #endif
 
 #if CPU_65816 != 1
-    #define NEAR
-    #define HUGE 
-    #define ZP
-    #define NO_INLINE 
-    #define INTERRUPT
+    #ifndef NEAR
+        #define NEAR
+    #endif
+    #ifndef HUGE
+        #define HUGE 
+    #endif
+    #ifndef ZP
+        #define ZP
+    #endif
+    #ifndef NO_INLINE
+        #define NO_INLINE 
+    #endif
+    #ifndef INTERRUPT
+        #define INTERRUPT
+    #endif
 #endif
 
 // SRAM defines

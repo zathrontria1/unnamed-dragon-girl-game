@@ -1,3 +1,5 @@
+struct game_object;
+
 extern uint16_t map_column[32]; // one contiguous column
 extern uint16_t map_row[2][32]; // two contiguous rows: left and right rows (2x32)
 

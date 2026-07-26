@@ -499,7 +499,7 @@ void Loop_Subscreen_MapDisplay_Init()
         }
     #endif
 
-    UserInterface_PrintText_Mode3((uint8_t *)&STR_UI_HELP_MAP, UI_MAPSCREEN_SL_START, UI_MARGIN_LEFT);
+    UserInterface_PrintText_Mode3((char *)&STR_UI_HELP_MAP, UI_MAPSCREEN_SL_START, UI_MARGIN_LEFT);
 
     system_target_routine = ROUTINE_MAPDISPLAY;
 
