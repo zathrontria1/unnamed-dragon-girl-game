@@ -710,16 +710,64 @@ void Subscreen_Options()
 
         Subscreen_Internal_UpdateNavigation((const struct menu_item *)&subscreen_items_options);
 
-        SpriteEngine_ProcessSpriteLists();
-
-        bool temp_exit_subscreen = false;
-
-        // Should check Left/Right clicks for sliders and similar.
-        // Probably can send a different integer to the called function.
-        if (System_CheckKey(KEY_A))
+        if (System_CheckKey(KEY_LEFT))
         {
-            if (subscreen_items_options[subscreen_selection].action == MENUACTION_CALLFUNCTION)
+            switch (subscreen_selection)
             {
+                case 0:
+                    /* Option 0: Sound Mode (Left) */
+                    break;
+                case 1:
+                    /* Option 1: Master Volume (Left) */
+                    break;
+                case 2:
+                    /* Option 2: BGM Enable (Left) */
+                    break;
+                case 3:
+                    /* Option 3: SFX Enable (Left) */
+                    break;
+                case 4:
+                    /* Option 4: Voice Enable (Left) */
+                    break;
+                case 5:
+                    /* Option 5: GFX Hit Blur (Left) */
+                    break;
+                case 6:
+                    /* Option 6: GFX Heatwave (Left) */
+                    break;
+                default:
+                    break;
+            }
+        }
+        else if (System_CheckKey(KEY_RIGHT))
+        {
+            switch (subscreen_selection)
+            {
+                case 0:
+                    /* Option 0: Sound Mode (Right) */
+                    break;
+                case 1:
+                    /* Option 1: Master Volume (Right) */
+                    break;
+                case 2:
+                    /* Option 2: BGM Enable (Right) */
+                    break;
+                case 3:
+                    /* Option 3: SFX Enable (Right) */
+                    break;
+                case 4:
+                    /* Option 4: Voice Enable (Right) */
+                    break;
+                case 5:
+                    /* Option 5: GFX Hit Blur (Right) */
+                    break;
+                case 6:
+                    /* Option 6: GFX Heatwave (Right) */
+                    break;
+                default:
+                    break;
+            }
+        }
 
         SpriteEngine_ProcessSpriteLists();
 
