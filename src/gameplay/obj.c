@@ -169,6 +169,8 @@ static uint32_t obj_enemy_ai_schedule_token;
 // the start of the pool cannot monopolize the per-frame AI budget.
 static uint16_t obj_enemy_ai_next_index;
 
+bool obj_has_active_ai_enemies;
+
 /**
  * Selects nearby, active enemies for full AI processing this frame.
  *
@@ -178,6 +180,11 @@ static uint16_t obj_enemy_ai_next_index;
  */
 void ObjectSystem_ScheduleEnemyAi(void)
 {
+    if (!obj_has_active_ai_enemies)
+    {
+        return;
+    }
+
     // Start a new generation before marking any objects. Old marks then fail
     // ObjectSystem_IsEnemyAiScheduled() automatically.
     obj_enemy_ai_schedule_token++;
@@ -275,6 +282,8 @@ void ObjectSystem_ProcessObjects()
     // New implementation
     struct game_object * ptr = (struct game_object *)&obj_general[0];
 
+    obj_has_active_ai_enemies = false; // Reset for this frame; callers will set to true if needed
+
     if (obj_active_count != 0)
     {
         uint16_t processed = 0;
@@ -290,8 +299,10 @@ void ObjectSystem_ProcessObjects()
 #endif
                 if (map_tilemap_recovery_pending)
                 {
+                    obj_has_active_ai_enemies = true; // Safe fallback
                     return;
                 }
+
                 processed++;
                 if (processed >= obj_active_count)
                 {

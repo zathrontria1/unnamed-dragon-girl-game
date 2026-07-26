@@ -26,6 +26,8 @@ extern uint16_t obj_enemies_defeated;
 extern uint16_t obj_enemies_target_count;
 extern uint16_t obj_enemies_max_count;
 
+extern bool obj_has_active_ai_enemies;
+
 // Player only data that shouldn't be in the object area
 extern uint16_t obj_player_attack_interval;
 extern uint16_t obj_player_prev_facing;
