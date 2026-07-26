@@ -33,8 +33,8 @@ near the door.";
 HUGE const char STR_MSG_TUTORIAL_MP[] = "\
 Welcome to Unnamed Dragon Girl Game!\n\
 Controls are as below:\n\
-\x14 Confirm/Attack \x15 Cancel/Run \x1d\x1e\x1f Map\n\
-\x16 Menu \x17 Ranged Attack \x1a\x1b\x1c Pause\r\
+" ICON_A " Confirm/Attack " ICON_B " Cancel/Run " ICON_SELECT " Map\n\
+" ICON_X " Menu " ICON_Y " Ranged Attack " ICON_START " Pause\r\
 This is a prototype game, and I hope you have fun\n\
 trying the game out!\n\
 \n\
@@ -225,7 +225,7 @@ function correctly and may pop.\n\
 To play the game anyway, press the following\n\
 button combination:\n\
 \n\
-\x18 + \x19 + \x1a\x1b\x1c + \x1d\x1e\x1f\n\
+" ICON_L " + " ICON_R " + " ICON_START " + " ICON_SELECT "\n\
 \n\
 or restart the console with the Reset button.\n\
 \n\

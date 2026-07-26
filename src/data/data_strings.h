@@ -3,6 +3,20 @@
 
 #include "consts.h"
 
+#define ICON_LEFT    "\x10"
+#define ICON_RIGHT   "\x11"
+#define ICON_UP      "\x12"
+#define ICON_DOWN    "\x13"
+#define ICON_A       "\x14"
+#define ICON_B       "\x15"
+#define ICON_X       "\x16"
+#define ICON_Y       "\x17"
+#define ICON_L       "\x18"
+#define ICON_R       "\x19"
+#define ICON_START   "\x1a\x1b\x1c"
+#define ICON_SELECT  "\x1d\x1e\x1f"
+
+
 /*extern HUGE const char STR_MSG_TEST_SINGLELINE[];
 extern HUGE const char STR_MSG_TEST_MULTILINE[];
 extern HUGE const char STR_MSG_TEST_MULTIPAGE[];*/
