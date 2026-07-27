@@ -16,6 +16,7 @@ void System_DisplayStartupSplash();
 void System_Init();
 void System_Init_CpuRegs();
 void System_Init_WramFunctions();
+void System_Init_Settings();
 void System_Init_Graphics();
 void System_Init_BgScroll();
 void System_Init_DisplaySettings(uint16_t routine);

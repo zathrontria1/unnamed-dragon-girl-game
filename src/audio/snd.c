@@ -12,7 +12,13 @@
 #include "consts_snd.h"
 
 bool snd_apu_booted;
+
+// User-settable settings.
 bool snd_settings_mono;
+uint8_t snd_settings_volume; // 0-127. Do not use the highest bit.
+bool snd_settings_enable_bgm;
+bool snd_settings_enable_sfx;
+bool snd_settings_enable_voice;
 
 uint8_t snd_current_command_counter; // Used to check if the SPC is ready for a new command
 
@@ -423,6 +429,11 @@ void SoundInterface_AcknowledgeNop()
  */
 void SoundInterface_PlaySfx_Pre(struct game_object * o, uint8_t sfx_id)
 {        
+    if (!snd_settings_enable_sfx)
+    {
+        return;
+    }
+
     int temp_snd_pan;
 
     if (!snd_settings_mono)
@@ -506,6 +517,11 @@ void SoundInterface_PlaySfx_Internal(uint8_t sfx_id, int8_t pan)
  */
 void SoundInterface_PlaySfx_Ex(uint8_t sfx_id, int8_t vol_l, int8_t vol_r, int8_t pitch)
 {
+    if (!snd_settings_enable_sfx)
+    {
+        return;
+    }
+    
     if (!SoundInterface_IsHigherPriority(sfx_id))
     {
         return;
@@ -516,6 +532,14 @@ void SoundInterface_PlaySfx_Ex(uint8_t sfx_id, int8_t vol_l, int8_t vol_r, int8_
     snd_defercmd_sfx_use_extended_format = true;
 
     snd_defercmd_sfx_id = sfx_id;
+
+    if (snd_settings_mono)
+    {
+        int8_t mono_vol = (vol_l > vol_r) ? vol_l : vol_r;
+        vol_l = mono_vol;
+        vol_r = mono_vol;
+    }
+    
     snd_defercmd_sfx_vol = vol_l;
     snd_defercmd_sfx_vol_r = vol_r;
     snd_defercmd_sfx_pitch = pitch;
@@ -614,6 +638,19 @@ void SoundInterface_SetDspRegister(uint8_t dsp_reg, uint8_t dsp_data)
     snd_current_command_counter++;
 
     SoundInterface_AcknowledgeNop();
+
+    return;
+}
+
+/*
+    Helper function to set master volume. This is a convenience function that sets both left and right master volume registers to the same value.
+
+    mvol must be 127 or lower.
+    */
+void SoundInterface_SetMasterVolume(uint8_t mvol)
+{
+    SoundInterface_SetDspRegister(0x0c, mvol);
+    SoundInterface_SetDspRegister(0x1c, mvol);
 
     return;
 }
@@ -904,6 +941,11 @@ void SoundInterface_UploadMusicSequence(struct seq_command * s, uint8_t track)
  */
 void SoundInterface_PlayMusic()
 {
+    if (!snd_settings_enable_bgm)
+    {
+        return;
+    }
+
     SoundInterface_AcknowledgeBusy(false);
 
     REG_APU01 = SND_CMD_MUS_START;
@@ -969,6 +1011,11 @@ void SoundInterface_StopMusic()
  */
 void SoundInterface_PlayClip(uint16_t clip_id)
 {
+    if (!snd_settings_enable_voice)
+    {
+        return;
+    }
+
     SoundInterface_PlayStream(data_stream_table[clip_id].ptr, data_stream_table[clip_id].len, data_stream_table[clip_id].loop);
 
     return;

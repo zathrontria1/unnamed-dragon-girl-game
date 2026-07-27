@@ -16,6 +16,9 @@
 
 #include "consts_snd.h"
 
+bool gfx_enable_hitblur;
+bool gfx_enable_heatwave;
+
 uint16_t gfx_mosaic_layers;
 int16_t gfx_mosaic_intensity;
 int16_t gfx_mosaic_change;

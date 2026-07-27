@@ -5,8 +5,15 @@
 #include <stdbool.h>
 #include "defs_structs.h"
 
+#define SND_DEFAULT_VOLUME 95
+
 extern bool snd_apu_booted;
+
 extern bool snd_settings_mono;
+extern uint8_t snd_settings_volume; 
+extern bool snd_settings_enable_bgm;
+extern bool snd_settings_enable_sfx;
+extern bool snd_settings_enable_voice;
 
 extern uint8_t snd_current_command_counter;
 
@@ -66,6 +73,8 @@ void SoundInterface_StopSfx_Internal(uint8_t sfx_id);
 void SoundInterface_RunDeferredCommands();
 
 void SoundInterface_SetDspRegister(uint8_t dsp_reg, uint8_t dsp_data);
+void SoundInterface_SetMasterVolume(uint8_t mvol);
+
 void SoundInterface_ResetAPU();
 
 void SoundInterface_UploadSample(struct sample_list_entry * s);

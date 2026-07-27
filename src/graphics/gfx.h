@@ -3,6 +3,9 @@
 
 #include "consts.h"
 
+extern bool gfx_enable_hitblur;
+extern bool gfx_enable_heatwave;
+
 extern uint16_t gfx_mosaic_layers;
 extern int16_t gfx_mosaic_intensity;
 extern int16_t gfx_mosaic_change;

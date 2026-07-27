@@ -138,6 +138,22 @@ void System_Init_WramFunctions()
     return;
 }
 
+/*
+    Initializes user-settable settings for audio and graphics.
+*/
+void System_Init_Settings()
+{
+    snd_settings_volume = SND_DEFAULT_VOLUME;
+    snd_settings_enable_bgm = true;
+    snd_settings_enable_sfx = true;
+    snd_settings_enable_voice = true;
+
+    gfx_enable_hitblur = true;
+    gfx_enable_heatwave = true;
+
+    return;
+}
+
 /**
  * @brief Displays the startup splash screen and initializes resources.
  * 
@@ -204,6 +220,11 @@ void System_DisplayStartupSplash()
     //SoundInterface_UploadMusicSequence((struct seq_command *)&data_seq_test_t5[0], 4); // Drum test sequence
     //SoundInterface_UploadMusicSequence((struct seq_command *)&data_seq_test_t6[0], 5); // Drum + instrument test sequence
     SoundInterface_SetMusicTempo(120);
+
+    // Initialize user game settings
+    System_Init_Settings();
+    
+    SoundInterface_SetMasterVolume(snd_settings_volume);
 
     shadow_brightness_change = 0;
 
