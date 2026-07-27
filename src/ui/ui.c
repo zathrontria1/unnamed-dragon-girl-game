@@ -118,13 +118,33 @@ void UserInterface_UpdateHealthCounters()
     {
         temp_bar_length_max = 208; // limit to max 208 pixels
 
-        // Scale down numbers larger than 8-bit
-        while (temp_hp_max >= 0x10000)
+        if (temp_hp_max >= 0x1000000)
+        {
+            temp_hp >>= 16;
+            temp_hp_max >>= 16;
+        }
+        else if (temp_hp_max >= 0x10000)
         {
             temp_hp >>= 8;
             temp_hp_max >>= 8;
         }
-        while (temp_hp_max >= 0x100)
+
+        if (temp_hp_max >= 0x1000)
+        {
+            temp_hp >>= 4;
+            temp_hp_max >>= 4;
+        }
+        if (temp_hp_max >= 0x400)
+        {
+            temp_hp >>= 2;
+            temp_hp_max >>= 2;
+        }
+        if (temp_hp_max >= 0x200)
+        {
+            temp_hp >>= 1;
+            temp_hp_max >>= 1;
+        }
+        if (temp_hp_max >= 0x100)
         {
             temp_hp >>= 1;
             temp_hp_max >>= 1;
@@ -321,13 +341,33 @@ void UserInterface_DrawEnemyHealthBar(struct game_object * o)
             temp_hp_max = 65535;
         }
 
-        while (temp_hp_max >= 0x10000)
+        if (temp_hp_max >= 0x1000000)
+        {
+            temp_hp >>= 16;
+            temp_hp_max >>= 16;
+        }
+        else if (temp_hp_max >= 0x10000)
         {
             temp_hp >>= 8;
             temp_hp_max >>= 8;
         }
 
-        while (temp_hp_max >= 0x100)
+        if (temp_hp_max >= 0x1000)
+        {
+            temp_hp >>= 4;
+            temp_hp_max >>= 4;
+        }
+        if (temp_hp_max >= 0x400)
+        {
+            temp_hp >>= 2;
+            temp_hp_max >>= 2;
+        }
+        if (temp_hp_max >= 0x200)
+        {
+            temp_hp >>= 1;
+            temp_hp_max >>= 1;
+        }
+        if (temp_hp_max >= 0x100)
         {
             temp_hp >>= 1;
             temp_hp_max >>= 1;
@@ -576,7 +616,7 @@ void UserInterface_UpdateEnemyCounters()
  * @param row        Target tilemap row.
  * @param col        Target tilemap column.
  */
-void UserInterface_PrintText(uint8_t * string_ptr, uint16_t row, uint16_t col)
+void UserInterface_PrintText(char * string_ptr, uint16_t row, uint16_t col)
 {
     int i = 0;
     uint16_t temp_len = 2;
@@ -625,7 +665,7 @@ void UserInterface_PrintText(uint8_t * string_ptr, uint16_t row, uint16_t col)
  * @param row        Target tilemap row.
  * @param col        Target tilemap column.
  */
-void UserInterface_PrintText_Mode3(uint8_t * string_ptr, uint16_t row, uint16_t col)
+void UserInterface_PrintText_Mode3(char * string_ptr, uint16_t row, uint16_t col)
 {
     uint16_t i = 0;
     uint16_t temp_len = 2;

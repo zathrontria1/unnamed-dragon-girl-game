@@ -350,10 +350,7 @@ void HdmaEngine_UpdateBgScrollValues()
     
     hdma_scroll_sine_index += (1 * V_MUL) >> 1;
 
-    while (hdma_scroll_sine_index >= 32)
-    {
-        hdma_scroll_sine_index -= 32;
-    }
+    hdma_scroll_sine_index &= 31;
 
     return;
 }
