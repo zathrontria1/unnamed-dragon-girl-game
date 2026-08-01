@@ -122,6 +122,8 @@ void Subscreen_Transition_Start(void * next_func)
 
 void Subscreen_Transition_Exit()
 {
+    DmaSystem_ResetQueue();
+    
     // Disable HDMA gradients
     hdma_use_gradient = 0x0000;
     
@@ -130,8 +132,6 @@ void Subscreen_Transition_Exit()
 
     // Exiting the subscreen. Load normal player palettes and resume game.
     AniSystem_Pal_LoadSubpalette((uint8_t *)&data_palette_player, 8);
-        
-    system_game_paused = false;
 
     UserInterface_ClearWindowBuffer(true);
     UserInterface_ClearTextBuffer();
@@ -146,6 +146,8 @@ void Subscreen_Transition_Exit()
 
     // Run first frame of gameplay loop while black to populate OAM shadow
     Loop_Game_Partial();
+
+    system_game_paused = false;
 
     return;
 }
