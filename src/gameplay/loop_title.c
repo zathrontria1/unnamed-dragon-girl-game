@@ -22,6 +22,7 @@
 #include "loop_cutscene.h"
 
 #include "spr.h"
+#include "vars_extern.h"
 
 // Placeholder; this should be filled with real code sometime soon
 void Title_Loop()
@@ -51,8 +52,8 @@ void Title_Loop()
     }
 
     // Set up the display for the title screen
-    System_Init_TilemapSettings(ROUTINE_TITLE);
-    System_Init_DisplaySettings(ROUTINE_TITLE);
+    //System_Init_TilemapSettings(ROUTINE_TITLE);
+    //System_Init_DisplaySettings(ROUTINE_TITLE);
 
     REG_OBSEL = OBJ_SIZE16_L32|3; // Enable sprite layer, needed for the title options
 
@@ -125,6 +126,40 @@ void Title_Loop()
         System_Init_TilemapSettings(system_target_routine);
         System_Init_DisplaySettings(system_target_routine);
     }
+
+    return;
+}
+
+void Title_Init()
+{
+    System_DisableInterrupts();
+
+    // Initialize the title screen
+    REG_INIDISP = 0x8f; // Disable display
+
+    uint16_t transfer_length_1 = LZ4_UnpackToWRAM((void *)&data_bg_title_back_lz4, (uint8_t *)LZ4_BUFFER_ADDR);
+    LZ4_UnpackToWRAM((void *)&data_tilemap_title_back_lz4, (uint8_t *)(LZ4_BUFFER_ADDR+0xc800));
+
+    // Copy the palette
+    DmaSystem_CopyToWram((uint8_t *)&data_palette_title, (uint8_t *)((uint32_t)&shadow_cgram+32), 224);
+
+    // Upload the title screen
+    DmaSystem_CopyToVram((uint8_t *)(LZ4_BUFFER_ADDR), 0x0000, transfer_length_1);
+    DmaSystem_CopyToVram((uint8_t *)(LZ4_BUFFER_ADDR+0xc800), 0x3800, 1792);
+
+    DmaSystem_UploadCgram();
+
+    REG_INIDISP = 0x00; // Enable display
+
+    System_EnableInterrupts();
+
+    shadow_brightness = 0;
+
+    system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_TITLE);
+    system_target_routine = ROUTINE_TITLE;
+
+    System_Init_TilemapSettings(system_target_routine);
+    System_Init_DisplaySettings(system_target_routine);
 
     return;
 }

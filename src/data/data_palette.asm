@@ -75,6 +75,11 @@ _data_palette_splash:
 _data_palette_error:
     incbin "palette/palette_error_background.bin"
 
+    section "_rodata.far.bindata.palette.title.backgrond.0"
+    global _data_palette_title
+_data_palette_title:
+    incbin "palette/palette_title_background.bin"
+
     section "_rodata.far.bindata.palette.title.options.0"
     global _data_palette_title_options
 _data_palette_title_options:

@@ -37,6 +37,7 @@ extern const uint8_t data_palette_map_1_8bpp[];
 
 extern const uint8_t data_palette_splash[];
 extern const uint8_t data_palette_error[];
+extern const uint8_t data_palette_title[];
 
 extern const uint8_t data_palette_title_options[];
 
@@ -48,8 +49,11 @@ extern const uint8_t data_bg_dungeon_anim_torch_lz4[]; // dungeon torch animatio
 extern const uint8_t data_bg_map_dungeon_0_8bpp_lz4[]; // dungeon map, compressed
 extern const uint8_t data_bg_map_dungeon_1_8bpp_lz4[]; // dungeon map, compressed
 
-extern const uint8_t data_bg_error_back_lz4[]; // error general back
+extern const uint8_t data_bg_error_back_lz4[]; // error general BG
 extern const uint8_t data_tilemap_error_back_lz4[];
+
+extern const uint8_t data_bg_title_back_lz4[]; // title BG
+extern const uint8_t data_tilemap_title_back_lz4[];
 
 extern const uint8_t data_spr_title_options_lz4[];
 

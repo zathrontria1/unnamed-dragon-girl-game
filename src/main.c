@@ -164,8 +164,8 @@ int main()
 
     System_DisplayStartupSplash(); // A good amount of init is here.
 
-    system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_TITLE);
-    system_target_routine = ROUTINE_TITLE;
+    system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_TITLE_INIT);
+    system_target_routine = ROUTINE_TITLE_INIT;
     System_Init_TilemapSettings(system_target_routine);
     System_Init_DisplaySettings(system_target_routine);
 
@@ -244,6 +244,9 @@ void * Main_GetFunctionPointer(uint16_t routine)
             break;
         case ROUTINE_SUBSCREEN_HELP:
             return (void *)&Subscreen_Help;
+            break;
+        case ROUTINE_TITLE_INIT:
+            return (void *)&Title_Init;
             break;
         case ROUTINE_TITLE:
             return (void *)&Title_Loop;

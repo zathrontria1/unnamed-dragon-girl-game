@@ -489,6 +489,7 @@ void System_Init_DisplaySettings(uint16_t routine)
             REG_TM = TM_MODE3; // BG1, BG2, and OBJ
             break;
         case ROUTINE_TITLE:
+        case ROUTINE_TITLE_INIT:
             REG_BGMODE = 0x09; // Mode 1, high priority bg3
             REG_TM = TM_TITLE; // BG1 and OBJ
             break;
@@ -537,6 +538,7 @@ void System_Init_TilemapSettings(uint16_t routine)
             REG_BG2SC = TILEMAP_ADDR_MAP_UI >> 8;
             break;
         case ROUTINE_TITLE:
+        case ROUTINE_TITLE_INIT:
             REG_BG12NBA = 0 << 4 | 0;
 
             REG_BG1SC = 0x3800 >> 8;

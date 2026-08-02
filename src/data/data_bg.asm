@@ -34,3 +34,13 @@ _data_bg_error_back_lz4:
     global  _data_tilemap_error_back_lz4
 _data_tilemap_error_back_lz4:
     incbin "error/error_background_tilemap.bin.lz4"
+
+    section "_rodata.far.bindata.title.0"
+    global  _data_bg_title_back_lz4
+_data_bg_title_back_lz4:
+    incbin "title/title_background.bin.lz4"
+
+    section "_rodata.far.bindata.title.1"
+    global  _data_tilemap_title_back_lz4
+_data_tilemap_title_back_lz4:
+    incbin "title/title_background_tilemap.bin.lz4"
