@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 uint32_t LZ4_ReadU32LE(const uint8_t * ptr);
+uint16_t LZ4_ReadU16LE(const uint8_t * ptr);
 uint32_t LZ4_UnpackToWRAM(void * src, void * dest);
 uint32_t LZ4_UnpackToVRAM(void * src, uint16_t dest);
 int32_t LZ4_GetLength(void * src);

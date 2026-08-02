@@ -32,6 +32,16 @@ uint32_t LZ4_ReadU32LE(const uint8_t * ptr)
 #endif
 }
 
+uint16_t LZ4_ReadU16LE(const uint8_t * ptr)
+{
+#if LZ4_DIRECT_CAST
+    return *((const uint16_t *)ptr);
+#else
+    return (uint16_t)ptr[0] |
+           ((uint16_t)ptr[1] << 8);
+#endif
+}
+
 /**
  * @brief Unpacks LZ4-compressed data to a WRAM area.
  * 
@@ -127,9 +137,12 @@ uint32_t LZ4_DecompressFrame(void * src, void * dest)
 {
     uint8_t * ptr_read = src;
     uint8_t * ptr_write = dest;
+    uint8_t * ptr_write_start = ptr_write;
+
+    uint16_t temp_hdmaen = shadow_hdmaen; // save the HDMA state 
 
     // Only do prep for DMA if HDMA isn't in use
-    if (!shadow_hdmaen)
+    if (!temp_hdmaen)
     {
         DmaSystem_CopyToWram_ShortPrep(((uint32_t)ptr_read) >> 16, ((uint32_t)ptr_write) >> 16);
     }
@@ -152,118 +165,127 @@ uint32_t LZ4_DecompressFrame(void * src, void * dest)
         // no content size bytes
         ptr_read += 3;
     }
-    
-    uint32_t temp_frame_bytes_written = 0;
-    uint32_t temp_start_offset = (uint32_t) ptr_read;
-
-    uint32_t temp_frame_bytes_read = 0;
 
     // data block section start
     // if the 4-byte header is not all zeroes, it's a valid block
-    while (LZ4_ReadU32LE(ptr_read) != 0x00000000)
+    uint32_t temp_block_header = LZ4_ReadU32LE(ptr_read);
+    while (temp_block_header != 0x00000000)
     {
-        uint32_t temp_block_start_offset = (uint32_t) ptr_read;
-        uint32_t temp_data_size = (LZ4_ReadU32LE(ptr_read) & 0x7fffffff);
+        uint32_t temp_data_size = temp_block_header & 0x7fffffff;
 
-        if ((LZ4_ReadU32LE(ptr_read) & 0x80000000) == (0x80000000))
+        ptr_read += 4;
+
+        if ((temp_block_header & 0x80000000) == 0x80000000)
         {
             // block is uncompressed
-            ptr_read += 4;
-            temp_frame_bytes_read += 4;
-
-            for (uint16_t i = 0; i < temp_data_size; i++)
+            if (!temp_hdmaen)
             {
-                (*ptr_write++) = (*ptr_read++);
+                DmaSystem_CopyToWram_ShortRun(ADDR_LOWORD(ptr_read), ADDR_LOWORD(ptr_write), (uint16_t)temp_data_size);
+            }
+            else
+            {
+                System_CopyBlock(ptr_read, ptr_write, (uint16_t)temp_data_size);
             }
 
-            temp_frame_bytes_written += temp_data_size;
-
-            temp_frame_bytes_read = (uint32_t)(ptr_read - temp_start_offset);
+            ptr_read += temp_data_size;
+            ptr_write += temp_data_size;
         }
         else 
         {
             // block is lz4 compressed
-            ptr_read += 4;
+            uint16_t temp_block_bytes_read = 0;
+            uint16_t temp_block_size = (uint16_t)temp_data_size;
+            uint8_t temp_length_byte = 0;
 
-            uint32_t temp_block_bytes_read = 0;
-
-            while (temp_block_bytes_read < temp_data_size)
+            if (temp_data_size != 0)
             {
-                uint16_t temp_literal_count = (*ptr_read) >> 4;
-                uint16_t temp_copy_count = (*ptr_read++) & 0x000f;
-
-                if (temp_literal_count == 15)
+                do
                 {
-                    // token length max, add more bytes
-                    while ((*ptr_read) == 255)
+                    uint8_t temp_token = *ptr_read++;
+                    uint16_t temp_literal_count = temp_token >> 4;
+                    uint16_t temp_copy_count = temp_token & 0x000f;
+
+                    if (temp_literal_count == 15)
                     {
-                        temp_literal_count += (*ptr_read++);
+                        // token length max, add more bytes
+                        do
+                        {
+                            temp_length_byte = *ptr_read++;
+                            temp_literal_count += temp_length_byte;
+                            temp_block_bytes_read += 1;
+                        }
+                        while (temp_length_byte == 255);
                     }
 
-                    temp_literal_count += (*ptr_read++);
-                }
-
-                // write out the literals
-                if (temp_literal_count != 0)
-                {
-                    if (!shadow_hdmaen)
+                    // write out the literals
+                    if (temp_literal_count != 0)
                     {
-                        // Only do this if HDMA isn't in use
-                        // This should be fine as it's always ROM to RAM
+                        if (!temp_hdmaen)
+                        {
+                            // Only do this if HDMA isn't in use
+                            // This should be fine as it's always ROM to RAM
 
-                        // This branch is cheap all things considered, so it's OK to leave it here.
-                        DmaSystem_CopyToWram_ShortRun(ADDR_LOWORD(ptr_read), ADDR_LOWORD(ptr_write), temp_literal_count);
-                    }
-                    else
-                    {
-                        System_CopyBlock(ptr_read, ptr_write, temp_literal_count);
-                    }
-                    
-                    ptr_write += temp_literal_count;
-                    ptr_read += temp_literal_count;
+                            // This branch is cheap all things considered, so it's OK to leave it here.
+                            DmaSystem_CopyToWram_ShortRun(ADDR_LOWORD(ptr_read), ADDR_LOWORD(ptr_write), temp_literal_count);
+                        }
+                        else
+                        {
+                            System_CopyBlock(ptr_read, ptr_write, temp_literal_count);
+                        }
 
-                    temp_frame_bytes_written += temp_literal_count;
-                }
-
-                // Now to start decoding for real
-                uint16_t temp_offset = (uint16_t)LZ4_ReadU32LE(ptr_read);
-
-                if (temp_offset == 0)
-                {
-                    // Corrupted block, abort
-                    return 0;
-                }
-
-                uint8_t * temp_past_ptr_read = ptr_write;
-
-                temp_past_ptr_read -= (uint16_t)LZ4_ReadU32LE(ptr_read);
-
-                ptr_read += 2; // get over the offset section
-
-                if (temp_copy_count == 15)
-                {
-                    // copy count max, add more bytes
-                    while ((*ptr_read) == 255)
-                    {
-                        temp_copy_count += (*ptr_read++);
+                        ptr_write += temp_literal_count;
+                        ptr_read += temp_literal_count;
                     }
 
-                    temp_copy_count += (*ptr_read++);
+                    temp_block_bytes_read += temp_literal_count + 1;
+
+                    // The final sequence may contain literals without a match.
+                    if (temp_block_bytes_read == temp_block_size)
+                    {
+                        break;
+                    }
+
+                    // Now to start decoding for real
+                    uint16_t temp_offset = LZ4_ReadU16LE(ptr_read);
+
+                    if (temp_offset == 0)
+                    {
+                        // Corrupted block, abort
+                        return 0;
+                    }
+
+                    uint8_t * temp_past_ptr_read = ptr_write;
+
+                    temp_past_ptr_read -= temp_offset;
+
+                    ptr_read += 2; // get over the offset section
+                    temp_block_bytes_read += 2;
+
+                    if (temp_copy_count == 15)
+                    {
+                        // copy count max, add more bytes
+                        do
+                        {
+                            temp_length_byte = *ptr_read++;
+                            temp_copy_count += temp_length_byte;
+                            temp_block_bytes_read += 1;
+                        }
+                        while (temp_length_byte == 255);
+                    }
+
+                    temp_copy_count += 4; // hardcoded minimum
+
+                    // write out the match string
+                    System_CopyBlock(temp_past_ptr_read, ptr_write, temp_copy_count);
+
+                    ptr_write += temp_copy_count;
                 }
-                temp_copy_count += 4; // hardcoded minimum
-
-                // write out the match string
-                System_CopyBlock(temp_past_ptr_read, ptr_write, temp_copy_count);
-
-                ptr_write += temp_copy_count;
-
-                temp_frame_bytes_written += temp_copy_count;
-
-                temp_frame_bytes_read += ((uint32_t)ptr_read - temp_start_offset);
-                temp_block_bytes_read = ((uint32_t)ptr_read - temp_block_start_offset);
+                while (temp_block_bytes_read != temp_block_size);
             }
         }
+
+        temp_block_header = LZ4_ReadU32LE(ptr_read);
     }
 
-    return temp_frame_bytes_written; 
+    return (uint32_t)(ptr_write - ptr_write_start);
 }
