@@ -34,6 +34,8 @@ void SpriteEngine_AddToSortedLayer(struct game_object * o, uint16_t tileattrib);
 void SpriteEngine_AddToBackLayer(struct game_object * o, uint16_t tileattrib);
 #endif
 
+void SpriteEngine_ResetSpriteLists();
+
 void SpriteEngine_ProcessSpriteLists();
 void SpriteEngine_ProcessSpriteLists_WriteFrontSprites();
 void SpriteEngine_ProcessSpriteLists_ClearDepthBuffer();

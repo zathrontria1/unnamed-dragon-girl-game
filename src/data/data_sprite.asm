@@ -48,3 +48,9 @@ _data_spr_spawn_placeholder:
 _data_spr_fixed_lz4:
     incbin "sprites/spr_fixed.bin.lz4"
 
+; For title screen options
+    section "_rodata.far.bindata.sprtiles.title.0"
+    global _data_spr_title_options_lz4
+_data_spr_title_options_lz4:
+    incbin "title/title_options.bin.lz4"
+

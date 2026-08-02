@@ -599,6 +599,23 @@ void SpriteEngine_ReleaseVramForBoss()
 }
 
 /**
+ * @brief Resets all sprite queues and counters for the next frame, 
+    *     and resets the shadow OAM tables to a clean state.
+ */
+void SpriteEngine_ResetSpriteLists()
+{
+    spr_sprite_count_prev = 128;
+    spr_sprite_count = 0;
+    spr_front_count = 0;
+    spr_back_count = 0;
+    spr_normal_count = 0;
+
+    SpriteEngine_ProcessSpriteLists();
+
+    return;
+}
+
+/**
  * @brief Main sprite rendering pipeline coordinator.
  * 
  * Sorts queued sprite entries and outputs them to the shadow OAM tables.

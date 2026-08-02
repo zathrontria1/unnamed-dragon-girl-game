@@ -16,6 +16,7 @@ del /f /q sprites\boss\*.bin sprites\boss\*.lz4 sprites\boss\*.dd 2>nul
 del /f /q ui\*.bin ui\*.lz4 2>nul
 del /f /q splash\*.bin splash\*.lz4 2>nul
 del /f /q error\*.bin error\*.lz4 2>nul
+del /f /q title\*.bin title\*.lz4 2>nul
 del /f /q cutscene\intro\*.bin cutscene\intro\*.lz4 2>nul
 del /f /q maps\*.h 2>nul
 

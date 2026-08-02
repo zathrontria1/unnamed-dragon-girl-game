@@ -55,7 +55,16 @@ void Loop_Subscreen_Transition_Init()
 
     while (shadow_brightness != 0x00)
     {
-        ; // Wait for fade out via alternate NMI
+        while ((REG_HVBJOY & VBL_READY) != VBL_READY)
+        {
+            ;
+        }
+        DmaSystem_UploadCgram(); // Avoid stale colour palettes. Do it only once per frame
+        while ((REG_HVBJOY & VBL_READY) == VBL_READY)
+        {
+            ;
+        }
+        // Wait for fade out via alternate NMI
     }
 
     subscreen_rendered = 0;

@@ -26,6 +26,7 @@
 #include "ani_bg.h"
 #include "ani_pal.h"
 #include "hdma.h"
+#include "spr.h"
 
 #include "snd.h"
 #include "ui.h"
@@ -163,6 +164,16 @@ void System_DisplayStartupSplash()
 {
     // Set up the PPU regs to what we want.
     System_Init_BgScroll();
+
+    // Reset the sprites
+    SpriteEngine_ResetSpriteLists();
+    
+    DmaSystem_UploadOam();
+    REG_OBSEL = OBJ_SIZE16_L32|3;
+
+    // Upload the title screen option graphics and palette
+    AniSystem_Pal_LoadSubpalette((uint8_t *)&data_palette_title_options, 8); // Upload title options palette
+    LZ4_UnpackToVRAM(&data_spr_title_options_lz4, 0x6000); // Upload title options graphics
 
     ErrorHandler_Internal_Setup();
 
@@ -477,6 +488,10 @@ void System_Init_DisplaySettings(uint16_t routine)
             REG_BGMODE = 0x03; // Mode 3
             REG_TM = TM_MODE3; // BG1, BG2, and OBJ
             break;
+        case ROUTINE_TITLE:
+            REG_BGMODE = 0x09; // Mode 1, high priority bg3
+            REG_TM = TM_TITLE; // BG1 and OBJ
+            break;
     }
 
     return;
@@ -520,6 +535,11 @@ void System_Init_TilemapSettings(uint16_t routine)
 
             REG_BG1SC = TILEMAP_ADDR_MAP_MAP >> 8;
             REG_BG2SC = TILEMAP_ADDR_MAP_UI >> 8;
+            break;
+        case ROUTINE_TITLE:
+            REG_BG12NBA = 0 << 4 | 0;
+
+            REG_BG1SC = 0x3800 >> 8;
             break;
     }
 

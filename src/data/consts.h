@@ -322,6 +322,7 @@
 #define PAL_UI_4BPP 0
 
 #define TM_MODE1 0x17 // BG1, BG2, BG3, OBJ
+#define TM_TITLE 0x11 // BG1, OBJ
 #define TM_MODE1_MSGBOX 0x07 // BG1, BG2, BG3
 #define TM_MODE3 0x13 // BG1, BG2, OBJ
 

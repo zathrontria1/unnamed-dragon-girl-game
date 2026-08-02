@@ -237,6 +237,7 @@ def build_assets(release_mode=False, force=False, num_threads=None):
         (['sprites/spr_cycle_fire.png'], 'palette/palette_cycle_fire.bin', ['superfamiconv', 'palette', '-i', 'sprites/spr_cycle_fire.png', '-d', 'palette/palette_cycle_fire.bin', '-R', '-C', '16', '--color-zero', '#000000']),
         (['splash/loading_splash_textonly.png'], 'splash/palette_splash.bin', ['superfamiconv', 'palette', '-i', 'splash/loading_splash_textonly.png', '-d', 'splash/palette_splash.bin', '-C', '16', '--color-zero', '#000000', '-R']),
         (['error/error_background_quantized.png'], 'palette/palette_error_background.bin', ['superfamiconv', 'palette', '-i', 'error/error_background_quantized.png', '-d', 'palette/palette_error_background.bin', '-P', '7', '-C', '16', '--color-zero', '#000000']),
+        (['title/title_options.png'], 'palette/palette_title_options.bin', ['superfamiconv', 'palette', '-i', 'title/title_options.png', '-d', 'palette/palette_title_options.bin', '-P', '7', '-C', '16', '--color-zero', '#000000', '-R']),
     ]
 
     for inputs, out, cmd in PALETTE_DEFINITIONS:
@@ -294,6 +295,7 @@ def build_assets(release_mode=False, force=False, num_threads=None):
         (['sprites/boss/spr_boss_hands.png', 'palette/palette_spr_boss_placeholder.bin'], 'sprites/boss/spr_boss_hands.bin', ['superfamiconv', 'tiles', '-i', 'sprites/boss/spr_boss_hands.png', '-p', 'palette/palette_spr_boss_placeholder.bin', '-d', 'sprites/boss/spr_boss_hands.bin', '-B', '4', '-D', '-F', '-R']),
         (['splash/loading_splash_textonly.png', 'splash/palette_splash.bin'], 'splash/loading_splash.bin', ['superfamiconv', 'tiles', '-i', 'splash/loading_splash_textonly.png', '-p', 'splash/palette_splash.bin', '-d', 'splash/loading_splash.bin', '-B', '4']),
         (['error/error_background_quantized.png', 'palette/palette_error_background.bin'], 'error/error_background.bin', ['superfamiconv', 'tiles', '-i', 'error/error_background_quantized.png', '-p', 'palette/palette_error_background.bin', '-d', 'error/error_background.bin', '-B', '4']),
+        (['title/title_options.png', 'palette/palette_title_options.bin'], 'title/title_options.bin', ['superfamiconv', 'tiles', '-i', 'title/title_options.png', '-p', 'palette/palette_title_options.bin', '-d', 'title/title_options.bin', '-B', '4', '-D', '-F', '-R']),
     ]
 
     phase2_tasks = []
@@ -382,7 +384,7 @@ def build_assets(release_mode=False, force=False, num_threads=None):
     # Inputs: All generated .bin files in target directories
     # Outputs: compressed .bin.lz4 files
     # =========================================================================
-    lz4_folders = ['sprites', 'bg', 'ui', 'splash', 'error', 'cutscene/intro']
+    lz4_folders = ['sprites', 'bg', 'ui', 'splash', 'error', 'cutscene/intro', 'title']
     bin_files = []
     for fld in lz4_folders:
         bin_files.extend(glob.glob(f"{fld}/*.bin"))
