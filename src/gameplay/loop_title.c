@@ -57,7 +57,7 @@ void Title_Loop()
     REG_OBSEL = OBJ_SIZE16_L32|3; // Enable sprite layer, needed for the title options
 
     // Blink the PRESS START text on the title screen
-    if (system_frames_elapsed % (60 / V_MUL) < (30 / V_MUL))
+    if (system_time_subframe % (60 / V_MUL) < (30 / V_MUL))
     {
         // Display the press start text at a blink rate of 2hz
 
