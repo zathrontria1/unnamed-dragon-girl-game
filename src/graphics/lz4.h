@@ -7,6 +7,7 @@ uint16_t LZ4_ReadU16LE(const uint8_t * ptr);
 uint32_t LZ4_UnpackToWRAM(void * src, void * dest);
 uint32_t LZ4_UnpackToVRAM(void * src, uint16_t dest);
 int32_t LZ4_GetLength(void * src);
+uint32_t LZ4_DecompressBlock(uint8_t **ptr_read, uint8_t **ptr_write, uint16_t block_size, uint16_t hdmaen);
 uint32_t LZ4_DecompressFrame(void * src, void * dest);
 
 #endif
