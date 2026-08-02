@@ -184,7 +184,7 @@ def build_assets(release_mode=False, force=False, num_threads=None):
     if num_threads is None:
         num_threads = max(1, os.cpu_count() or 4)
 
-    lz4_level = "-12" if release_mode else "-1"
+    lz4_level = "-12" # LZ4 compression is so fast that we can always use maximum compression for release builds
     print(f"Building assets (LZ4 Level: {lz4_level}, Parallel Threads: {num_threads})...")
 
     cache = load_cache()

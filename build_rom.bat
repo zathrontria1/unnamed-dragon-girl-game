@@ -35,11 +35,12 @@ if errorlevel 1 (
 if "%target%"=="release" goto build_release
 if "%target%"=="all" goto build_all
 
+REM debug builds are done with -O4 optimisation level as the speed of compilation isn't very much different from -O2, and the only "thing" that -O2 gives is worse performance.
 :build_debug
 echo Compiling ROM [main_debug.sfc]...
 set sfc_name=main_debug
 set debug_define=-DDEBUG_ALL=1
-vc.exe +vlink-config -I. -Isrc -Isrc/core -Isrc/gameplay -Isrc/graphics -Isrc/ui -Isrc/audio -Isrc/data -O2 -size -msfp4 -lms4 --Mmapfile_debug --DFASTROM=1 --DLZ4_DIRECT_CAST=1 %debug_define% "--symfmt %%06x:%%s" "--symfile %sfc_name%.sym" %cmd_code% %cmd_data% -o %sfc_name%_temp.sfc
+vc.exe +vlink-config -I. -Isrc -Isrc/core -Isrc/gameplay -Isrc/graphics -Isrc/ui -Isrc/audio -Isrc/data -O4 -size -msfp4 -lms4 --Mmapfile_debug --DFASTROM=1 --DLZ4_DIRECT_CAST=1 %debug_define% "--symfmt %%06x:%%s" "--symfile %sfc_name%.sym" %cmd_code% %cmd_data% -o %sfc_name%_temp.sfc
 if errorlevel 1 goto build_failed
 
 python .\tools\checksum.py --hirom --pad %sfc_name%_temp.sfc -o %sfc_name%.sfc

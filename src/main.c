@@ -163,15 +163,6 @@ int main()
     }
 
     System_DisplayStartupSplash(); // A good amount of init is here.
-    
-    /*system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_CUTSCENE_INIT);
-    
-    system_target_routine = ROUTINE_CUTSCENE_INIT;
-
-    cs_current = (struct cutscene_data *)&data_cs_intro;
-    
-    System_Init_TilemapSettings(system_target_routine);
-    System_Init_DisplaySettings(system_target_routine);*/
 
     system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_TITLE);
     system_target_routine = ROUTINE_TITLE;
