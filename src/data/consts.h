@@ -2,7 +2,11 @@
 #define CONSTS_H
 
 #ifndef _WIN32
-    #define INLINE_ASM 1
+    #ifdef NO_ASM
+        #define INLINE_ASM 0
+    #else
+        #define INLINE_ASM 1
+    #endif
 #endif
 
 #ifdef __VBCC__
