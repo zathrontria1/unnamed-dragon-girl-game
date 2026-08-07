@@ -50,7 +50,7 @@ You might want to mute the audio some other way for now if you don't want to hea
 Assets are included only in binary form (i.e. ready to be placed in the ROM image as is).
 
 ## Building and testing
-Note: The project expects support for the C standard library and 32-bit floating point support.
+Note: The code expects C standard library and 32-bit floating-point support.
 
 Primarily tested with [VBCC](http://www.compilers.de/vbcc.html) and [Mesen2](https://github.com/SourMesen/Mesen2)
 
