@@ -45,6 +45,9 @@ hello.sfc
 *.idb
 *.pdb
 
+# Local / Documentation notes
+/docs/optimization-notes.md
+
 # Kernel Module Compile Results
 *.mod*
 *.cmd
