@@ -45,6 +45,9 @@ hello.sfc
 *.idb
 *.pdb
 
+# Local/Documentation notes
+/docs/optimization-notes.md
+
 # Kernel Module Compile Results
 *.mod*
 *.cmd
@@ -128,6 +131,7 @@ tools/asset_watcher.ps1
 tools/schedule_watcher.ps1
 tools/unschedule_watcher.ps1
 .github/copilot-instructions.md
+.github/copilot_implementation_plan.md
 
 # Old planning and data
 archived-data
