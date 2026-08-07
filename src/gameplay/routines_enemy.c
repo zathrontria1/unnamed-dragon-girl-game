@@ -36,7 +36,7 @@ void Routines_Enemy_CommonUpdate(struct game_object * o, const enemy_standard_cf
 {
     if (!system_game_paused)
     {
-        uint16_t temp_invalidate_animation_frame = 0;
+        //uint16_t temp_invalidate_animation_frame = 0;
 
         struct game_object * p = obj_player_pointer;
 
@@ -61,7 +61,8 @@ void Routines_Enemy_CommonUpdate(struct game_object * o, const enemy_standard_cf
                 
                 if (ObjectSystem_IsEnemyAiScheduled(o))
                 {
-                    temp_invalidate_animation_frame = Routines_Enemy_Ai_Process(o, temp_dist, temp_x, temp_y, cfg->dist_min, cfg->allow_flipflop, cfg->attack_delay, cfg->archetype);
+                    // temp_invalidate_animation_frame = // unused
+                    Routines_Enemy_Ai_Process(o, temp_dist, temp_x, temp_y, cfg->dist_min, cfg->allow_flipflop, cfg->attack_delay, cfg->archetype);
                 }
 
                 Routines_Enemy_Ai_UpdateTimer(o);
@@ -190,7 +191,7 @@ void Routines_Enemy_CommonUpdate(struct game_object * o, const enemy_standard_cf
                             }
                             o->struct_data.npc_data.hp -= temp_dmg;
 
-                            temp_invalidate_animation_frame = 1;
+                            //temp_invalidate_animation_frame = 1;
 
                             o->struct_data.npc_data.hp_display_time = 60 / V_MUL;
                         }
@@ -203,10 +204,10 @@ void Routines_Enemy_CommonUpdate(struct game_object * o, const enemy_standard_cf
                     Gfx_EmitSmoke(o, 12);
                 }
 
-                if (Routines_Shared_StatusMaintenance(o))
+                /*if (Routines_Shared_StatusMaintenance(o))
                 {
                     temp_invalidate_animation_frame = true;
-                }
+                }*/
 
                 // Check if the enemy is dead and set states
                 Routines_Shared_CheckIfDead(o);
