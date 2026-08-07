@@ -21,7 +21,7 @@ _LZ4_DecompressBlock:
     rep #$30 
     
     sta r28
-    stx r29 ; Immediately safe them as these registers will be used very soon
+    stx r29 ; Immediately save them as these registers will be used very soon
 
     ; fetch block size and HDMAEN enable
     ; r10 and r11 can be reused
@@ -29,12 +29,12 @@ _LZ4_DecompressBlock:
     bne :+
         ; Block size is 0. Abort.
         lda #$0000
-        ldx #$0000
+        tax
         rtl
     :
     sta r10
     lda 10,s
-    sta r11 ; TODO: HDMAEN is not read and always uses MVN even if safe.
+    sta r11
 
     ; Fetch ptr_read
     lda [r28]
@@ -116,11 +116,25 @@ SFX_LZ4_decompress_block:
 
         jsr     Setup
         
+        ; Check if HDMA is enabled.
+        lda     r11
+        bne     .mvn_mode
+        a16
+        x16
+        rep #$30
+
+        jsr     DecodeBlock_DMA
+
+        bra .decompress_end
+
+        .mvn_mode:
         a16
         x16
         rep #$30
 
         jsr     DecodeBlock
+
+        .decompress_end:
         rtl
 
 
@@ -163,6 +177,109 @@ Setup:
         sta     r6+$03
         rts
 
+DecodeBlock_DMA:
+        a16
+        x16
+
+        ldy     r2         ;Store destination offset for decompressed size calculation
+        phy
+        lda     [r0]     ;Read lower 16 bits of block size
+        jsr     Skip4           ;Skip block size
+        clc
+        adc     r0       ;Store block end offset
+        sta     r8
+
+ReadToken_DMA:
+        lda     [r0]     ;Read token byte
+        pha                     ;Save for @Match
+        inc     r0
+
+        and     #$00f0          ;Check high nibble
+        beq     .IsBlockDone_DMA    ;Zero: No literal
+
+.Literal_DMA:
+        lsr                     ;Compute literal length
+        lsr
+        lsr
+        lsr
+        cmp     #$000f          ;Short literal?
+        bne     .CopyLiteral_DMA
+        jsr     AddLength
+
+.CopyLiteral_DMA:
+        ; dma code
+        ; Since most of the DMA setup is already done beforehand, just make sure the values make sense
+
+        ; take advantage of the fact that DMA regs are R/W
+        ; and directly use them without a function call.
+        pha
+        sta $4375 ; len
+
+        lda r0
+        sta $4372 ; src
+
+        lda r2
+        sta $2181 ; dest
+
+        a8
+        sep #$20
+
+        lda #$80
+        sta $420b
+
+        a16
+        rep #$21
+
+        ldx $4372
+        stx r0
+
+        pla
+        adc r2
+        sta r2
+        tay
+
+        stx     r0       ;Copy offsets
+        sty     r2
+
+.IsBlockDone_DMA:
+        lda     r8
+        cmp     r0
+        beq     BlockDone
+
+.Match_DMA:
+        pla                     ;Pull block token
+        tax                     ;Stash
+
+        lda     [r0]     ;Read match offset (word)
+        pha                     ;and save on stack for @CopyMatch
+        inc     r0
+        inc     r0
+
+        txa                     ;Swap back token
+        and     #$000f          ;Check low nibble
+        cmp     #$000f          ;Short match length?
+        bne     .CopyMatch_DMA
+        jsr     AddLength
+
+.CopyMatch_DMA:
+        tay                     ;Length in A
+        lda     r2         ;Copy from dest
+        sec
+        sbc     1,s             ;Offset on stack
+        tax
+        pla                     ;Unwind
+
+        tya
+        clc
+        adc     #$03
+        ldy     r2
+        phb
+        jsl     r6          ;Mode 21 = JSL
+        plb
+        sty     r2         ;Copy destination offset
+
+        bra     ReadToken_DMA
+
 DecodeBlock:
         a16
         x16
@@ -191,24 +308,25 @@ ReadToken:
         lsr
         cmp     #$000f          ;Short literal?
         bne     .CopyLiteral
-        jsr     .AddLength
+        jsr     AddLength
 
 .CopyLiteral:
+        ; original block move code
+        :
         ldx     r0       ;Length in A, perform block move
         ldy     r2
         dec
         phb
         jsl     r4          ;Mode 21 = JSL
         plb
+        ; end of original code
         stx     r0       ;Copy offsets
         sty     r2
-
 
 .IsBlockDone:
         lda     r8
         cmp     r0
-        beq     .BlockDone
-
+        beq     BlockDone
 
 .Match:
         pla                     ;Pull block token
@@ -223,7 +341,7 @@ ReadToken:
         and     #$000f          ;Check low nibble
         cmp     #$000f          ;Short match length?
         bne     .CopyMatch
-        jsr     .AddLength
+        jsr     AddLength
 
 .CopyMatch:
         tay                     ;Length in A
@@ -245,7 +363,7 @@ ReadToken:
         bra     ReadToken
 
 
-.BlockDone:
+BlockDone:
         pla
         lda     r2         ;Calculate decompressed size
         sec
@@ -254,7 +372,7 @@ ReadToken:
         rts
 
 
-.AddLength:
+AddLength:
         pha                     ;Accumulated length at s+1
 :       lda     [r0]     ;Read next length byte
         inc     r0
@@ -319,3 +437,4 @@ Skip3:  inc     r0       ;Skip 3 bytes
 	zpage	btmp1
 	zpage	btmp2
 	zpage	btmp3
+        global  _DmaSystem_CopyToWram_ShortRun
