@@ -990,7 +990,7 @@ void UserInterface_CopyUiBuffers()
     if (DmaSystem_AddItemToQueue(
         (uint8_t *)(&ui_window_background[0][0]), 
         0x3000, 
-        2048,
+        (SCREEN_HEIGHT / 4) * 32,
         VRAM_INCHIGH, 
         0
         ) != 0)
@@ -1001,7 +1001,7 @@ void UserInterface_CopyUiBuffers()
     if (DmaSystem_AddItemToQueue(
         (uint8_t *)(&ui_window_text[0][0]), 
         0x3400, 
-        2048,
+        (SCREEN_HEIGHT / 4) * 32,
         VRAM_INCHIGH, 
         0
         ) == 0)

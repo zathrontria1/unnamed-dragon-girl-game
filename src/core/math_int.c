@@ -49,66 +49,6 @@ uint8_t Math_GetAtan2_u8(int16_t y, int16_t x)
     return (y < 0) ? (256 - angle) : angle;
 }
 
-#if VBCC_ASM == 1
-NO_INLINE uint16_t Math_GetRandom_u16()
-#else
-uint16_t Math_GetRandom_u16()
-#endif
-{
-    #if VBCC_ASM == 1
-        __asm(
-            "\ta8\n"
-            "\tsep #$20\n"
-            "\tlda _rand_array\n"           // Operation 7 (with carry clear).
-            "\tasl\n"
-            "\teor _rand_array+1\n"
-            "\tsta _rand_array+1\n"
-            "\trol\n"             // Operation 9.
-            "\teor _rand_array+2\n"
-            "\tsta _rand_array+2\n"
-            "\teor _rand_array\n"           // Operation 5.
-            "\tsta _rand_array\n"
-            "\tlda _rand_array+1\n"           // Operation 15.
-            "\tror\n"
-            "\teor _rand_array+2\n"
-            "\tsta _rand_array+2\n"
-            "\teor _rand_array+1\n"           // Operation 6.
-            "\tsta _rand_array+1\n"
-            "\ta16\n"
-            "\trep #$30\n"
-            "\tlda _rand_array\n"
-            "\trtl\n"
-        );
-    #else
-        uint8_t r0 = (uint8_t)rand_array[0];
-        uint8_t r1 = (uint8_t)rand_array[1];
-        uint8_t r2 = (uint8_t)rand_array[2];
-
-        uint8_t c1 = (r0 & 0x80) ? 1 : 0;
-        uint8_t r1_new = ((r0 << 1) ^ r1) & 0xff;
-        
-        uint8_t c2 = (r1_new & 0x80) ? 1 : 0;
-        uint8_t a = ((r1_new << 1) | c1) & 0xff;
-        
-        uint8_t r2_new = a ^ r2;
-        uint8_t r0_new = r2_new ^ r0;
-        
-        uint8_t a2 = r1_new;
-        a2 = (a2 >> 1) | (c2 << 7);
-        
-        uint8_t r2_new2 = a2 ^ r2_new;
-        uint8_t r1_new2 = r2_new2 ^ r1_new;
-
-        rand_array[0] = (int8_t)r0_new;
-        rand_array[1] = (int8_t)r1_new2;
-        rand_array[2] = (int8_t)r2_new2;
-
-        return (uint16_t)r0_new | ((uint16_t)r1_new2 << 8);
-    #endif
-    
-    return 0;
-}
-
 /**
  * @brief Seeds the pseudo-random number generator with a 24-bit seed.
  * 
