@@ -8,6 +8,7 @@
 #include "loop_cutscene.h"
 
 #include "level.h"
+#include "map.h"
 
 #include "dma.h"
 
@@ -146,6 +147,10 @@ void Cs_Loop()
             REG_MOSAIC = shadow_mosaic;
 
             REG_INIDISP = 0x8f;
+            
+            MapSystem_UpdateCameraPosition(1);
+            HdmaEngine_UpdateBgScrollValues();
+            HdmaEngine_UpdateBgScrollValues();
             
             shadow_fblank_enable = 0;
             shadow_brightness = 0 << 8;

@@ -133,10 +133,6 @@ bool LevelSystem_LoadLevel(const struct level_data * level)
         }
         else
         {
-            // Just update the scroll tables
-            HdmaEngine_UpdateBgScrollValues();
-            HdmaEngine_UpdateBgScrollValues(); // Yes, run this twice, so both tables are populated
-        
             // Same for COLDATA
             HdmaEngine_UpdateColdataValues();
             HdmaEngine_UpdateColdataValues();

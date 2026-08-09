@@ -13,14 +13,14 @@ uint16_t ani_bg_row_water;
 uint8_t * ani_bg_addr_water;
 uint8_t * ani_bg_addr_water_start;
 uint16_t ani_bg_dest_water;
-ZP uint16_t ani_bg_water_dma_ready;
+uint8_t ani_bg_water_dma_ready;
 
 // 64px dedicated section is updated in one go. has to go to the odd frame NMI DMAs.
 uint16_t ani_bg_frame_tallbg; // the 2KB sheet
 uint8_t * ani_bg_addr_tallbg;
 uint8_t * ani_bg_addr_tallbg_start;
 uint16_t ani_bg_dest_tallbg;
-ZP uint16_t ani_bg_tallbg_dma_ready;
+uint8_t ani_bg_tallbg_dma_ready;
 
 /*
     Updates strip animation tiles with 512 byte chunks

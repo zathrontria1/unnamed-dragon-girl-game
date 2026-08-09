@@ -102,7 +102,7 @@ void Loop_Game_Messagebox()
     system_game_paused = true;
     system_dont_count_lag = true;
 
-    hdma_use_gradient = 0xffff;
+    hdma_use_gradient = 0xff;
     hdma_gradient_ptr = ADDR_LOWORD(&hdma_windowbackground_tables[0][0]);
 
     ObjectSystem_ProcessObjects();
@@ -638,6 +638,10 @@ void Loop_Game_NewLevel()
     REG_INIDISP = 0x8f;
 
     REG_HDMAEN = 0x00;
+
+    MapSystem_UpdateCameraPosition(1);
+    HdmaEngine_UpdateBgScrollValues();
+    HdmaEngine_UpdateBgScrollValues();
 
     // DMA just the background and BG3 tiles, IF there was a need to
     if (!temp_level_reuses_vram_contents)

@@ -956,7 +956,7 @@ void Subscreen_Internal_InitState()
     system_game_paused = true;
     system_dont_count_lag = true;
 
-    hdma_use_gradient = 0xffff;
+    hdma_use_gradient = 0xff;
     hdma_gradient_ptr = ADDR_LOWORD(&hdma_windowbackground_tables[1][0]);
 
     ui_in_subscreen = true;

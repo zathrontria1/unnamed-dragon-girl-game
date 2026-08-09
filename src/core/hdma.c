@@ -20,23 +20,26 @@ struct hdma_indirect_table_entry hdma_windowbackground_tables[2][4];
 uint16_t hdma_windowbackground_data[2][SCREEN_HEIGHT << 1];
 uint16_t hdma_windowbackground_select;
 
-ZP uint16_t hdma_use_gradient;
-ZP uint16_t hdma_gradient_ptr;
+uint8_t hdma_use_gradient;
+uint16_t hdma_gradient_ptr;
 
 // Scroll tables for v-scroll
 struct hdma_indirect_table_entry hdma_scroll_tables[2][8];
 uint16_t hdma_scroll_data[2][32];
 
 uint16_t hdma_scroll_select;
-ZP uint16_t hdma_scroll_ptr;
+uint16_t hdma_scroll_ptr;
 uint16_t hdma_scroll_sine_index;
 
 bool hdma_coldata_usegradient; // If set, does the more complicated colour math version
+uint16_t hdma_coldata_last_r;
+uint16_t hdma_coldata_last_g;
+uint16_t hdma_coldata_last_b;
 struct hdma_indirect_table_entry hdma_coldata_tables[2][225];
 uint16_t hdma_coldata_data[2][32][4]; // Deliberately use 2 bytes; highest 8 bits relevant
 
 uint16_t hdma_coldata_select;
-ZP uint16_t hdma_coldata_ptr;
+uint16_t hdma_coldata_ptr;
 
 // These are so large that they are larger than the available stack (1536 bytes > 1024), so they're defined globally
 uint8_t hdma_cache_scaled_r[CACHE_PALETTE_ENTRIES * 64];
@@ -53,9 +56,6 @@ void HdmaEngine_SetupHdma()
     HdmaEngine_SetupPaletteHdma();
     HdmaEngine_SetupBgScrollHdma();
     HdmaEngine_SetupColdataHdma();
-
-    HdmaEngine_UpdateBgScrollValues();
-    HdmaEngine_UpdateBgScrollValues(); // Yes, run this twice, so both tables are populated
 
     HdmaEngine_UpdateColdataValues();
     HdmaEngine_UpdateColdataValues(); // Same as above
@@ -164,6 +164,10 @@ void HdmaEngine_SetupBgScrollHdma()
  */
 void HdmaEngine_SetupColdataHdma()
 {
+    hdma_coldata_last_r = 0xffff;
+    hdma_coldata_last_g = 0xffff;
+    hdma_coldata_last_b = 0xffff;
+
     REG_DMAP4 = 0x40;  // COLDATA - Indirect, pattern 1
 
     REG_BBAD4 = (uint8_t)((uint32_t)&REG_COLDATA); // One register
@@ -430,7 +434,7 @@ void HdmaEngine_GeneratePaletteTable(uint16_t * table_ptr, uint16_t pal_start, u
  */
 void HdmaEngine_SetHdmaShadow()
 {
-    if (hdma_use_gradient == 0xffff)
+    if (hdma_use_gradient == 0xff)
     {
         if (ui_in_subscreen)
         {
