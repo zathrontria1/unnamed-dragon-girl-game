@@ -24,15 +24,18 @@ void HdmaEngine_UpdateBgScrollValues()
 
     int16_t temp_y = bg_scroll_y.full.high.a - 1;
 
+    const int16_t *sine_ptr = &const_hdma_scroll_sine[temp_sine_select][hdma_scroll_sine_index];
+    uint16_t *dest_ptr = hdma_scroll_data[temp_table_to_write];
+
     for (int i = 0; i < 32; i++)
     {
-        hdma_scroll_data[temp_table_to_write][i] = temp_y + const_hdma_scroll_sine[temp_sine_select][hdma_scroll_sine_index + i];
+        *dest_ptr++ = temp_y + *sine_ptr++;
     }
 
     hdma_scroll_select = temp_table_to_write;
     hdma_scroll_ptr = ADDR_LOWORD(&hdma_scroll_tables[hdma_scroll_select]);
 
-    hdma_scroll_sine_index += (1 * V_MUL) >> 1;
+    hdma_scroll_sine_index += 1;
     hdma_scroll_sine_index &= 31;
 
     return;
@@ -40,32 +43,53 @@ void HdmaEngine_UpdateBgScrollValues()
 
 void HdmaEngine_UpdateColdataValues()
 {
+    uint16_t r_add = 0;
+    uint16_t g_add = 0;
+    uint16_t b_add = 0;
+
+    if (hdma_coldata_usegradient)
+    {
+        r_add = gfx_cmath_r >> 5;
+        g_add = gfx_cmath_g >> 5;
+        b_add = gfx_cmath_b >> 5;
+    }
+
+    if (r_add == hdma_coldata_last_r && g_add == hdma_coldata_last_g && b_add == hdma_coldata_last_b)
+    {
+        return;
+    }
+
+    hdma_coldata_last_r = r_add;
+    hdma_coldata_last_g = g_add;
+    hdma_coldata_last_b = b_add;
+
     uint16_t temp_table_to_write = (hdma_coldata_select + 1) & 0x01;
 
-    if (!hdma_coldata_usegradient)
+    if ((r_add | g_add | b_add) == 0)
     {
-        for (int i = 31; i >= 0; i--)
+        uint16_t *dest_ptr = &hdma_coldata_data[temp_table_to_write][0][0];
+        for (int i = 0; i < 32; i++)
         {
-            hdma_coldata_data[temp_table_to_write][i][0] = 0;
-            hdma_coldata_data[temp_table_to_write][i][1] = 0;
-            hdma_coldata_data[temp_table_to_write][i][2] = 0;
+            dest_ptr[0] = 0;
+            dest_ptr[1] = 0;
+            dest_ptr[2] = 0;
+            dest_ptr += 4;
         }
     }
     else
     {
-        uint16_t r_add = gfx_cmath_r >> 5;
-        uint16_t g_add = gfx_cmath_g >> 5;
-        uint16_t b_add = gfx_cmath_b >> 5;
-
         uint16_t r = 0x2000;
         uint16_t g = 0x4000;
         uint16_t b = 0x8000;
 
+        uint16_t (*step)[4] = &hdma_coldata_data[temp_table_to_write][31];
+
         for (int i = 31; i >= 0; i--)
         {
-            hdma_coldata_data[temp_table_to_write][i][0] = r;
-            hdma_coldata_data[temp_table_to_write][i][1] = g;
-            hdma_coldata_data[temp_table_to_write][i][2] = b;
+            (*step)[0] = r;
+            (*step)[1] = g;
+            (*step)[2] = b;
+            step--;
 
             r += r_add;
             g += g_add;
