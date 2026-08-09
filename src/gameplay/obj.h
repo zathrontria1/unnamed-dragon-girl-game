@@ -61,8 +61,9 @@ extern struct game_object obj_hitbox_enemy[OBJ_ENEMYHITBOX_MAX_COUNT];
 extern uint16_t obj_hitbox_enemy_delete_queue[OBJ_ENEMYHITBOX_MAX_COUNT];
 extern uint16_t obj_hitbox_enemy_delete_queue_count;
 extern uint16_t obj_hitbox_count_enemy;
-
 extern const uint16_t const_obj_vram_slot_to_tilenum[128];
+
+#include "map.h"
 
 void ObjectSystem_ProcessObjects();
 bool ObjectSystem_IsEnemyAiScheduled(const struct game_object * o);
@@ -76,6 +77,14 @@ int16_t ObjectSystem_InstantiateObject(
     int16_t x,
     int16_t y, 
     uint16_t local_event_flag
+);
+
+int16_t ObjectSystem_InstantiateParticle(
+    uint16_t id,
+    int16_t x,
+    int16_t y,
+    void (*func)(struct game_object *),
+    uint16_t ttl
 );
 
 int16_t ObjectSystem_InstantiatePlayerHitbox(

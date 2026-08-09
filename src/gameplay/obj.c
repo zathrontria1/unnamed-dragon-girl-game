@@ -794,6 +794,67 @@ int16_t ObjectSystem_InstantiateObject(
     return i;
 }
 
+int16_t ObjectSystem_InstantiateParticle(
+    uint16_t id,
+    int16_t x,
+    int16_t y,
+    void (*func)(struct game_object *),
+    uint16_t ttl
+)
+{
+    if (obj_first_available == 0xffff)
+    {
+        return -1;
+    }
+
+    uint16_t i = obj_first_available;
+    obj_first_available = obj_general[i].next_free;
+
+    struct game_object * p = &obj_general[i];
+
+    p->id = id;
+
+    uint16_t temp_uid = obj_next_uid++;
+    if (obj_next_uid == 0)
+    {
+        obj_next_uid = 1;
+    }
+    p->uid = temp_uid;
+
+    p->array_index = i;
+
+    p->pos.x.lh.h = x;
+    p->pos.x.lh.l = 0;
+    p->pos.y.lh.h = y;
+    p->pos.y.lh.l = 0;
+
+    p->delta.x.a = 0;
+    p->delta.y.a = 0;
+
+    p->pos.z.a = 0;
+    p->delta.z.a = 0;
+
+    p->struct_data.npc_data.ttl = ttl;
+    p->struct_data.npc_data.ai_scheduled_token = 0xffffffffl;
+
+    p->struct_data.npc_data.ani.frame = 0;
+    p->struct_data.npc_data.ani.display = 0x5d;
+
+    p->hit_type = 0x0000;
+
+    p->w = 16;
+    p->h = 16;
+
+    p->r = x + 16;
+    p->b = y + 16;
+
+    obj_active_count++;
+
+    p->func_ptr = (void *)func;
+
+    return i;
+}
+
 /*
     Player hitboxes should call this instead
 */
