@@ -204,10 +204,7 @@ void Routines_Enemy_CommonUpdate(struct game_object * o, const enemy_standard_cf
                     Gfx_EmitSmoke(o, 12);
                 }
 
-                /*if (Routines_Shared_StatusMaintenance(o))
-                {
-                    temp_invalidate_animation_frame = true;
-                }*/
+                Routines_Shared_StatusMaintenance(o);
 
                 // Check if the enemy is dead and set states
                 Routines_Shared_CheckIfDead(o);
