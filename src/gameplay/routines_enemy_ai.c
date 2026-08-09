@@ -25,10 +25,8 @@
 
 bool Routines_Enemy_Ai_IsTileInBounds(int16_t x, int16_t y)
 {
-    return x >= 0 &&
-           y >= 0 &&
-           x < (int16_t)map_extent_tiles_x &&
-           y < (int16_t)map_extent_tiles_y;
+    return ((uint16_t)x < map_extent_tiles_x) &&
+           ((uint16_t)y < map_extent_tiles_y);
 }
 
 /*
@@ -49,12 +47,14 @@ bool Routines_Enemy_Ai_CheckRawTileLOS(int16_t ex, int16_t ey, int16_t px, int16
     int16_t sy = (ey < py) ? 1 : -1;
     int16_t err = dx - dy;
 
+    uint16_t map_w = map_extent_tiles_x;
+    uint16_t map_h = map_extent_tiles_y;
     uint16_t shiftcount = map_extent_tiles_x_shiftcount;
 
     int16_t curr_x = ex;
     int16_t curr_y = ey;
 
-    if (!Routines_Enemy_Ai_IsTileInBounds(curr_x, curr_y))
+    if (((uint16_t)curr_x >= map_w) || ((uint16_t)curr_y >= map_h))
     {
         return false; // Out of bounds
     }
@@ -65,11 +65,13 @@ bool Routines_Enemy_Ai_CheckRawTileLOS(int16_t ex, int16_t ey, int16_t px, int16
         return true; // Reached target tile safely
     }
 
+    uint16_t curr_y_shift = (uint16_t)curr_y << shiftcount;
+
     for (uint8_t step = 0; step < 20; step++)
     {
         if (step > 0)
         {
-            uint16_t tile_idx = (curr_y << shiftcount) + curr_x;
+            uint16_t tile_idx = curr_y_shift + (uint16_t)curr_x;
             if (!(map_collision_buf[tile_idx] & MAP_COLL_PASS_SIGHT))
             {
                 return false; // Tile does not allow sight to pass
@@ -84,7 +86,7 @@ bool Routines_Enemy_Ai_CheckRawTileLOS(int16_t ex, int16_t ey, int16_t px, int16
         int16_t next_x = curr_x;
         int16_t next_y = curr_y;
 
-        int16_t e2 = (int16_t)((uint16_t)err << 1);
+        int16_t e2 = err << 1;
         if (e2 > -dy)
         {
             err -= dy;
@@ -99,13 +101,15 @@ bool Routines_Enemy_Ai_CheckRawTileLOS(int16_t ex, int16_t ey, int16_t px, int16
         // Super-cover corner check: if stepping diagonally, check orthogonal corner tiles to prevent corner-cutting
         if (next_x != curr_x && next_y != curr_y)
         {
-            if (!Routines_Enemy_Ai_IsTileInBounds(next_x, curr_y) || !Routines_Enemy_Ai_IsTileInBounds(curr_x, next_y))
+            if (((uint16_t)next_x >= map_w) || ((uint16_t)curr_y >= map_h) ||
+                ((uint16_t)curr_x >= map_w) || ((uint16_t)next_y >= map_h))
             {
                 return false; // Out of bounds
             }
 
-            uint16_t corner1_idx = (curr_y << shiftcount) + next_x;
-            uint16_t corner2_idx = (next_y << shiftcount) + curr_x;
+            uint16_t next_y_shift = (uint16_t)next_y << shiftcount;
+            uint16_t corner1_idx = curr_y_shift + (uint16_t)next_x;
+            uint16_t corner2_idx = next_y_shift + (uint16_t)curr_x;
 
             if (!(map_collision_buf[corner1_idx] & MAP_COLL_PASS_SIGHT) || !(map_collision_buf[corner2_idx] & MAP_COLL_PASS_SIGHT))
             {
@@ -116,10 +120,12 @@ bool Routines_Enemy_Ai_CheckRawTileLOS(int16_t ex, int16_t ey, int16_t px, int16
         curr_x = next_x;
         curr_y = next_y;
 
-        if (!Routines_Enemy_Ai_IsTileInBounds(curr_x, curr_y))
+        if (((uint16_t)curr_x >= map_w) || ((uint16_t)curr_y >= map_h))
         {
             return false; // Out of bounds
         }
+
+        curr_y_shift = (uint16_t)curr_y << shiftcount;
     }
 
     // Player is too far away (beyond 20 tiles) to be seen by enemy
@@ -133,23 +139,23 @@ bool Routines_Enemy_Ai_CheckLineOfSight(struct game_object * o, int16_t x, int16
 {
     struct game_data_npc * npc = &o->struct_data.npc_data;
 
-    // x and y represent (enemy_x - player_x) and (enemy_y - player_y)
-    uint8_t angle_to_player = Math_GetAtan2_u8(y, x);
-    uint8_t angle_diff = (uint8_t)(angle_to_player - o->angle);
-
     // Unalerted enemies use a 180-degree forward vision hemisphere (+/- 90 degrees) for 2D top-down gameplay
     if ((npc->ai_flags & AI_FLAG_ALERTED) == 0)
     {
+        // x and y represent (enemy_x - player_x) and (enemy_y - player_y)
+        uint8_t angle_to_player = Math_GetAtan2_u8(y, x);
+        uint8_t angle_diff = (uint8_t)(angle_to_player - o->angle);
+
         if (angle_diff > 64 && angle_diff < 192)
         {
             return false; // Outside 180-degree forward vision hemisphere
         }
     }
 
-    int16_t ex = (o->pos.x.lh.h + 8) >> 4;
-    int16_t ey = (o->pos.y.lh.h + 8) >> 4;
-    int16_t px = (o->pos.x.lh.h + 8 - x) >> 4;
-    int16_t py = (o->pos.y.lh.h + 8 - y) >> 4;
+    uint16_t ex = ((uint16_t)o->pos.x.lh.h + 8) >> 4;
+    uint16_t ey = ((uint16_t)o->pos.y.lh.h + 8) >> 4;
+    uint16_t px = ((uint16_t)(o->pos.x.lh.h + 8 - x)) >> 4;
+    uint16_t py = ((uint16_t)(o->pos.y.lh.h + 8 - y)) >> 4;
 
     return Routines_Enemy_Ai_CheckRawTileLOS(ex, ey, px, py);
 }
@@ -229,10 +235,10 @@ bool Routines_Enemy_Ai_Process(struct game_object * o, uint32_t dist, int16_t x,
     }
     else if (dist <= 2304) // Peripheral / Hearing proximity (~48px / 3 tiles)
     {
-        int16_t ex = (o->pos.x.lh.h + 8) >> 4;
-        int16_t ey = (o->pos.y.lh.h + 8) >> 4;
-        int16_t px = (o->pos.x.lh.h + 8 - x) >> 4;
-        int16_t py = (o->pos.y.lh.h + 8 - y) >> 4;
+        uint16_t ex = ((uint16_t)o->pos.x.lh.h + 8) >> 4;
+        uint16_t ey = ((uint16_t)o->pos.y.lh.h + 8) >> 4;
+        uint16_t px = ((uint16_t)(o->pos.x.lh.h + 8 - x)) >> 4;
+        uint16_t py = ((uint16_t)(o->pos.y.lh.h + 8 - y)) >> 4;
 
         if (Routines_Enemy_Ai_CheckRawTileLOS(ex, ey, px, py))
         {
