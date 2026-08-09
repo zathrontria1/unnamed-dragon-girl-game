@@ -104,52 +104,7 @@ void MapSystem_LoadMap(const uint8_t * map, const uint16_t * lut, const uint8_t 
     return;
 }
 
-/*
-    Call to build the collision table
-    The table will be completely linear, so only ends when it's out of tiles.
-*/
-/**
- * @brief Decompresses map collision metatiles into the WRAM collision matrix `map_collision_buf`.
- */
-void MapSystem_BuildCollisionTable()
-{
-    const uint8_t * ptr = map_current;
-    ptr += 2; 
 
-    uint16_t temp_len = map_extent_tiles_x * map_extent_tiles_y;
-    uint16_t x = 0;
-    uint16_t y = 0;
-
-    // Need to convert the map from screen-based to linear for further performance improvements
-    for (unsigned int i = 0; i < temp_len; i++)
-    {
-        uint16_t temp_start_x = (x & 0xf);
-        uint16_t temp_screen_x = x >> 4;
-
-        uint16_t temp_start_y = (y & 0xf) << 4;
-        uint16_t temp_screen_y = y >> 4;
-
-        uint16_t temp_screen_offset = (temp_screen_x << 8) + (temp_screen_y << (6 + (map_extent_x >> 8)));
-
-        //uint16_t q;
-        const uint8_t * q;
-        q = ptr + temp_screen_offset + temp_start_x + temp_start_y;
-
-        map_collision_buf[i] = map_lut_col[*q];
-
-        x++;
-        if (x >= map_extent_tiles_x)
-        {
-            x = 0;
-            y++;
-        }
-
-        //map_collision_buf[i] = map_lut_col[*ptr];
-        //ptr++;
-    }
-
-    return;
-}
 
 /**
  * @brief Checks whether a given bounding box position overlaps a solid map tile or map boundary.
