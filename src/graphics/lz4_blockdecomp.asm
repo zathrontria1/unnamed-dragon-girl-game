@@ -3,99 +3,50 @@
 	a16
 	x16
 	global	_LZ4_DecompressBlock
-    ; uint32_t LZ4_DecompressBlock(uint8_t **ptr_read, uint8_t **ptr_write, uint16_t block_size, uint16_t hdmaen);
-    ; On enter:
-    ; A/X = pointer to ptr_read
-    ; 4,s = pointer to ptr_write
-    ; 8,s = block_size
-    ; 10,s = hdmaen
+    ; uint16_t LZ4_DecompressBlock(const uint8_t *src, uint8_t *dest, uint16_t block_size, uint16_t hdmaen);
+    ; On enter (via __reg):
+    ; r0/r1 = src (loword / bank)
+    ; r2/r3 = dest (loword / bank)
+    ; r10   = block_size
+    ; r11   = hdmaen
     
     ; NOTE: cross bank read and write dests are not supported.
     ;       this matches behaviour with C code which ultimately
     ;       uses MVN or DMA, which has the underlying limitation.
 _LZ4_DecompressBlock:
-    ; translate things from what vbcc/vasm expects to the new code.
-    ; can carve out r0-r9, that's 18 bytes of zero page. As they're assumed
-    ; to be volatile we can just use it
-    ; use r10-15 + r28-31 for scratch here. Also volatile, so preservation isn't needed.
-    rep #$30 
-    
-    sta r28
-    stx r29 ; Immediately save them as these registers will be used very soon
-
-    ; fetch block size and HDMAEN enable
-    ; r10 and r11 can be reused
-    lda 8,s
-    bne :+
-        ; Block size is 0. Abort.
-        lda #$0000
-        tax
-        rtl
-    :
-    sta r10
-    lda 10,s
-    sta r11
-
-    ; Fetch ptr_read
-    lda [r28]
-    sec
-    sbc #$0004 ; Adjust it backwards by 4. Cross bank isn't a factor, so we just subtract 4
-
-    ldy #$0002
-    sta r12
-    lda [r28],y
-    sta r13 ; r12-13 contains ptr_read
-
-    ; Fetch ptr_write
-    lda 4,s
-    sta r30
-    lda 6,s
-    sta r31 
-    lda [r30]
-    sta r14
-    lda [r30],y
-    sta r15 ; r14-15 contains ptr_write
-
-    ; All variables have been copied
-
-    ; now to put the variables in the format the subroutine expects.
-
-    ldx r12
-    ldy r14
-
-    a8
+    a16
     x16
-    sep #$20
-    rep #$10
 
-    lda r15
+    lda r10
+    bne .valid_block
+    ; Block size is 0. Abort.
+    lda #$0000
+    rtl
+
+.valid_block:
+    lda r0
+    sec
+    sbc #$0004 ; Adjust source offset backward by 4 bytes for libSFX
+    tax
+
+    ldy r2
+
+    sep #$20
+    a8
+
+    lda r3
     xba
-    lda r13
+    lda r1     ; B = dest bank, A = source bank
 
     jsl SFX_LZ4_decompress_block
 
-    ; After the subroutine returns, need to adjust read and write pointers
-
+    ; Return to C ABI in 16-bit mode (a16, x16)
+    rep #$30
     a16
     x16
-    rep #$20
-
-    ; Update write pointer
-    tax ; store A in X temporarily
-    clc
-    adc [r30]
-    sta [r30]
-
-    ; Update read pointer
-    lda [r28]
-    clc
-    adc r10
-    sta [r28]
-
-    txa
-    ldx #$0000 ; make the high bytes always 0
 
     rtl
+
 
 ; ported code directly below
 

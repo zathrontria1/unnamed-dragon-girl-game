@@ -147,24 +147,9 @@ uint32_t LZ4_DecompressFrame(void * src, void * dest)
         DmaSystem_CopyToWram_ShortPrep(((uint32_t)ptr_read) >> 16, ((uint32_t)ptr_write) >> 16);
     }
 
-    if (LZ4_ReadU32LE(ptr_read) != 0x184D2204)
-    {
-        // Magic ID check failure
-        return 0;
-    }
-    
-    ptr_read += 4;
-
-    if (((*ptr_read) & 0x08) == 0x08)
-    {
-        // Content size is found
-        ptr_read += 11;
-    }
-    else
-    {
-        // no content size bytes
-        ptr_read += 3;
-    }
+    // Skip 15-byte frame header (magic + flags + descriptor + content size + checksum)
+    // Pre-validated by LZ4_GetLength
+    ptr_read += 15;
 
     // data block section start
     // if the 4-byte header is not all zeroes, it's a valid block
@@ -192,7 +177,9 @@ uint32_t LZ4_DecompressFrame(void * src, void * dest)
         }
         else 
         {
-            LZ4_DecompressBlock(&ptr_read, &ptr_write, (uint16_t)temp_data_size, temp_hdmaen);
+            uint16_t decomp_size = LZ4_DecompressBlock(ptr_read, ptr_write, (uint16_t)temp_data_size, temp_hdmaen);
+            ptr_read += temp_data_size;
+            ptr_write += decomp_size;
         }
 
         temp_block_header = LZ4_ReadU32LE(ptr_read);
