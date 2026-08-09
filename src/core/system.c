@@ -31,6 +31,7 @@
 #include "snd.h"
 #include "ui.h"
 #include "ui_vwf.h"
+#include "ui_textscreen.h"
 
 #include "errorhandling.h"
 
@@ -173,11 +174,11 @@ void System_DisplayStartupSplash()
 
     // Upload the title screen option graphics and palette
     AniSystem_Pal_LoadSubpalette((uint8_t *)&data_palette_title_options, 8); // Upload title options palette
-    LZ4_UnpackToVRAM(&data_spr_title_options_lz4, 0x6000); // Upload title options graphics
+    LZ4_UnpackToVRAM((void *)&data_spr_title_options_lz4, 0x6000); // Upload title options graphics
 
-    ErrorHandler_Internal_Setup();
+    Ui_TextScreen_Setup();
 
-    ErrorHandler_Internal_Display((uint8_t *)&STR_STARTUP);
+    Ui_TextScreen_Display((uint8_t *)&STR_STARTUP);
 
     // Set up a fade-in. Doing this so that we can actually run the other steps
     // while the game is still setting up.

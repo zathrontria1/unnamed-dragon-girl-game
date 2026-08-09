@@ -2,6 +2,7 @@
 #define SYSTEM_H
 
 #include "snes/console.h"
+#include "consts.h"
 
 extern uint8_t system_MVNCodeInWRAM[4];
 

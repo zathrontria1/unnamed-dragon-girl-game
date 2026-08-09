@@ -15,14 +15,14 @@
 #include "dma.h"
 #include "hdma.h"
 #include "ui_vwf.h"
-#include "errorhandling.h"
+#include "ui_textscreen.h"
 
 #include "loop_gameover.h"
 
 void GameOver_Loop()
 {
-    ErrorHandler_Internal_Setup();
-    ErrorHandler_Internal_Display((uint8_t *)&STR_GAME_OVER);
+    Ui_TextScreen_Setup();
+    Ui_TextScreen_Display((uint8_t *)&STR_GAME_OVER);
 
     int timer = 10 * FPS;
 
