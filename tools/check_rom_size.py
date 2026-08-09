@@ -2,6 +2,39 @@ import os
 import re
 import sys
 
+
+def clean_symbol_name(label):
+    # Extract human-readable variable symbol from linker labels
+    m = re.search(r'(?:bss|data)\.(?:far|near)\.([^.\s]+)', label)
+    if m:
+        return m.group(1)
+    m2 = re.search(r'([^\s()]+)\.o\(([^)]+)\)', label)
+    if m2:
+        objfile, sec = m2.groups()
+        return f"{sec} ({objfile})"
+    return label
+
+
+def categorize_ram_item(label, name):
+    lbl_lower = label.lower()
+    name_lower = name.lower()
+
+    if any(k in name_lower or k in lbl_lower for k in ['obj_', 'routines_player', 'routines_enemy', 'routines_boss', 'hittest']):
+        return 'Object Engine & Hitboxes'
+    elif any(k in name_lower or k in lbl_lower for k in ['spr_', 'shadow_oam', 'metaspr']):
+        return 'Sprite Engine & OAM'
+    elif any(k in name_lower or k in lbl_lower for k in ['cgram', 'hdma_', 'gfx_', 'pal_']):
+        return 'Graphics & HDMA Buffers'
+    elif any(k in name_lower or k in lbl_lower for k in ['map_', 'level_', 'bg_scroll']):
+        return 'Maps & Level Buffers'
+    elif any(k in name_lower or k in lbl_lower for k in ['ui_', 'subscreen_', 'vwf_']):
+        return 'UI & Text Engine'
+    elif any(k in name_lower or k in lbl_lower for k in ['snd_', 'audio']):
+        return 'Sound & Audio Engine'
+    else:
+        return 'System & Other RAM'
+
+
 def parse_mapfile(map_path, verbose=False):
     if not os.path.exists(map_path):
         return False
@@ -12,8 +45,14 @@ def parse_mapfile(map_path, verbose=False):
     in_section_mapping = False
     sections = []
     current_sec = None
+    stack_bytes = 1024  # Default 1 KB stack
 
     for line in lines:
+        # Check for STACKLEN definition (e.g. "  0x000400 STACKLEN: global abs, size 0")
+        m_stack = re.search(r'0x([0-9a-fA-F]+)\s+(?:STACKLEN|___stacklen)', line)
+        if m_stack:
+            stack_bytes = int(m_stack.group(1), 16)
+
         if 'Section mapping' in line:
             in_section_mapping = True
             continue
@@ -96,7 +135,7 @@ def parse_mapfile(map_path, verbose=False):
                 # ROM addresses in HiROM start at 0xC00000
                 addr_start = item['start']
                 addr_end = item['end']
-                
+
                 start_bank = ((addr_start >> 16) & 0x7f)
                 if start_bank >= 0x40:
                     start_bank -= 0x40  # 0xC0 -> 0, 0xC1 -> 1, etc.
@@ -119,6 +158,93 @@ def parse_mapfile(map_path, verbose=False):
 
             total_rom_used += sec_used
 
+    # --- Process RAM Sections ---
+    ram_item_list = []
+    ram_categories = {
+        'Object Engine & Hitboxes': 0,
+        'Sprite Engine & OAM': 0,
+        'Graphics & HDMA Buffers': 0,
+        'Maps & Level Buffers': 0,
+        'UI & Text Engine': 0,
+        'Sound & Audio Engine': 0,
+        'System & Other RAM': 0,
+    }
+
+    dp_capacity = 256  # Direct Page (0x0000 - 0x00FF)
+    raw_near_capacity = 8192 - 256  # 0x0100 to 0x1FFF = 7936 bytes (7.75 KB)
+    usable_near_capacity = max(0, raw_near_capacity - stack_bytes)
+    bank7e_wram_capacity = 56 * 1024  # 56 KB (57,344 bytes) for 0x7E2000 - 0x7EFFFF
+
+    dp_used_bytes = 0
+    dp_max_end = 0
+    near_max_end = 0
+    bank7e_max_end = 0
+    bank7f_max_end = 0
+
+    section_ram_summary = {}
+
+    for sec in sections:
+        if sec['name'] in ram_sections:
+            sec_name = sec['name']
+            sec_size = sec['size']
+            section_ram_summary[sec_name] = {
+                'size': sec_size,
+                'offset': sec['offset']
+            }
+
+            if sec_name == 'zpage':
+                dp_used_bytes = max(dp_used_bytes, sec_size)
+
+            for item in sec['items']:
+                item_size = item['end'] - item['start']
+                start_addr = item['start']
+                end_addr = item['end']
+                label = item['label']
+                sym_name = clean_symbol_name(label)
+                category = categorize_ram_item(label, sym_name)
+                ram_categories[category] += item_size
+
+                if sec_name == 'zpage' or (start_addr < 0x100 and sec_name in {'ndata', 'nbss'}):
+                    region = 'Direct Page'
+                    dp_max_end = max(dp_max_end, end_addr)
+                elif sec_name in {'ndata', 'nbss'} or (0x100 <= start_addr < 0x2000):
+                    region = 'Near WRAM'
+                    near_max_end = max(near_max_end, end_addr)
+                elif (0x7e0000 <= start_addr < 0x7f0000) or sec_name in {'fdata', 'fbss'}:
+                    region = 'Far WRAM (7E)'
+                    bank7e_max_end = max(bank7e_max_end, end_addr)
+                elif start_addr >= 0x7f0000 or sec_name in {'hdata', 'hbss'}:
+                    region = 'Huge WRAM (7F)'
+                    bank7f_max_end = max(bank7f_max_end, end_addr)
+                else:
+                    region = f"RAM ({sec_name})"
+
+                ram_item_list.append({
+                    'name': sym_name,
+                    'size': item_size,
+                    'start': start_addr,
+                    'end': end_addr,
+                    'label': label,
+                    'section': sec_name,
+                    'region': region
+                })
+
+    if dp_max_end > 0:
+        dp_used_bytes = max(dp_used_bytes, dp_max_end)
+    elif 'zpage' in section_ram_summary:
+        dp_used_bytes = section_ram_summary['zpage']['size']
+
+    near_used_bytes = max(0, near_max_end - 0x0100) if near_max_end >= 0x0100 else 0
+    if near_used_bytes == 0 and ('ndata' in section_ram_summary or 'nbss' in section_ram_summary):
+        near_used_bytes = section_ram_summary.get('ndata', {}).get('size', 0) + \
+                            section_ram_summary.get('nbss', {}).get('size', 0)
+
+    bank7e_used_bytes = max(0, bank7e_max_end - 0x7e2000) if bank7e_max_end >= 0x7e2000 else 0
+    if bank7e_used_bytes == 0 and ('fdata' in section_ram_summary or 'fbss' in section_ram_summary):
+        bank7e_used_bytes = section_ram_summary.get('fdata', {}).get('size', 0) + \
+                            section_ram_summary.get('fbss', {}).get('size', 0)
+
+    # --- ROM Display Output ---
     print(f"--- ROM Size Analysis (via Linker Mapfile: {os.path.basename(map_path)}) ---")
     print(f"Total True ROM Used : {total_rom_used:6d} bytes / {total_rom_capacity:6d} bytes ({total_rom_used / 1024:.2f} KB / {total_rom_capacity // 1024} KB)")
     print(f"Total Free ROM Space: {total_rom_capacity - total_rom_used:6d} bytes ({(total_rom_capacity - total_rom_used) / 1024:.2f} KB free, {(total_rom_used / total_rom_capacity) * 100:.1f}% capacity used)")
@@ -149,10 +275,54 @@ def parse_mapfile(map_path, verbose=False):
             if sz > 0:
                 print(f"  {cat:<30s}: {sz:6d} bytes ({sz / 1024:6.2f} KB)")
 
-        print("\n--- RAM Allocation Summary ---")
-        for sec in sections:
-            if sec['name'] in ram_sections:
-                print(f"  Section {sec['name']:<8s}: Allocated {sec['allocated']:5d} bytes (0x{sec['offset']:06X})")
+    # --- RAM Display Output ---
+    print("\n--- Direct Page & Work RAM Size Analysis ---")
+
+    dp_pct = (dp_used_bytes / dp_capacity) * 100 if dp_capacity else 0
+    dp_free = dp_capacity - dp_used_bytes
+    print("Direct Page (DP / Bank $00 0x0000-0x00FF):")
+    print(f"  Statically Allocated : {dp_used_bytes:6d} / {dp_capacity:6d} bytes ({dp_used_bytes / 1024:.2f} KB / {dp_capacity / 1024:.2f} KB)")
+    print(f"  Free DP Space        : {dp_free:6d} bytes ({dp_pct:.1f}% used, {100.0 - dp_pct:.1f}% free)")
+
+    print(f"\nStack Allocation (Linker STACKLEN):")
+    print(f"  Allocated Stack      : {stack_bytes:6d} bytes ({stack_bytes / 1024:.2f} KB)")
+
+    near_pct = (near_used_bytes / usable_near_capacity) * 100 if usable_near_capacity else 0
+    near_free = usable_near_capacity - near_used_bytes
+    print("\nNear Work RAM (Bank $00 Low 8KB 0x0100-0x1FFF minus Stack):")
+    print(f"  High-Water Mark      : 0x{near_max_end:04X} ({near_used_bytes:5d} / {usable_near_capacity:5d} bytes | {near_used_bytes / 1024:.2f} KB / {usable_near_capacity / 1024:.2f} KB usable)")
+    print(f"  Free Near WRAM       : {near_free:5d} bytes ({near_pct:.1f}% used, {100.0 - near_pct:.1f}% free)")
+
+    b7e_pct = (bank7e_used_bytes / bank7e_wram_capacity) * 100 if bank7e_wram_capacity else 0
+    b7e_free = bank7e_wram_capacity - bank7e_used_bytes
+    print("\nWork RAM Bank $7E (56 KB Target Budget 0x7E2000-0x7EFFFF):")
+    print(f"  High-Water Mark      : 0x{bank7e_max_end if bank7e_max_end >= 0x7e2000 else 0x7e2000:06X} ({bank7e_used_bytes:5d} / {bank7e_wram_capacity:5d} bytes | {bank7e_used_bytes / 1024:.2f} KB / {bank7e_wram_capacity // 1024:.2f} KB)")
+    print(f"  Free Bank $7E WRAM   : {b7e_free:5d} bytes ({b7e_pct:.1f}% used, {100.0 - b7e_pct:.1f}% free)")
+
+    if bank7f_max_end >= 0x7f0000:
+        b7f_used = bank7f_max_end - 0x7f0000
+        print("\nExtended Work RAM Bank $7F:")
+        print(f"  High-Water Mark      : 0x{bank7f_max_end:06X} ({b7f_used:5d} / 65536 bytes | {b7f_used / 1024:.2f} KB)")
+
+    # Sort RAM items by size descending
+    sorted_ram_items = sorted(ram_item_list, key=lambda x: x['size'], reverse=True)
+
+    top_count = 10 if not verbose else 15
+    if sorted_ram_items:
+        print(f"\n--- Top {min(top_count, len(sorted_ram_items))} Statically Allocated RAM Variables ---")
+        for idx, item in enumerate(sorted_ram_items[:top_count], 1):
+            addr_str = f"0x{item['start']:06X}-0x{item['end']:06X}" if item['start'] >= 0x10000 else f"0x{item['start']:04X}-0x{item['end']:04X}"
+            print(f"  {idx:2d}. {item['name']:<32s}: {item['size']:5d} bytes ({item['size'] / 1024:5.2f} KB) [{item['region']} {addr_str}]")
+
+    if verbose:
+        print("\n--- RAM Section Breakdown ---")
+        for sec_name, sinfo in section_ram_summary.items():
+            print(f"  Section {sec_name:<8s}: {sinfo['size']:5d} bytes (Offset: 0x{sinfo['offset']:06X})")
+
+        print("\n--- RAM Subsystem Category Breakdown ---")
+        for cat, sz in ram_categories.items():
+            if sz > 0:
+                print(f"  {cat:<30s}: {sz:5d} bytes ({sz / 1024:5.2f} KB)")
 
     return True
 
@@ -176,7 +346,7 @@ def analyze_rom_fallback(rom_path, verbose=False):
 
     for i in range(num_blocks):
         block = rom_data[i * block_size : (i + 1) * block_size]
-        
+
         # Count contiguous 0x00 bytes from the end of the block
         zeros_at_end = 0
         for byte in reversed(block):
@@ -184,7 +354,7 @@ def analyze_rom_fallback(rom_path, verbose=False):
                 zeros_at_end += 1
             else:
                 break
-                
+
         used_bytes = block_size - zeros_at_end
         total_used_zeros += used_bytes
 
@@ -207,7 +377,7 @@ def analyze_rom_fallback(rom_path, verbose=False):
 
         bank_details.append((i, zeros_at_end, used_bytes, max_free_run))
 
-    print(f"[Note: Using 0x00 byte scan fallback. Compile with linker mapfile for exact metrics.]")
+    print("[Note: Using 0x00 byte scan fallback. Compile with linker mapfile for exact ROM and RAM metrics.]")
     if verbose:
         print(f"ROM File: {rom_path}")
         print(f"ROM Size: {rom_size} bytes ({rom_size // 1024} KB)")
@@ -230,8 +400,12 @@ def main():
 
     # Check candidate mapfiles
     candidates = []
-    if target_path and target_path != 'mapfile_debug':
-        candidates.append(target_path)
+    if target_path:
+        if target_path.endswith('.sfc'):
+            map_name = 'mapfile_debug' if 'debug' in target_path else 'mapfile'
+            candidates.append(map_name)
+        elif target_path != 'mapfile_debug':
+            candidates.append(target_path)
     candidates.extend(['mapfile_debug', 'mapfile'])
 
     for cand in candidates:
@@ -248,4 +422,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 
