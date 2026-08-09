@@ -20,7 +20,7 @@
 #include "ui_vwf.h"
 #include "spr.h"
 
-ZP bool ui_in_subscreen;
+bool ui_in_subscreen;
 bool ui_in_bg2;
 
 // UI cache invalidation stuff
@@ -39,9 +39,8 @@ uint8_t ui_show_message_string[31]; // 30 characters + null terminator
 // Sub-strings
 uint16_t ui_hp_gauge[28];
 uint16_t ui_money_counter[11];
-uint16_t ui_enemy_counter[9];
-
 uint16_t ui_level_status[5];
+uint16_t ui_enemy_counter[9];
 
 uint32_t ui_display_money;
 
@@ -91,70 +90,83 @@ void UserInterface_Process()
 }
 
 /**
- * @brief Redraws the player HP heart/gauge bar into the UI tilemap buffer.
+ * @brief Redraws the player HP gauge bar into the UI tilemap buffer.
  */
 void UserInterface_UpdateHealthCounters()
 {
-    // Copy these values
-    int32_t temp_hp = obj_player_pointer->struct_data.npc_data.hp;
-    int32_t temp_hp_max = obj_player_pointer->struct_data.npc_data.hp_max;
+    static const uint16_t hp_tile_offsets[8] = {
+        0,         // & 7 == 0
+        0,         // & 7 == 1
+        32 * 3,    // & 7 == 2
+        32 * 7,    // & 7 == 3
+        32 * 12,   // & 7 == 4
+        32 * 18,   // & 7 == 5
+        32 * 25,   // & 7 == 6
+        32 * 33    // & 7 == 7
+    };
+
+    // Copy raw values to prevent mutation from breaking 1 HP guard or UI cache
+    int32_t raw_hp = obj_player_pointer->struct_data.npc_data.hp;
+    int32_t raw_hp_max = obj_player_pointer->struct_data.npc_data.hp_max;
+
+    if (raw_hp > raw_hp_max)
+    {
+        raw_hp = raw_hp_max;
+    }
+
+    int32_t scale_hp = raw_hp;
+    int32_t scale_hp_max = raw_hp_max;
 
     // Calculate the amount of pixels the health bar would have
     uint16_t temp_bar_length_fill;
     uint16_t temp_bar_length_max;
 
-    if (temp_hp > temp_hp_max)
+    if (scale_hp_max < 208) // Less than 208 max HP
     {
-        temp_hp = temp_hp_max;
-    }
-
-    if (temp_hp_max < 208) // Less than 208 max HP
-    {
-        temp_bar_length_max = temp_hp_max;
-
-        temp_bar_length_fill = temp_hp;
+        temp_bar_length_max = (uint16_t)scale_hp_max;
+        temp_bar_length_fill = (uint16_t)scale_hp;
     }
     else // 208 or more max HP
     {
         temp_bar_length_max = 208; // limit to max 208 pixels
 
-        if (temp_hp_max >= 0x1000000)
+        if (scale_hp_max >= 0x1000000)
         {
-            temp_hp >>= 16;
-            temp_hp_max >>= 16;
+            scale_hp >>= 16;
+            scale_hp_max >>= 16;
         }
-        else if (temp_hp_max >= 0x10000)
+        else if (scale_hp_max >= 0x10000)
         {
-            temp_hp >>= 8;
-            temp_hp_max >>= 8;
-        }
-
-        if (temp_hp_max >= 0x1000)
-        {
-            temp_hp >>= 4;
-            temp_hp_max >>= 4;
-        }
-        if (temp_hp_max >= 0x400)
-        {
-            temp_hp >>= 2;
-            temp_hp_max >>= 2;
-        }
-        if (temp_hp_max >= 0x200)
-        {
-            temp_hp >>= 1;
-            temp_hp_max >>= 1;
-        }
-        if (temp_hp_max >= 0x100)
-        {
-            temp_hp >>= 1;
-            temp_hp_max >>= 1;
+            scale_hp >>= 8;
+            scale_hp_max >>= 8;
         }
 
-        // Adjust the fill based on the fraction 
-        temp_bar_length_fill = (uint16_t)(temp_hp * 208) / (uint8_t)temp_hp_max;
+        if (scale_hp_max >= 0x1000)
+        {
+            scale_hp >>= 4;
+            scale_hp_max >>= 4;
+        }
+        if (scale_hp_max >= 0x400)
+        {
+            scale_hp >>= 2;
+            scale_hp_max >>= 2;
+        }
+        if (scale_hp_max >= 0x200)
+        {
+            scale_hp >>= 1;
+            scale_hp_max >>= 1;
+        }
+        if (scale_hp_max >= 0x100)
+        {
+            scale_hp >>= 1;
+            scale_hp_max >>= 1;
+        }
+
+        // Adjust the fill based on the fraction using 16-bit division
+        temp_bar_length_fill = (uint16_t)((uint16_t)scale_hp * 208) / (uint16_t)scale_hp_max;
     }
 
-    if (temp_hp <= 0)
+    if (raw_hp <= 0)
     {
         temp_bar_length_fill = 0;
     }
@@ -169,57 +181,31 @@ void UserInterface_UpdateHealthCounters()
 
     int i = 0;
     uint16_t temp_extra_length = 0;
-    ui_hp_gauge[i] = 0x016b | 0x2000 | (PAL_UI_4BPP << 10);
-    i++;
+    uint16_t base_attr = 0x2000 | (PAL_UI_4BPP << 10);
 
-    for (; i < temp_bar_filled_tiles + 1; i++)
+    ui_hp_gauge[i++] = 0x016b | base_attr;
+
+    uint16_t filled_end = temp_bar_filled_tiles + 1;
+    while (i < filled_end)
     {
-        ui_hp_gauge[i] = 0x0168 | 0x2000 | (PAL_UI_4BPP << 10);
+        ui_hp_gauge[i++] = 0x0168 | base_attr;
     }
 
-    // Calculate the "behind" backing
-    uint32_t temp_bar_tile_offset;
-
-    switch ((temp_bar_length_max & 0x07) - 1)
-    {
-        case 0:
-            temp_bar_tile_offset = 0;
-            break;
-        case 1:
-            temp_bar_tile_offset = 32 * 3;
-            break;
-        case 2:
-            temp_bar_tile_offset = 32 * 7;
-            break;
-        case 3:
-            temp_bar_tile_offset = 32 * 12;
-            break;
-        case 4:
-            temp_bar_tile_offset = 32 * 18;
-            break;
-        case 5:
-            temp_bar_tile_offset = 32 * 25;
-            break;
-        case 6:
-            temp_bar_tile_offset = 32 * 33;
-            break;
-        default: 
-            temp_bar_tile_offset = 0;
-    }
+    // Calculate the "behind" backing via lookup table
+    uint32_t temp_bar_tile_offset = hp_tile_offsets[temp_bar_length_max & 0x07];
 
     if (temp_bar_partial_tile != 0)
     {
         if (i == (temp_bar_filled_tiles + temp_bar_empty_tiles + 1))
         {
-            // Use the dynamic tile if the partial fill tile is 
-            // the last tile
-            ui_hp_gauge[i] = 0x0169 | 0x2000 | (PAL_UI_4BPP << 10);
+            // Use the dynamic tile if the partial fill tile is the last tile
+            ui_hp_gauge[i] = 0x0169 | base_attr;
 
             if ((temp_bar_length_max & 0x07) >= 5)
             {
                 // One extra tile
                 temp_extra_length = 1;
-                ui_hp_gauge[i+1] = 0x016a | 0x2000 | (PAL_UI_4BPP << 10);
+                ui_hp_gauge[i+1] = 0x016a | base_attr;
 
                 if ((DmaSystem_AddItemToQueue(
                     (uint8_t *)(&data_ui_dynamic_hp) + (((temp_bar_length_max & 0x07) + 1) << 5) + temp_bar_tile_offset, 
@@ -229,7 +215,6 @@ void UserInterface_UpdateHealthCounters()
                     0 
                     ) != 0 ))
                 {
-                    // If we can't update the tile, just return (consider it failed)
                     return;
                 }
             }
@@ -242,44 +227,51 @@ void UserInterface_UpdateHealthCounters()
                 0 
                 ) != 0 ))
             {
-                // If we can't update the tile, just return (consider it failed)
                 return;
             }
         }
         else
         {
-            ui_hp_gauge[i] = (0x0160 + temp_bar_partial_tile) | 0x2000 | (PAL_UI_4BPP << 10);
+            ui_hp_gauge[i] = (0x0160 + temp_bar_partial_tile) | base_attr;
         }
 
         i++;
     }
 
-    if ((temp_bar_length_max & 0x07) == 0)
+    if ((temp_bar_length_max & 0x07) == 0 && temp_bar_empty_tiles > 0)
     {
         temp_bar_empty_tiles--;
     }
 
-    for (; i < (temp_bar_filled_tiles + temp_bar_empty_tiles + 2); i++)
+    uint16_t empty_tile = 0x0160 | base_attr;
+    uint16_t empty_end = temp_bar_filled_tiles + temp_bar_empty_tiles + 1;
+    while (i < empty_end)
     {
-        if (i == (temp_bar_filled_tiles + temp_bar_empty_tiles + 1) && ((temp_bar_length_max & 0x07) != 00))
+        ui_hp_gauge[i++] = empty_tile;
+    }
+
+    if (i == empty_end)
+    {
+        if ((temp_bar_length_max & 0x07) != 0)
         {
             // last tile is partial
-            // Use the dynamic tile if the partial fill tile is 
-            // the last tile
-            temp_extra_length = 1;
-            ui_hp_gauge[i] = (0x0169) | 0x2000 | (PAL_UI_4BPP << 10);
-            ui_hp_gauge[i+1] = (0x016a) | 0x2000 | (PAL_UI_4BPP << 10);
+            ui_hp_gauge[i] = 0x0169 | base_attr;
 
-            if (DmaSystem_AddItemToQueue(
-                    (uint8_t *)(&data_ui_dynamic_hp) + (((temp_bar_length_max & 0x07) + 1) << 5) + temp_bar_tile_offset, 
-                    0x56a0, 
-                    32,
-                    VRAM_INCHIGH, 
-                    0
-                    ) != 0 )
+            if ((temp_bar_length_max & 0x07) >= 5)
             {
-                // If we can't update the tile, just return (consider it failed)
-                return;
+                temp_extra_length = 1;
+                ui_hp_gauge[i+1] = 0x016a | base_attr;
+
+                if (DmaSystem_AddItemToQueue(
+                        (uint8_t *)(&data_ui_dynamic_hp) + (((temp_bar_length_max & 0x07) + 1) << 5) + temp_bar_tile_offset, 
+                        0x56a0, 
+                        32,
+                        VRAM_INCHIGH, 
+                        0
+                        ) != 0 )
+                {
+                    return;
+                }
             }
 
             if (DmaSystem_AddItemToQueue(
@@ -290,21 +282,24 @@ void UserInterface_UpdateHealthCounters()
                 0
                 ) != 0)
             {
-                // If we can't update the tile, just return (consider it failed)
                 return;
             }
+            i++;
         }
-        else
+        else if (temp_bar_empty_tiles > 0 || temp_bar_filled_tiles < (temp_bar_length_max >> 3))
         {
-            ui_hp_gauge[i] = 0x0160 | 0x2000 | (PAL_UI_4BPP << 10);
+            ui_hp_gauge[i++] = empty_tile;
         }
     }
 
     if ((temp_bar_length_max & 0x07) == 0)
     {
         // One extra tile and the last tile was a full tile
-        temp_extra_length = 1;
-        ui_hp_gauge[i] = (0x016c) | 0x2000 | (PAL_UI_4BPP << 10);
+        if (temp_bar_empty_tiles > 0 || temp_bar_filled_tiles < (temp_bar_length_max >> 3))
+        {
+            temp_extra_length = 1;
+        }
+        ui_hp_gauge[i] = 0x016c | base_attr;
     }
 
     // Upload the tilemap data itself
@@ -316,8 +311,8 @@ void UserInterface_UpdateHealthCounters()
         0
         ) == 0)
     {
-        ui_cached_hp = temp_hp;
-        ui_cached_hp_max = temp_hp_max;
+        ui_cached_hp = raw_hp;
+        ui_cached_hp_max = raw_hp_max;
     }
 
     return;
@@ -416,21 +411,11 @@ void UserInterface_UpdateMoneyCounters()
     // Copy these values
     uint8_t temp_string[6] = "     " ; // 5 spaces
 
-    int32_t temp_counter_adjust = (obj_player_pointer->struct_data.npc_data.money - ui_display_money) / 2; // The amount of money to change to the visual display.
-    if (temp_counter_adjust == 0)
+    int32_t diff = (int32_t)obj_player_pointer->struct_data.npc_data.money - (int32_t)ui_display_money;
+    int32_t temp_counter_adjust = diff >> 1; // Amount of money to change visually (avoid 32-bit division)
+    if (temp_counter_adjust == 0 && diff != 0)
     {
-        if (obj_player_pointer->struct_data.npc_data.money - ui_display_money > 0)
-        {
-            temp_counter_adjust = 1;
-        }
-        else if (obj_player_pointer->struct_data.npc_data.money - ui_display_money == 0)
-        {
-            temp_counter_adjust = 0;
-        }
-        else
-        {
-            temp_counter_adjust = -1;
-        }
+        temp_counter_adjust = (diff > 0) ? 1 : -1;
     }
 
     uint32_t temp_money = ui_display_money + temp_counter_adjust;
@@ -459,38 +444,59 @@ void UserInterface_UpdateMoneyCounters()
     // The icon
     ui_money_counter[0] = 0x016d | 0x2000 | (PAL_UI_4BPP << 10);
 
-    // Now to make the counter digits itself.
-    // 4 digits with denominator at a fixed location, so 6 characters
-    
-    //uint8_t * t = (uint8_t *)&temp_string; 
-
-    //sprintf(t, "%10lu", temp_money); // Slower when dealing with just a number.
-
-    uint16_t temp_len = 1;
-
-    if (temp_money_copy != 0)
+    uint8_t th = 0, h = 0, t = 0;
+    while (temp_money_copy >= 1000)
     {
-        // Non-zero value
-        for (int i = 3; i >= 0; i--)
-        {
-            temp_string[i] = 0x30 + (temp_money_copy % 10);
-            temp_money_copy /= 10;
+        temp_money_copy -= 1000;
+        th++;
+    }
+    while (temp_money_copy >= 100)
+    {
+        temp_money_copy -= 100;
+        h++;
+    }
+    while (temp_money_copy >= 10)
+    {
+        temp_money_copy -= 10;
+        t++;
+    }
+    uint8_t u = (uint8_t)temp_money_copy;
 
-            if (temp_money_copy == 0)
-            {
-                break;
-            }
-        }
+    if (th != 0)
+    {
+        temp_string[0] = '0' + th;
+        temp_string[1] = '0' + h;
+        temp_string[2] = '0' + t;
+        temp_string[3] = '0' + u;
+    }
+    else if (h != 0)
+    {
+        temp_string[0] = ' ';
+        temp_string[1] = '0' + h;
+        temp_string[2] = '0' + t;
+        temp_string[3] = '0' + u;
+    }
+    else if (t != 0)
+    {
+        temp_string[0] = ' ';
+        temp_string[1] = ' ';
+        temp_string[2] = '0' + t;
+        temp_string[3] = '0' + u;
     }
     else
     {
-        temp_string[3] = '0';
+        temp_string[0] = ' ';
+        temp_string[1] = ' ';
+        temp_string[2] = ' ';
+        temp_string[3] = '0' + u;
     }
 
-    for (int i = 1; i < 6; i++)
-    {
-        ui_money_counter[i] = 0x00e0+(temp_string[i-1]) | 0x2000 | (PAL_UI_4BPP << 10);
-    }
+    uint16_t char_attr_base = 0x20e0 | (PAL_UI_4BPP << 10);
+    ui_money_counter[1] = char_attr_base + (uint8_t)temp_string[0];
+    ui_money_counter[2] = char_attr_base + (uint8_t)temp_string[1];
+    ui_money_counter[3] = char_attr_base + (uint8_t)temp_string[2];
+    ui_money_counter[4] = char_attr_base + (uint8_t)temp_string[3];
+    ui_money_counter[5] = char_attr_base + (uint8_t)temp_string[4];
 
     if (DmaSystem_AddItemToQueue(
         (uint8_t *)(&ui_money_counter[0]), 
@@ -525,25 +531,42 @@ void UserInterface_Internal_Format3U(char *buf, uint16_t val)
         val = 999;
     }
 
-    if (val >= 100)
+    uint8_t h = 0;
+    while (val >= 100)
     {
-        buf[0] = '0' + (val / 100);
-        val %= 100;
-        buf[1] = '0' + (val / 10);
-        buf[2] = '0' + (val % 10);
+        val -= 100;
+        h++;
     }
-    else if (val >= 10)
+
+    uint8_t t = 0;
+    while (val >= 10)
+    {
+        val -= 10;
+        t++;
+    }
+
+    uint8_t u = (uint8_t)val;
+
+    if (h != 0)
+    {
+        buf[0] = (char)('0' + h);
+        buf[1] = (char)('0' + t);
+        buf[2] = (char)('0' + u);
+    }
+    else if (t != 0)
     {
         buf[0] = ' ';
-        buf[1] = '0' + (val / 10);
-        buf[2] = '0' + (val % 10);
+        buf[1] = (char)('0' + t);
+        buf[2] = (char)('0' + u);
     }
     else
     {
         buf[0] = ' ';
         buf[1] = ' ';
-        buf[2] = '0' + val;
+        buf[2] = (char)('0' + u);
     }
+
+    return;
 }
 
 /**
@@ -553,34 +576,39 @@ void UserInterface_UpdateEnemyCounters()
 {
     // Copy these values
     char temp_string[8];
+    uint16_t base_attr = 0x2000 | (PAL_UI_4BPP << 10);
 
-    // The icon
-    ui_enemy_counter[0] = 0x016e | 0x2000 | (PAL_UI_4BPP << 10);
+    ui_enemy_counter[0] = 0x016e | base_attr;
 
     UserInterface_Internal_Format3U(&temp_string[0], obj_enemies_defeated);
     temp_string[3] = '/';
     UserInterface_Internal_Format3U(&temp_string[4], obj_enemies_max_count);
-    temp_string[7] = '\0';
 
-    for (int i = 0; i < 8; i++)
-    {
-        ui_enemy_counter[i+1] = (0x00e0 + temp_string[i]) | 0x2000 | (PAL_UI_4BPP << 10);
-    }
+    uint16_t char_attr_base = 0x20e0 | (PAL_UI_4BPP << 10);
+    ui_enemy_counter[1] = char_attr_base + (uint8_t)temp_string[0];
+    ui_enemy_counter[2] = char_attr_base + (uint8_t)temp_string[1];
+    ui_enemy_counter[3] = char_attr_base + (uint8_t)temp_string[2];
+    ui_enemy_counter[4] = char_attr_base + (uint8_t)temp_string[3];
+    ui_enemy_counter[5] = char_attr_base + (uint8_t)temp_string[4];
+    ui_enemy_counter[6] = char_attr_base + (uint8_t)temp_string[5];
+    ui_enemy_counter[7] = char_attr_base + (uint8_t)temp_string[6];
 
-    //if (obj_enemies_defeated == obj_enemies_max_count)
     if (obj_enemies_defeated >= obj_enemies_target_count)
     {
-        for (int i = 0; i < 5; i++)
-        {
-            ui_level_status[i] = (0x0195+i) | 0x2000 | (PAL_UI_4BPP << 10);
-        }
+        ui_level_status[0] = 0x0195 | base_attr;
+        ui_level_status[1] = 0x0196 | base_attr;
+        ui_level_status[2] = 0x0197 | base_attr;
+        ui_level_status[3] = 0x0198 | base_attr;
+        ui_level_status[4] = 0x0199 | base_attr;
     }
     else
     {
-        for (int i = 0; i < 5; i++)
-        {
-            ui_level_status[i] = (0x0100) | 0x2000 | (PAL_UI_4BPP << 10);
-        }
+        uint16_t blank = 0x0100 | base_attr;
+        ui_level_status[0] = blank;
+        ui_level_status[1] = blank;
+        ui_level_status[2] = blank;
+        ui_level_status[3] = blank;
+        ui_level_status[4] = blank;
     }
 
     if (DmaSystem_AddItemToQueue(

@@ -9,7 +9,7 @@
 
 struct game_object;
 
-extern ZP bool ui_in_subscreen;
+extern bool ui_in_subscreen;
 extern bool ui_in_bg2;
 
 // UI cache invalidation stuff
@@ -28,9 +28,8 @@ extern uint8_t ui_show_message_string[31]; // 30 characters + null terminator
 // Sub-strings
 extern uint16_t ui_hp_gauge[28];
 extern uint16_t ui_money_counter[11];
-extern uint16_t ui_enemy_counter[9];
-
 extern uint16_t ui_level_status[5];
+extern uint16_t ui_enemy_counter[9];
 
 extern uint32_t ui_display_money;
 
