@@ -12,5 +12,11 @@ void Loop_Game_ReloadScene(void);
 void Loop_Game_Partial(void); // Used to quickly restore UI and sprites without running most game logic
 void Loop_Game_NewLevel(void); // Called when the level is to be swapped
 
+#if VBCC_ASM == 1
+    NO_INLINE void Loop_Subscreen_MapDisplay_InitBackground(void);
+#else
+    void Loop_Subscreen_MapDisplay_InitBackground(void);
+#endif
+
 #endif // LOOP_H
 
