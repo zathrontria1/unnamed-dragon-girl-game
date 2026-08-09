@@ -65,19 +65,11 @@ bool vwf_print_finished;
 */
 #define ALIGN_POINTERS() \
 do { \
-    int i; \
-    if (shift == 0) { \
-        i = 0; \
-    } else { \
-        i = 1; \
-        *tilemap_ptr = tile_id; \
-        tilemap_ptr++; \
-    } \
     int remaining = (32 - col) + vwf_col_start; \
-    for (; i < remaining; i++) { \
-        *tilemap_ptr = 0x0000; \
-        tilemap_ptr++; \
+    if (shift != 0) { \
+        *(tilemap_ptr + 1) = 0x0000; \
     } \
+    tilemap_ptr += remaining; \
     col = vwf_col_start; \
     shift = 0; \
     string_ptr++; \
@@ -195,112 +187,119 @@ uint8_t * VwfEngine_PrintText_Gradual(int len)
 
     for (int c = 0; c < len; c++)
     {
-        if (*string_ptr != 0x00)
-        {
-            // Efficient implementation
-            if (*string_ptr == '\n')
-            {
-                ALIGN_POINTERS();
-
-                text_prev_is_newline = true;
-
-                row++;
-                
-                continue;
-            }
-            else if (*string_ptr == '\r')
-            {
-                ALIGN_POINTERS();
-
-                row = vwf_row_start;
-
-                vwf_print_ongoing = false;
-
-                break;
-            }
-            else if (col >= 32)
-            {
-                tilemap_ptr += (32-col)+vwf_col_start;
-
-                row++;
-                col = vwf_col_start;
-                shift = 0;
-
-                tile_id++;
-                tiledata_ptr += 16;
-            }
-            
-            text_prev_is_newline = false;
-
-            if (row >= 28)
-            {
-                break;
-            }
-
-            text_rendered = true;
-
-            uint8_t glyph_sel = *string_ptr;
-
-            int width = const_ui_vwf_offsets[glyph_sel];
-
-            uint8_t * glyph_ptr = (uint8_t *)&data_ui_vwf + ((uint16_t)glyph_sel << 4);
-
-            if (shift_overflow)
-            {
-                run_width++;
-                shift_overflow = false;
-            }
-
-            if (shift == 0)
-            {
-                // Copy the tile as is
-                System_CopyBlock(glyph_ptr, tiledata_ptr, 16);
-                if (run_width == 0)
-                {
-                    run_width = 1;
-                }
-            }
-            else
-            {
-                uint16_t bitplane_mul = const_vwf_bitplane_mul[shift];
-
-                VwfEngine_PrintText_Render(glyph_ptr, tiledata_ptr, bitplane_mul);
-
-                if (run_width < 2)
-                {
-                    run_width = 2;
-                }
-            }
-
-            *tilemap_ptr = tile_id;
-            if (shift != 0)
-            {
-                *(tilemap_ptr+1) = tile_id+1;
-            }
-
-            shift += width;
-
-            if (shift >= 8)
-            {
-                shift -= 8;
-                tiledata_ptr += 16;
-                tile_id++;
-                tilemap_ptr++;
-                col++;
-
-                shift_overflow = true;
-                advance_width++;
-            }
-
-            string_ptr++;
-        }
-
-        if (*string_ptr == 0x00)
+        uint8_t ch = *string_ptr;
+        if (ch == 0x00)
         {
             vwf_print_finished = true;
             vwf_print_ongoing = false;
             break;
         }
+
+        // Efficient implementation
+        if (ch == '\n')
+        {
+            ALIGN_POINTERS();
+
+            text_prev_is_newline = true;
+
+            row++;
+            
+            continue;
+        }
+        else if (ch == '\r')
+        {
+            ALIGN_POINTERS();
+
+            row = vwf_row_start;
+
+            vwf_print_ongoing = false;
+
+            break;
+        }
+        else if (col >= 32)
+        {
+            tilemap_ptr += (32-col)+vwf_col_start;
+
+            row++;
+            col = vwf_col_start;
+            shift = 0;
+
+            tile_id++;
+            tiledata_ptr += 16;
+        }
+        
+        text_prev_is_newline = false;
+
+        if (row >= 28)
+        {
+            break;
+        }
+
+        text_rendered = true;
+
+        uint8_t glyph_sel = ch;
+
+        int width = const_ui_vwf_offsets[glyph_sel];
+
+        uint8_t * glyph_ptr = (uint8_t *)&data_ui_vwf + ((uint16_t)glyph_sel << 4);
+
+        if (shift_overflow)
+        {
+            run_width++;
+            shift_overflow = false;
+        }
+
+        if (shift == 0)
+        {
+            // Copy the tile as is using fast 16-byte word copy
+            uint16_t * src16 = (uint16_t *)glyph_ptr;
+            uint16_t * dst16 = (uint16_t *)tiledata_ptr;
+            dst16[0] = src16[0];
+            dst16[1] = src16[1];
+            dst16[2] = src16[2];
+            dst16[3] = src16[3];
+            dst16[4] = src16[4];
+            dst16[5] = src16[5];
+            dst16[6] = src16[6];
+            dst16[7] = src16[7];
+            if (run_width == 0)
+            {
+                run_width = 1;
+            }
+        }
+        else
+        {
+            uint16_t bitplane_mul = const_vwf_bitplane_mul[shift];
+
+            VwfEngine_PrintText_Render(glyph_ptr, tiledata_ptr, bitplane_mul);
+
+            if (run_width < 2)
+            {
+                run_width = 2;
+            }
+        }
+
+        *tilemap_ptr = tile_id;
+        if (shift != 0)
+        {
+            *(tilemap_ptr+1) = tile_id+1;
+        }
+
+        shift += width;
+
+        if (shift >= 8)
+        {
+            shift -= 8;
+            tiledata_ptr += 16;
+            tile_id++;
+            tilemap_ptr++;
+            col++;
+
+            shift_overflow = true;
+            advance_width++;
+        }
+
+        string_ptr++;
     }
 
     if (shift_overflow) // One extra catch
