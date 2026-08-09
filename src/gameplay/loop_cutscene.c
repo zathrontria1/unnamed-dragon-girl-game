@@ -227,18 +227,41 @@ void Cs_StartCutscene()
         DmaSystem_CopyToVram((uint8_t *)cs_current->tilemap, TILEMAP_ADDR_CS_FRAME_A, 1280);
         DmaSystem_CopyToWram((uint8_t *)cs_current->palette, (uint8_t *)&shadow_cgram, 256);
 
-        // Stub out the tilemap data past entry 640 (byte 1280)
-        REG_VMAIN = VRAM_INCHIGH;
-        REG_VMADDLH = TILEMAP_ADDR_CS_FRAME_A+640;
-        for (int i = 640; i < 1024; i++)
-        {
-            REG_VMDATALH = 640;
-        }
-        REG_VMADDLH = TILEMAP_ADDR_CS_FRAME_B+640;
-        for (int i = 640; i < 1024; i++)
-        {
-            REG_VMDATALH = 640;
-        }
+        // Stub out the tilemap data past entry 640 (384 words) with tile index 640 (0x0280)
+        // Fixed-source DMA requires 2 passes (low byte 0x80 to $2118, high byte 0x02 to $2119)
+        // because SNES DMA does not increment the A-bus pointer within fixed-source transfers.
+        static const uint8_t fill_low = 0x80;
+        static const uint8_t fill_high = 0x02;
+
+        REG_DMAP0 = 0x08; // 1-register write (mode 0), fixed source address
+
+        // Pass 1: Fill low bytes (0x80) to VMDATAL ($2118)
+        REG_BBAD0 = 0x18;
+        REG_A1T0LH = ADDR_LOWORD(&fill_low);
+        REG_A1B0 = ADDR_BANK(&fill_low);
+
+        REG_VMAIN = VRAM_INCLOW; // 0x00 - increment VRAM word address on low byte write
+        REG_VMADDLH = TILEMAP_ADDR_CS_FRAME_A + 640;
+        REG_DAS0LH = 384;
+        REG_MDMAEN = 0x01;
+
+        REG_VMADDLH = TILEMAP_ADDR_CS_FRAME_B + 640;
+        REG_DAS0LH = 384;
+        REG_MDMAEN = 0x01;
+
+        // Pass 2: Fill high bytes (0x02) to VMDATAH ($2119)
+        REG_BBAD0 = 0x19;
+        REG_A1T0LH = ADDR_LOWORD(&fill_high);
+        REG_A1B0 = ADDR_BANK(&fill_high);
+
+        REG_VMAIN = VRAM_INCHIGH; // 0x80 - increment VRAM word address on high byte write
+        REG_VMADDLH = TILEMAP_ADDR_CS_FRAME_A + 640;
+        REG_DAS0LH = 384;
+        REG_MDMAEN = 0x01;
+
+        REG_VMADDLH = TILEMAP_ADDR_CS_FRAME_B + 640;
+        REG_DAS0LH = 384;
+        REG_MDMAEN = 0x01;
 
         DmaSystem_UploadCgram();
 
