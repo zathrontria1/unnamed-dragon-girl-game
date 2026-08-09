@@ -21,18 +21,23 @@ void SpriteEngine_AddMetaSprite_Priority(struct game_object * o, const struct sp
 {
     int16_t temp_x;
     int16_t temp_y;
-    int16_t temp_depth_signed = o->pos.y.lh.h + 16 - bg_scroll_y.full.high.a;
+    int16_t raw_y = o->pos.y.lh.h + 16 - bg_scroll_y.full.high.a;
+    int16_t temp_depth_signed;
 
-    if (temp_depth_signed > 255)
+    if (raw_y <= 0)
     {
-        temp_depth_signed = 255;
-    }
-    else if (temp_depth_signed < 0)
-    {   
         temp_depth_signed = 0;
     }
+    else
+    {
+        temp_depth_signed = raw_y >> 1;
+        if (temp_depth_signed > 127)
+        {
+            temp_depth_signed = 127;
+        }
+    }
 
-    uint16_t temp_depth = temp_depth_signed & 0x00ff;
+    uint16_t temp_depth = (uint16_t)temp_depth_signed & 0x007f;
     
     while (m->size != 0xffff)
     {

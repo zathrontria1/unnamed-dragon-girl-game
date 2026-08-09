@@ -26,11 +26,12 @@ _SpriteEngine_AddMetaSprite:
 		lda #$0000
 		bra .no_saturate_depth
 .depth_is_positive:
-	cmp #$00ff
+	lsr
+	cmp #$007f
 	bcc .no_saturate_depth
-		lda #$00ff
+		lda #$007f
 .no_saturate_depth:
-	and #$00ff
+	and #$007f
 	sta r3
 
 	lda $7e0008,x ; carry is guaranteed clear
@@ -49,7 +50,6 @@ _SpriteEngine_AddMetaSprite:
 	cmp #64
 	bcs .finish
 
-	asl
 	asl
 	asl
 	asl ; clears carry
@@ -142,8 +142,12 @@ _SpriteEngine_AddMetaSprite:
 .draw:
 	ldy r2
 	sta _spr_queue_normal+2,y
+	sep #$20
+	a8
 	lda r3
-	sta _spr_queue_normal+8,y
+	sta _spr_queue_normal+7,y
+	rep #$20
+	a16
 	lda [r0]
 	sta _spr_queue_normal+4,y
 	inc _spr_normal_count
@@ -185,11 +189,12 @@ _SpriteEngine_AddMetaSprite_Back:
 		lda #$0000
 		bra .no_saturate_depth
 .depth_is_positive:
-	cmp #$00ff
+	lsr
+	cmp #$007f
 	bcc .no_saturate_depth
-		lda #$00ff
+		lda #$007f
 .no_saturate_depth:
-	and #$00ff
+	and #$007f
 	sta r3
 
 	lda $7e0008,x ; carry is guaranteed clear
@@ -208,7 +213,6 @@ _SpriteEngine_AddMetaSprite_Back:
 	cmp #64
 	bcs .finish
 
-	asl
 	asl
 	asl
 	asl ; clears carry
@@ -301,8 +305,12 @@ _SpriteEngine_AddMetaSprite_Back:
 .draw:
 	ldy r2
 	sta _spr_queue_back+2,y
+	sep #$20
+	a8
 	lda r3
-	sta _spr_queue_back+8,y
+	sta _spr_queue_back+7,y
+	rep #$20
+	a16
 	lda [r0]
 	sta _spr_queue_back+4,y
 	inc _spr_back_count
