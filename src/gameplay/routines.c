@@ -45,6 +45,15 @@ void Routines_Fx_Smoke(struct game_object * o)
         // Move the object based on the stored delta
         ObjectSystem_MoveWithoutCollision_Fast(o);
 
+        int16_t temp_x = o->pos.x.lh.h - bg_scroll_x.full.high.a;
+        int16_t temp_y = o->pos.y.lh.h - o->pos.z.lh.h - bg_scroll_y.full.high.a;
+
+        if ((temp_x <= -16) || (temp_x >= 256) || (temp_y <= -16) || (temp_y >= 224))
+        {
+            ObjectSystem_DestroyStandardObject(o->array_index);
+            return;
+        }
+
         // Update every 8 frames
         if (!((uint16_t)system_frames_elapsed & ANI_INTERVAL_8))
         {
@@ -55,6 +64,7 @@ void Routines_Fx_Smoke(struct game_object * o)
         if (!o->struct_data.npc_data.ttl)
         {
             ObjectSystem_DestroyStandardObject(o->array_index);
+            return;
         }
         else
         {
@@ -63,9 +73,12 @@ void Routines_Fx_Smoke(struct game_object * o)
         }
     }
 
-    unsigned int offset = o->struct_data.npc_data.ani.frame << 1;
-
-    Routines_Shared_DrawFixed(o, (0x0006 + offset) | PAL_FX_SMOKE << 9, 0, true); 
+    if ((o->uid & 0x0001) == ((uint16_t)system_frames_elapsed & 0x0001))
+    {
+        unsigned int offset = o->struct_data.npc_data.ani.frame << 1;
+        uint16_t tileattrib = (0x3006 + offset) | (PAL_FX_SMOKE << 9);
+        SpriteEngine_AddToFrontLayer(o, tileattrib);
+    }
 
     return;
 }
@@ -95,7 +108,9 @@ void Routines_Fx_Impact(struct game_object * o)
 
 void Routines_Interactables_Switch(struct game_object * o)
 {
-    if (!system_game_paused)
+    bool offscreen = ObjectSystem_IsObjectOffscreenMargin(o, 32);
+
+    if (!system_game_paused && !offscreen)
     {
         // Check if a player hit is on the switch
 
@@ -136,15 +151,24 @@ void Routines_Interactables_Switch(struct game_object * o)
             o->struct_data.interactable_data.delay_time--;
         }
     }
+    else if (!system_game_paused && o->struct_data.interactable_data.delay_time != 0)
+    {
+        o->struct_data.interactable_data.delay_time--;
+    }
 
-    Routines_Shared_DrawFixed(o, 0x20 + (o->state << 1) | PAL_INTERACTABLE_SWITCH_WALL << 9, 2, false);
+    if (!offscreen)
+    {
+        Routines_Shared_DrawFixed(o, 0x20 + (o->state << 1) | PAL_INTERACTABLE_SWITCH_WALL << 9, 2, false);
+    }
 
     return;
 }
 
 void Routines_Interactable_Sign(struct game_object * o)
 {
-    if (!system_game_paused)
+    bool offscreen = ObjectSystem_IsObjectOffscreenMargin(o, 32);
+
+    if (!system_game_paused && !offscreen)
     {
         // Check if a player hit is on the sign
         // And while not in combat
@@ -179,21 +203,30 @@ void Routines_Interactable_Sign(struct game_object * o)
             o->struct_data.interactable_data.delay_time--;
         }
     }
+    else if (!system_game_paused && o->struct_data.interactable_data.delay_time != 0)
+    {
+        o->struct_data.interactable_data.delay_time--;
+    }
 
-    Routines_Shared_DrawFixed(o, 0x28 | PAL_INTERACTABLE_SIGN_WALL << 9, 2, false);
+    if (!offscreen)
+    {
+        Routines_Shared_DrawFixed(o, 0x28 | PAL_INTERACTABLE_SIGN_WALL << 9, 2, false);
+    }
 
     return;
 }
 
 void Routines_TreasureChest(struct game_object * o)
 {
+    bool offscreen = ObjectSystem_IsObjectOffscreenMargin(o, 32);
+
     if (!system_game_paused)
     {
         if (!o->struct_data.interactable_data.opened)
         {
             // Check if a player hit is on the sign
             // And while not in combat
-            if (event_interaction_x != -32728 && CollisionCheck_InteractableTestPlayerAction(o) != 0)
+            if (!offscreen && event_interaction_x != -32728 && CollisionCheck_InteractableTestPlayerAction(o) != 0)
             {
                 if (!event_in_combat_shadow)
                 {
@@ -228,12 +261,12 @@ void Routines_TreasureChest(struct game_object * o)
             {
                 // Decrement time to live
 
-                // Also draw a coin on top of it
-                // Make a copy of the object
-                game_object_t c = *o;
-
-                if (o->struct_data.interactable_data.ttl >= 90 / V_MUL)
+                // Also draw a coin on top of it if onscreen
+                if (!offscreen && o->struct_data.interactable_data.ttl >= 90 / V_MUL)
                 {
+                    // Make a copy of the object
+                    game_object_t c = *o;
+
                     // Calculate elapsed frames since chest was opened
                     uint16_t elapsed = (180 / V_MUL) - o->struct_data.interactable_data.ttl;
 
@@ -244,15 +277,18 @@ void Routines_TreasureChest(struct game_object * o)
                     c.pos.z.a += (8l << 16) + bounce_z;
 
                     Routines_Shared_DrawFixed(&c, 0x2a | PAL_DROP_MONEY << 9, 0, false);
-                } // Don't draw the coin if less than 90 / V_MUL frames left
+                } // Don't draw the coin if less than 90 / V_MUL frames left or offscreen
 
                 o->struct_data.interactable_data.ttl--;
             }
         }
     }
 
-    unsigned int offset = (o->struct_data.interactable_data.opened << 1);
-    Routines_Shared_DrawFixed(o, 0x24+(offset) | PAL_INTERACTABLE_TREASURECHEST << 9, 1, false);
+    if (!offscreen)
+    {
+        unsigned int offset = (o->struct_data.interactable_data.opened << 1);
+        Routines_Shared_DrawFixed(o, 0x24+(offset) | PAL_INTERACTABLE_TREASURECHEST << 9, 1, false);
+    }
 
     return;
 }
@@ -351,6 +387,11 @@ void Routines_Interactable_Blocker(struct game_object * o)
         }
     }
 
+    if (ObjectSystem_IsObjectOffscreenMargin(o, 32))
+    {
+        return;
+    }
+
     if (o->state == STATE_SWITCH_OFF) 
     {
         switch (o->id)
@@ -430,6 +471,11 @@ void Routines_LevelWarp(struct game_object * o)
 
             warp_open = true;
         }
+    }
+
+    if (ObjectSystem_IsObjectOffscreenMargin(o, 32))
+    {
+        return;
     }
 
     if (!warp_open)
@@ -523,11 +569,15 @@ void Routines_Drops_Money(struct game_object * o)
                 p->struct_data.npc_data.money += o->struct_data.npc_data.money;
 
                 ObjectSystem_DestroyStandardObject(o->array_index);
+                return;
             }
         }
     }
 
-    Routines_Shared_DrawFixed(o, 0x2a | PAL_DROP_MONEY << 9, 1, false);
+    if (!ObjectSystem_IsObjectOffscreenMargin(o, 32))
+    {
+        Routines_Shared_DrawFixed(o, 0x2a | PAL_DROP_MONEY << 9, 1, false);
+    }
 
     return;
 }
@@ -565,11 +615,15 @@ void Routines_Drops_Recovery_Meat(struct game_object * o)
                 shadow_cgadsub = CM_MSCR_BACK | CM_MSCR_PAL47 | CM_MSCR_BG2;
                 
                 ObjectSystem_DestroyStandardObject(o->array_index);
+                return;
             }
         }
     }
 
-    Routines_Shared_DrawFixed(o, 0xa0 | PAL_DROP_REC_MEAT << 9, 1, false);
+    if (!ObjectSystem_IsObjectOffscreenMargin(o, 32))
+    {
+        Routines_Shared_DrawFixed(o, 0xa0 | PAL_DROP_REC_MEAT << 9, 1, false);
+    }
 
     return;
 }

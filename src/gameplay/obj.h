@@ -68,6 +68,10 @@ extern const uint16_t const_obj_vram_slot_to_tilenum[128];
 void ObjectSystem_ProcessObjects();
 bool ObjectSystem_IsEnemyAiScheduled(const struct game_object * o);
 
+#define ObjectSystem_IsObjectOffscreenMargin(o, margin) \
+    (((uint16_t)(((o)->pos.x.lh.h - bg_scroll_x.full.high.a) + (margin)) > (uint16_t)(256 + ((margin) << 1))) || \
+     ((uint16_t)(((o)->pos.y.lh.h - bg_scroll_y.full.high.a) + (margin)) > (uint16_t)(224 + ((margin) << 1))))
+
 void ObjectSystem_ResetStandardObjects(int start_index);
 void ObjectSystem_ResetPlayerHitboxes();
 void ObjectSystem_ResetEnemyHitboxes();
