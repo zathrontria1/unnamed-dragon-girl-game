@@ -629,6 +629,15 @@ void Routines_Player_Fireball(struct game_object * o)
         // Move the object based on the stored delta
         ObjectSystem_MoveWithoutCollision(o);
 
+        int16_t temp_x = o->pos.x.lh.h - bg_scroll_x.full.high.a;
+        int16_t temp_y = o->pos.y.lh.h - o->pos.z.lh.h - bg_scroll_y.full.high.a;
+
+        if ((temp_x <= -16) || (temp_x >= 256) || (temp_y <= -16) || (temp_y >= 224))
+        {
+            ObjectSystem_DestroyPlayerHitbox(o->array_index);
+            return;
+        }
+
         // Update every 8 frames
         if (!((uint16_t)system_frames_elapsed & ANI_INTERVAL_8))
         {
@@ -642,12 +651,16 @@ void Routines_Player_Fireball(struct game_object * o)
         if (!o->struct_data.npc_data.ttl)
         {
             ObjectSystem_DestroyPlayerHitbox(o->array_index);
+            return;
         }
     }
 
-    unsigned int offset = o->struct_data.npc_data.ani.frame << 1;
-
-    Routines_Shared_DrawFixed(o, (0x0002 + offset) | PAL_FIREBALL << 9, 0, true); 
+    if ((o->uid & 0x0001) == ((uint16_t)system_frames_elapsed & 0x0001))
+    {
+        unsigned int offset = o->struct_data.npc_data.ani.frame << 1;
+        uint16_t tileattrib = (0x3002 + offset) | (PAL_FIREBALL << 9);
+        SpriteEngine_AddToFrontLayer(o, tileattrib);
+    }
 
     obj_player_active_fireballs++;
 
