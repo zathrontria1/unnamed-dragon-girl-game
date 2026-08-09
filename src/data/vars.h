@@ -16,17 +16,17 @@ extern const uint32_t const_zero[8];
 // System general shadows and variables
 extern ZP bool system_in_vblank;
 
-extern ZP uint16_t system_current_routine;
-extern ZP uint16_t system_target_routine;
+extern uint16_t system_current_routine;
+extern uint16_t system_target_routine;
 
-extern ZP uint32_t system_frames_elapsed;
+extern uint32_t system_frames_elapsed;
 
-extern ZP uint16_t system_time_h;
-extern ZP uint8_t system_time_m;
-extern ZP uint8_t system_time_s;
-extern ZP uint8_t system_time_subframe;
+extern uint16_t system_time_h;
+extern uint8_t system_time_m;
+extern uint8_t system_time_s;
+extern uint8_t system_time_subframe;
 
-extern ZP uint32_t system_frames_lag;
+extern uint32_t system_frames_lag;
 extern bool system_dont_count_lag; // set to 1 to not increment the lag counter during e.g. creating a text box
 
 extern ZP uint16_t system_nmis_counted;
@@ -36,7 +36,7 @@ extern ZP bool system_use_long_vblank;
 
 extern ZP bool system_game_paused;
 
-extern ZP void * system_loop_func_ptr;
+extern void * system_loop_func_ptr;
 
 extern ZP bool system_suppress_odd_transfers;
 
@@ -59,8 +59,8 @@ extern ZP uint8_t shadow_stat77;
 
 extern ZP uint8_t shadow_hdmaen;
 
-extern NEAR union oam_buffer shadow_oam;
-extern NEAR union cgram_full shadow_cgram; // 256 palette entries, 2 bytes wide each
+extern union oam_buffer shadow_oam;
+extern union cgram_full shadow_cgram; // 256 palette entries, 2 bytes wide each
 
 // Event flags
 extern uint8_t event_flags_global[EVENT_FLAG_GLOBAL_MAX];

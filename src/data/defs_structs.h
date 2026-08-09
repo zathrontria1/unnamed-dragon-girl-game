@@ -145,13 +145,11 @@ typedef struct tile_xy
 
 typedef struct dma_entry 
 {
-    uint16_t vmain; // VMain type
-    // Splits are handled on function, divide it into 2^split. For copying a square section.
-    uint8_t * src; // A bus src
+    uint8_t vmain; // VMain type
+    uint16_t src_offset; // A bus src offset (low 16 bits)
+    uint8_t src_bank; // A bus src bank (high 8 bits)
     uint16_t dest; // VRAM word dest
     uint16_t length;
-
-    uint8_t padding[6]; 
 } dma_entry_t;
 
 typedef struct spr_queue_entry 
@@ -159,9 +157,8 @@ typedef struct spr_queue_entry
     int16_t x; 
     int16_t y;
     uint16_t tileattrib;
-    uint16_t signsize;
-    uint16_t depth;
-    uint8_t padding[6];
+    uint8_t signsize;
+    uint8_t depth;
 } spr_queue_entry_t;
 
 typedef struct pos_lh32
