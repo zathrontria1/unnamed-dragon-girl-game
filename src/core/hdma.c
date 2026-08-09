@@ -18,7 +18,6 @@ uint16_t hdma_bgpalette_data[SCREEN_HEIGHT << 1];
 
 struct hdma_indirect_table_entry hdma_windowbackground_tables[2][4];
 uint16_t hdma_windowbackground_data[2][SCREEN_HEIGHT << 1];
-uint16_t hdma_windowbackground_select;
 
 uint8_t hdma_use_gradient;
 uint16_t hdma_gradient_ptr;

@@ -48,7 +48,6 @@ uint16_t obj_enemies_max_count;
 // Player only data that shouldn't be in the object area
 uint16_t obj_player_attack_interval;
 uint16_t obj_player_prev_facing;
-uint8_t * obj_player_prev_sprframe;
 uint16_t obj_player_active_fireballs;
 
 uint16_t obj_player_health_regen_delay;

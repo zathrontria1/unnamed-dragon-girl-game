@@ -14,7 +14,6 @@ extern uint16_t hdma_bgpalette_data[SCREEN_HEIGHT << 1];
 
 extern struct hdma_indirect_table_entry hdma_windowbackground_tables[2][4];
 extern uint16_t hdma_windowbackground_data[2][SCREEN_HEIGHT << 1];
-extern uint16_t hdma_windowbackground_select;
 
 extern uint8_t hdma_use_gradient;
 extern uint16_t hdma_gradient_ptr;

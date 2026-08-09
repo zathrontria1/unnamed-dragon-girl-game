@@ -31,7 +31,6 @@ extern bool obj_has_active_ai_enemies;
 // Player only data that shouldn't be in the object area
 extern uint16_t obj_player_attack_interval;
 extern uint16_t obj_player_prev_facing;
-extern uint8_t * obj_player_prev_sprframe;
 extern uint16_t obj_player_active_fireballs;
 
 extern uint16_t obj_player_health_regen_delay;

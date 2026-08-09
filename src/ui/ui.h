@@ -23,8 +23,6 @@ extern uint16_t ui_cached_enemy_counter;
 extern uint16_t ui_window_background[(SCREEN_HEIGHT >> 3)][32]; // BG1. Call functions to draw a window here.
 extern uint16_t ui_window_text[(SCREEN_HEIGHT >> 3)][32]; // BG3. Call functions to draw text here.
 
-extern uint8_t ui_show_message_string[31]; // 30 characters + null terminator
-
 // Sub-strings
 extern uint16_t ui_hp_gauge[28];
 extern uint16_t ui_money_counter[11];

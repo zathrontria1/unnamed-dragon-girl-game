@@ -34,9 +34,6 @@ uint16_t subscreen_selection;
 uint16_t subscreen_selection_profile;
 uint16_t subscreen_bottom_entry;
 
-uint16_t subscreen_cursor_x;
-uint16_t subscreen_cursor_y;
-
 bool subscreen_is_in_profile;
 bool subscreen_restore_sprite_page;
 
@@ -45,7 +42,6 @@ bool subscreen_skip_window_redraw;
 
 uint8_t subscreen_cgadsub_copy;
 
-static void * subscreen_current_func_ptr;
 static void * subscreen_next_func_ptr;
 uint16_t subscreen_transition_state;
 
