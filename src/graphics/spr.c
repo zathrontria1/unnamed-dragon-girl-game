@@ -6,6 +6,7 @@
 #include "spr.h"
 #include "map.h"
 #include "system.h"
+#include "dma.h"
 
 uint16_t spr_sprite_count; // Rendered sprites this frame
 uint16_t spr_sprite_count_prev; // previous
@@ -265,6 +266,22 @@ void SpriteEngine_ResetSpriteLists()
     spr_normal_count = 0;
 
     SpriteEngine_ProcessSpriteLists();
+
+    return;
+}
+
+void SpriteEngine_ProcessSpriteLists_ClearDepthBuffer()
+{
+    System_Hsync(0);
+
+    REG_DMAP7 = 0x08; // byte reg write, fixed
+    REG_A1T7LH = ADDR_LOWORD(&const_zero);
+    REG_A1B7 = ADDR_BANK(&const_zero);
+    REG_BBAD7 = 0x80; // WMDATA
+    REG_WMADDLM = ADDR_LOWORD(spr_depth_count);
+    REG_WMADDH = ADDR_BANK(spr_depth_count);
+    REG_DAS7LH = 129;
+    REG_MDMAEN = 0x80; // Enable DMA Channel 7
 
     return;
 }

@@ -24,7 +24,6 @@ _SpriteEngine_AddToFrontLayer:
 	asl
 	asl
 	asl
-	asl
 	tay
 
 	lda $7e0008,x
@@ -37,16 +36,15 @@ _SpriteEngine_AddToFrontLayer:
 	bcc .reject
 	; Object partially on the left edge
 	sta _spr_queue_front,y
-	lda #$40
-	sta _spr_queue_front+6,y
+	lda #$0040
 	bra .y_test
 .x_pos:
 	cmp #256
 	bcs .reject
 	sta _spr_queue_front,y
-	lda #$00
-	sta _spr_queue_front+6,y
+	lda #$0000
 .y_test:
+	sta r0
 	lda $7e000c,x
 	sec
 	sbc $7e0010,x
@@ -66,8 +64,11 @@ _SpriteEngine_AddToFrontLayer:
 .finish:
 	sta _spr_queue_front+2,y
 	adc #16
-	and #$00ff
-	sta _spr_queue_front+8,y
+	lsr
+	and #$007f
+	xba
+	ora r0
+	sta _spr_queue_front+6,y
 	lda 4,s
 	sta _spr_queue_front+4,y
 	inc _spr_front_count
@@ -100,7 +101,6 @@ _SpriteEngine_AddToSortedLayer:
 	asl
 	asl
 	asl
-	asl
 	tay
 
 	lda $7e0008,x
@@ -113,16 +113,15 @@ _SpriteEngine_AddToSortedLayer:
 	bcc .reject
 	; Object partially on the left edge
 	sta _spr_queue_normal,y
-	lda #$40
-	sta _spr_queue_normal+6,y
+	lda #$0040
 	bra .y_test
 .x_pos:
 	cmp #256
 	bcs .reject
 	sta _spr_queue_normal,y
-	lda #$00
-	sta _spr_queue_normal+6,y
+	lda #$0000
 .y_test:
+	sta r0
 	lda $7e000c,x
 	sec
 	sbc $7e0010,x
@@ -144,8 +143,11 @@ _SpriteEngine_AddToSortedLayer:
 .finish:
 	sta _spr_queue_normal+2,y
 	adc #16
-	and #$00ff
-	sta _spr_queue_normal+8,y
+	lsr
+	and #$007f
+	xba
+	ora r0
+	sta _spr_queue_normal+6,y
 	lda 4,s
 	sta _spr_queue_normal+4,y
 	inc _spr_normal_count
@@ -178,7 +180,6 @@ _SpriteEngine_AddToBackLayer:
 	asl
 	asl
 	asl
-	asl
 	tay
 
 	lda $7e0008,x
@@ -191,16 +192,15 @@ _SpriteEngine_AddToBackLayer:
 	bcc .reject
 	; Object partially on the left edge
 	sta _spr_queue_back,y
-	lda #$40
-	sta _spr_queue_back+6,y
+	lda #$0040
 	bra .y_test
 .x_pos:
 	cmp #256
 	bcs .reject
 	sta _spr_queue_back,y
-	lda #$00
-	sta _spr_queue_back+6,y
+	lda #$0000
 .y_test:
+	sta r0
 	lda $7e000c,x
 	sec
 	sbc $7e0010,x
@@ -220,8 +220,11 @@ _SpriteEngine_AddToBackLayer:
 .finish:
 	sta _spr_queue_back+2,y
 	adc #16
-	and #$00ff
-	sta _spr_queue_back+8,y
+	lsr
+	and #$007f
+	xba
+	ora r0
+	sta _spr_queue_back+6,y
 	lda 4,s
 	sta _spr_queue_back+4,y
 	inc _spr_back_count
@@ -242,63 +245,67 @@ _SpriteEngine_ProcessSpriteLists_WriteFrontSprites:
 	lda _spr_front_count
 	beq .end_drawfront
 
-	tay
-	lda #<_spr_queue_front
-	sta r0
-	lda #^_spr_queue_front
-	sta r1
+	sta r2
+	ldy #0
+
+	lda _spr_sprite_count
+	cmp #128
+	bcs .end_drawfront
+	sta r3
+	asl
+	asl
+	tax
 
 .loop_drawfrontsprites:
-	jsl >_SpriteEngine_DrawSprite
-	lda r0
+	lda r3
+	cmp #128
+	bcs .end_drawfront
+
+	lda _spr_queue_front+4,y
+	sta >_shadow_oam+2,x
+
+	sep #$20
+	a8
+
+	lda _spr_queue_front,y
+	sta >_shadow_oam,x
+	lda _spr_queue_front+2,y
+	sta >_shadow_oam+1,x
+
+	phx
+	ldx r3
+	lda _spr_queue_front+6,y
+	sta >_shadow_oam+512,x
+	inc r3
+	plx
+
+	inx
+	inx
+	inx
+	inx
+
+	rep #$20
+	a16
+
+	tya
 	clc
-	adc #16
-	sta r0
-	dey
+	adc #8
+	tay
+
+	dec r2
 	bne .loop_drawfrontsprites
+
+	lda r3
+	cmp #128
+	bcc .front_count_ok
+	lda #128
+.front_count_ok:
+	sta _spr_sprite_count
 
 .end_drawfront:
 	stz _spr_front_count
 	rtl
 
-	section	"DONTMERGE_text.far._SpriteEngine_ProcessSpriteLists_ClearDepthBuffer.0","acrx"
-	a16
-	x16
-	global	_SpriteEngine_ProcessSpriteLists_ClearDepthBuffer
-
-; void SpriteEngine_ProcessSpriteLists_ClearDepthBuffer()
-_SpriteEngine_ProcessSpriteLists_ClearDepthBuffer:
-	a16
-	x16
-
-	x8
-	sep #$10
-
-	phd
-	lda #<_spr_depth_count
-	and #$ff00
-	pha
-	pld
-	tax
-	clc
-.loop_depthclear:
-	stz <_spr_depth_count,x
-	stz <_spr_depth_count+2,x
-	stz <_spr_depth_count+4,x
-	stz <_spr_depth_count+6,x
-	stz <_spr_depth_count+8,x
-	stz <_spr_depth_count+10,x
-	stz <_spr_depth_count+12,x
-	stz <_spr_depth_count+14,x
-	txa
-	adc #16
-	tax
-	bne .loop_depthclear
-	stz !_spr_depth_count+255
-	pld
-	rep #$10
-	x16
-	rtl
 
 	section	"DONTMERGE_text.far._SpriteEngine_ProcessSpriteLists_TallySprites.0","acrx"
 	a16
@@ -318,37 +325,36 @@ _SpriteEngine_ProcessSpriteLists_TallySprites:
 	sta r2
 
 	lda #$0000
-	ldy #8
+	ldy #7
 
-	a8
 	sep #$20
-	phb
-	lda #^_spr_depth_count
-	pha
-	plb
+	a8
 	clc
 
 .loop_depthtally:
 	lda (r0),y
+	and #$7f
 	tax
-	inx
-	inc !_spr_depth_count,x
+	inc _spr_depth_count+1,x
 	lda r0
-	adc #16
+	adc #8
 	sta r0
-	bcc .depthtally_nocarry
-	clc
-	inc r0+1
-.depthtally_nocarry:
+	bcs .carry_occurred
+
+.back_depthtally:
 	dec r2
 	bne .loop_depthtally
 
-	a16
 	rep #$20
-	plb
+	a16
 
 .end:
 	rtl
+
+.carry_occurred:
+	inc r0+1
+	clc
+	bra .back_depthtally
 
 	section	"DONTMERGE_text.far._SpriteEngine_ProcessSpriteLists_CalculateOffsets.0","acrx"
 	a16
@@ -372,6 +378,10 @@ _SpriteEngine_ProcessSpriteLists_CalculateOffsets:
 	lda _spr_sprite_count
 	clc
 	adc _spr_normal_count
+	cmp #128
+	bcc .offset_calc_ok
+	lda #128
+.offset_calc_ok:
 	sep #$21
 	a8
 	tay
@@ -415,9 +425,10 @@ _SpriteEngine_ProcessSpriteLists_CalculateOffsets:
 	clc
 	adc #16
 	tax
-	bne .loop_oamoffsetcalc
+	cpx #128
+	bcc .loop_oamoffsetcalc
 	tya
-	sta !_spr_depth_count+256
+	sta !_spr_depth_count+128
 	rep #$30
 	a16
 	x16
@@ -439,58 +450,72 @@ _SpriteEngine_ProcessSpriteLists_WriteSortedSprites:
 	sta r2
 
 	ldy #0
-.loop_spritewrite:
-	; Decrement the depth count
-	; Wipe the accumulator first
 	tdc
 	sep #$20
 	a8
-	lda !_spr_queue_normal+8,y
+
+.loop_spritewrite:
+	lda !_spr_queue_normal+7,y
+	and #$7f
 	tax
 
 	lda >_spr_depth_count,x
 	dec
 	sta >_spr_depth_count,x
-
-	; Prepare the indices
+	cmp #128
+	bcs .skip_sorted_item
 	tax
 
-	rep #$20
-	a16
-	asl
-	asl
-	sta r3
-	sep #$20
-	a8
-
-	; Transfer the sprite information
 	lda !_spr_queue_normal+6,y
 	sta >_shadow_oam+512,x
 
-	ldx r3
-
-	lda !_spr_queue_normal+2,y
-	sta >_shadow_oam+1,x
-
 	lda !_spr_queue_normal,y
-	sta >_shadow_oam,x
+	sta r0
+	lda !_spr_queue_normal+2,y
+	sta r0+1
 
 	rep #$21
 	a16
+
+	txa
+	asl
+	asl
+	tax
+
+	lda r0
+	sta >_shadow_oam,x
 	lda !_spr_queue_normal+4,y
 	sta >_shadow_oam+2,x
 
+.skip_sorted_item:
+	rep #$21
+	a16
+
 	tya
-	adc #16
+	adc #8
 	tay
 
 	dec r2
-	bne .loop_spritewrite
+	beq .done_spritewrite
 
+	tdc ; avoid stale high byte
+
+	sep #$20
+	a8
+	bra .loop_spritewrite
+
+.done_spritewrite:
 .end2:
+	rep #$20
+	a16
+	
 	lda _spr_sprite_count
 	clc
 	adc _spr_normal_count
+	cmp #128
+	bcc .normal_count_ok
+	lda #128
+.normal_count_ok:
 	sta _spr_sprite_count
 	stz _spr_normal_count
 	rtl
@@ -508,20 +533,62 @@ _SpriteEngine_ProcessSpriteLists_WriteBackSprites:
 	lda _spr_back_count
 	beq .end_drawback
 
-	tay
-	lda #<_spr_queue_back
-	sta r0
-	lda #^_spr_queue_back
-	sta r1
+	sta r2
+	ldy #0
+
+	lda _spr_sprite_count
+	cmp #128
+	bcs .end_drawback
+	sta r3
+	asl
+	asl
+	tax
 
 .loop_drawbacksprites:
-	jsl >_SpriteEngine_DrawSprite
-	lda r0
+	lda r3
+	cmp #128
+	bcs .end_drawback
+
+	lda _spr_queue_back+4,y
+	sta >_shadow_oam+2,x
+
+	sep #$20
+	a8
+
+	lda _spr_queue_back,y
+	sta >_shadow_oam,x
+	lda _spr_queue_back+2,y
+	sta >_shadow_oam+1,x
+
+	phx
+	ldx r3
+	lda _spr_queue_back+6,y
+	sta >_shadow_oam+512,x
+	inc r3
+	plx
+
+	inx
+	inx
+	inx
+	inx
+
+	rep #$20
+	a16
+
+	tya
 	clc
-	adc #16
-	sta r0
-	dey
+	adc #8
+	tay
+
+	dec r2
 	bne .loop_drawbacksprites
+
+	lda r3
+	cmp #128
+	bcc .back_count_ok
+	lda #128
+.back_count_ok:
+	sta _spr_sprite_count
 
 .end_drawback:
 	stz _spr_back_count
@@ -539,6 +606,9 @@ _SpriteEngine_DrawSprite:
 	phy
 
 	lda _spr_sprite_count
+	cmp #128
+	bcs .draw_sprite_full
+
 	asl
 	asl
 	tax
@@ -560,6 +630,8 @@ _SpriteEngine_DrawSprite:
 	stx _spr_sprite_count
 	a16
 	rep #$20
+
+.draw_sprite_full:
 	ply
 	rtl
 
@@ -572,65 +644,64 @@ _SpriteEngine_DrawSprite:
 _SpriteEngine_PackOamHighTable:
 	a16
 	x16
-	phd
-	lda #<_shadow_oam+512
-	and #$ff00
-	pha
-	pld
-
 	sep #$31
 	a8
 	x8
+	phb
+	lda #^_shadow_oam
+	pha
+	plb
+
 	ldx #0
 	txy
 	clc
 .loop_packoam:
-	lda <_shadow_oam+512,x
+	lda _shadow_oam+512,x
 	lsr
 	lsr
-	ora <_shadow_oam+513,x
+	ora _shadow_oam+513,x
 	lsr
 	lsr
-	ora <_shadow_oam+514,x
+	ora _shadow_oam+514,x
 	lsr
 	lsr
-	ora <_shadow_oam+515,x
+	ora _shadow_oam+515,x
 	sta _shadow_oam+512,y
 
-	lda <_shadow_oam+516,x
+	lda _shadow_oam+516,x
 	lsr
 	lsr
-	ora <_shadow_oam+517,x
+	ora _shadow_oam+517,x
 	lsr
 	lsr
-	ora <_shadow_oam+518,x
+	ora _shadow_oam+518,x
 	lsr
 	lsr
-	ora <_shadow_oam+519,x
+	ora _shadow_oam+519,x
 	sta _shadow_oam+513,y
 
-	lda <_shadow_oam+520,x
+	lda _shadow_oam+520,x
 	lsr
 	lsr
-	ora <_shadow_oam+521,x
+	ora _shadow_oam+521,x
 	lsr
 	lsr
-	ora <_shadow_oam+522,x
+	ora _shadow_oam+522,x
 	lsr
 	lsr
-	ora <_shadow_oam+523,x
+	ora _shadow_oam+523,x
 	sta _shadow_oam+514,y
 
-	lda <_shadow_oam+524,x
+	lda _shadow_oam+524,x
 	lsr
 	lsr
-	ora <_shadow_oam+525,x
+	ora _shadow_oam+525,x
 	lsr
 	lsr
-	ora <_shadow_oam+526,x
+	ora _shadow_oam+526,x
 	lsr
 	lsr
-	ora <_shadow_oam+527,x
+	ora _shadow_oam+527,x
 	sta _shadow_oam+515,y
 
 	txa
@@ -645,7 +716,7 @@ _SpriteEngine_PackOamHighTable:
 	x16
 	rep #$30
 
-	pld
+	plb
 	stz _spr_sprite_count
 	rtl
 
@@ -660,20 +731,24 @@ _SpriteEngine_ResetOam:
 	x16
 
 	lda _spr_sprite_count_prev
-	bit #3
-	beq .sprcount_is_already_multiple_of_four
-
-.loop_roundcount:
-	inc
-	bit #3
-	bne .loop_roundcount
-
-.sprcount_is_already_multiple_of_four:
+	clc
+	adc #3
+	and #$fffc
+	cmp #128
+	bcc .reset_len_ok
+	lda #128
+.reset_len_ok:
 	sta r10
 
 	lda _spr_sprite_count
+	cmp #128
+	bcc .reset_cnt_ok
+	lda #128
+.reset_cnt_ok:
+	sta r9
+
 	cmp r10
-	bcs .end_sprreset
+	bcs .end_low_reset
 
 	tay
 
@@ -681,18 +756,16 @@ _SpriteEngine_ResetOam:
 	asl
 	tax
 
-	lda #^(_shadow_oam+512)
-	sta r2+2
-	lda #<_shadow_oam+512
-	sta r2
-
+	phb
 	sep #$20
 	a8
-.loop_sprreset:
-	lda #0
-	sta [r2],y
-	sta >_shadow_oam,x
+	lda #^_shadow_oam
+	pha
+	plb
+
 	lda #240
+
+.loop_low_reset:
 	sta >_shadow_oam+1,x
 
 	inx
@@ -702,14 +775,41 @@ _SpriteEngine_ResetOam:
 
 	iny
 	cpy r10
+	bcc .loop_low_reset
 
-	bcc .loop_sprreset
-
-	a16
 	rep #$20
+	a16
+	plb
 
-.end_sprreset:
-	lda _spr_sprite_count
+.end_low_reset:
+	lda r9
+	cmp #128
+	bcs .end_high_reset
+
+	tay
+
+	phb
+	sep #$20
+	a8
+	lda #^_shadow_oam
+	pha
+	plb
+
+	lda #0
+
+.loop_high_reset:
+	sta _shadow_oam+512,y
+
+	iny
+	cpy #128
+	bcc .loop_high_reset
+
+	rep #$20
+	a16
+	plb
+
+.end_high_reset:
+	lda r9
 	sta _spr_sprite_count_prev
 	rtl
 

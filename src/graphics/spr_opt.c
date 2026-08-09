@@ -29,7 +29,7 @@ void SpriteEngine_AddToFrontLayer(struct game_object * o, uint16_t tileattrib)
             entry->tileattrib = tileattrib;
             entry->x = temp_x;
             entry->y = temp_y;
-            entry->depth = (temp_y + 16) & 0x00ff;
+            entry->depth = ((temp_y + 16) >> 1) & 0x007f;
 
             spr_front_count++;
 
@@ -62,7 +62,7 @@ void SpriteEngine_AddToSortedLayer(struct game_object * o, uint16_t tileattrib)
             entry->x = temp_x;
             entry->y = temp_y;
             entry->tileattrib = tileattrib;
-            entry->depth = (temp_y + 16) & 0x00ff;
+            entry->depth = ((temp_y + 16) >> 1) & 0x007f;
 
             spr_normal_count++;
 
@@ -95,7 +95,7 @@ void SpriteEngine_AddToBackLayer(struct game_object * o, uint16_t tileattrib)
             entry->tileattrib = tileattrib;
             entry->x = temp_x;
             entry->y = temp_y;
-            entry->depth = (temp_y + 16) & 0x00ff;
+            entry->depth = ((temp_y + 16) >> 1) & 0x007f;
 
             spr_back_count++;
 
@@ -109,22 +109,28 @@ void SpriteEngine_AddToBackLayer(struct game_object * o, uint16_t tileattrib)
 void SpriteEngine_ProcessSpriteLists_WriteFrontSprites()
 {
     struct spr_queue_entry *queue = &spr_queue_front[0];
-    for (int i = 0; i < spr_front_count; i++)
+    uint16_t count = spr_front_count;
+    uint16_t idx = spr_sprite_count;
+    for (uint16_t i = 0; i < count; i++)
     {
-        SpriteEngine_DrawSprite(queue++);
+        if (idx >= 128)
+        {
+            break;
+        }
+        shadow_oam.entries.shadow_oam_low[idx].tileattrib = queue->tileattrib;
+        shadow_oam.entries.shadow_oam_low[idx].x = (uint8_t)queue->x;
+        shadow_oam.entries.shadow_oam_low[idx].y = (uint8_t)queue->y;
+        shadow_oam.entries.shadow_oam_high[idx].signsize = queue->signsize;
+        idx++;
+        queue++;
     }
 
+    if (idx > 128)
+    {
+        idx = 128;
+    }
+    spr_sprite_count = idx;
     spr_front_count = 0;
-
-    return;
-}
-
-void SpriteEngine_ProcessSpriteLists_ClearDepthBuffer()
-{
-    for (int i = 0; i < 257; i++)
-    {
-        spr_depth_count[i] = 0;
-    }
 
     return;
 }
@@ -133,7 +139,8 @@ void SpriteEngine_ProcessSpriteLists_TallySprites()
 {
     for (int i = 0; i < spr_normal_count; i++)
     {
-        spr_depth_count[spr_queue_normal[i].depth + 1]++;
+        uint16_t depth = spr_queue_normal[i].depth & 0x007f;
+        spr_depth_count[depth + 1]++;
     }
 
     return;
@@ -142,9 +149,13 @@ void SpriteEngine_ProcessSpriteLists_TallySprites()
 void SpriteEngine_ProcessSpriteLists_CalculateOffsets()
 {
     uint16_t temp_offset = spr_sprite_count + spr_normal_count;
+    if (temp_offset > 128)
+    {
+        temp_offset = 128;
+    }
     uint16_t t;
 
-    for (int i = 0; i < 257; i++)
+    for (int i = 0; i < 129; i++)
     {
         t = temp_offset;
 
@@ -161,18 +172,25 @@ void SpriteEngine_ProcessSpriteLists_WriteSortedSprites()
     struct spr_queue_entry *queue = &spr_queue_normal[0];
     for (int i = 0; i < spr_normal_count; i++)
     {
-        uint16_t depth = queue->depth;
+        uint16_t depth = queue->depth & 0x007f;
         uint16_t index = --spr_depth_count[depth];
 
-        shadow_oam.entries.shadow_oam_low[index].x = (uint8_t)queue->x;
-        shadow_oam.entries.shadow_oam_low[index].y = (uint8_t)queue->y;
-        shadow_oam.entries.shadow_oam_low[index].tileattrib = queue->tileattrib;
-        shadow_oam.entries.shadow_oam_high[index].signsize = queue->signsize;
+        if (index < 128)
+        {
+            shadow_oam.entries.shadow_oam_low[index].x = (uint8_t)queue->x;
+            shadow_oam.entries.shadow_oam_low[index].y = (uint8_t)queue->y;
+            shadow_oam.entries.shadow_oam_low[index].tileattrib = queue->tileattrib;
+            shadow_oam.entries.shadow_oam_high[index].signsize = queue->signsize;
+        }
 
         queue++;
     }
 
     spr_sprite_count += spr_normal_count;
+    if (spr_sprite_count > 128)
+    {
+        spr_sprite_count = 128;
+    }
     spr_normal_count = 0;
 
     return;
@@ -181,11 +199,27 @@ void SpriteEngine_ProcessSpriteLists_WriteSortedSprites()
 void SpriteEngine_ProcessSpriteLists_WriteBackSprites()
 {
     struct spr_queue_entry *queue = &spr_queue_back[0];
-    for (int i = 0; i < spr_back_count; i++)
+    uint16_t count = spr_back_count;
+    uint16_t idx = spr_sprite_count;
+    for (uint16_t i = 0; i < count; i++)
     {
-        SpriteEngine_DrawSprite(queue++);
+        if (idx >= 128)
+        {
+            break;
+        }
+        shadow_oam.entries.shadow_oam_low[idx].tileattrib = queue->tileattrib;
+        shadow_oam.entries.shadow_oam_low[idx].x = (uint8_t)queue->x;
+        shadow_oam.entries.shadow_oam_low[idx].y = (uint8_t)queue->y;
+        shadow_oam.entries.shadow_oam_high[idx].signsize = queue->signsize;
+        idx++;
+        queue++;
     }
 
+    if (idx > 128)
+    {
+        idx = 128;
+    }
+    spr_sprite_count = idx;
     spr_back_count = 0;
 
     return;
@@ -193,6 +227,11 @@ void SpriteEngine_ProcessSpriteLists_WriteBackSprites()
 
 void SpriteEngine_DrawSprite(struct spr_queue_entry * s)
 {
+    if (spr_sprite_count >= 128)
+    {
+        return;
+    }
+
     shadow_oam.entries.shadow_oam_low[spr_sprite_count].tileattrib = s->tileattrib;
     shadow_oam.entries.shadow_oam_low[spr_sprite_count].x = (uint8_t)s->x;
     shadow_oam.entries.shadow_oam_low[spr_sprite_count].y = (uint8_t)s->y;
@@ -225,20 +264,33 @@ void SpriteEngine_PackOamHighTable()
 
 void SpriteEngine_ResetOam()
 {
-    uint16_t temp_len = spr_sprite_count_prev;
-    while ((temp_len & 0x03) != 0x00)
+    uint16_t temp_len = (spr_sprite_count_prev + 3) & ~0x03;
+    if (temp_len > 128)
     {
-        // Round it up to the nearest multiple of 4
-        temp_len++;
+        temp_len = 128;
     }
 
-    for (int i = spr_sprite_count; i < temp_len; i++)
+    uint16_t start_idx = spr_sprite_count;
+    if (start_idx > 128)
+    {
+        start_idx = 128;
+    }
+
+    for (int i = start_idx; i < temp_len; i++)
     {
         // from the first unused entry to the end of previous frame's active entry.
         shadow_oam.entries.shadow_oam_low[i].y = 240;
+    }
+
+    for (int i = start_idx; i < 128; i++)
+    {
         shadow_oam.entries.shadow_oam_high[i].signsize = 0;
     }
 
+    if (spr_sprite_count > 128)
+    {
+        spr_sprite_count = 128;
+    }
     spr_sprite_count_prev = spr_sprite_count;
 
     // Do not reset sprite count of current frame yet, the high oam packing needs it
