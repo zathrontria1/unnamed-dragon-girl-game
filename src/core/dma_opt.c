@@ -85,6 +85,15 @@ void DmaSystem_UploadCgram()
     return;
 }
 
+void DmaSystem_NmiDmaTransfer()
+{
+    DmaSystem_UploadOam();
+    DmaSystem_UploadCgram();
+    DmaSystem_ProcessQueue();
+
+    return;
+}
+
 void DmaSystem_UploadCgram_Subset(uint16_t start, uint16_t len)
 {
     REG_CGADD = start; //reset palette address
@@ -151,8 +160,8 @@ void DmaSystem_ProcessQueue()
         REG_VMAIN = dma_queue[i].vmain;
         REG_VMADDLH = dma_queue[i].dest;
 
-        REG_A1T0LH = ADDR_LOWORD(dma_queue[i].src);
-        REG_A1B0 = ADDR_BANK(dma_queue[i].src);
+        REG_A1T0LH = dma_queue[i].src_offset;
+        REG_A1B0 = dma_queue[i].src_bank;
 
         REG_DAS0LH = dma_queue[i].length;
 
@@ -181,5 +190,77 @@ void DmaSystem_ProcessQueue()
     }
 
     return;
+}
+
+uint16_t DmaSystem_AddItemToQueue(
+    uint8_t * src, 
+    uint16_t dest, 
+    uint16_t length,
+    uint16_t vmain,
+    uint16_t split)
+{
+    // Check for capacity (count, length) issues
+    uint16_t temp_length = length + const_lut_dma_split_lookup[split] + dma_queue_length;
+
+    uint16_t temp_queue_count = dma_queue_count + (1 << split);
+
+    if (temp_queue_count > DMA_QUEUE_MAX_ENTRIES)
+    {
+        return 1; // exceeds current max queue count
+    }
+    
+    if (system_use_long_vblank)
+    {
+        if (temp_length > DMA_QUEUE_MAX_LENGTH_FBE)
+        {
+            return 1; // out of DMA bandwidth
+        }
+    }
+    else
+    {
+        if (temp_length > DMA_QUEUE_MAX_LENGTH)
+        {
+            return 1; // out of DMA bandwidth
+        }
+    }
+
+    // Add the valid entry
+    if (split > 0)
+    {
+        // Item is a split transfer
+        // For split transfers, assuming a 128px wide cylinder.
+        uint16_t split_count = 1 << split;
+
+        uint16_t temp_length_chunk = length >> split;
+
+        for (int i = 0; i < split_count; i++)
+        {
+            dma_queue[dma_queue_count].vmain = (uint8_t)vmain;
+            dma_queue[dma_queue_count].src_offset = ADDR_LOWORD(src);
+            dma_queue[dma_queue_count].src_bank = ADDR_BANK(src);
+            dma_queue[dma_queue_count].dest = dest;
+            dma_queue[dma_queue_count].length = temp_length_chunk;
+
+            src += 512;
+            dest += 256;
+
+            dma_queue_count++;
+        }
+    }
+    else
+    {
+        // Item is a contiguous transfer
+        dma_queue[dma_queue_count].vmain = (uint8_t)vmain;
+        dma_queue[dma_queue_count].src_offset = ADDR_LOWORD(src);
+        dma_queue[dma_queue_count].src_bank = ADDR_BANK(src);
+        dma_queue[dma_queue_count].dest = dest;
+        dma_queue[dma_queue_count].length = length;
+
+        dma_queue_count++;
+    }
+
+    dma_queue_length = temp_length;
+    
+    return 0;
 }
 #endif

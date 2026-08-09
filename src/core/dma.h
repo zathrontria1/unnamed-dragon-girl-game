@@ -63,6 +63,7 @@ void DmaSystem_CopyFromVramToWram(
 
 void DmaSystem_UploadOam();
 void DmaSystem_UploadCgram();
+void DmaSystem_NmiDmaTransfer();
 
 #if VBCC_ASM == 1
     NO_INLINE void DmaSystem_UploadCgram_Subset(uint16_t start, uint16_t len);
@@ -70,12 +71,21 @@ void DmaSystem_UploadCgram();
     void DmaSystem_UploadCgram_Subset(uint16_t start, uint16_t len);
 #endif
 
+#if VBCC_ASM == 1
+    NO_INLINE uint16_t DmaSystem_AddItemToQueue(
+    __reg("r0/r1") uint8_t * src, 
+    __reg("r2") uint16_t dest, 
+    __reg("r3") uint16_t length,
+    __reg("a") uint16_t vmain, 
+    __reg("x") uint16_t split);
+#else
 uint16_t DmaSystem_AddItemToQueue(
     uint8_t * src, 
     uint16_t dest, 
     uint16_t length,
     uint16_t vmain, 
     uint16_t split);
+#endif
 
 uint16_t DmaSystem_SetClear(uint16_t dest, uint16_t length, uint8_t val);
 
