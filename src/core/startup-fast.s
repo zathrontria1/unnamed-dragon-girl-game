@@ -2,9 +2,16 @@
     zpage r1
     zpage r2
     zpage r3
+    zpage r4
+    zpage r5
+    zpage r6
     global ___exit
     global ___start
     section start_text.startup
+
+zero_byte:
+    byte $00
+
 ___start:
     clc
     xce
@@ -15,23 +22,23 @@ ___start:
     a8
     x16
 
-    ; Reset three registers that must be reset ASAP
-zero_byte: ; Refer to this + 1 to fetch a known source of zero
-    stz $004200 ; Disable interrupts
+    ; Reset two hardware control registers ASAP
+    stz $004200 ; Disable interrupts (NMI/VBLANK/H-V timer)
     stz $00420c ; Disable HDMA
 
     lda #$8f
-    sta $8f2100 ; Disable screen
+    sta $8f2100 ; Disable screen (forced blank)
 
     lda #$01
     sta $80420d ; Enable FastROM
 
-    lda #$80
+    lda #<__DBR_init
     pha
-    plb ; Change to FastROM data bank
+    plb ; Change Data Bank to FastROM bank (__DBR_init)
     
     rep #$30
     a16
+    x16
 
     lda #___stackend
     tcs
@@ -39,158 +46,97 @@ zero_byte: ; Refer to this + 1 to fetch a known source of zero
     and #$ff00
     tcd
     
-    ; Near bank WRAM clear
-    ; Write addresses and length of the clear area
+    ; Clear Near BSS
     sep #$20
     a8
-    ldx #<zero_byte+1
-    stx r0
-    lda #^zero_byte
-    sta r1
-
-    lda #$08
-    sta r5
-    
     ldx #<__NBS
     stx r2
     lda #^__NBS
     sta r3
+    ldx #<__NBE
+    stx r0
+    lda #^__NBE
+    sta r1
+    jsr clear_section_dma
 
-    rep #$30 ; axy16
-    a16
-    x16
-
-    lda #<__NBE
-    sec
-    sbc #<__NBS
-    beq .clearfar
-    sta r4
-    
-    jsl copy_dma
-.clearfar:
-    ; Repeat for the other banks.
-    ; Far bank WRAM clear
-    ; Write addresses and length of the clear area
+    ; Clear Far BSS
     sep #$20
     a8
     ldx #<__FBS
     stx r2
     lda #^__FBS
     sta r3
+    ldx #<__FBE
+    stx r0
+    lda #^__FBE
+    sta r1
+    jsr clear_section_dma
 
-    rep #$30 ; axy16
-    a16
-    x16
-
-    lda #<__FBE
-    sec
-    sbc #<__FBS
-    beq .clearhuge
-    sta r4
-    
-    jsl copy_dma
-
-    ; Huge bank WRAM clear
-.clearhuge:
+    ; Clear Huge BSS
     sep #$20
     a8
     ldx #<__HBS
     stx r2
     lda #^__HBS
     sta r3
+    ldx #<__HBE
+    stx r0
+    lda #^__HBE
+    sta r1
+    jsr clear_section_dma
 
-    rep #$30 ; axy16
-    a16
-    x16
-
-    lda #<__HBE
-    sec
-    sbc #<__HBS
-    beq .clear_done
-    sta r4
-    
-    jsl copy_dma
-.clear_done:
-    ; Begin copying.
-    ; C is the location of the source. S is destination.
+    ; Copy Near Data
     sep #$20
     a8
     ldx #<__NDC
     stx r0
     lda #^__NDC
     sta r1
-
-    lda #$00
-    sta r5
-    
     ldx #<__NDS
     stx r2
     lda #^__NDS
     sta r3
+    ldx #<__NDE
+    stx r4
+    lda #^__NDE
+    sta r5
+    jsr copy_section_dma
 
-    rep #$30 ; axy16
-    a16
-    x16
-
-    lda #<__NDE
-    sec
-    sbc #<__NDS
-    beq .copyfar
-    sta r4
-    
-    jsl copy_dma
-.copyfar:
+    ; Copy Far Data
     sep #$20
     a8
     ldx #<__FDC
     stx r0
     lda #^__FDC
     sta r1
-    
     ldx #<__FDS
     stx r2
     lda #^__FDS
     sta r3
+    ldx #<__FDE
+    stx r4
+    lda #^__FDE
+    sta r5
+    jsr copy_section_dma
 
-    rep #$30 ; axy16
-    a16
-    x16
-
-    lda #<__FDE
-    sec
-    sbc #<__FDS
-    beq .copyhuge
-    sta r4
-    
-    jsl copy_dma
-
-.copyhuge:
+    ; Copy Huge Data
     sep #$20
     a8
     ldx #<__HDC
     stx r0
     lda #^__HDC
     sta r1
-    
     ldx #<__HDS
     stx r2
     lda #^__HDS
     sta r3
+    ldx #<__HDE
+    stx r4
+    lda #^__HDE
+    sta r5
+    jsr copy_section_dma
 
-    rep #$30 ; axy16
-    a16
-    x16
-
-    lda #<__HDE
-    sec
-    sbc #<__HDS
-    beq .copy_done
-    sta r4
-    
-    jsl copy_dma
-
-.copy_done:
-    ; Clear the stack. Must be manually done without subroutine calls.
+    ; Clear the stack area
     sep #$20  ; 8-bit accumulator
     rep #$10  ; 16-bit index
     a8
@@ -204,35 +150,36 @@ zero_byte: ; Refer to this + 1 to fetch a known source of zero
     ldx #___stacklen
     stx $4305
 
-    ; Configure DMA to write to WMDATA
+    ; Configure DMA channel 0 to write zero to WMDATA
     lda #$08
     sta $4300
-
     lda #$80
     sta $4301
 
-    ldx #<zero_byte+1
+    ldx #<zero_byte
     stx $4302
-    ; Set the bank byte of the source address too
     lda #^zero_byte
     sta $4304
 
-    ; Start the DMA
-    lda #$1
+    ; Start DMA for stack clear
+    lda #$01
     sta $420b
 
-    ; Clear the zero page
+    ; Clear Direct Page / Zero Page (256 bytes at 0x0000)
     stz $2183
     ldx #$0000
     stx $2181
 
-    sta $4306
+    ldx #$0100
+    stx $4305
     
+    lda #$01
     sta $420b
 
     ; Get ready to call __main();
-    rep #$30  ; 16-bit accumulator
+    rep #$30  ; 16-bit accumulator and index
     a16
+    x16
 
     lda #$0000
     tax
@@ -242,44 +189,255 @@ zero_byte: ; Refer to this + 1 to fetch a known source of zero
 ___exit:
     jmp ___exit
 
-copy_dma:
-    ; r0/r1 source
-    ; r2/r3 destination
-    ; r4 length
-    ; r5 fill/copy?
+clear_section_dma:
+    ; r2/r3 = 24-bit WRAM start address
+    ; r0/r1 = 24-bit WRAM end address
     php
-    sep #$20  ; 8-bit accumulator
-    rep #$10  ; 16-bit index
-    a8
+    rep #$30
+    a16
     x16
 
+    ; Calculate 24-bit length = end (r0/r1) - start (r2/r3)
+    lda r0
+    sec
+    sbc r2
+    sta r4      ; r4 = low 16 bits of length
+    sep #$20
+    a8
+    lda r1
+    sbc r3
+    sta r5      ; r5 = bank byte of length
+
+    ; Check if length is 0 (r5 == 0 && r4 == 0)
+    bne .clear_start
+    rep #$30
+    a16
+    x16
+    lda r4
+    beq .clear_exit
+
+.clear_start:
+    ; Set WRAM destination address ($2181-$2183)
+    sep #$20
+    a8
     lda r3
     sta $2183 
     ldx r2
-    stx $2181 ; WRAM address, bottom 16 bits
+    stx $2181
 
-    ldx r4
-    stx $4305
+    ; Configure DMA channel 0 to write zero to WMDATA ($2180)
+    lda #$08
+    sta $4300   ; Fixed source address, write 1 byte to 1 register ($2180)
+    lda #$80
+    sta $4301   ; WMDATA ($2180)
+    ldx #<zero_byte
+    stx $4302
+    lda #^zero_byte
+    sta $4304
 
-    ; Configure DMA to write to WMDATA
+.clear_loop:
+    sep #$20
+    a8
     lda r5
-    sta $4300
+    beq .clear_last_chunk
 
+    ; r5 > 0: Transfer 64KB (0x0000 in $4305)
+    rep #$30
+    a16
+    x16
+    ldy #$0000
+    sty $4305
+    sep #$20
+    a8
+    lda #$01
+    sta $420b   ; Start DMA channel 0
+    dec r5      ; Decrement high bank count
+    bra .clear_loop
+
+.clear_last_chunk:
+    rep #$30
+    a16
+    x16
+    lda r4
+    beq .clear_exit
+
+    sta $4305   ; Transfer remaining r4 bytes
+    sep #$20
+    a8
+    lda #$01
+    sta $420b   ; Start DMA channel 0
+
+.clear_exit:
+    plp
+    rep #$30
+    a16
+    x16
+    rts
+
+copy_section_dma:
+    ; r0/r1 = 24-bit ROM source start
+    ; r2/r3 = 24-bit WRAM dest start
+    ; r4/r5 = 24-bit WRAM dest end
+    php
+    rep #$30
+    a16
+    x16
+
+    ; Calculate 24-bit length = dest_end (r4/r5) - dest_start (r2/r3)
+    lda r4
+    sec
+    sbc r2
+    sta r4      ; r4 = remaining length low 16 bits
+    sep #$20
+    a8
+    lda r5
+    sbc r3
+    sta r5      ; r5 = remaining length high bank byte
+
+    ; Check if length is 0 (r5 == 0 && r4 == 0)
+    bne .copy_start
+    rep #$30
+    a16
+    x16
+    lda r4
+    beq .copy_exit
+
+.copy_start:
+    ; Set WRAM destination address ($2181-$2183)
+    sep #$20
+    a8
+    lda r3
+    sta $2183
+    ldx r2
+    stx $2181
+
+    ; Configure DMA channel 0 mode (incrementing source, write 1 byte to WMDATA $2180)
+    lda #$00
+    sta $4300
     lda #$80
     sta $4301
 
+.copy_loop:
+    ; Check if remaining length is 0 (r5 == 0 && r4 == 0)
+    sep #$20
+    a8
+    lda r5
+    bne .copy_do_chunk
+    rep #$30
+    a16
+    x16
+    lda r4
+    beq .copy_exit
+
+.copy_do_chunk:
+    ; Calculate bytes left in current 64KB ROM bank:
+    ; avail = 0x10000 - r0
+    rep #$30
+    a16
+    x16
+    lda #$0000
+    sec
+    sbc r0      ; A = bytes left in current ROM bank (0x0000 means 65536)
+
+    ; Determine chunk_size (store in r6)
+    sep #$20
+    a8
+    lda r5      ; remaining high bank byte
+    beq .copy_check_small
+
+    ; remaining length >= 64KB (r5 > 0) -> use avail (in A)
+    rep #$30
+    a16
+    x16
+    sta r6      ; r6 = chunk_size (avail)
+    bra .copy_execute
+
+.copy_check_small:
+    ; remaining length < 64KB (r5 == 0, length in r4)
+    rep #$30
+    a16
+    x16
+    cmp #$0000  ; Is avail == 64KB (0x0000)?
+    beq .copy_use_r4
+    cmp r4      ; compare avail with r4
+    bcc .copy_use_avail ; if avail < r4, use avail
+.copy_use_r4:
+    lda r4
+    sta r6      ; r6 = r4
+    bra .copy_execute
+.copy_use_avail:
+    sta r6      ; r6 = avail
+
+.copy_execute:
+    ; r6 contains chunk_size to transfer
+    ; Set DMA source
     ldx r0
     stx $4302
-    ; Set the bank byte of the source address too
+    sep #$20
+    a8
     lda r1
     sta $4304
 
-    ; Start the DMA
-    lda #$1
+    ; Set DMA length
+    rep #$30
+    a16
+    x16
+    ldx r6
+    stx $4305
+
+    ; Start DMA channel 0
+    sep #$20
+    a8
+    lda #$01
     sta $420b
 
+    ; Advance ROM source address r0/r1 by r6
+    rep #$30
+    a16
+    x16
+    lda r0
+    clc
+    adc r6      ; r0 += r6
+    sta r0
+    bcc .copy_sub_len
+    ; r0 wrapped 64KB boundary, advance r1 bank byte
+    sep #$20
+    a8
+    inc r1
+
+.copy_sub_len:
+    ; Subtract r6 from remaining length r4/r5
+    rep #$30
+    a16
+    x16
+    lda r6
+    beq .copy_sub_64k
+
+    ; r6 != 0: subtract r6 from r4/r5
+    lda r4
+    sec
+    sbc r6
+    sta r4
+    sep #$20
+    a8
+    lda r5
+    sbc #$00
+    sta r5
+    bra .copy_loop
+
+.copy_sub_64k:
+    ; r6 == 0 (64KB transferred): decrement r5
+    sep #$20
+    a8
+    dec r5
+    bra .copy_loop
+
+.copy_exit:
     plp
-    rtl
+    rep #$30
+    a16
+    x16
+    rts
 
  section zpage
 r0: reserve 2
