@@ -2,6 +2,13 @@
 .include "sndeng_const.inc"
 .include "sndeng_vars.inc"
 
+.export _start
+.export _stream_upload
+.export _data_upload_loop_stream
+.export _data_upload_loop_2byte
+.export _stream_play
+.export _stream_stop
+
 .segment "SPCIMAGE"
 
 ;    Convention outside the stock IPL:

@@ -67,6 +67,8 @@ mapfile_debug
 rommap.svg
 rammap.svg
 *~
+sound/*.dbg
+sound/*.lbl
 
 # vscode stuff
 .vscode/*
