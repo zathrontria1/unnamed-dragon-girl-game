@@ -807,3 +807,197 @@ void System_UpdateFrameCounters()
 // Extracted to src/core/system_opt.asm and src/core/system_opt.c.
 
 // Extracted to src/core/system_opt.asm and src/core/system_opt.c.
+
+static size_t format_u32_dec(uint32_t val, char *buf, size_t maxlen, int min_width, bool zero_pad)
+{
+    char tmp[11];
+    int len = 0;
+
+    if (val == 0)
+    {
+        tmp[len++] = '0';
+    }
+    else
+    {
+        while (val > 0)
+        {
+            tmp[len++] = '0' + (val % 10);
+            val /= 10;
+        }
+    }
+
+    int padding = (min_width > len) ? (min_width - len) : 0;
+    char pad_char = zero_pad ? '0' : ' ';
+    size_t written = 0;
+
+    while (padding > 0 && written + 1 < maxlen)
+    {
+        buf[written++] = pad_char;
+        padding--;
+    }
+
+    while (len > 0 && written + 1 < maxlen)
+    {
+        buf[written++] = tmp[--len];
+    }
+
+    return written;
+}
+
+static size_t format_u32_hex(uint32_t val, char *buf, size_t maxlen, int min_width, bool zero_pad, bool uppercase)
+{
+    static const char hex_lower[] = "0123456789abcdef";
+    static const char hex_upper[] = "0123456789ABCDEF";
+    const char *hex_digits = uppercase ? hex_upper : hex_lower;
+
+    char tmp[9];
+    int len = 0;
+
+    if (val == 0)
+    {
+        tmp[len++] = '0';
+    }
+    else
+    {
+        while (val > 0)
+        {
+            tmp[len++] = hex_digits[val & 0x0f];
+            val >>= 4;
+        }
+    }
+
+    int padding = (min_width > len) ? (min_width - len) : 0;
+    char pad_char = zero_pad ? '0' : ' ';
+    size_t written = 0;
+
+    while (padding > 0 && written + 1 < maxlen)
+    {
+        buf[written++] = pad_char;
+        padding--;
+    }
+
+    while (len > 0 && written + 1 < maxlen)
+    {
+        buf[written++] = tmp[--len];
+    }
+
+    return written;
+}
+
+/**
+ * @brief Lightweight, integer-only vsnprintf implementation for SNES.
+ */
+int vsnprintf(char *str, size_t size, const char *format, va_list args)
+{
+    if (!str || size == 0) return 0;
+
+    size_t out = 0;
+    const char *p = format;
+
+    while (*p && out + 1 < size)
+    {
+        if (*p != '%')
+        {
+            str[out++] = *p++;
+            continue;
+        }
+
+        p++; // Skip '%'
+
+        if (*p == '%')
+        {
+            str[out++] = '%';
+            p++;
+            continue;
+        }
+
+        bool zero_pad = false;
+        if (*p == '0')
+        {
+            zero_pad = true;
+            p++;
+        }
+
+        int min_width = 0;
+        while (*p >= '0' && *p <= '9')
+        {
+            min_width = min_width * 10 + (*p - '0');
+            p++;
+        }
+
+        bool is_long = false;
+        if (*p == 'l')
+        {
+            is_long = true;
+            p++;
+        }
+
+        char spec = *p++;
+        switch (spec)
+        {
+            case 'c':
+            {
+                char c = (char)va_arg(args, int);
+                str[out++] = c;
+                break;
+            }
+            case 's':
+            {
+                const char *s = va_arg(args, const char *);
+                if (!s) s = "(null)";
+                while (*s && out + 1 < size)
+                {
+                    str[out++] = *s++;
+                }
+                break;
+            }
+            case 'd':
+            case 'i':
+            {
+                int32_t val = is_long ? va_arg(args, int32_t) : (int32_t)va_arg(args, int);
+                if (val < 0)
+                {
+                    str[out++] = '-';
+                    val = -val;
+                    if (min_width > 0) min_width--;
+                }
+                out += format_u32_dec((uint32_t)val, str + out, size - out, min_width, zero_pad);
+                break;
+            }
+            case 'u':
+            {
+                uint32_t val = is_long ? va_arg(args, uint32_t) : (uint32_t)va_arg(args, unsigned int);
+                out += format_u32_dec(val, str + out, size - out, min_width, zero_pad);
+                break;
+            }
+            case 'x':
+            case 'X':
+            {
+                uint32_t val = is_long ? va_arg(args, uint32_t) : (uint32_t)va_arg(args, unsigned int);
+                out += format_u32_hex(val, str + out, size - out, min_width, zero_pad, (spec == 'X'));
+                break;
+            }
+            default:
+            {
+                str[out++] = '%';
+                if (spec) str[out++] = spec;
+                break;
+            }
+        }
+    }
+
+    str[out] = '\0';
+    return (int)out;
+}
+
+/**
+ * @brief Lightweight, integer-only snprintf replacement.
+ */
+int snprintf(char *str, size_t size, const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    int res = vsnprintf(str, size, format, args);
+    va_end(args);
+    return res;
+}

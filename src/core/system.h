@@ -1,8 +1,14 @@
 #ifndef SYSTEM_H
 #define SYSTEM_H
 
+#include <stdarg.h>
+#include <stddef.h>
+
 #include "snes/console.h"
 #include "consts.h"
+
+int vsnprintf(char *str, size_t size, const char *format, va_list args);
+int snprintf(char *str, size_t size, const char *format, ...);
 
 extern uint8_t system_MVNCodeInWRAM[4];
 
