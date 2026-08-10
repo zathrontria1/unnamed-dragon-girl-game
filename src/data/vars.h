@@ -43,6 +43,13 @@ extern ZP bool system_suppress_odd_transfers;
 // Shadow buffers
 extern ZP uint8_t shadow_nmitimen;
 
+// Dedicated zero-page scratch space for NMI routines (avoids compiler pseudoregisters)
+extern ZP uint8_t nmi_snd_scratch_ptr[4];
+extern ZP uint8_t nmi_snd_scratch_ptr2[4];
+extern ZP uint16_t nmi_snd_scratch_len;
+extern ZP uint16_t nmi_snd_scratch_temp;
+
+
 extern ZP uint8_t shadow_fblank_enable;
 extern ZP int16_t shadow_brightness;
 extern ZP int16_t shadow_brightness_change;

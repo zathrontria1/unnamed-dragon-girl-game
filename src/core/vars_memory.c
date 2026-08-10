@@ -50,6 +50,13 @@ ZP bool system_suppress_odd_transfers;
 // Shadow buffers
 ZP uint8_t shadow_nmitimen;
 
+// Dedicated zero-page scratch space for NMI routines (avoids compiler pseudoregisters)
+ZP uint8_t nmi_snd_scratch_ptr[4];
+ZP uint8_t nmi_snd_scratch_ptr2[4];
+ZP uint16_t nmi_snd_scratch_len;
+ZP uint16_t nmi_snd_scratch_temp;
+
+
 // Additional variables to enable the ability to smoothly alter INIDISP. 
 ZP uint8_t shadow_fblank_enable; // Valid values are 0x80 and 0x00. Will be OR'd with the highest 4 bits of the below.
 ZP int16_t shadow_brightness; // 12-bit (4+8). Must be clamped to positive values only, but otherwise has to be an int

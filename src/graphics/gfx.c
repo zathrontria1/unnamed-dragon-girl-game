@@ -81,6 +81,7 @@ void Gfx_ProcessSmoke()
     return;
 }
 
+#if VBCC_ASM == 0
 /**
  * @brief Advances active mosaic scaling transitions and updates `shadow_mosaic`.
  */
@@ -124,6 +125,8 @@ void Gfx_ProcessMosaic()
 
     return;
 }
+#endif
+
 
 /**
  * @brief Advances active color math transitions and updates COLDATA registers in shadow WRAM.

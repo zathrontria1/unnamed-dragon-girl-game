@@ -21,6 +21,7 @@ ___irq_vblank:
 	plb
 	plb
 
+	ifd NO_ASM
 	pei	(r28)
 	pei	(r29)
 	pei	(r30)
@@ -41,6 +42,7 @@ ___irq_vblank:
 	pei	(r13)
 	pei	(r14)
 	pei	(r15)
+	endif
 	lda	_system_use_alternate_nmi
 	and #$00ff
 	bne	l4
@@ -58,6 +60,7 @@ l7:
 
 	rep	#$30
 
+	ifd NO_ASM
 	plx
 	stx	r15
 	plx
@@ -98,6 +101,7 @@ l7:
 	sta	r29
 	pla
 	sta	r28
+	endif
 
 	pld
 	plb
@@ -131,6 +135,7 @@ ___irq_ext:
 	plb
 	plb
 
+	ifd NO_ASM
 	pei	(r28)
 	pei	(r29)
 	pei	(r30)
@@ -151,6 +156,7 @@ ___irq_ext:
 	pei	(r13)
 	pei	(r14)
 	pei	(r15)
+	endif
 	jsl	>_Nmi_Cutscene
 	lda	_snd_stream_enable
 	and #$00ff
@@ -163,6 +169,7 @@ l11:
 
 	rep	#$30
 
+	ifd NO_ASM
 	plx
 	stx	r15
 	plx
@@ -203,6 +210,7 @@ l11:
 	sta	r29
 	pla
 	sta	r28
+	endif
 
 	pld
 	plb

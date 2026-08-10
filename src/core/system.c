@@ -773,6 +773,7 @@ void System_SoftReset()
 
 // Extracted to src/core/system_opt.asm and src/core/system_opt.c.
 
+#if VBCC_ASM == 0
 /**
  * @brief Increments system frame counters and update timing structures.
  */
@@ -801,12 +802,8 @@ void System_UpdateFrameCounters()
 
     return;
 }
+#endif
 
-// Extracted to src/core/system_opt.asm and src/core/system_opt.c.
-
-// Extracted to src/core/system_opt.asm and src/core/system_opt.c.
-
-// Extracted to src/core/system_opt.asm and src/core/system_opt.c.
 
 static size_t format_u32_dec(uint32_t val, char *buf, size_t maxlen, int min_width, bool zero_pad)
 {

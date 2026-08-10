@@ -182,6 +182,47 @@ _System_CopyBlock:
 	plb
 	rtl
 
+	section	"DONTMERGE_text.far._System_UpdateFrameCounters.0","acrx"
+	a16
+	x16
+	global	_System_UpdateFrameCounters
+_System_UpdateFrameCounters:
+	inc _system_frames_elapsed
+	bne .subframe
+	inc _system_frames_elapsed+2
+
+.subframe:
+	sep #$20
+	a8
+	inc _system_time_subframe
+	lda _system_time_subframe
+	cmp #30
+	bcc .done
+
+	stz _system_time_subframe
+	inc _system_time_s
+	lda _system_time_s
+	cmp #60
+	bcc .done
+
+	stz _system_time_s
+	inc _system_time_m
+	lda _system_time_m
+	cmp #60
+	bcc .done
+
+	stz _system_time_m
+	rep #$20
+	a16
+	inc _system_time_h
+	rtl
+
+.done:
+	rep #$20
+	a16
+	rtl
+
+
 	zpage	r0
 	zpage	r1
 	zpage	r2
