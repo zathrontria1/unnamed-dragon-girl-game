@@ -48,7 +48,7 @@ uint16_t crashhandler_stack[16];
 uint32_t crashhandler_emulation_mode; // This must be 4 bytes wide to avoid clobbering the next bytes over in case
 uint8_t crashhandler_error_code;
 
-static HUGE const char * crashhandler_error_messages[] =
+static HUGE const char * const crashhandler_error_messages[] =
 {
     (char *)&STR_CRASH_ERROR_UNKNOWN,
     (char *)&STR_CRASH_ERROR_MAIN_LOOP_NULL,

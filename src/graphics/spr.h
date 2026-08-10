@@ -22,6 +22,8 @@ extern uint16_t spr_normal_count;
 NEAR extern uint8_t spr_depth_count[129]; // Count of sprites on each depth line
 NEAR extern struct spr_queue_entry spr_queue_normal[SPR_COUNT_MAX_SORTED]; // depth sorted sprite entries
 
+extern bool spr_boss_vram_active;
+
 void SpriteEngine_DrawUISprite(int16_t x, int16_t y, uint16_t tileattrib);
 
 #if VBCC_ASM == 1

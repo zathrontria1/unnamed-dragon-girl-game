@@ -23,6 +23,8 @@ uint16_t spr_normal_count;
 //NEAR uint8_t spr_depth_count[257]; // Count of sprites on each depth line // Declared in ASM
 NEAR struct spr_queue_entry spr_queue_normal[SPR_COUNT_MAX_SORTED]; // depth sorted sprite entries
 
+bool spr_boss_vram_active;
+
 /*
     Adds a sprite to the draw queue
 
@@ -182,8 +184,6 @@ uint16_t SpriteEngine_GetVramSlot32(uint16_t i)
 
     return 128;
 }
-
-bool spr_boss_vram_active = false;
 
 /**
  * @brief Releases allocated VRAM sprite tile slots back to the pool.
