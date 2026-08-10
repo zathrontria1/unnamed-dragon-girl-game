@@ -589,7 +589,7 @@ _HdmaEngine_UpdateColdataValues:
 	lda r0
 	sta _hdma_coldata_select
 	beq .coldata_no_offset
-		lda #$02a3
+		lda #$0243
 .coldata_no_offset:
 
 	clc

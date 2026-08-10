@@ -9,16 +9,16 @@
 
 #define CACHE_PALETTE_ENTRIES 8
 
-extern struct hdma_indirect_table_entry hdma_bgpalette_tables[3];
+extern const struct hdma_indirect_table_entry hdma_bgpalette_tables[3];
 extern uint16_t hdma_bgpalette_data[SCREEN_HEIGHT << 1];
 
-extern struct hdma_indirect_table_entry hdma_windowbackground_tables[2][4];
+extern const struct hdma_indirect_table_entry hdma_windowbackground_tables[2][4];
 extern uint16_t hdma_windowbackground_data[2][SCREEN_HEIGHT << 1];
 
 extern uint8_t hdma_use_gradient;
 extern uint16_t hdma_gradient_ptr;
 
-extern struct hdma_indirect_table_entry hdma_scroll_tables[2][8];
+extern const struct hdma_indirect_table_entry hdma_scroll_tables[2][8];
 extern uint16_t hdma_scroll_data[2][32];
 
 extern uint16_t hdma_scroll_select;
@@ -29,7 +29,7 @@ extern bool hdma_coldata_usegradient;
 extern uint16_t hdma_coldata_last_r;
 extern uint16_t hdma_coldata_last_g;
 extern uint16_t hdma_coldata_last_b;
-extern struct hdma_indirect_table_entry hdma_coldata_tables[2][225];
+extern struct hdma_indirect_table_entry hdma_coldata_tables[2][193];
 extern uint16_t hdma_coldata_data[2][32][4];
 
 extern uint16_t hdma_coldata_select;
@@ -38,9 +38,7 @@ extern uint16_t hdma_coldata_ptr;
 extern const uint8_t const_hdma_tm_msgbox[];
 extern const int16_t const_hdma_scroll_sine[16][64];
 
-extern uint8_t hdma_cache_scaled_r[CACHE_PALETTE_ENTRIES * 64];
-extern uint8_t hdma_cache_scaled_g[CACHE_PALETTE_ENTRIES * 64];
-extern uint8_t hdma_cache_scaled_b[CACHE_PALETTE_ENTRIES * 64];
+extern const uint8_t const_scaled_color_table[32][64];
 
 void HdmaEngine_SetupHdma();
 
