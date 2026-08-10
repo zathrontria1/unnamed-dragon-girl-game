@@ -451,6 +451,9 @@ _DmaSystem_AddItemToQueue:
 	sta r4
 	stx r8
 
+	lda r3
+	beq .early_exit_zero
+
 	cpx #0
 	bne .split_nonzero
 
@@ -584,6 +587,10 @@ _DmaSystem_AddItemToQueue:
 	lda r6
 	sta _dma_queue_length
 
+	lda #0
+	rtl
+
+.early_exit_zero:
 	lda #0
 	rtl
 

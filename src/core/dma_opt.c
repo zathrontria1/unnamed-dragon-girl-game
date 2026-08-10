@@ -199,6 +199,11 @@ uint16_t DmaSystem_AddItemToQueue(
     uint16_t vmain,
     uint16_t split)
 {
+    if (length == 0)
+    {
+        return 0;
+    }
+
     // Check for capacity (count, length) issues
     uint16_t temp_length = length + const_lut_dma_split_lookup[split] + dma_queue_length;
 

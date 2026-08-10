@@ -129,7 +129,10 @@ void Loop_Game_Messagebox()
         DmaSystem_AddItemToQueue((uint8_t *)(LZ4_BUFFER_ADDR+0x8800), TILEMAP_ADDR_GAME_UI_2BPP+((UI_MSGBOX_ML_START + 1) << 5), 256, VRAM_INCHIGH, 0);
 
         register volatile unsigned int data_len = vwf_tiledata_run;
-        DmaSystem_AddItemToQueue(new_data_addr, 0x4400+vwf_vram_offset, data_len, VRAM_INCHIGH, 0);
+        if (data_len > 0)
+        {
+            DmaSystem_AddItemToQueue(new_data_addr, 0x4400+vwf_vram_offset, data_len, VRAM_INCHIGH, 0);
+        }
 
         vwf_wram_offset = vwf_wram_offset + vwf_tiledata_advance;
         vwf_vram_offset = vwf_vram_offset + vwf_tiledata_advance_vram;
