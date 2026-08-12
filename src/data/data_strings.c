@@ -178,6 +178,9 @@ HUGE const char STR_UI_SUBSCREEN_OPTIONS_SOUND_VOI_ENABLE[] = "Voices";
 HUGE const char STR_UI_SUBSCREEN_OPTIONS_GFX_HITBLUR[] = "Hit mosaic/blur on dmg taken";
 HUGE const char STR_UI_SUBSCREEN_OPTIONS_GFX_HEATWAVE[] = "Heat wave effect";
 
+HUGE const char STR_UI_SUBSCREEN_OPTIONS_ON[] = "On";
+HUGE const char STR_UI_SUBSCREEN_OPTIONS_OFF[] = "Off";
+
 HUGE const char STR_UI_SUBSCREEN_OPTIONS_RETURN[] = "Back";
 
 HUGE const char STR_UI_SUBSCREEN_RESETCONFIRMATION[] = "\

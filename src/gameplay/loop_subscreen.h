@@ -67,6 +67,8 @@ void Subscreen_Help();
 void Subscreen_Help_DrawText(bool copy_result);
 
 void Subscreen_Options();
+void Subscreen_Options_DrawTile(uint16_t x, uint16_t y, uint16_t tile);
+void Subscreen_Options_DrawValues(bool copy_result);
 
 void Subscreen_ResetConfirmation();
 

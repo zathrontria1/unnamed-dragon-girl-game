@@ -16,6 +16,7 @@
 #include "system.h"
 
 #include "spr.h"
+#include "gfx.h"
 
 #include "snd.h"
 #include "consts_snd.h"
@@ -44,6 +45,9 @@ uint8_t subscreen_cgadsub_copy;
 
 static void * subscreen_next_func_ptr;
 uint16_t subscreen_transition_state;
+
+static uint8_t subscreen_options_volume_repeat_timer;
+static uint32_t subscreen_options_volume_repeat_frame;
 
 void Loop_Subscreen_Transition_Init()
 {
@@ -673,6 +677,71 @@ void Subscreen_Help_DrawText(bool copy_result)
     return;
 }
 
+void Subscreen_Options_DrawTile(uint16_t x, uint16_t y, uint16_t tile)
+{
+    if ((x >= 32) || (y >= (SCREEN_HEIGHT >> 3)))
+    {
+        return;
+    }
+
+    ui_window_text[y][x] = tile | 0x2000 | (PAL_UI_TEXT_WHITE << 10);
+
+    return;
+}
+
+void Subscreen_Options_DrawValues(bool copy_result)
+{
+    uint8_t volume_display = snd_settings_volume;
+    uint8_t volume_full_tiles;
+    uint8_t volume_partial_fill;
+    uint16_t checked_tile = 0x006d;
+    uint16_t unchecked_tile = 0x006e;
+
+    if (volume_display != 0)
+    {
+        volume_display++;
+    }
+    volume_full_tiles = volume_display >> 3;
+    volume_partial_fill = volume_display & 0x07;
+
+    Subscreen_Options_DrawTile(16, 5, snd_settings_mono ? unchecked_tile : checked_tile);
+    Subscreen_Options_DrawTile(25, 5, snd_settings_mono ? checked_tile : unchecked_tile);
+
+    Subscreen_Options_DrawTile(13, 7, 0x0062);
+    for (uint8_t i = 0; i < 16; i++)
+    {
+        uint16_t tile = 0x0063;
+        if (i < volume_full_tiles)
+        {
+            tile = 0x006b;
+        }
+        else if (i == volume_full_tiles)
+        {
+            tile += volume_partial_fill;
+        }
+        Subscreen_Options_DrawTile(14 + i, 7, tile);
+    }
+    Subscreen_Options_DrawTile(30, 7, 0x006c);
+
+    Subscreen_Options_DrawTile(18, 9, snd_settings_enable_bgm ? checked_tile : unchecked_tile);
+    Subscreen_Options_DrawTile(25, 9, snd_settings_enable_bgm ? unchecked_tile : checked_tile);
+    Subscreen_Options_DrawTile(18, 11, snd_settings_enable_sfx ? checked_tile : unchecked_tile);
+    Subscreen_Options_DrawTile(25, 11, snd_settings_enable_sfx ? unchecked_tile : checked_tile);
+    Subscreen_Options_DrawTile(18, 13, snd_settings_enable_voice ? checked_tile : unchecked_tile);
+    Subscreen_Options_DrawTile(25, 13, snd_settings_enable_voice ? unchecked_tile : checked_tile);
+    Subscreen_Options_DrawTile(18, 15, gfx_enable_hitblur ? checked_tile : unchecked_tile);
+    Subscreen_Options_DrawTile(25, 15, gfx_enable_hitblur ? unchecked_tile : checked_tile);
+    Subscreen_Options_DrawTile(18, 17, gfx_enable_heatwave ? checked_tile : unchecked_tile);
+    Subscreen_Options_DrawTile(25, 17, gfx_enable_heatwave ? unchecked_tile : checked_tile);
+
+    if (copy_result)
+    {
+        UserInterface_CopyUiBuffers();
+    }
+
+    return;
+}
+
 /*
     Options menu
 */
@@ -694,17 +763,29 @@ void Subscreen_Options()
         UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_HEADING, 3, 1);
 
         UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_SOUND_MODE, 3, 4);
-        UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_SOUND_MODE_STEREO, 6, 5);
-        UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_SOUND_MODE_MONO, 15, 5);
+        UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_SOUND_MODE_STEREO, 18, 5);
+        UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_SOUND_MODE_MONO, 27, 5);
 
         UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_SOUND_MVOL, 3, 6);
         UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_SOUND_BGM_ENABLE, 3, 8);
+        UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_ON, 20, 9);
+        UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_OFF, 27, 9);
         UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_SOUND_SFX_ENABLE, 3, 10);
+        UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_ON, 20, 11);
+        UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_OFF, 27, 11);
         UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_SOUND_VOI_ENABLE, 3, 12);
+        UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_ON, 20, 13);
+        UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_OFF, 27, 13);
         UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_GFX_HITBLUR, 3, 14);
+        UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_ON, 20, 15);
+        UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_OFF, 27, 15);
         UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_GFX_HEATWAVE, 3, 16);
+        UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_ON, 20, 17);
+        UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_OFF, 27, 17);
 
         UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_RETURN, 3, 26);
+
+        Subscreen_Options_DrawValues(false);
         
         UserInterface_CopyUiBuffers();
         
@@ -714,66 +795,118 @@ void Subscreen_Options()
     {
         // Perform menu navigation
         bool update_text = false;
+        bool volume_button_newly_pressed = false;
+        bool volume_repeat_due = false;
 
         Subscreen_Internal_UpdateNavigation((const struct menu_item *)&subscreen_items_options);
 
-        if (System_CheckKey(KEY_LEFT))
+        bool left_pressed = System_CheckKey(KEY_LEFT);
+        bool right_pressed = System_CheckKey(KEY_RIGHT);
+        bool toggle_pressed = left_pressed || right_pressed || System_CheckKey(KEY_A);
+
+        if ((subscreen_selection == 1) && (System_CheckKeyHeld(KEY_LEFT) || System_CheckKeyHeld(KEY_RIGHT)))
         {
             switch (subscreen_selection)
             {
-                case 0:
-                    /* Option 0: Sound Mode (Left) */
-                    break;
                 case 1:
-                    /* Option 1: Master Volume (Left) */
-                    break;
-                case 2:
-                    /* Option 2: BGM Enable (Left) */
-                    break;
-                case 3:
-                    /* Option 3: SFX Enable (Left) */
-                    break;
-                case 4:
-                    /* Option 4: Voice Enable (Left) */
-                    break;
-                case 5:
-                    /* Option 5: GFX Hit Blur (Left) */
-                    break;
-                case 6:
-                    /* Option 6: GFX Heatwave (Left) */
+                    volume_button_newly_pressed = left_pressed || right_pressed;
+
+                    if (volume_button_newly_pressed)
+                    {
+                        subscreen_options_volume_repeat_timer = 16;
+                        subscreen_options_volume_repeat_frame = system_frames_elapsed;
+                    }
+                    else if (subscreen_options_volume_repeat_frame != system_frames_elapsed)
+                    {
+                        subscreen_options_volume_repeat_frame = system_frames_elapsed;
+                        if (subscreen_options_volume_repeat_timer > 0)
+                        {
+                            subscreen_options_volume_repeat_timer--;
+                        }
+                        volume_repeat_due = subscreen_options_volume_repeat_timer == 0;
+                    }
+
+                    if (volume_button_newly_pressed || volume_repeat_due)
+                    {
+                        if (System_CheckKeyHeld(KEY_LEFT))
+                        {
+                            if (snd_settings_volume >= 8)
+                            {
+                                snd_settings_volume -= 8;
+                            }
+                            else
+                            {
+                                snd_settings_volume = 0;
+                            }
+                        }
+                        else if (System_CheckKeyHeld(KEY_RIGHT))
+                        {
+                            if (snd_settings_volume <= 119)
+                            {
+                                snd_settings_volume += 8;
+                            }
+                            else
+                            {
+                                snd_settings_volume = 127;
+                            }
+                        }
+                        if (volume_repeat_due)
+                        {
+                            subscreen_options_volume_repeat_timer = 4;
+                        }
+                        SoundInterface_SetMasterVolume(snd_settings_volume);
+                        update_text = true;
+                    }
                     break;
                 default:
                     break;
             }
         }
-        else if (System_CheckKey(KEY_RIGHT))
+        else if (toggle_pressed)
         {
             switch (subscreen_selection)
             {
                 case 0:
-                    /* Option 0: Sound Mode (Right) */
-                    break;
-                case 1:
-                    /* Option 1: Master Volume (Right) */
+                    snd_settings_mono = !snd_settings_mono;
+                    SoundInterface_SetOutputMode(snd_settings_mono ? 1 : 0);
+                    update_text = true;
                     break;
                 case 2:
-                    /* Option 2: BGM Enable (Right) */
+                    snd_settings_enable_bgm = !snd_settings_enable_bgm;
+                    if (snd_settings_enable_bgm)
+                    {
+                        SoundInterface_PlayMusic();
+                    }
+                    else
+                    {
+                        SoundInterface_PauseMusic();
+                    }
+                    update_text = true;
                     break;
                 case 3:
-                    /* Option 3: SFX Enable (Right) */
+                    snd_settings_enable_sfx = !snd_settings_enable_sfx;
+                    update_text = true;
                     break;
                 case 4:
-                    /* Option 4: Voice Enable (Right) */
+                    snd_settings_enable_voice = !snd_settings_enable_voice;
+                    update_text = true;
                     break;
                 case 5:
-                    /* Option 5: GFX Hit Blur (Right) */
+                    gfx_enable_hitblur = !gfx_enable_hitblur;
+                    update_text = true;
                     break;
                 case 6:
-                    /* Option 6: GFX Heatwave (Right) */
+                    gfx_enable_heatwave = !gfx_enable_heatwave;
+                    update_text = true;
                     break;
                 default:
                     break;
             }
+        }
+
+        if (update_text)
+        {
+            Subscreen_Options_DrawValues(true);
         }
 
         SpriteEngine_ProcessSpriteLists();
