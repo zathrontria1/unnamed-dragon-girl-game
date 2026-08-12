@@ -291,6 +291,11 @@ void SoundInterface_SetDspRegister(uint8_t dsp_reg, uint8_t dsp_data)
     */
 void SoundInterface_SetMasterVolume(uint8_t mvol)
 {
+    if (mvol > 127)
+    {
+        mvol = 127;
+    }
+    
     SoundInterface_SetDspRegister(0x0c, mvol);
     SoundInterface_SetDspRegister(0x1c, mvol);
 
@@ -350,13 +355,24 @@ void SoundInterface_UploadSample(struct sample_list_entry * s)
         temp = ((((s->len * 3l) << 4l) / 9l) * (32000l / temp_realsamplerate)) / 1600l;
     }
 
+    if (temp > 0xfffe)
+    {
+        temp = 0xfffe;
+    }
+
     while (REG_APU01 != SND_CMD_DATA_SAMPLE_UPLOAD)
     {
         ; // Wait for opcode echo.
     }
 
-    //REG_APU03 = s->ticks; // now implied
-    REG_APU03 = (uint8_t)temp;
+    REG_APU0203 = (uint16_t)temp;
+    REG_APU01 = SND_CMD_DATA_SAMPLE_UPLOAD_TICK; // Phase two
+
+    while (REG_APU01 != SND_CMD_DATA_SAMPLE_UPLOAD_TICK)
+    {
+        ; // Wait for opcode echo.
+    }
+    
     REG_APU02 = s->id;
     REG_APU01 = SND_CMD_DATA_SAMPLE_UPLOAD_SLOT; // Phase two
 
@@ -523,6 +539,25 @@ void SoundInterface_SetMusicTempo(uint16_t tempo)
     return;
 }
 
+void SoundInterface_SetOutputMode(uint8_t mode)
+{
+    SoundInterface_AcknowledgeBusy(false);
+
+    REG_APU02 = mode;
+    REG_APU01 = SND_CMD_MUS_SET_OUTPUTMODE; // Initial
+
+    while (REG_APU01 != SND_CMD_MUS_SET_OUTPUTMODE)
+    {
+        ; // Wait for opcode echo.
+    }
+
+    snd_current_command_counter++;
+
+    SoundInterface_AcknowledgeNop();
+
+    return;
+}
+
 /**
  * @brief Uploads music sequences to the sound engine's tracks.
  * 
@@ -646,4 +681,4 @@ void SoundInterface_StopMusic()
     return;
 }
 
-
+

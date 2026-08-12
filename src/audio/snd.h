@@ -74,6 +74,7 @@ void SoundInterface_RunDeferredCommands();
 
 void SoundInterface_SetDspRegister(uint8_t dsp_reg, uint8_t dsp_data);
 void SoundInterface_SetMasterVolume(uint8_t mvol);
+void SoundInterface_SetOutputMode(uint8_t mode);
 
 void SoundInterface_ResetAPU();
 
