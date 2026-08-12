@@ -136,44 +136,89 @@ _start:
 
     mov <global_last_cmd, A ; Make it so that the "last command" is the soft reset command which is impossible for a fresh boot
 _main:
+    call !_poll_command
+    bne @have_command
+
+    call !_poll_sfx_timer
+    beq @no_sfx
+        call !_process_sfx
+    @no_sfx:
+
+    call !_poll_music_timer
+    beq @no_music
+        call !_process_mus
+        cmp A, #1
+        beq @have_command
+    @no_music:
+
+    call !_poll_stream_watchdog
+    beq _main
+        call !_stream_stop
+    bra _main
+
+    @have_command:
+    call !_service_command
+
+    bra _main
+
+; polling/check routines
+_poll_command:
     ; Check if a signal is ready.
-    mov A,<global_last_cmd
-    cmp A,<REG_APUIO1
-    bne :+
-        ; no signal
-        mov A, <REG_T0OUT
-        beq @no_sfx_tick
-            call !_process_sfx
+    mov A, <global_last_cmd
+    cmp A, <REG_APUIO1
+    beq @none
+        mov A, #1
+        ret
+    @none:
+    mov A, #0
+    ret
 
-        @no_sfx_tick:
-        mov A, <REG_T1OUT
-        beq @no_mus_tick
-            mov A, <seq_tick_timer;
-            inc A 
-            mov <seq_tick_timer, A
-            cmp A, <seq_tick_timer_target
-            bcc @no_mus_tick
-                call !_process_mus
-                mov <seq_tick_timer, #0
-        @no_mus_tick:
+_poll_sfx_timer:
+    mov A, <REG_T0OUT
+    ret
 
-        mov A, <stream_watchdog
-        or A, <stream_watchdog+1
-        beq _main
-            mov <r15, #1
-            mov <r15+1, #0
-            movw ya, <stream_watchdog
-            setc
-            subw ya, <r15
-            movw <stream_watchdog, ya
+_poll_music_timer:
+    mov A, <REG_T1OUT
+    beq @none
 
-            mov A, <stream_watchdog
-            or A, <stream_watchdog+1
-            bne _main
-                call !_stream_stop
-        bra _main
-    :
+    mov A, <seq_tick_timer
+    inc A
+    mov <seq_tick_timer, A
+    cmp A, <seq_tick_timer_target
+    bcc @none
 
+    mov <seq_tick_timer, #0
+    mov A, #1
+    ret
+
+    @none:
+    mov A, #0
+    ret
+
+_poll_stream_watchdog:
+    mov A, <stream_watchdog
+    or A, <stream_watchdog+1
+    beq @none
+
+    mov <r15, #1
+    mov <r15+1, #0
+    movw ya, <stream_watchdog
+    setc
+    subw ya, <r15
+    movw <stream_watchdog, ya
+
+    mov A, <stream_watchdog
+    or A, <stream_watchdog+1
+    bne @none
+
+    mov A, #1
+    ret
+
+    @none:
+    mov A, #0
+    ret
+
+_service_command:
     ; A signal exists. Check the contents of APUIO2 and jump accordingly
     mov A,<REG_APUIO1
     mov <global_received_cmd,A ;copy it so that it doesn't disappear on us later
@@ -191,14 +236,14 @@ _main:
     cmp A,#SND_CMD_STREAM_UPLOAD
     bne :+
         call !_stream_upload
-        bra @end
+        jmp !@end
     :
     cmp A,#SND_CMD_STREAM_STOP
     bne :+
         call !_stream_stop
         bra @end
     :
-    cmp A,#SND_CMD_DATA_UPLOAD
+    cmp A,#SND_CMD_DATA_SAMPLE_UPLOAD
     bne :+
         call !_sfx_upload
         ; subroutine will twiddle the IO ports
@@ -250,6 +295,11 @@ _main:
         call !_mus_set_tempo
         bra @end
     :
+    cmp A,#SND_CMD_MUS_SET_OUTPUTMODE
+    bne :+
+        call !_mus_set_outputmode
+        bra @end
+    :
     cmp A,#SND_CMD_DSP_SET
     bne :+
         call !_dsp_reg_write
@@ -266,6 +316,7 @@ _main:
     @end:
     inc <global_current_command_counter
     @end_skipinc:
+
     mov <REG_CONTROL, #$33 ; Reset the read ports
     mov <global_received_cmd, #SND_CMD_NOP
     mov <global_last_cmd,<global_received_cmd
@@ -275,16 +326,23 @@ _main:
     mov <REG_APUIO2, #0
     mov <REG_APUIO3, #0
 
-    jmp !_main
+    ret
 
 _process_mus:
     mov A, <seq_playing
     bne :+
+        mov A, #0
         ret
     :
 
-    mov X, #0
+    mov X, <seq_process_track
     @track_loop:
+    mov A, <global_last_cmd
+    cmp A, <REG_APUIO1
+    beq :+
+        jmp !@yield_to_command
+    :
+
     mov A, <seq_track_wait+X
     beq @track_active
         dec A
@@ -318,146 +376,16 @@ _process_mus:
     mov Y, #0
 
     mov A, [<seq_current_track_ptr]+Y
-    bmi :+ ; all below is a note
-        mov X, A
-        
-        inc Y
-        mov A, [<seq_current_track_ptr]+Y
-        mov <r0, A
-
-        inc Y
-        mov A, [<seq_current_track_ptr]+Y
-        mov <r8, A
-
-        inc Y
-        mov A, [<seq_current_track_ptr]+Y
-        mov <r9, A
-
-        mov A, <r0
-        
-        call !_ins_play_note
-
-        jmp !@increment_track_ptr
-    :
-    cmp A, #SEQ_OPCODE_PLAY_ONESHOT
-    bne :+
-        inc Y
-        mov A, [<seq_current_track_ptr]+Y
-        mov <r0, A
-
-        inc Y
-        mov A, [<seq_current_track_ptr]+Y
-        mov <r8, A
-
-        inc Y
-        mov A, [<seq_current_track_ptr]+Y
-        mov <r9, A
-
-        mov A, <r0
-        
-        call !_ins_play_oneshot
-
-        jmp !@increment_track_ptr
-    :
-    cmp A, #SEQ_OPCODE_WAIT
-    bne :+
-        inc Y
-        mov A, [<seq_current_track_ptr]+Y
-
-        mov X, <seq_current_track
-        mov <seq_track_wait+X, A
-
-        jmp !@increment_track_ptr
-    :
-    cmp A, #SEQ_OPCODE_NOTEPREFIX
-    bne :+
-        mov <seq_note_prefix, #1
-        inc Y
-        mov A, [<seq_current_track_ptr]+Y
-        mov <seq_note_adsr_override, A
-        inc Y
-        mov A, [<seq_current_track_ptr]+Y
-        mov <seq_note_adsr_override+1, A
-        inc Y
-        mov A, [<seq_current_track_ptr]+Y
-        mov <seq_note_tick_override, A
-
-        call !_adjust_ptr
-
-        mov X, <seq_current_track ; This must be placed outside the function
-
-        jmp !@track_active
-    :
-    cmp A, #SEQ_OPCODE_SETRESTARTPOINT
-    bne :+
-        call !_adjust_ptr
-
-        mov <seq_ptr_start+X, A 
-        mov <seq_ptr_start+1+X, Y 
-
-        mov X, <seq_current_track
-
-        jmp !@track_active
-    :
-    cmp A, #SEQ_OPCODE_SETLOOPPOINT
-    bne :+
-        inc Y
-        mov A, [<seq_current_track_ptr]+Y
-        mov X, <seq_current_track
-        mov <seq_loop_counter+X, A
-
-        call !_adjust_ptr
-
-        mov <seq_ptr_loop+X, A 
-        mov <seq_ptr_loop+1+X, Y 
-
-        mov X, <seq_current_track
-
-        jmp !@track_active
-    :
-    cmp A, #SEQ_OPCODE_LOOP
-    bne :+
-        mov X, <seq_current_track
-        mov A, <seq_loop_counter+X
-        bne @prepare_loop_return
-            ; Not looping
-            call !_adjust_ptr
-
-            mov X, <seq_current_track
-
-            jmp !@track_active
-        @prepare_loop_return:
-
-        ; Special handling is done here. Do not call the subroutine!
-        mov A, X
-        asl A
-        mov X, A
-
-        mov A, <seq_ptr_loop+X
-        mov <seq_ptr+X, A
-        mov A, <seq_ptr_loop+1+X
-        mov <seq_ptr+1+X, A
-
-        mov X, <seq_current_track
-        dec <seq_loop_counter+X
-
-        jmp !@track_active ; go to normal processing
-    :
-    cmp A, #SEQ_OPCODE_RESTART
-    bne :+
-        ; Special handling is done here. Do not call the subroutine!
-
-        mov A, <seq_ptr_start+X
-        mov <seq_ptr+X, A
-        mov A, <seq_ptr_start+1+X
-        mov <seq_ptr+1+X, A
-
-        mov X, <seq_current_track
-
-        jmp !@track_active ; go to normal processing
-    :
+    bpl @note ; all positive is a note
+    cmp A, #$86
+    bcc @opcode_runfromtable
+    cmp A, #$ff
+    beq @opcode_restart
 
     @increment_track_ptr:
+    mov A, <seq_current_track
+    asl A
+    mov X, A
 
     call !_adjust_ptr
 
@@ -467,11 +395,184 @@ _process_mus:
     inc X
     cmp X, #8
     bcs @tick_processed
+        mov <seq_process_track, X
         jmp !@track_loop
     @tick_processed:
-
-
+    mov A, #0
+    mov <seq_process_track, A
     ret
+
+@yield_to_command:
+    mov <seq_process_track, X
+    call !_service_command
+
+    mov A, <seq_playing
+    beq @yield_return
+
+    mov X, <seq_process_track
+    jmp !@track_loop
+
+@yield_return:
+    mov A, #0
+    ret
+
+@note:
+    mov X, A
+    
+    inc Y
+    mov A, [<seq_current_track_ptr]+Y
+    mov <r0, A
+
+    inc Y
+    mov A, [<seq_current_track_ptr]+Y
+    mov <r8, A
+
+    inc Y
+    mov A, [<seq_current_track_ptr]+Y
+    mov <r9, A
+
+    mov A, <r0
+    
+    call !_ins_play_note
+
+    jmp !@increment_track_ptr
+
+@opcode_runfromtable:
+    setc
+    sbc A, #$80
+    asl A
+    mov X, A
+    jmp_ [!@seq_opcode_table+X]
+
+@opcode_restart:
+    ; Special handling is done here. Do not call the subroutine!
+
+    mov A, <seq_ptr_start+X
+    mov <seq_ptr+X, A
+    mov A, <seq_ptr_start+1+X
+    mov <seq_ptr+1+X, A
+
+    mov X, <seq_current_track
+
+    jmp !@track_active ; go to normal processing
+
+@opcode_play_oneshot:
+    mov A, <seq_current_track
+    asl A
+    mov X, A
+
+    inc Y
+    mov A, [<seq_current_track_ptr]+Y
+    mov <r0, A
+
+    inc Y
+    mov A, [<seq_current_track_ptr]+Y
+    mov <r8, A
+
+    inc Y
+    mov A, [<seq_current_track_ptr]+Y
+    mov <r9, A
+
+    mov A, <r0
+    
+    call !_ins_play_oneshot
+
+    jmp !@increment_track_ptr
+
+@opcode_wait:
+    inc Y
+    mov A, [<seq_current_track_ptr]+Y
+
+    mov X, <seq_current_track
+    mov <seq_track_wait+X, A
+
+    jmp !@increment_track_ptr
+
+@opcode_noteprefix:
+    mov A, <seq_current_track
+    asl A
+    mov X, A
+
+    mov <seq_note_prefix, #1
+    inc Y
+    mov A, [<seq_current_track_ptr]+Y
+    mov <seq_note_adsr_override, A
+    inc Y
+    mov A, [<seq_current_track_ptr]+Y
+    mov <seq_note_adsr_override+1, A
+    inc Y
+    mov A, [<seq_current_track_ptr]+Y
+    mov <seq_note_tick_override, A
+
+    call !_adjust_ptr
+
+    mov X, <seq_current_track ; This must be placed outside the function
+
+    jmp !@track_active
+
+@opcode_set_restart:
+    mov A, <seq_current_track
+    asl A
+    mov X, A
+    
+    call !_adjust_ptr
+
+    mov <seq_ptr_start+X, A 
+    mov <seq_ptr_start+1+X, Y 
+
+    mov X, <seq_current_track
+
+    jmp !@track_active
+
+@opcode_set_loop:
+    inc Y
+    mov A, [<seq_current_track_ptr]+Y
+    mov X, <seq_current_track
+    mov <seq_loop_counter+X, A
+
+    call !_adjust_ptr
+
+    mov <seq_ptr_loop+X, A 
+    mov <seq_ptr_loop+1+X, Y 
+
+    mov X, <seq_current_track
+
+    jmp !@track_active
+
+@opcode_loop:
+    mov X, <seq_current_track
+    mov A, <seq_loop_counter+X
+    bne @prepare_loop_return
+        ; Not looping
+        call !_adjust_ptr
+
+        mov X, <seq_current_track
+
+        jmp !@track_active
+    @prepare_loop_return:
+
+    ; Special handling is done here. Do not call the subroutine!
+    mov A, X
+    asl A
+    mov X, A
+
+    mov A, <seq_ptr_loop+X
+    mov <seq_ptr+X, A
+    mov A, <seq_ptr_loop+1+X
+    mov <seq_ptr+1+X, A
+
+    mov X, <seq_current_track
+    dec <seq_loop_counter+X
+
+    jmp !@track_active ; go to normal processing
+
+@seq_opcode_table:
+    .word @opcode_play_oneshot
+    .word @opcode_wait
+    .word @opcode_noteprefix
+    .word @opcode_set_restart
+    .word @opcode_set_loop
+    .word @opcode_loop
 
 _adjust_ptr:
     ; Use this subroutine to adjust pointer
@@ -516,48 +617,56 @@ _sfx_stop:
     mov <REG_DSPADDR, #DSP_V0SRCN ; Channel 0
     cbne <REG_DSPDATA, :+
         mov <global_sfx_tick_counter,X
+        mov <global_sfx_tick_counter+1,X
         or <r1, #%00000001
     :
     clrc
     adc <REG_DSPADDR, #$10  ; Channel 1
     cbne <REG_DSPDATA, :+
-        mov <global_sfx_tick_counter+1,X
+        mov <global_sfx_tick_counter+2,X
+        mov <global_sfx_tick_counter+3,X
         or <r1, #%00000010
     :
     clrc
     adc <REG_DSPADDR, #$10  ; Channel 2
     cbne <REG_DSPDATA, :+
-        mov <global_sfx_tick_counter+2,X
+        mov <global_sfx_tick_counter+4,X
+        mov <global_sfx_tick_counter+5,X
         or <r1, #%00000100
     :
     clrc
     adc <REG_DSPADDR, #$10  ; Channel 3
     cbne <REG_DSPDATA, :+
-        mov <global_sfx_tick_counter+3,X
+        mov <global_sfx_tick_counter+6,X
+        mov <global_sfx_tick_counter+7,X
         or <r1, #%00001000
     :
     clrc
     adc <REG_DSPADDR, #$10  ; Channel 4
     cbne <REG_DSPDATA, :+
-        mov <global_sfx_tick_counter+4,X
+        mov <global_sfx_tick_counter+8,X
+        mov <global_sfx_tick_counter+9,X
         or <r1, #%00010000
     :
     clrc
     adc <REG_DSPADDR, #$10  ; Channel 5
     cbne <REG_DSPDATA, :+
-        mov <global_sfx_tick_counter+5,X
+        mov <global_sfx_tick_counter+10,X
+        mov <global_sfx_tick_counter+11,X
         or <r1, #%00100000
     :
     clrc
     adc <REG_DSPADDR, #$10  ; Channel 6
     cbne <REG_DSPDATA, :+
-        mov <global_sfx_tick_counter+6,X
+        mov <global_sfx_tick_counter+12,X
+        mov <global_sfx_tick_counter+13,X
         or <r1, #%01000000
     :
     clrc
     adc <REG_DSPADDR, #$10  ; Channel 7
     cbne <REG_DSPDATA, :+
-        mov <global_sfx_tick_counter+7,X
+        mov <global_sfx_tick_counter+14,X
+        mov <global_sfx_tick_counter+15,X
         or <r1, #%10000000
     :
 
@@ -584,48 +693,56 @@ _stream_stop:
     mov <REG_DSPADDR, #DSP_V0SRCN ; Channel 0
     cbne <REG_DSPDATA, :+
         mov <global_sfx_tick_counter,X
+        mov <global_sfx_tick_counter+1,X
         or <r1, #%00000001
     :
     clrc
     adc <REG_DSPADDR, #$10  ; Channel 1
     cbne <REG_DSPDATA, :+
-        mov <global_sfx_tick_counter+1,X
+        mov <global_sfx_tick_counter+2,X
+        mov <global_sfx_tick_counter+3,X
         or <r1, #%00000010
     :
     clrc
     adc <REG_DSPADDR, #$10  ; Channel 2
     cbne <REG_DSPDATA, :+
-        mov <global_sfx_tick_counter+2,X
+        mov <global_sfx_tick_counter+4,X
+        mov <global_sfx_tick_counter+5,X
         or <r1, #%00000100
     :
     clrc
     adc <REG_DSPADDR, #$10  ; Channel 3
     cbne <REG_DSPDATA, :+
-        mov <global_sfx_tick_counter+3,X
+        mov <global_sfx_tick_counter+6,X
+        mov <global_sfx_tick_counter+7,X
         or <r1, #%00001000
     :
     clrc
     adc <REG_DSPADDR, #$10  ; Channel 4
     cbne <REG_DSPDATA, :+
-        mov <global_sfx_tick_counter+4,X
+        mov <global_sfx_tick_counter+8,X
+        mov <global_sfx_tick_counter+9,X
         or <r1, #%00010000
     :
     clrc
     adc <REG_DSPADDR, #$10  ; Channel 5
     cbne <REG_DSPDATA, :+
-        mov <global_sfx_tick_counter+5,X
+        mov <global_sfx_tick_counter+10,X
+        mov <global_sfx_tick_counter+11,X
         or <r1, #%00100000
     :
     clrc
     adc <REG_DSPADDR, #$10  ; Channel 6
     cbne <REG_DSPDATA, :+
-        mov <global_sfx_tick_counter+6,X
+        mov <global_sfx_tick_counter+12,X
+        mov <global_sfx_tick_counter+13,X
         or <r1, #%01000000
     :
     clrc
     adc <REG_DSPADDR, #$10  ; Channel 7
     cbne <REG_DSPDATA, :+
-        mov <global_sfx_tick_counter+7,X
+        mov <global_sfx_tick_counter+14,X
+        mov <global_sfx_tick_counter+15,X
         or <r1, #%10000000
     :
 
@@ -659,46 +776,89 @@ _update_channel_lru:
 
     movw <r8,ya
 
-    mov X,#8
+    mov <r2,#8 ;counter
+    mov X,#0
     mov Y,#0
 
-    mov <r0,#255
+    mov <r0,#$ff
+    mov <r0+1,#$ff
 
     @loop:
+    mov A,[<r8]+Y
+    cmp A,#$ff
+    bne @not_infinite
+        inc Y
         mov A,[<r8]+Y
-        cmp A,#255
-        beq @check_next_channel
-            ; tick is 255 (infinite)
-            ; do nothing
+        dec Y
+        cmp A,#$ff
+        beq @check_next_channel ; tick is 0xffff (65535) (infinite), do nothing
+    @not_infinite:
+
+    mov A,[<r8]+Y
+    cmp A,#0
+    bne @not_zero_tick
+        inc Y
+        mov A,[<r8]+Y
+        dec Y
         cmp A,#0
         beq @zero_tick
-            ; Non-zero tick
-            ; If the argument is set, decrement the value of A
-            cmp <r1, #1
-            bne @no_dec
-                dec A
-                mov [<r8]+Y,A
-            @no_dec:
-            ; Check if tick is the least recently used.
+    @not_zero_tick:
+        ; Non-zero tick
+        ; If the argument is set, decrement the value of A
+        cmp <r1, #1
+        bne @no_dec
+            ; copy the entire value to r14
+            mov A,[<r8]+Y
+            mov <r14, A
+            inc Y
+            mov A,[<r8]+Y
+            mov <r14+1, A
+            dec Y
+            decw <r14
+
+            mov A,<r14
+            mov [<r8]+Y,A
+            inc Y
+            mov A,<r14+1
+            mov [<r8]+Y,A
+            dec Y
+        @no_dec:
+        ; Check if tick is the least recently used.
+        inc Y
+        mov A,[<r8]+Y
+        dec Y
+        cmp A, <r0+1
+        bcc @new_soonest
+        bne @check_next_channel
+            mov A,[<r8]+Y
             cmp A, <r0
             bcs @check_next_channel
-                mov <r0,A
-                mov <global_sfx_endsoonest,Y
-                bra @check_next_channel
-        @zero_tick:
-            ; Zero tick, aka finished playing.
-            mov A, !lut_channel_mask+Y
+        @new_soonest:
+            mov A,[<r8]+Y
+            mov <r0,A
+            inc Y
+            mov A,[<r8]+Y
+            mov <r0+1,A
+            dec Y
+            mov <global_sfx_endsoonest,X
+            bra @check_next_channel
+    @zero_tick:
+        ; Zero tick, aka finished playing.
+        mov A, !lut_channel_mask+X
 
-            mov <REG_DSPADDR,#DSP_KOFF
-            mov <REG_DSPDATA,A
-            
-            mov <global_sfx_endsoonest,Y
+        mov <REG_DSPADDR,#DSP_KOFF
+        mov <REG_DSPDATA,A
+        
+        mov <global_sfx_endsoonest,X
 
             mov <r0, #0 ; always true
-        @check_next_channel:
-        inc Y
-        dec X
-        bne @loop
+            mov <r0+1, #0
+    @check_next_channel:
+    inc Y
+    inc Y
+    inc X
+    dec <r2
+    bne @loop
 
     mov <REG_DSPADDR,#DSP_KOFF
     mov <REG_DSPDATA, #%000000000

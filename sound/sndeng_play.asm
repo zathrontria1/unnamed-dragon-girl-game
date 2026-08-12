@@ -19,6 +19,20 @@ _ins_play_note:
         ret
     :
 
+    ; if mono is set, sum the volumes and then divide them by 2.
+    ; as values never exceed 127, and negative volumes are out of scope
+    ; this should be fine
+    mov A, <seq_force_mono
+    beq :+
+        ; mono is set
+        mov A, <dsp_param_vol_l
+        clrc
+        adc A, <dsp_param_vol_r
+        lsr A
+        mov <dsp_param_vol_l, A
+        mov <dsp_param_vol_r, A
+    :
+
     ; subtract the MIDI note with reference note point 
     @note_adjust:
     mov A, <r1
@@ -350,10 +364,14 @@ _sfx_play_extend:
     ret
 
 _stream_play:
-    mov A, #255
-    mov Y, <global_sfx_endsoonest
+    mov A, <global_sfx_endsoonest
+    mov X, A
+    asl A
+    mov Y, A
+    mov A, #$ff
     mov !global_sfx_tick_counter+Y,A
-    mov A, !lut_channel_mask+Y
+    mov !global_sfx_tick_counter+1+Y,A
+    mov A, !lut_channel_mask+X
     mov <dsp_param_kon,A
 
     mov A,<global_sfx_endsoonest
@@ -431,48 +449,41 @@ _start_note:
     mov A, <seq_note_prefix ; check if the tick count is overridden
     beq @tick_skip
         mov A, <seq_note_tick_override
-        bne @tick_end ; if tick is not set, use defaults
-        ;beq @tick_skip ; if tick is not set, use defaults
-            ;mov <r14, <seq_note_tick_override
-            ;bra @tick_end
+        beq @tick_skip ; if tick is not set, use defaults
+        mov <r8, A
+        mov <r8+1, #0
+        bra @tick_end
     @tick_skip:
-        mov Y,<dsp_param_srcn
+        mov A,<dsp_param_srcn
+        asl A
+        mov Y, A
         mov A,!global_sfx_tickcounts+Y
-        ;mov <r14,A 
+        mov <r8,A
+        mov A,!global_sfx_tickcounts+1+Y
+        mov <r8+1,A
     @tick_end:
-
-    ;mov <r14, A ; store the sound's tickcount temporarily
 
     ; reset the extension command
     mov <seq_note_prefix, #0
 
     ; now we have to determine what channel to use.
     
+    mov A, <global_sfx_endsoonest
+    asl A
+    mov Y, A
+
+    ; store the sound tickcount now
+    mov A, <r8
+    mov !global_sfx_tick_counter+Y,A 
+    mov A, <r8+1
+    mov !global_sfx_tick_counter+1+Y,A 
+
     mov Y, <global_sfx_endsoonest
-
-    mov !global_sfx_tick_counter+Y,A ; store the sound tickcount now
-
     mov A, !lut_channel_mask+Y
-
-    ;mov <dsp_param_kon,<global_sfx_endsoonest
-    ;mov A,#1
-    ;cmp <dsp_param_kon,#0
-    ;beq @skip_shift
-    ;dec <dsp_param_kon
-    ;@shift:
-    ;    asl A
-    ;    dec <dsp_param_kon
-    ;    bpl @shift
-    ;@skip_shift:
 
     mov <dsp_param_kon,A
     ; dsp_param_kon contains the channel to key on 
-
-    ;mov Y,<global_sfx_endsoonest
-    ;mov A,<r14
-    ;mov !global_sfx_tick_counter+Y,A
-
-    ;mov A,Y
+    
     mov A,<global_sfx_endsoonest
     xcn A ; Contains the channel offset
     clrc

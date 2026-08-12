@@ -37,13 +37,10 @@ r15: .res 2
 
 global_last_cmd: .res 1
 global_received_cmd: .res 1
-global_tick_ran: .res 1
 
 global_sfx_endsoonest: .res 1
 
-global_sfx_queue_counter: .res 1
-global_sfx_queue: .res 8
-global_sfx_tick_counter: .res 8
+global_sfx_tick_counter: .res 16 ; eight 16-bit counters
 
 global_nextfree: .res 2
 global_sample_end: .res 2
@@ -54,6 +51,7 @@ seq_playing: .res 1
 
 seq_current_track: .res 1
 seq_current_track_ptr: .res 2
+seq_process_track: .res 1
 
 seq_tick_timer: .res 1
 seq_tick_timer_target: .res 1
@@ -69,6 +67,8 @@ seq_track_wait: .res 8 ; if non-zero, nops this row. Placed here to make clearin
 seq_note_prefix: .res 1
 seq_note_adsr_override: .res 2
 seq_note_tick_override: .res 1
+
+seq_force_mono: .res 1
 
 mul16_a: .res 2
 mul16_b: .res 2
@@ -90,14 +90,14 @@ stream_watchdog: .res 2 ; must be 2 bytes
 
 .align $100
 BSS_START:
-global_sampledata: .res (60 * 1024) ; 60 KB
+global_sampledata: .res 61184
 .align $100
 INTERNAL_UNIQUE_SAMPLE_COUNT = 64
 global_sampletable: .res (4 * INTERNAL_UNIQUE_SAMPLE_COUNT)
 
 global_sfx_samplerates: .res (2 * INTERNAL_UNIQUE_SAMPLE_COUNT)
 global_sfx_adsr: .res (2 * INTERNAL_UNIQUE_SAMPLE_COUNT)
-global_sfx_tickcounts: .res INTERNAL_UNIQUE_SAMPLE_COUNT
+global_sfx_tickcounts: .res (2 * INTERNAL_UNIQUE_SAMPLE_COUNT)
 global_ins_tune: .res INTERNAL_UNIQUE_SAMPLE_COUNT
 
 ; for sample streaming

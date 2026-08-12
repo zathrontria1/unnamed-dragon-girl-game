@@ -79,14 +79,26 @@ _sfx_upload:
     mov <REG_APUIO1,<REG_APUIO1 ;echo the opcode.
 
     ; wait for echo from cpu on REG_APUIO1 that indicates that new data has been sent
-    mov A,#SND_CMD_DATA_UPLOAD_SLOT
+    mov A,#SND_CMD_DATA_SAMPLE_UPLOAD_TICK
     :
         cbne <REG_APUIO1, :-
     :
         cbne <REG_APUIO1, :-
 
-    ; then the tick count and slot
-    mov <r6,<REG_APUIO3
+    ; then the tick count
+    mov <r6,<REG_APUIO2
+    mov <r6+1,<REG_APUIO3
+
+    mov <REG_APUIO1,<REG_APUIO1
+
+    ; wait for echo from cpu on REG_APUIO1 that indicates that new data has been sent
+    mov A,#SND_CMD_DATA_SAMPLE_UPLOAD_SLOT
+    :
+        cbne <REG_APUIO1, :-
+    :
+        cbne <REG_APUIO1, :-
+
+    ; then the slot
     mov <r1,<REG_APUIO2
     mov <r1+1,#0 ; clean the high byte
 
@@ -164,10 +176,14 @@ _sfx_upload:
     mov Y,#>global_sfx_tickcounts
     clrc
     addw ya,<r1
+    addw ya,<r1 ; hacky, but avoids a reload
     movw <r7,ya ; now points to sample tick length table
 
     mov Y, #0
     mov A, <r6
+    mov [<r7]+y,a
+    mov A, <r6+1
+    inc Y
     mov [<r7]+y,a
 
     ; Write the slot the sample belongs to
