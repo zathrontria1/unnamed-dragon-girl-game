@@ -160,7 +160,7 @@ const struct sample_list_entry data_snd_samples[] =
     {SFX_INTERACT_SWITCH, (void *)&data_snd_smp_sfx_switch, 414, ((8000l * 4096l) / 32000l), 0x0000, 0},
     {SFX_ATK_SPLASH, (void *)&data_snd_smp_sfx_splash, 1116, ((8000l * 4096l) / 32000l), 0x0000, 0},
     {SFX_ATK_SPLAT_HIT, (void *)&data_snd_smp_sfx_splathit, 1116, ((8000l * 4096l) / 32000l), 0x0000, 0},
-    {SFX_ATK_FIRE_BREATH, (void *)&data_snd_smp_sfx_flamestream, 2250, ((8000l * 4096l) / 32000l), 0x0000, 255},
+    {SFX_ATK_FIRE_BREATH, (void *)&data_snd_smp_sfx_flamestream, 2250, ((8000l * 4096l) / 32000l), 0x0000, 65535},
     {SFX_ATK_FIRE_CRACKLE, (void *)&data_snd_smp_sfx_firecrackle, 576, ((8000l * 4096l) / 32000l), 0xfaff, 30},
     {SFX_DROP_BOUNCE, (void *)&data_snd_smp_sfx_bounce, 153, ((32000l * 4096l) / 32000l), 0xfaff, 15},
     {0, 0, 0, 0x1000, 0x0000, 0},

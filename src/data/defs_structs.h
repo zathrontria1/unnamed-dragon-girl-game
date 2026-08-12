@@ -75,7 +75,7 @@ typedef struct sample_list_entry
     uint16_t len;
     uint16_t sample_rate;
     uint16_t adsr;
-    uint8_t ticks;
+    uint16_t ticks;
     // ticks are implied by length and sample rate if set to 0
 } sample_list_entry_t;
 
@@ -86,7 +86,7 @@ typedef struct sample_list_entry_ins
     uint16_t len;
     uint16_t sample_rate;
     uint16_t adsr;
-    uint8_t ticks;
+    uint16_t ticks;
     // ticks are implied by length and sample rate if set to 0
     uint8_t tune;
 } sample_list_entry_ins_t;
