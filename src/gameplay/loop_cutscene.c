@@ -113,6 +113,9 @@ void Cs_Loop()
 
             System_DisableInterrupts();
 
+            // Play any pending sounds
+            SoundInterface_RunDeferredCommands();
+
             // Perform level load stuff
             LevelSystem_LoadLevel(level_data_ptr); // non-VRAM hitting parts here
 
