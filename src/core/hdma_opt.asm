@@ -37,6 +37,46 @@ _HdmaEngine_UpdateBgScrollValues:
 	dec
 	sta r2
 
+	lda >_gfx_enable_heatwave
+	and #$00ff
+	bne .apply_heatwave_scroll
+
+	lda r2
+	sta >_hdma_scroll_data+0,x
+	sta >_hdma_scroll_data+2,x
+	sta >_hdma_scroll_data+4,x
+	sta >_hdma_scroll_data+6,x
+	sta >_hdma_scroll_data+8,x
+	sta >_hdma_scroll_data+10,x
+	sta >_hdma_scroll_data+12,x
+	sta >_hdma_scroll_data+14,x
+	sta >_hdma_scroll_data+16,x
+	sta >_hdma_scroll_data+18,x
+	sta >_hdma_scroll_data+20,x
+	sta >_hdma_scroll_data+22,x
+	sta >_hdma_scroll_data+24,x
+	sta >_hdma_scroll_data+26,x
+	sta >_hdma_scroll_data+28,x
+	sta >_hdma_scroll_data+30,x
+	sta >_hdma_scroll_data+32,x
+	sta >_hdma_scroll_data+34,x
+	sta >_hdma_scroll_data+36,x
+	sta >_hdma_scroll_data+38,x
+	sta >_hdma_scroll_data+40,x
+	sta >_hdma_scroll_data+42,x
+	sta >_hdma_scroll_data+44,x
+	sta >_hdma_scroll_data+46,x
+	sta >_hdma_scroll_data+48,x
+	sta >_hdma_scroll_data+50,x
+	sta >_hdma_scroll_data+52,x
+	sta >_hdma_scroll_data+54,x
+	sta >_hdma_scroll_data+56,x
+	sta >_hdma_scroll_data+58,x
+	sta >_hdma_scroll_data+60,x
+	sta >_hdma_scroll_data+62,x
+	bra .scroll_values_done
+
+.apply_heatwave_scroll:
 	clc
 	ldy #0
 	lda r2
@@ -198,6 +238,8 @@ _HdmaEngine_UpdateBgScrollValues:
 	adc [r5],y
 	sta >_hdma_scroll_data+62,x
 
+.scroll_values_done:
+
 	lda r0
 	sta _hdma_scroll_select
 	beq .scroll_no_offset
@@ -224,6 +266,9 @@ _HdmaEngine_UpdateColdataValues:
 	stz r11
 
 	lda >_hdma_coldata_usegradient
+	and #$00ff
+	beq .coldata_check_last
+	lda >_gfx_enable_heatwave
 	and #$00ff
 	beq .coldata_check_last
 

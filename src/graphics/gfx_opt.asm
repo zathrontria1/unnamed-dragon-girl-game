@@ -3,6 +3,19 @@
 	x16
 	global	_Gfx_ProcessMosaic
 _Gfx_ProcessMosaic:
+	lda _gfx_enable_hitblur
+	bne .process_mosaic
+	stz _gfx_mosaic_intensity
+	stz _gfx_mosaic_change
+	stz _gfx_mosaic_layers
+	sep #$20
+	a8
+	stz _shadow_mosaic
+	rep #$20
+	a16
+	rtl
+
+.process_mosaic:
 	lda _gfx_mosaic_change
 	beq .check_intensity
 

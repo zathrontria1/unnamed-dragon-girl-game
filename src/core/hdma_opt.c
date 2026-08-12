@@ -27,9 +27,19 @@ void HdmaEngine_UpdateBgScrollValues()
     const int16_t *sine_ptr = &const_hdma_scroll_sine[temp_sine_select][hdma_scroll_sine_index];
     uint16_t *dest_ptr = hdma_scroll_data[temp_table_to_write];
 
-    for (int i = 0; i < 32; i++)
+    if (gfx_enable_heatwave)
     {
-        *dest_ptr++ = temp_y + *sine_ptr++;
+        for (int i = 0; i < 32; i++)
+        {
+            *dest_ptr++ = temp_y + *sine_ptr++;
+        }
+    }
+    else
+    {
+        for (int i = 0; i < 32; i++)
+        {
+            *dest_ptr++ = temp_y;
+        }
     }
 
     hdma_scroll_select = temp_table_to_write;
@@ -47,7 +57,7 @@ void HdmaEngine_UpdateColdataValues()
     uint16_t g_add = 0;
     uint16_t b_add = 0;
 
-    if (hdma_coldata_usegradient)
+    if (hdma_coldata_usegradient && gfx_enable_heatwave)
     {
         r_add = gfx_cmath_r >> 5;
         g_add = gfx_cmath_g >> 5;

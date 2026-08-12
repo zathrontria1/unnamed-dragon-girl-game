@@ -87,6 +87,15 @@ void Gfx_ProcessSmoke()
  */
 void Gfx_ProcessMosaic()
 {
+    if (!gfx_enable_hitblur)
+    {
+        gfx_mosaic_intensity = 0;
+        gfx_mosaic_change = 0;
+        gfx_mosaic_layers = 0;
+        shadow_mosaic = 0;
+        return;
+    }
+
     if (gfx_mosaic_change != 0)
     {
         gfx_mosaic_intensity += (gfx_mosaic_change << 8);
@@ -133,6 +142,15 @@ void Gfx_ProcessMosaic()
  */
 void Gfx_ProcessColorMath()
 {
+    if (!gfx_enable_heatwave && hdma_coldata_usegradient)
+    {
+        gfx_cmath_r = 0;
+        gfx_cmath_g = 0;
+        gfx_cmath_b = 0;
+        gfx_cmath_change = 0;
+        hdma_coldata_usegradient = false;
+    }
+
     if (gfx_cmath_change != 0)
     {
         gfx_cmath_r += gfx_cmath_change;
@@ -192,6 +210,14 @@ void Gfx_ProcessColorMath()
  */
 void Gfx_SetColorMath(int16_t r, int16_t g, int16_t b, bool gradient)
 {
+    if (gradient && !gfx_enable_heatwave)
+    {
+        r = 0;
+        g = 0;
+        b = 0;
+        gradient = false;
+    }
+
     gfx_cmath_r = r << 8;
     gfx_cmath_g = g << 8;
     gfx_cmath_b = b << 8;

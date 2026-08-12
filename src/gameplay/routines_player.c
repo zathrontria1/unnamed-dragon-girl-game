@@ -485,9 +485,12 @@ void Routines_Player(struct game_object * o)
                         obj_player_health_regen_delay = PLAYER_HEALTH_REGEN_DELAY;
 
                         // Also trigger the mosaic
-                        gfx_mosaic_change = -1;
-                        gfx_mosaic_intensity = 0x0400;
-                        gfx_mosaic_layers = 0x02;
+                        if (gfx_enable_hitblur)
+                        {
+                            gfx_mosaic_change = -1;
+                            gfx_mosaic_intensity = 0x0400;
+                            gfx_mosaic_layers = 0x02;
+                        }
                     }
 
                     p->struct_data.npc_data.ttl = 1; // despawn the object that triggered the hit
