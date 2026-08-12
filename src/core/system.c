@@ -145,6 +145,7 @@ void System_Init_WramFunctions()
 */
 void System_Init_Settings()
 {
+    snd_settings_mono = false;
     snd_settings_volume = SND_DEFAULT_VOLUME;
     snd_settings_enable_bgm = true;
     snd_settings_enable_sfx = true;
