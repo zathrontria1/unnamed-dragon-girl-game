@@ -20,6 +20,8 @@
 #include "loop_title.h"
 #include "main.h"
 #include "loop_cutscene.h"
+#include "snd.h"
+#include "consts_snd.h"
 
 #include "spr.h"
 #include "vars_extern.h"
@@ -91,6 +93,8 @@ void Title_Loop()
     // TODO: make this go into a selection for new game/continue
     if (System_CheckKeyAny())
     {
+        SoundInterface_PlaySfx(SFX_ATK_PUNCH, 0); // Perhaps a better sound effect for this would be a "confirm" sound, but for now this is fine.
+
         shadow_brightness_change = 0;
 
         system_use_alternate_nmi = false;
