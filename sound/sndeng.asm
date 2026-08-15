@@ -705,157 +705,51 @@ _sfx_stop:
     ;(uint8_t id)
     mov A,<REG_APUIO2
     mov <REG_APUIO1,#SND_CMD_SFX_STOP ; opcode echo
-
-    mov X, #0
-    mov <r1, X ; mask for KOFF
-
-    mov <REG_DSPADDR, #DSP_V0SRCN ; Channel 0
-    cbne <REG_DSPDATA, :+
-        mov <global_sfx_tick_counter,X
-        mov <global_sfx_tick_counter+1,X
-        or <r1, #%00000001
-    :
-    clrc
-    adc <REG_DSPADDR, #$10  ; Channel 1
-    cbne <REG_DSPDATA, :+
-        mov <global_sfx_tick_counter+2,X
-        mov <global_sfx_tick_counter+3,X
-        or <r1, #%00000010
-    :
-    clrc
-    adc <REG_DSPADDR, #$10  ; Channel 2
-    cbne <REG_DSPDATA, :+
-        mov <global_sfx_tick_counter+4,X
-        mov <global_sfx_tick_counter+5,X
-        or <r1, #%00000100
-    :
-    clrc
-    adc <REG_DSPADDR, #$10  ; Channel 3
-    cbne <REG_DSPDATA, :+
-        mov <global_sfx_tick_counter+6,X
-        mov <global_sfx_tick_counter+7,X
-        or <r1, #%00001000
-    :
-    clrc
-    adc <REG_DSPADDR, #$10  ; Channel 4
-    cbne <REG_DSPDATA, :+
-        mov <global_sfx_tick_counter+8,X
-        mov <global_sfx_tick_counter+9,X
-        or <r1, #%00010000
-    :
-    clrc
-    adc <REG_DSPADDR, #$10  ; Channel 5
-    cbne <REG_DSPDATA, :+
-        mov <global_sfx_tick_counter+10,X
-        mov <global_sfx_tick_counter+11,X
-        or <r1, #%00100000
-    :
-    clrc
-    adc <REG_DSPADDR, #$10  ; Channel 6
-    cbne <REG_DSPDATA, :+
-        mov <global_sfx_tick_counter+12,X
-        mov <global_sfx_tick_counter+13,X
-        or <r1, #%01000000
-    :
-    clrc
-    adc <REG_DSPADDR, #$10  ; Channel 7
-    cbne <REG_DSPDATA, :+
-        mov <global_sfx_tick_counter+14,X
-        mov <global_sfx_tick_counter+15,X
-        or <r1, #%10000000
-    :
-
-    ; This one is a global reg
-    mov <REG_DSPADDR, #DSP_KOFF
-    mov <REG_DSPDATA, <r1
-
-    ; Update channel LRUs to the newest situation without ticking
-    mov A, X ; X is #0
-    call !_update_channel_lru
-
-    ; Then restore it
-    mov <REG_DSPADDR, #DSP_KOFF
-    mov <REG_DSPDATA, #$00
-
-    ret
+    bra _stop_voice_channels
 
 _stream_stop:
-    mov A,#63 ; voice for stream
-
-    mov X, #0
-    mov <r1, X ; mask for KOFF
-
-    mov <REG_DSPADDR, #DSP_V0SRCN ; Channel 0
-    cbne <REG_DSPDATA, :+
-        mov <global_sfx_tick_counter,X
-        mov <global_sfx_tick_counter+1,X
-        or <r1, #%00000001
-    :
-    clrc
-    adc <REG_DSPADDR, #$10  ; Channel 1
-    cbne <REG_DSPDATA, :+
-        mov <global_sfx_tick_counter+2,X
-        mov <global_sfx_tick_counter+3,X
-        or <r1, #%00000010
-    :
-    clrc
-    adc <REG_DSPADDR, #$10  ; Channel 2
-    cbne <REG_DSPDATA, :+
-        mov <global_sfx_tick_counter+4,X
-        mov <global_sfx_tick_counter+5,X
-        or <r1, #%00000100
-    :
-    clrc
-    adc <REG_DSPADDR, #$10  ; Channel 3
-    cbne <REG_DSPDATA, :+
-        mov <global_sfx_tick_counter+6,X
-        mov <global_sfx_tick_counter+7,X
-        or <r1, #%00001000
-    :
-    clrc
-    adc <REG_DSPADDR, #$10  ; Channel 4
-    cbne <REG_DSPDATA, :+
-        mov <global_sfx_tick_counter+8,X
-        mov <global_sfx_tick_counter+9,X
-        or <r1, #%00010000
-    :
-    clrc
-    adc <REG_DSPADDR, #$10  ; Channel 5
-    cbne <REG_DSPDATA, :+
-        mov <global_sfx_tick_counter+10,X
-        mov <global_sfx_tick_counter+11,X
-        or <r1, #%00100000
-    :
-    clrc
-    adc <REG_DSPADDR, #$10  ; Channel 6
-    cbne <REG_DSPDATA, :+
-        mov <global_sfx_tick_counter+12,X
-        mov <global_sfx_tick_counter+13,X
-        or <r1, #%01000000
-    :
-    clrc
-    adc <REG_DSPADDR, #$10  ; Channel 7
-    cbne <REG_DSPDATA, :+
-        mov <global_sfx_tick_counter+14,X
-        mov <global_sfx_tick_counter+15,X
-        or <r1, #%10000000
-    :
-
-    ; This one is a global reg
-    mov <REG_DSPADDR, #DSP_KOFF
-    mov <REG_DSPDATA, <r1
-
-    ; Update channel LRUs to the newest situation without ticking
-    mov A, X ; X is #0
-    call !_update_channel_lru
-
-    ; Then restore it
-    mov <REG_DSPADDR, #DSP_KOFF
-    mov <REG_DSPDATA, #$00
-
     mov <stream_active, #0
     mov <stream_current_block, #0
     mov <stream_watchdog, #0
+    mov <stream_watchdog+1, #0
+    mov A, #63 ; voice for stream
+
+_stop_voice_channels:
+    mov <r0, A ; target SFX/voice ID to stop
+    mov <r1, #0 ; mask for KOFF
+
+    mov <REG_DSPADDR, #DSP_V0SRCN
+    mov X, #0 ; tick counter byte offset (0, 2, 4, ... 14)
+    mov Y, #0 ; channel index (0..7)
+@chan_loop:
+    mov A, <r0
+    cbne <REG_DSPDATA, @next_chan
+        mov A, #0
+        mov <global_sfx_tick_counter+X, A
+        mov <global_sfx_tick_counter+1+X, A
+        mov A, !lut_channel_mask+Y
+        or A, <r1
+        mov <r1, A
+@next_chan:
+    clrc
+    adc <REG_DSPADDR, #$10
+    inc X
+    inc X
+    inc Y
+    cmp Y, #8
+    bcc @chan_loop
+
+    ; This one is a global reg
+    mov <REG_DSPADDR, #DSP_KOFF
+    mov <REG_DSPDATA, <r1
+
+    ; Update channel LRUs to the newest situation without ticking
+    mov A, #0
+    call !_update_channel_lru
+
+    ; Then restore it
+    mov <REG_DSPADDR, #DSP_KOFF
+    mov <REG_DSPDATA, #$00
 
     ret
 
