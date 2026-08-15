@@ -28,6 +28,8 @@ extern HUGE const uint8_t data_seq_aryx_t3[];
 extern HUGE const uint8_t data_seq_aryx_t4[];
 extern HUGE const uint8_t data_seq_aryx_t5[];
 extern HUGE const uint8_t data_seq_aryx_t6[];
+extern HUGE const uint8_t data_seq_aryx_t7[];
+extern HUGE const uint8_t data_seq_aryx_t8[];
 
 extern HUGE const struct sample_list_entry_ins data_snd_instruments[];
 extern HUGE const struct sample_list_entry_ins data_snd_instruments_module1[];
@@ -92,6 +94,7 @@ extern HUGE const uint8_t data_snd_smp_aryx_smp6[];
 extern HUGE const uint8_t data_snd_smp_aryx_smp7[];
 extern HUGE const uint8_t data_snd_smp_aryx_smp8[];
 // Aryx Oxx slice samples
+extern HUGE const uint8_t data_snd_smp_aryx_smp5_o01[];
 extern HUGE const uint8_t data_snd_smp_aryx_smp6_o01[];
 extern HUGE const uint8_t data_snd_smp_aryx_smp6_o02[];
 

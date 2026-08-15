@@ -175,6 +175,8 @@ void Title_Init()
     SoundInterface_UploadMusicSequence(data_seq_aryx_t4, 3);
     SoundInterface_UploadMusicSequence(data_seq_aryx_t5, 4);
     SoundInterface_UploadMusicSequence(data_seq_aryx_t6, 5);
+    SoundInterface_UploadMusicSequence(data_seq_aryx_t7, 6);
+    SoundInterface_UploadMusicSequence(data_seq_aryx_t8, 7);
     SoundInterface_SetMusicSpeed(2);
     SoundInterface_SetMusicTempo(95);
     SoundInterface_PlayMusic();

@@ -294,7 +294,7 @@ def convert_it_song(it_path, max_channels=8, prefix="", merge_drums=True):
     last_ins_scan = {}
     for pidx in playable_orders:
         for r in range(pat_rows.get(pidx, 64)):
-            for ch in range(max_channels):
+            for ch in range(32):
                 for ev in pat_data[pidx][ch]:
                     if ev[0] == r:
                         row, note, ins, vol, eff_cmd, eff_val = ev
@@ -398,12 +398,16 @@ def convert_it_song(it_path, max_channels=8, prefix="", merge_drums=True):
                 elif n is not None and ch in curr_ch_ins:
                     pat_data[pidx][ch][idx] = (r, n, curr_ch_ins[ch], v, ec, ev_val)
 
-    # 3. Optimize channels: Detect 100% identical channel pairs and merge percussion
+    # 3. Optimize channels: Detect identical/stereo channel pairs across all 32 channels and merge percussion
+    num_it_channels = 32
     merged_into = {}
-    for i in range(max_channels):
+    for i in range(num_it_channels):
         if i in merged_into: continue
-        for j in range(i+1, max_channels):
+        for j in range(i+1, num_it_channels):
             if j in merged_into: continue
+            has_i = any(pat_data[pidx][i] for pidx in unique_patterns)
+            has_j = any(pat_data[pidx][j] for pidx in unique_patterns)
+            if not (has_i and has_j): continue
             is_ident = True
             for pidx in unique_patterns:
                 evA = pat_data[pidx][i]
@@ -418,11 +422,13 @@ def convert_it_song(it_path, max_channels=8, prefix="", merge_drums=True):
                 if not is_ident: break
             if is_ident:
                 merged_into[j] = i
-                chn_pan[i] = 32
-                print(f"Detected identical channel pair: Ch {j+1} merged into Ch {i+1} (Center panned)")
+                pan_i = chn_pan[i] if i < len(chn_pan) else 32
+                pan_j = chn_pan[j] if j < len(chn_pan) else 32
+                chn_pan[i] = (pan_i + pan_j) // 2
+                print(f"Detected identical/stereo channel pair: Ch {j+1} merged into Ch {i+1} (Pan averaged to {chn_pan[i]})")
 
     # Percussion channel consolidation (e.g. Ch 7 & 8 if unlooped one-shots)
-    if merge_drums and 6 < max_channels and 7 < max_channels and 6 not in merged_into and 7 not in merged_into:
+    if merge_drums and 6 not in merged_into and 7 not in merged_into:
         has_7 = any(pat_data[pidx][6] for pidx in unique_patterns)
         has_8 = any(pat_data[pidx][7] for pidx in unique_patterns)
         if has_7 and has_8:
@@ -442,7 +448,11 @@ def convert_it_song(it_path, max_channels=8, prefix="", merge_drums=True):
             merged_into[7] = 6
             chn_pan[6] = 32
 
-    active_channels = [ch for ch in range(max_channels) if ch not in merged_into and any(pat_data[pidx][ch] for pidx in unique_patterns)]
+    active_channels = [ch for ch in range(num_it_channels) if ch not in merged_into and any(pat_data[pidx][ch] for pidx in unique_patterns)]
+    if len(active_channels) > max_channels:
+        dropped = active_channels[max_channels:]
+        active_channels = active_channels[:max_channels]
+        print(f"Channels exceed max_channels ({max_channels}): Keeping {[c+1 for c in active_channels]}, Dropping {[c+1 for c in dropped]}")
     print(f"Active Channels ({len(active_channels)}): {[c+1 for c in active_channels]}")
 
     # 4. Generate pattern-based bytecode for each active channel
