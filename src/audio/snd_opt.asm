@@ -338,6 +338,7 @@ _SoundInterface_PlayStream:
 	a16
 	rep	#32
 .restart_stream:
+	stz	_snd_stream_current_block
 	lda	r16
 	sta	_snd_stream_ptr
 	sta	_snd_stream_ptr_start
@@ -352,6 +353,7 @@ _SoundInterface_PlayStream:
 	lda	10,s
 	sta	_snd_stream_loop
 	lda	#1
+	sta	_snd_stream_starting
 	sta	_snd_stream_enable
 	a16
 	plx
@@ -444,6 +446,7 @@ _SoundInterface_StopStream:
 	sta	_snd_stream_ptr
 	lda	2+_snd_stream_ptr_start
 	sta	2+_snd_stream_ptr
+	stz	_snd_stream_current_block
 	rtl
 
 	section	"DONTMERGE_text.far.SoundInterface_StopStream_Internal.0","acrx"
@@ -472,6 +475,9 @@ _SoundInterface_NmiAudioUpload:
 	jsl	>_SoundInterface_AcknowledgeBusy
 	sep	#32
 	a8
+	lda	_snd_stream_starting
+	sta	8515
+	stz	_snd_stream_starting
 	lda	_snd_stream_current_block
 	sta	8514
 	lda	#$11 ; SND_CMD_STREAM_UPLOAD
@@ -514,10 +520,6 @@ l176:
 	sta	8512
 	inc	_snd_current_command_counter
 	stz	8513
-l349:
-	lda	8512
-	cmp	_snd_current_command_counter
-	bne	l349
 	a16
 	rep	#32
 	lda	_snd_stream_current_block

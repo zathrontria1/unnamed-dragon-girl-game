@@ -247,6 +247,11 @@ _stream_upload:
     mov A, <REG_APUIO2
     mov <stream_current_block, A
 
+    mov A, <REG_APUIO3
+    beq :+
+        mov <stream_active, #0
+    :
+
     mov <REG_APUIO1,<REG_APUIO1 ;echo the opcode.
 
     ; wait for echo from cpu on REG_APUIO1 that indicates that new data has been sent

@@ -47,6 +47,7 @@ uint8_t * snd_stream_ptr_start;
 uint16_t snd_stream_length;
 bool snd_stream_enable;
 bool snd_stream_loop;
+bool snd_stream_starting;
 uint16_t snd_stream_current_block;
 
 /*

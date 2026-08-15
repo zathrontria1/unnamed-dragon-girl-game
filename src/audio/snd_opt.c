@@ -248,9 +248,11 @@ void SoundInterface_PlayStream(uint8_t * ptr, uint16_t len, bool loop)
 
     snd_stream_ptr = ptr;
     snd_stream_ptr_start = ptr;
+    snd_stream_current_block = 0;
     
     snd_stream_length = len;
     snd_stream_loop = loop;
+    snd_stream_starting = true;
 
     snd_stream_enable = true; // MUST BE SET LAST
 
@@ -285,6 +287,7 @@ void SoundInterface_StopStream()
     snd_stream_enable = false;
 
     snd_stream_ptr = snd_stream_ptr_start;
+    snd_stream_current_block = 0;
 
     snd_defercmd_stream_stop_enable = true;
 
@@ -300,6 +303,8 @@ void SoundInterface_NmiAudioUpload()
 
     uint16_t temp_len = 72;
 
+    REG_APU03 = (uint8_t)(snd_stream_starting ? 1 : 0);
+    snd_stream_starting = false;
     REG_APU02 = (uint8_t)snd_stream_current_block;
     REG_APU01 = SND_CMD_STREAM_UPLOAD; // Initial
 
@@ -327,11 +332,6 @@ void SoundInterface_NmiAudioUpload()
     snd_current_command_counter++;
 
     SoundInterface_AcknowledgeNop();
-
-    while (REG_APU00 != snd_current_command_counter)
-    {
-        ;
-    }
 
     snd_stream_current_block = ((snd_stream_current_block + 1) & 0x03);
 

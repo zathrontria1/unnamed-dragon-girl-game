@@ -42,6 +42,7 @@ extern uint16_t snd_stream_length;
 
 extern bool snd_stream_enable;
 extern bool snd_stream_loop;
+extern bool snd_stream_starting;
 extern uint16_t snd_stream_current_block;
 
 void SoundInterface_StartSoundEngine();

@@ -128,10 +128,9 @@ _start:
     mov !global_sampletable+253, A
     mov !global_sampletable+255, A ; Set both to the same pointer to simulate a loop
 
-    ; Place a guard header
-    mov A, !stream_data+144
-    or A, #$03
-    mov !stream_data+144, A
+    ; Place a guard header at the end of the 4-block ring buffer (block 3, 8th BRR header: 216 + 63 = 279)
+    mov A, #$03
+    mov !stream_data+279, A
 
     mov <REG_DSPADDR,#DSP_KOFF
     mov <REG_DSPDATA, #0 ; Clear all Key offs
@@ -1317,6 +1316,9 @@ _mus_ins_reset:
     mov <seq_tick_timer, #0
     mov <seq_tick_in_row, #0
     mov <global_sfx_endsoonest, #0
+    mov <stream_channel, #$ff
+    mov <stream_active, #0
+    mov <stream_current_block, #0
 
     mov <REG_APUIO1, #SND_CMD_MUS_INS_RESET
     ret

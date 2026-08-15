@@ -435,7 +435,9 @@ _stream_play:
         mov <global_sfx_endsoonest, A
         bra _commit_dsp_voice
     :
-    ; Otherwise, allocate via LRU and save assigned channel
+    ; Otherwise, query LRU allocator for the best free channel
+    mov A, #0
+    call !_update_channel_lru
     mov A, <global_sfx_endsoonest
     mov <stream_channel, A
 
@@ -604,11 +606,12 @@ _commit_dsp_voice:
     inc <REG_DSPADDR ; #DSP_V0GAIN
     mov <REG_DSPDATA, #$7f ; always write this regardless
 
-    ; Clear KOFF before keying on
+    ; Pulse KOFF before keying on to ensure voice restarts cleanly if already active
     mov <REG_DSPADDR, #DSP_KOFF
+    mov <REG_DSPDATA, <dsp_param_kon
     mov <REG_DSPDATA, #$00
 
-    ; This one is a global reg
+    ; Key on the channel
     mov <REG_DSPADDR, #DSP_KON
     mov <REG_DSPDATA, <dsp_param_kon
 
