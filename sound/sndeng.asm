@@ -52,16 +52,25 @@ _start:
         inc Y
         bne :-
 
-    ; Full clear sample memory pool
-    mov <r0+1, #(>global_sampledata + 1)
-    mov Y, A
+    ; Full clear all BSS tables, stream buffers, and sample pool from BSS_START to $FFFF
+    ; Phase 1: Clear partial first page
+    mov <r0, #0
+    mov <r0+1, #>BSS_START
+    mov Y, #<BSS_START
+    mov A, #0
     :
-        mov [<r0]+Y,A
+        mov [<r0]+Y, A
         inc Y
         bne :-
-        ; if Y is 0, increment high byte of address
+
+    ; Phase 2: Clear all remaining full pages to $FFFF
+    inc <r0+1
+    :
+        mov [<r0]+Y, A
+        inc Y
+        bne :-
         inc <r0+1
-        bne :- ; if address wraps all the way back to $0000, memory is fully cleared.
+        bne :-
 
     ;Clear control ports
     mov <REG_CONTROL,#$30
@@ -662,108 +671,90 @@ _stop_voice_channels:
 
     ret
 
-; For this one, detect if it's called from _process or not
-; if it ISN'T, do not perform tick downs
-; can use a passed argument - in A
 _update_channel_lru:
     ;(uint8_t tick_down)
-    mov <r1,A
+    mov <r1, A          ; 1 = tickdown pass; 0 = query only
+    mov <r3, #0         ; accumulated KOFF bitmask
 
-    mov A,#<global_sfx_tick_counter
-    mov Y,#>global_sfx_tick_counter
+    mov X, #0           ; Byte offset (0, 2, 4, ... 14)
+    mov Y, #0           ; Channel index (0..7)
+    mov <r0, #$ff       ; Min tick low byte
+    mov <r0+1, #$ff     ; Min tick high byte
 
-    movw <r8,ya
-
-    mov <r2,#8 ;counter
-    mov X,#0
-    mov Y,#0
-
-    mov <r0,#$ff
-    mov <r0+1,#$ff
-
-    @loop:
-    mov A,[<r8]+Y
-    cmp A,#$ff
+@loop:
+    ; Check if tick is infinite ($FFFF)
+    mov A, <global_sfx_tick_counter+1+X
+    cmp A, #$ff
     bne @not_infinite
-        inc Y
-        mov A,[<r8]+Y
-        dec Y
-        cmp A,#$ff
-        beq @check_next_channel ; tick is 0xffff (65535) (infinite), do nothing
-    @not_infinite:
+        mov A, <global_sfx_tick_counter+X
+        cmp A, #$ff
+        beq @next_chan  ; $FFFF -> infinite, do not steal
+@not_infinite:
 
-    mov A,[<r8]+Y
-    cmp A,#0
-    bne @not_zero_tick
-        inc Y
-        mov A,[<r8]+Y
-        dec Y
-        cmp A,#0
-        beq @zero_tick
-    @not_zero_tick:
-        ; Non-zero tick
-        ; If the argument is set, decrement the value of A
-        cmp <r1, #1
-        bne @no_dec
-            ; copy the entire value to r14
-            mov A,[<r8]+Y
-            mov <r14, A
-            inc Y
-            mov A,[<r8]+Y
-            mov <r14+1, A
-            dec Y
-            decw <r14
+    ; Check if tick is zero (idle channel)
+    mov A, <global_sfx_tick_counter+X
+    or A, <global_sfx_tick_counter+1+X
+    bne @not_zero
+        ; Idle channel (0 ticks): top priority candidate
+        mov <global_sfx_endsoonest, Y
+        mov <r0, #0
+        mov <r0+1, #0
+        bra @next_chan
 
-            mov A,<r14
-            mov [<r8]+Y,A
-            inc Y
-            mov A,<r14+1
-            mov [<r8]+Y,A
-            dec Y
-        @no_dec:
-        ; Check if tick is the least recently used.
-        inc Y
-        mov A,[<r8]+Y
-        dec Y
-        cmp A, <r0+1
-        bcc @new_soonest
-        bne @check_next_channel
-            mov A,[<r8]+Y
-            cmp A, <r0
-            bcs @check_next_channel
-        @new_soonest:
-            mov A,[<r8]+Y
-            mov <r0,A
-            inc Y
-            mov A,[<r8]+Y
-            mov <r0+1,A
-            dec Y
-            mov <global_sfx_endsoonest,X
-            bra @check_next_channel
-    @zero_tick:
-        ; Zero tick, aka finished playing.
-        ; Only send DSP_KOFF if we are in the timer tickdown pass (r1 == 1)
-        cmp <r1, #1
+@not_zero:
+    ; Non-zero tick: check if tickdown requested (r1 == 1)
+    cmp <r1, #1
+    bne @no_dec
+        ; Tickdown pass: decrement 16-bit tick count
+        mov A, <global_sfx_tick_counter+X
         bne :+
-            mov A, !lut_channel_mask+X
-
-            mov <REG_DSPADDR,#DSP_KOFF
-            mov <REG_DSPDATA,A
+            dec <global_sfx_tick_counter+1+X
         :
-        
-        mov <global_sfx_endsoonest,X
+        dec <global_sfx_tick_counter+X
 
-            mov <r0, #0 ; always true
+        ; Check if it just reached 0
+        mov A, <global_sfx_tick_counter+X
+        or A, <global_sfx_tick_counter+1+X
+        bne @no_dec
+            ; Channel just expired: add to KOFF mask and mark as free
+            mov A, !lut_channel_mask+Y
+            or A, <r3
+            mov <r3, A
+
+            mov <global_sfx_endsoonest, Y
+            mov <r0, #0
             mov <r0+1, #0
-    @check_next_channel:
-    inc Y
-    inc Y
-    inc X
-    dec <r2
-    bne @loop
+            bra @next_chan
 
-    mov <REG_DSPADDR,#DSP_KOFF
-    mov <REG_DSPDATA, #%000000000
+@no_dec:
+    ; Compare channel 16-bit tick with minimum (<r0, <r0+1)
+    mov A, <global_sfx_tick_counter+1+X
+    cmp A, <r0+1
+    bcc @new_min
+    bne @next_chan
+        mov A, <global_sfx_tick_counter+X
+        cmp A, <r0
+        bcs @next_chan
+@new_min:
+    mov A, <global_sfx_tick_counter+X
+    mov <r0, A
+    mov A, <global_sfx_tick_counter+1+X
+    mov <r0+1, A
+    mov <global_sfx_endsoonest, Y
+
+@next_chan:
+    inc X
+    inc X
+    inc Y
+    cmp Y, #8
+    bcc @loop
+
+    ; If any channels expired, write KOFF mask to DSP
+    mov A, <r3
+    beq :+
+        mov <REG_DSPADDR, #DSP_KOFF
+        mov <REG_DSPDATA, A
+    :
 
     ret
 

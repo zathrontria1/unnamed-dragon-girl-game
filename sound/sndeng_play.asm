@@ -478,18 +478,18 @@ _commit_dsp_voice:
     ; now we have to determine what channel to use.
     mov A, <global_sfx_endsoonest
     asl A
-    mov Y, A
+    mov X, A
 
     ; store the sound tickcount now
     mov A, <r8
-    mov !global_sfx_tick_counter+Y,A 
+    mov <global_sfx_tick_counter+X, A
     mov A, <r8+1
-    mov !global_sfx_tick_counter+1+Y,A 
+    mov <global_sfx_tick_counter+1+X, A
 
     mov Y, <global_sfx_endsoonest
     mov A, !lut_channel_mask+Y
 
-    mov <dsp_param_kon,A
+    mov <dsp_param_kon, A
     ; dsp_param_kon contains the channel to key on 
     
     mov A,<global_sfx_endsoonest
@@ -520,6 +520,10 @@ _commit_dsp_voice:
 
     inc <REG_DSPADDR ; #DSP_V0GAIN
     mov <REG_DSPDATA, #$7f ; always write this regardless
+
+    ; Clear KOFF before keying on
+    mov <REG_DSPADDR, #DSP_KOFF
+    mov <REG_DSPDATA, #$00
 
     ; This one is a global reg
     mov <REG_DSPADDR, #DSP_KON
