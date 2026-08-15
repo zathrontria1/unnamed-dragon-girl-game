@@ -121,10 +121,24 @@ void Title_Loop()
         SpriteEngine_ResetSpriteLists();
         DmaSystem_ResetQueue();
 
-        // Start the game intro
         system_loop_func_ptr = Main_GetFunctionPointer(ROUTINE_CUTSCENE_INIT);
     
         system_target_routine = ROUTINE_CUTSCENE_INIT;
+
+        // Upload and start Aryx music sequence (8 channels)
+        SoundInterface_ResetSongInstruments();
+        SoundInterface_UploadInstrumentList((struct sample_list_entry_ins *)&data_snd_instruments_aryx[0]);
+        SoundInterface_UploadMusicSequence(data_seq_aryx_t1, 0);
+        SoundInterface_UploadMusicSequence(data_seq_aryx_t2, 1);
+        SoundInterface_UploadMusicSequence(data_seq_aryx_t3, 2);
+        SoundInterface_UploadMusicSequence(data_seq_aryx_t4, 3);
+        SoundInterface_UploadMusicSequence(data_seq_aryx_t5, 4);
+        SoundInterface_UploadMusicSequence(data_seq_aryx_t6, 5);
+        SoundInterface_UploadMusicSequence(data_seq_aryx_t7, 6);
+        SoundInterface_UploadMusicSequence(data_seq_aryx_t8, 7);
+        SoundInterface_SetMusicSpeed(2);
+        SoundInterface_SetMusicTempo(95);
+        SoundInterface_PlayMusic();
 
         cs_current = (struct cutscene_data *)&data_cs_intro;
         

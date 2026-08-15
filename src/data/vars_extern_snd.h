@@ -22,8 +22,18 @@ extern HUGE const uint8_t data_seq_module1_t3[];
 extern HUGE const uint8_t data_seq_module1_t4[];
 extern HUGE const uint8_t data_seq_module1_t5[];
 
+extern HUGE const uint8_t data_seq_aryx_t1[];
+extern HUGE const uint8_t data_seq_aryx_t2[];
+extern HUGE const uint8_t data_seq_aryx_t3[];
+extern HUGE const uint8_t data_seq_aryx_t4[];
+extern HUGE const uint8_t data_seq_aryx_t5[];
+extern HUGE const uint8_t data_seq_aryx_t6[];
+extern HUGE const uint8_t data_seq_aryx_t7[];
+extern HUGE const uint8_t data_seq_aryx_t8[];
+
 extern HUGE const struct sample_list_entry_ins data_snd_instruments[];
 extern HUGE const struct sample_list_entry_ins data_snd_instruments_module1[];
+extern HUGE const struct sample_list_entry_ins data_snd_instruments_aryx[];
 extern HUGE const struct sample_list_entry data_snd_samples[];
 
 // SFX
@@ -68,11 +78,21 @@ extern HUGE const uint8_t data_snd_smp_ins_drum_clap[];
 extern HUGE const uint8_t data_snd_smp_ins_drum_stick[];
 
 // Module 1 samples
-extern HUGE const uint8_t data_snd_smp_m1_kick[];
-extern HUGE const uint8_t data_snd_smp_m1_hihat[];
-extern HUGE const uint8_t data_snd_smp_m1_snare[];
-extern HUGE const uint8_t data_snd_smp_m1_bass[];
-extern HUGE const uint8_t data_snd_smp_m1_lead[];
+extern HUGE const uint8_t data_snd_smp_module1_smp1[];
+extern HUGE const uint8_t data_snd_smp_module1_smp2[];
+extern HUGE const uint8_t data_snd_smp_module1_smp4[];
+extern HUGE const uint8_t data_snd_smp_module1_smp5[];
+extern HUGE const uint8_t data_snd_smp_module1_smp6[];
+
+// Aryx samples
+extern HUGE const uint8_t data_snd_smp_aryx_smp1[];
+extern HUGE const uint8_t data_snd_smp_aryx_smp2[];
+extern HUGE const uint8_t data_snd_smp_aryx_smp3[];
+extern HUGE const uint8_t data_snd_smp_aryx_smp4[];
+extern HUGE const uint8_t data_snd_smp_aryx_smp5[];
+extern HUGE const uint8_t data_snd_smp_aryx_smp6[];
+extern HUGE const uint8_t data_snd_smp_aryx_smp7[];
+extern HUGE const uint8_t data_snd_smp_aryx_smp8[];
 
 // Streamed audio
 // Player voice

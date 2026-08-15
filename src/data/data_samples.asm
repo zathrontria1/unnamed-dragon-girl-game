@@ -150,29 +150,70 @@ _data_snd_smp_ins_drum_stick:
 
 ; MODULE 1 SAMPLES
     section "_rodata.huge.bindata.audio.samples.29"
-    global _data_snd_smp_m1_kick
-_data_snd_smp_m1_kick:
-    incbin "sound/ins/itconv/ins_m1_kick.brr"
+    global _data_snd_smp_module1_smp1
+_data_snd_smp_module1_smp1:
+    incbin "sound/ins/itconv/ins_module1_smp1.brr"
 
     section "_rodata.huge.bindata.audio.samples.30"
-    global _data_snd_smp_m1_hihat
-_data_snd_smp_m1_hihat:
-    incbin "sound/ins/itconv/ins_m1_hihat.brr"
+    global _data_snd_smp_module1_smp2
+_data_snd_smp_module1_smp2:
+    incbin "sound/ins/itconv/ins_module1_smp2.brr"
 
     section "_rodata.huge.bindata.audio.samples.31"
-    global _data_snd_smp_m1_snare
-_data_snd_smp_m1_snare:
-    incbin "sound/ins/itconv/ins_m1_snare.brr"
+    global _data_snd_smp_module1_smp4
+_data_snd_smp_module1_smp4:
+    incbin "sound/ins/itconv/ins_module1_smp4.brr"
 
     section "_rodata.huge.bindata.audio.samples.32"
-    global _data_snd_smp_m1_bass
-_data_snd_smp_m1_bass:
-    incbin "sound/ins/itconv/ins_m1_bass.brr"
+    global _data_snd_smp_module1_smp5
+_data_snd_smp_module1_smp5:
+    incbin "sound/ins/itconv/ins_module1_smp5.brr"
 
     section "_rodata.huge.bindata.audio.samples.33"
-    global _data_snd_smp_m1_lead
-_data_snd_smp_m1_lead:
-    incbin "sound/ins/itconv/ins_m1_lead.brr"
+    global _data_snd_smp_module1_smp6
+_data_snd_smp_module1_smp6:
+    incbin "sound/ins/itconv/ins_module1_smp6.brr"
+
+; ARYX SAMPLES
+    section "_rodata.huge.bindata.audio.samples.34"
+    global _data_snd_smp_aryx_smp1
+_data_snd_smp_aryx_smp1:
+    incbin "sound/ins/itconv/ins_aryx_smp1.brr"
+
+    section "_rodata.huge.bindata.audio.samples.35"
+    global _data_snd_smp_aryx_smp2
+_data_snd_smp_aryx_smp2:
+    incbin "sound/ins/itconv/ins_aryx_smp2.brr"
+
+    section "_rodata.huge.bindata.audio.samples.36"
+    global _data_snd_smp_aryx_smp3
+_data_snd_smp_aryx_smp3:
+    incbin "sound/ins/itconv/ins_aryx_smp3.brr"
+
+    section "_rodata.huge.bindata.audio.samples.37"
+    global _data_snd_smp_aryx_smp4
+_data_snd_smp_aryx_smp4:
+    incbin "sound/ins/itconv/ins_aryx_smp4.brr"
+
+    section "_rodata.huge.bindata.audio.samples.38"
+    global _data_snd_smp_aryx_smp5
+_data_snd_smp_aryx_smp5:
+    incbin "sound/ins/itconv/ins_aryx_smp5.brr"
+
+    section "_rodata.huge.bindata.audio.samples.39"
+    global _data_snd_smp_aryx_smp6
+_data_snd_smp_aryx_smp6:
+    incbin "sound/ins/itconv/ins_aryx_smp6.brr"
+
+    section "_rodata.huge.bindata.audio.samples.40"
+    global _data_snd_smp_aryx_smp7
+_data_snd_smp_aryx_smp7:
+    incbin "sound/ins/itconv/ins_aryx_smp7.brr"
+
+    section "_rodata.huge.bindata.audio.samples.41"
+    global _data_snd_smp_aryx_smp8
+_data_snd_smp_aryx_smp8:
+    incbin "sound/ins/itconv/ins_aryx_smp8.brr"
 
 ; START OF STREAMED AUDIO
 ; Player voice data

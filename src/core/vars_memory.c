@@ -15,6 +15,7 @@
 #include "consts_snd.h"
 #include "sound/seq/seq_test.h"
 #include "sound/seq/seq_module1.h"
+#include "sound/seq/seq_aryx.h"
 
 const uint32_t const_zero[] = 
 {

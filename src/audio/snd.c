@@ -429,9 +429,9 @@ void SoundInterface_UploadSample(struct sample_list_entry * s)
         temp = ((((s->len * 3l) << 4l) / 9l) * (32000l / temp_realsamplerate)) / 1600l;
     }
 
-    if (temp > 0xfffe)
+    if (temp > 0xffff)
     {
-        temp = 0xfffe;
+        temp = 0xffff;
     }
 
     while (REG_APU01 != SND_CMD_DATA_SAMPLE_UPLOAD)
@@ -713,6 +713,7 @@ void SoundInterface_UploadMusicSequence(const uint8_t * s, uint8_t track)
 {
     // Scan the sequence to get its length first, advancing according to opcodes
     const uint8_t * temp_ptr = s;
+    uint16_t max_sub_offset = 0;
 
     while (*temp_ptr != SEQ_OPCODE_RESTART)
     {
@@ -742,9 +743,20 @@ void SoundInterface_UploadMusicSequence(const uint8_t * s, uint8_t track)
                 case SEQ_OPCODE_SET_ADSR:     // 3 bytes: opcode + adsr_l + adsr_h
                     temp_ptr += 3;
                     break;
+                case SEQ_OPCODE_CALL_SUB:     // 3 bytes: opcode + offset_l + offset_h
+                {
+                    uint16_t off = (uint16_t)temp_ptr[1] | ((uint16_t)temp_ptr[2] << 8);
+                    if (off > max_sub_offset)
+                    {
+                        max_sub_offset = off;
+                    }
+                    temp_ptr += 3;
+                    break;
+                }
                 case SEQ_OPCODE_LOOP:         // 1 byte
                 case SEQ_OPCODE_SET_RESTART:  // 1 byte
                 case SEQ_OPCODE_NOTE_CUT:     // 1 byte
+                case SEQ_OPCODE_RET:          // 1 byte
                     temp_ptr += 1;
                     break;
                 default:
@@ -754,6 +766,48 @@ void SoundInterface_UploadMusicSequence(const uint8_t * s, uint8_t track)
         }
     }
     temp_ptr += 1; // Include SEQ_OPCODE_RESTART (0xFF)
+
+    // If subroutines were called, scan the final subroutine block up to its SEQ_OPCODE_RET
+    if (max_sub_offset > 0)
+    {
+        temp_ptr = s + max_sub_offset;
+        while (*temp_ptr != SEQ_OPCODE_RET)
+        {
+            uint8_t op = *temp_ptr;
+            if (op < 0x80)
+            {
+                temp_ptr += 1;
+            }
+            else if (op <= 0x8f)
+            {
+                temp_ptr += 1;
+            }
+            else
+            {
+                switch (op)
+                {
+                    case SEQ_OPCODE_WAIT_EXT:
+                    case SEQ_OPCODE_SET_INS:
+                    case SEQ_OPCODE_SET_DURATION:
+                    case SEQ_OPCODE_PLAY_DRUM:
+                    case SEQ_OPCODE_SET_LOOP:
+                    case SEQ_OPCODE_SET_SPEED:
+                    case SEQ_OPCODE_SET_TEMPO:
+                        temp_ptr += 2;
+                        break;
+                    case SEQ_OPCODE_SET_VOL:
+                    case SEQ_OPCODE_SET_ADSR:
+                    case SEQ_OPCODE_CALL_SUB:
+                        temp_ptr += 3;
+                        break;
+                    default:
+                        temp_ptr += 1;
+                        break;
+                }
+            }
+        }
+        temp_ptr += 1; // Include SEQ_OPCODE_RET (0x9D)
+    }
 
     uint16_t temp_len = (uint16_t)(temp_ptr - s);
     // Align length to 2-byte boundary (accept slight 1-byte overrun)

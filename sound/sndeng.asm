@@ -629,6 +629,53 @@ _process_mus:
     mov X, <seq_current_track
     jmp !@track_active
 
+@opcode_call_sub:
+    inc Y
+    mov A, [<seq_current_track_ptr]+Y
+    mov <r0, A
+    inc Y
+    mov A, [<seq_current_track_ptr]+Y
+    mov <r0+1, A
+
+    ; Return address is seq_ptr + 3
+    mov A, <seq_current_track
+    asl A
+    mov X, A
+
+    mov A, <seq_ptr+X
+    clrc
+    adc A, #3
+    mov <seq_track_ret+X, A
+    mov A, <seq_ptr+1+X
+    adc A, #0
+    mov <seq_track_ret+1+X, A
+
+    ; Target address is seq_ptr_start + r0 (relative offset)
+    mov A, <seq_ptr_start+X
+    clrc
+    adc A, <r0
+    mov <seq_ptr+X, A
+    mov A, <seq_ptr_start+1+X
+    adc A, <r0+1
+    mov <seq_ptr+1+X, A
+
+    mov X, <seq_current_track
+    jmp !@track_active
+
+@opcode_ret:
+    ; Restore seq_ptr from seq_track_ret
+    mov A, <seq_current_track
+    asl A
+    mov X, A
+
+    mov A, <seq_track_ret+X
+    mov <seq_ptr+X, A
+    mov A, <seq_track_ret+1+X
+    mov <seq_ptr+1+X, A
+
+    mov X, <seq_current_track
+    jmp !@track_active
+
 @seq_opcode_table:
     .word @opcode_wait_ext     ; $90
     .word @opcode_set_ins      ; $91
@@ -642,6 +689,8 @@ _process_mus:
     .word @opcode_set_speed    ; $99
     .word @opcode_set_tempo    ; $9a
     .word @opcode_note_cut     ; $9b
+    .word @opcode_call_sub     ; $9c
+    .word @opcode_ret          ; $9d
 
 _advance_ptr_3:
     mov A, #3
@@ -865,6 +914,10 @@ _mus_ins_reset:
     ; Stop music playback immediately
     mov <seq_playing, #0
 
+    ; Key off all 8 DSP voices immediately
+    mov <REG_DSPADDR, #DSP_KOFF
+    mov <REG_DSPDATA, #$FF
+
     ; Reset sample allocation back to the SFX boundary
     movw ya, <global_sfx_end
     movw <global_nextfree, ya
@@ -884,23 +937,79 @@ _mus_ins_reset:
         cmp X, #128
         bcc @clear_dir_loop
 
-    ; Clear sequence track pointers
+    ; Clear song instrument tables (slots 0..31: 64 bytes each for tickcounts, rates, adsr)
     mov X, #0
-    @clear_seq_loop:
-        mov <seq_ptr_start+X, A
-        mov <seq_ptr+X, A
+    @clear_ins_tables_loop:
+        mov !global_sfx_tickcounts+X, A
+        mov !global_sfx_samplerates+X, A
+        mov !global_sfx_adsr+X, A
+        inc X
+        cmp X, #64
+        bcc @clear_ins_tables_loop
+
+    ; Clear song instrument tuning table (slots 0..31: 32 bytes)
+    mov X, #0
+    @clear_tune_loop:
+        mov !global_ins_tune+X, A
+        inc X
+        cmp X, #32
+        bcc @clear_tune_loop
+
+    ; Clear all 8 voice counters and reset voice ownership to $FF (unowned)
+    mov X, #0
+    @clear_voice_loop:
+        mov <global_sfx_tick_counter+X, A
         inc X
         cmp X, #16
-        bcc @clear_seq_loop
+        bcc @clear_voice_loop
 
-    ; Reset track channel assignments
     mov X, #0
-    mov A, #$ff
-    @clear_chan_loop:
-        mov !seq_track_channel+X, A
+    mov A, #$FF
+    @clear_voice_owner_loop:
+        mov !voice_owner+X, A
         inc X
         cmp X, #8
-        bcc @clear_chan_loop
+        bcc @clear_voice_owner_loop
+
+    ; Clear all 8 sequence tracks pointers, loops, return addresses, and overrides
+    mov X, #0
+    mov A, #0
+    @clear_seq_tracks_loop:
+        mov <seq_ptr_start+X, A
+        mov <seq_ptr+X, A
+        mov <seq_ptr_loop+X, A
+        mov <seq_track_ret+X, A
+        mov !seq_track_adsr_override+X, A
+        mov !seq_track_tick_override+X, A
+        mov !seq_track_pitch_curr+X, A
+        mov !seq_track_pitch_target+X, A
+        mov !seq_track_pitch_slide+X, A
+        inc X
+        cmp X, #16
+        bcc @clear_seq_tracks_loop
+
+    ; Reset track wait, channels, instruments, and volumes
+    mov X, #0
+    @clear_track_bytes_loop:
+        mov A, #0
+        mov <seq_loop_counter+X, A
+        mov <seq_track_wait+X, A
+        mov !seq_track_vol_slide_l+X, A
+        mov !seq_track_vol_slide_r+X, A
+        mov !seq_track_pitch_mode+X, A
+        mov !seq_track_ins+X, A
+        mov A, #$FF
+        mov !seq_track_channel+X, A
+        mov A, #31
+        mov !seq_track_vol_l+X, A
+        mov !seq_track_vol_r+X, A
+        inc X
+        cmp X, #8
+        bcc @clear_track_bytes_loop
+
+    mov <seq_tick_timer, #0
+    mov <seq_tick_in_row, #0
+    mov <global_sfx_endsoonest, #0
 
     mov <REG_APUIO1, #SND_CMD_MUS_INS_RESET
     ret

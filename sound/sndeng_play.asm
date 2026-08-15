@@ -417,17 +417,16 @@ _stream_play:
 _start_note:
     ; Update ADSR
     ; Sequence instrument notes (ID < 16) can use per-track sticky overrides
-    mov A, <dsp_param_srcn
-    cmp A, #16
-    bcs @adsr_skip
-
+    ; --- ADSR setup ---
     mov A, <seq_current_track
+    cmp A, #8
+    bcs @adsr_skip ; SFX ($FF) or invalid track: use instrument table default
+
     asl A
     mov X, A
-
     mov A, !seq_track_adsr_override+X
     or A, !seq_track_adsr_override+1+X
-    beq @adsr_skip ; if ADSR is not set use defaults
+    beq @adsr_skip
         mov A, !seq_track_adsr_override+X
         mov <dsp_param_adsr, A
         mov A, !seq_track_adsr_override+1+X
@@ -437,44 +436,40 @@ _start_note:
         mov A, #<global_sfx_adsr
         mov Y, #>global_sfx_adsr
         clrc
-        addw ya,<r15
-        movw <r15,ya
+        addw ya, <r15
+        movw <r15, ya
 
-        mov Y,#0
-
-        mov A,[<r15]+Y
+        mov Y, #0
+        mov A, [<r15]+Y
         mov <dsp_param_adsr, A
-        inc y
-        mov A,[<r15]+Y
+        inc Y
+        mov A, [<r15]+Y
         mov <dsp_param_adsr+1, A
     @adsr_end:
 
-    ; Set the tickdown rate
-    ; <dsp_param_srcn has the sfx id slot
-    mov A, <dsp_param_srcn
-    cmp A, #16
-    bcs @tick_skip
-
+    ; --- Tick duration setup ---
     mov A, <seq_current_track
+    cmp A, #8
+    bcs @tick_skip ; SFX ($FF) or invalid track: use instrument table default
+
     asl A
     mov X, A
-
     mov A, !seq_track_tick_override+X
     or A, !seq_track_tick_override+1+X
-    beq @tick_skip ; if tick is not set, use defaults
+    beq @tick_skip
         mov A, !seq_track_tick_override+X
         mov <r8, A
         mov A, !seq_track_tick_override+1+X
         mov <r8+1, A
         bra @tick_end
     @tick_skip:
-        mov A,<dsp_param_srcn
+        mov A, <dsp_param_srcn
         asl A
         mov Y, A
-        mov A,!global_sfx_tickcounts+Y
-        mov <r8,A
-        mov A,!global_sfx_tickcounts+1+Y
-        mov <r8+1,A
+        mov A, !global_sfx_tickcounts+Y
+        mov <r8, A
+        mov A, !global_sfx_tickcounts+1+Y
+        mov <r8+1, A
     @tick_end:
 
 _commit_dsp_voice:

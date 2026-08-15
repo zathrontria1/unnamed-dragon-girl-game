@@ -62,6 +62,8 @@ SEQ_OPCODE_SET_RESTART  = $98
 SEQ_OPCODE_SET_SPEED    = $99
 SEQ_OPCODE_SET_TEMPO    = $9a
 SEQ_OPCODE_NOTE_CUT     = $9b
+SEQ_OPCODE_CALL_SUB     = $9c
+SEQ_OPCODE_RET          = $9d
 SEQ_OPCODE_RESTART      = $ff
 
 ; Define the stream data as this particular sample
