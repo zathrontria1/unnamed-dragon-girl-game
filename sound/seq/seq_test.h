@@ -8,7 +8,7 @@
 
 HUGE const uint8_t data_seq_test_t1[] = {
     SEQ_SET_LOOP(6),
-    SEQ_SET_VOL(31, 31),
+    SEQ_SET_VOL(64, 16),
     SEQ_PLAY_DRUM(INS_DRUM_KICK),
     SEQ_WAIT_0,
     SEQ_PLAY_DRUM(INS_DRUM_HIHAT),
@@ -33,7 +33,7 @@ HUGE const uint8_t data_seq_test_t1[] = {
 
 HUGE const uint8_t data_seq_test_t2[] = {
     SEQ_WAIT_3,
-    SEQ_SET_VOL(31, 31),
+    SEQ_SET_VOL(16, 64),
     SEQ_PLAY_DRUM(INS_DRUM_SNARE),
     SEQ_WAIT_2,
     SEQ_RESTART,
@@ -43,7 +43,7 @@ HUGE const uint8_t data_seq_test_t3[] = {
     SEQ_WAIT_1,
     SEQ_SET_LOOP(3),
     SEQ_SET_INS(INS_BASS),
-    SEQ_SET_VOL(31, 31),
+    SEQ_SET_VOL(64, 64),
     26,
     SEQ_WAIT_2,
     SEQ_LOOP,
@@ -109,7 +109,7 @@ HUGE const uint8_t data_seq_test_t4[] = {
     SEQ_SET_ADSR((0x03 | (0x07 << 4) | (0x01 << 7)), ((0x0c) | (0x07 << 5))),
     SEQ_SET_DURATION(240),
     SEQ_SET_INS(INS_STRINGS),
-    SEQ_SET_VOL(31, 31),
+    SEQ_SET_VOL(64, 64),
     NOTE_C3,
     SEQ_WAIT(30),
     NOTE_E3,
@@ -156,7 +156,7 @@ HUGE const uint8_t data_seq_test_t4[] = {
 };
 
 HUGE const uint8_t data_seq_test_t5[] = {
-    SEQ_SET_VOL(31, 31),
+    SEQ_SET_VOL(64, 64),
     SEQ_PLAY_DRUM(INS_DRUM_KICK),
     SEQ_WAIT_2,
     SEQ_PLAY_DRUM(INS_DRUM_SNARE),
@@ -174,7 +174,7 @@ HUGE const uint8_t data_seq_test_t5[] = {
 
 HUGE const uint8_t data_seq_test_t6[] = {
     SEQ_SET_INS(INS_BASS),
-    SEQ_SET_VOL(31, 31),
+    SEQ_SET_VOL(64, 64),
     NOTE_C2,
     SEQ_WAIT_2,
     NOTE_D2,
