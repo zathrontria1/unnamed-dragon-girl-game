@@ -1,5 +1,31 @@
 .segment "SPCIMAGE"
 
+_scale_single_volume:
+    mul ya
+    asl A
+    mov A, Y
+    adc A, #0
+    ret
+
+_scale_volumes_music:
+    mov Y, !seq_music_volume
+    bra _scale_both_volumes
+
+_scale_volumes_sfx:
+    mov Y, !seq_sfx_volume
+
+_scale_both_volumes:
+    push Y
+    mov A, <dsp_param_vol_l
+    call !_scale_single_volume
+    mov <dsp_param_vol_l, A
+
+    pop Y
+    mov A, <dsp_param_vol_r
+    call !_scale_single_volume
+    mov <dsp_param_vol_r, A
+    ret
+
 _ins_play_note:
     ;(uint8_t id, uint8_t note, uint8_t vol_l, uint8_t vol_r)
     ; A contains instrument, X contains the current note
@@ -34,21 +60,7 @@ _ins_play_note:
     :
 
     ; Scale note volumes with seq_music_volume
-    mov Y, !seq_music_volume
-    mov A, <dsp_param_vol_l
-    mul ya
-    asl A
-    mov A, Y
-    adc A, #0
-    mov <dsp_param_vol_l, A
-
-    mov Y, !seq_music_volume
-    mov A, <dsp_param_vol_r
-    mul ya
-    asl A
-    mov A, Y
-    adc A, #0
-    mov <dsp_param_vol_r, A
+    call !_scale_volumes_music
 
     ; subtract the MIDI note with reference note point 
     @note_adjust:
@@ -224,21 +236,7 @@ _ins_play_oneshot:
     :
 
     ; Scale one-shot volumes with seq_music_volume
-    mov Y, !seq_music_volume
-    mov A, <dsp_param_vol_l
-    mul ya
-    asl A
-    mov A, Y
-    adc A, #0
-    mov <dsp_param_vol_l, A
-
-    mov Y, !seq_music_volume
-    mov A, <dsp_param_vol_r
-    mul ya
-    asl A
-    mov A, Y
-    adc A, #0
-    mov <dsp_param_vol_r, A
+    call !_scale_volumes_music
 
     ; Fetch the slot effective value; needed for ADSR (auto fetched in _start_note)
     mov <r0+1, #0 ; clear the high byte
@@ -304,21 +302,7 @@ _sfx_play:
     @pan_calc_done:
 
     ; Scale SFX volume with seq_sfx_volume
-    mov Y, !seq_sfx_volume
-    mov A, <dsp_param_vol_l
-    mul ya
-    asl A
-    mov A, Y
-    adc A, #0
-    mov <dsp_param_vol_l, A
-
-    mov Y, !seq_sfx_volume
-    mov A, <dsp_param_vol_r
-    mul ya
-    asl A
-    mov A, Y
-    adc A, #0
-    mov <dsp_param_vol_r, A
+    call !_scale_volumes_sfx
 
     ; Fetch the slot effective value
     mov <r0, <dsp_param_srcn ; copy the SFX ID
@@ -367,21 +351,7 @@ _sfx_play_extend:
     mov <REG_APUIO1,<REG_APUIO1 ; again
 
     ; Scale SFX extended volume with seq_sfx_volume
-    mov Y, !seq_sfx_volume
-    mov A, <dsp_param_vol_l
-    mul ya
-    asl A
-    mov A, Y
-    adc A, #0
-    mov <dsp_param_vol_l, A
-
-    mov Y, !seq_sfx_volume
-    mov A, <dsp_param_vol_r
-    mul ya
-    asl A
-    mov A, Y
-    adc A, #0
-    mov <dsp_param_vol_r, A
+    call !_scale_volumes_sfx
 
     ; check if volume is zero. if yes, return immediately
     mov A, <dsp_param_vol_r
@@ -434,10 +404,7 @@ _stream_play:
 
     mov Y, !seq_voice_volume
     mov A, #63
-    mul ya
-    asl A
-    mov A, Y
-    adc A, #0
+    call !_scale_single_volume
     mov <REG_DSPDATA, A
 
     ; Remaining DSPADDR reg can be incremented
