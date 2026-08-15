@@ -146,12 +146,24 @@ _start:
     mov <seq_speed, #6
     mov <seq_tick_in_row, #0
 
+    mov A, #0
+    mov <global_sfx_end, A
+    mov <global_sfx_end+1, A
+
     mov A, #96
     mov !seq_music_volume, A
     mov !seq_sfx_volume, A
     mov !seq_voice_volume, A
 
+    mov X, #0
     mov A, #$ff
+    :
+        mov !seq_track_channel+X, A
+        mov !voice_owner+X, A
+        inc X
+        cmp X, #8
+        bcc :-
+
     mov <global_last_cmd, A ; Make it so that the "last command" is the soft reset command which is impossible for a fresh boot
 _main:
     call !_poll_command
@@ -236,7 +248,7 @@ _poll_stream_watchdog:
     mov A, #0
     ret
 
-SND_CMD_COUNT = $14
+SND_CMD_COUNT = $16
 
 _service_command:
     mov A, <REG_APUIO1
@@ -285,6 +297,8 @@ _service_command:
     .word _dsp_reg_write        ; $12: SND_CMD_DSP_SET
     .word _dir_reset            ; $13: SND_CMD_DIR_RESET
     .word _reset_spc            ; $14: SND_CMD_SOFTRESET
+    .word _lock_sfx_boundary    ; $15: SND_CMD_LOCK_SFX
+    .word _mus_ins_reset        ; $16: SND_CMD_MUS_INS_RESET
 
 _process_mus:
     mov A, <seq_playing
@@ -572,6 +586,49 @@ _process_mus:
     call !_advance_ptr_2
     jmp !@track_active
 
+@opcode_note_cut:
+    call !_advance_ptr_1
+
+    mov X, <seq_current_track
+    mov A, !seq_track_channel+X
+    cmp A, #8
+    bcs @cut_done
+
+    mov Y, A
+    mov A, !voice_owner+Y
+    cmp A, <seq_current_track
+    bne @cut_done
+
+    ; Issue KOFF to this voice channel
+    mov A, !lut_channel_mask+Y
+    mov <REG_DSPADDR, #DSP_KOFF
+    mov <REG_DSPDATA, A
+
+    ; Clear tick counter for this voice
+    mov A, Y
+    asl A
+    mov X, A
+    mov A, #0
+    mov <global_sfx_tick_counter+X, A
+    mov <global_sfx_tick_counter+1+X, A
+
+    ; Clear tracking
+    mov X, <seq_current_track
+    mov A, #$ff
+    mov !seq_track_channel+X, A
+    mov !voice_owner+Y, A
+
+    ; Clear KOFF and update LRU
+    mov <REG_DSPADDR, #DSP_KOFF
+    mov <REG_DSPDATA, #0
+
+    mov A, #0
+    call !_update_channel_lru
+
+@cut_done:
+    mov X, <seq_current_track
+    jmp !@track_active
+
 @seq_opcode_table:
     .word @opcode_wait_ext     ; $90
     .word @opcode_set_ins      ; $91
@@ -584,6 +641,7 @@ _process_mus:
     .word @opcode_set_restart  ; $98
     .word @opcode_set_speed    ; $99
     .word @opcode_set_tempo    ; $9a
+    .word @opcode_note_cut     ; $9b
 
 _advance_ptr_3:
     mov A, #3
@@ -717,6 +775,18 @@ _update_channel_lru:
         or A, <global_sfx_tick_counter+1+X
         bne @no_dec
             ; Channel just expired: add to KOFF mask and mark as free
+            mov A, !voice_owner+Y
+            cmp A, #8
+            bcs :+
+                push X
+                mov X, A
+                mov A, #$ff
+                mov !seq_track_channel+X, A
+                pop X
+            :
+            mov A, #$ff
+            mov !voice_owner+Y, A
+
             mov A, !lut_channel_mask+Y
             or A, <r3
             mov <r3, A
@@ -776,6 +846,7 @@ _dir_reset:
     mov A, #0
     mov Y, #0
     movw <global_nextfree, ya
+    movw <global_sfx_end, ya
     movw <global_sample_end, ya
     movw <global_seq_start, ya
     movw <global_seq_end, ya
@@ -784,6 +855,55 @@ _dir_reset:
 
     ret
 
+_lock_sfx_boundary:
+    movw ya, <global_nextfree
+    movw <global_sfx_end, ya
+    mov <REG_APUIO1, #SND_CMD_LOCK_SFX
+    ret
+
+_mus_ins_reset:
+    ; Stop music playback immediately
+    mov <seq_playing, #0
+
+    ; Reset sample allocation back to the SFX boundary
+    movw ya, <global_sfx_end
+    movw <global_nextfree, ya
+    mov A, #0
+    mov <global_sample_end, A
+    mov <global_sample_end+1, A
+    mov <global_seq_start, A
+    mov <global_seq_start+1, A
+    mov <global_seq_end, A
+    mov <global_seq_end+1, A
+
+    ; Clear directory entries 0..31 in global_sampletable (32 entries * 4 bytes = 128 bytes)
+    mov X, #0
+    @clear_dir_loop:
+        mov !global_sampletable+X, A
+        inc X
+        cmp X, #128
+        bcc @clear_dir_loop
+
+    ; Clear sequence track pointers
+    mov X, #0
+    @clear_seq_loop:
+        mov <seq_ptr_start+X, A
+        mov <seq_ptr+X, A
+        inc X
+        cmp X, #16
+        bcc @clear_seq_loop
+
+    ; Reset track channel assignments
+    mov X, #0
+    mov A, #$ff
+    @clear_chan_loop:
+        mov !seq_track_channel+X, A
+        inc X
+        cmp X, #8
+        bcc @clear_chan_loop
+
+    mov <REG_APUIO1, #SND_CMD_MUS_INS_RESET
+    ret
 
 _dsp_reg_write:
     ;(uint8_t addr, uint8_t data)

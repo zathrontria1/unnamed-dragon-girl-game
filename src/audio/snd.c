@@ -537,6 +537,48 @@ void SoundInterface_UploadInstrumentList(struct sample_list_entry_ins * s)
 }
 
 /**
+ * @brief Locks in the post-SFX sample boundary in the sound engine.
+ */
+void SoundInterface_LockSfxBoundary()
+{
+    SoundInterface_AcknowledgeBusy(false);
+
+    REG_APU01 = SND_CMD_LOCK_SFX;
+
+    while (REG_APU01 != SND_CMD_LOCK_SFX)
+    {
+        ; // Wait for opcode echo.
+    }
+
+    snd_current_command_counter++;
+
+    SoundInterface_AcknowledgeNop();
+
+    return;
+}
+
+/**
+ * @brief Clears song instruments and rewinds the sample heap to the SFX boundary.
+ */
+void SoundInterface_ResetSongInstruments()
+{
+    SoundInterface_AcknowledgeBusy(false);
+
+    REG_APU01 = SND_CMD_MUS_INS_RESET;
+
+    while (REG_APU01 != SND_CMD_MUS_INS_RESET)
+    {
+        ; // Wait for opcode echo.
+    }
+
+    snd_current_command_counter++;
+
+    SoundInterface_AcknowledgeNop();
+
+    return;
+}
+
+/**
  * @brief Updates the default pitch tuning index for a specific instrument ID.
  * 
  * @param ins_id The instrument ID index.
@@ -702,6 +744,7 @@ void SoundInterface_UploadMusicSequence(const uint8_t * s, uint8_t track)
                     break;
                 case SEQ_OPCODE_LOOP:         // 1 byte
                 case SEQ_OPCODE_SET_RESTART:  // 1 byte
+                case SEQ_OPCODE_NOTE_CUT:     // 1 byte
                     temp_ptr += 1;
                     break;
                 default:

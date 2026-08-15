@@ -148,6 +148,32 @@ _data_snd_smp_ins_drum_clap:
 _data_snd_smp_ins_drum_stick:
     incbin "sound/ins/ins_drum_stick.brr"
 
+; MODULE 1 SAMPLES
+    section "_rodata.huge.bindata.audio.samples.29"
+    global _data_snd_smp_m1_kick
+_data_snd_smp_m1_kick:
+    incbin "sound/ins/itconv/ins_m1_kick.brr"
+
+    section "_rodata.huge.bindata.audio.samples.30"
+    global _data_snd_smp_m1_hihat
+_data_snd_smp_m1_hihat:
+    incbin "sound/ins/itconv/ins_m1_hihat.brr"
+
+    section "_rodata.huge.bindata.audio.samples.31"
+    global _data_snd_smp_m1_snare
+_data_snd_smp_m1_snare:
+    incbin "sound/ins/itconv/ins_m1_snare.brr"
+
+    section "_rodata.huge.bindata.audio.samples.32"
+    global _data_snd_smp_m1_bass
+_data_snd_smp_m1_bass:
+    incbin "sound/ins/itconv/ins_m1_bass.brr"
+
+    section "_rodata.huge.bindata.audio.samples.33"
+    global _data_snd_smp_m1_lead
+_data_snd_smp_m1_lead:
+    incbin "sound/ins/itconv/ins_m1_lead.brr"
+
 ; START OF STREAMED AUDIO
 ; Player voice data
     section "_rodata.huge.bindata.audio.stream.player.0"

@@ -31,6 +31,8 @@ SND_CMD_STREAM_UPLOAD = $11
 SND_CMD_DSP_SET = $12
 SND_CMD_DIR_RESET = $13
 SND_CMD_SOFTRESET = $14
+SND_CMD_LOCK_SFX = $15
+SND_CMD_MUS_INS_RESET = $16
 
 ; Multi-phase handshake sub-commands ($20..$26)
 SND_CMD_DATA_SAMPLE_UPLOAD_TICK = $20
@@ -59,6 +61,7 @@ SEQ_OPCODE_LOOP         = $97
 SEQ_OPCODE_SET_RESTART  = $98
 SEQ_OPCODE_SET_SPEED    = $99
 SEQ_OPCODE_SET_TEMPO    = $9a
+SEQ_OPCODE_NOTE_CUT     = $9b
 SEQ_OPCODE_RESTART      = $ff
 
 ; Define the stream data as this particular sample

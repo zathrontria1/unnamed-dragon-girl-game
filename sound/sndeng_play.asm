@@ -267,6 +267,7 @@ _ins_play_oneshot:
 
 _sfx_play:
     ;(uint8_t id, uint8_t properties)
+    mov <seq_current_track, #$ff
     mov <dsp_param_srcn, <REG_APUIO2 ; sfx ID
     mov A, <REG_APUIO3 ; pan (from -127 to +127)
 
@@ -333,6 +334,7 @@ _sfx_play:
 
 _sfx_play_extend:
     ;(uint8_t sfx_id, int8_t vol_l, int8_t vol_r, int8_t pitch)
+    mov <seq_current_track, #$ff
     mov <dsp_param_srcn, <REG_APUIO2 ; sfx ID
     mov <dsp_param_vpitch, <REG_APUIO3 ; pitch (8-bit)
 
@@ -386,6 +388,7 @@ _sfx_play_extend:
     ret
 
 _stream_play:
+    mov <seq_current_track, #$ff
     ; Set up infinite tick count ($FFFF)
     mov A, #$ff
     mov <r8, A
@@ -475,6 +478,30 @@ _start_note:
     @tick_end:
 
 _commit_dsp_voice:
+    ; Update voice ownership and track assignment
+    mov Y, <global_sfx_endsoonest
+    mov A, !voice_owner+Y
+    cmp A, #8
+    bcs @no_prev_track_owner
+        mov X, A
+        mov A, #$ff
+        mov !seq_track_channel+X, A
+    @no_prev_track_owner:
+
+    mov A, <seq_current_track
+    cmp A, #8
+    bcs @sfx_voice_owner
+        mov X, A
+        mov A, <global_sfx_endsoonest
+        mov !seq_track_channel+X, A
+        mov A, <seq_current_track
+        mov !voice_owner+Y, A
+        bra @voice_owner_done
+    @sfx_voice_owner:
+        mov A, #$ff
+        mov !voice_owner+Y, A
+    @voice_owner_done:
+
     ; now we have to determine what channel to use.
     mov A, <global_sfx_endsoonest
     asl A

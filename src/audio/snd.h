@@ -87,6 +87,8 @@ void SoundInterface_UploadSample(struct sample_list_entry * s);
 
 void SoundInterface_UploadInstrumentList(struct sample_list_entry_ins * s);
 void SoundInterface_UploadSampleList(struct sample_list_entry * s);
+void SoundInterface_LockSfxBoundary();
+void SoundInterface_ResetSongInstruments();
 void SoundInterface_SetSampleTune(uint8_t ins_id, uint8_t tune);
 void SoundInterface_SetMusicTempo(uint16_t tempo);
 void SoundInterface_SetMusicSpeed(uint8_t speed);

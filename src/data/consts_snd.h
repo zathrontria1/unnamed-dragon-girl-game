@@ -31,6 +31,8 @@
 #define SND_CMD_DSP_SET 0x12
 #define SND_CMD_DIR_RESET 0x13
 #define SND_CMD_SOFTRESET 0x14
+#define SND_CMD_LOCK_SFX 0x15
+#define SND_CMD_MUS_INS_RESET 0x16
 
 // Multi-phase handshake sub-commands (0x20..0x26)
 #define SND_CMD_DATA_SAMPLE_UPLOAD_TICK 0x20
@@ -89,7 +91,7 @@
 /*
     Below 0x80 = 1-byte note key-on (uses track sticky instrument, volume, ADSR, duration).
     0x80 - 0x8F = 1-byte short wait (0 to 15 ticks).
-    0x90 - 0x98, 0xFF = extended control and parameterized opcodes.
+    0x90 - 0x9b, 0xFF = extended control and parameterized opcodes.
 */
 
 // Short wait opcodes (1-byte opcodes for 0..15 ticks)
@@ -122,6 +124,7 @@
 #define SEQ_SET_RESTART          0x98
 #define SEQ_SET_SPEED(speed)     0x99, (uint8_t)(speed)
 #define SEQ_SET_TEMPO(bpm)       0x9a, (uint8_t)(bpm)
+#define SEQ_NOTE_CUT             0x9b
 #define SEQ_RESTART              0xff
 
 // Raw opcode numbers for parser
@@ -137,6 +140,7 @@
 #define SEQ_OPCODE_SET_RESTART   0x98
 #define SEQ_OPCODE_SET_SPEED     0x99
 #define SEQ_OPCODE_SET_TEMPO     0x9a
+#define SEQ_OPCODE_NOTE_CUT      0x9b
 #define SEQ_OPCODE_RESTART       0xff
 
 // Piano key freq names to MIDI note

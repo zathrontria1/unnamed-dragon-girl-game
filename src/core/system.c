@@ -224,16 +224,7 @@ void System_DisplayStartupSplash()
     // TODO: describe a sequence pointer and structure so this can be handled as a single pointer to pass to a function
     // Upload SFX data (shared for entire game)
     SoundInterface_UploadSampleList((struct sample_list_entry *)&data_snd_samples[0]);
-
-    SoundInterface_UploadInstrumentList((struct sample_list_entry_ins *)&data_snd_instruments[0]);
-    SoundInterface_UploadMusicSequence(data_seq_test_t1, 0); // Drum 1
-    SoundInterface_UploadMusicSequence(data_seq_test_t2, 1); // Drum 2
-    SoundInterface_UploadMusicSequence(data_seq_test_t3, 2); // Bass
-    SoundInterface_UploadMusicSequence(data_seq_test_t4, 3); // Secondary
-    //SoundInterface_UploadMusicSequence(data_seq_test_t5, 4); // Drum test sequence
-    //SoundInterface_UploadMusicSequence(data_seq_test_t6, 5); // Drum + instrument test sequence
-    SoundInterface_SetMusicSpeed(6);
-    SoundInterface_SetMusicTempo(120);
+    SoundInterface_LockSfxBoundary();
 
     // Initialize user game settings
     System_Init_Settings();

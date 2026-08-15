@@ -177,6 +177,17 @@ void Cs_Loop()
             Loop_Game_Partial();
 
             HdmaEngine_EnableHdma();
+            
+            SoundInterface_ResetSongInstruments();
+            SoundInterface_UploadInstrumentList((struct sample_list_entry_ins *)&data_snd_instruments[0]);
+            SoundInterface_UploadMusicSequence(data_seq_test_t1, 0); // Drum 1
+            SoundInterface_UploadMusicSequence(data_seq_test_t2, 1); // Drum 2
+            SoundInterface_UploadMusicSequence(data_seq_test_t3, 2); // Bass
+            SoundInterface_UploadMusicSequence(data_seq_test_t4, 3); // Secondary
+            //SoundInterface_UploadMusicSequence(data_seq_test_t5, 4); // Drum test sequence
+            //SoundInterface_UploadMusicSequence(data_seq_test_t6, 5); // Drum + instrument test sequence
+            SoundInterface_SetMusicSpeed(6);
+            SoundInterface_SetMusicTempo(120);
 
             SoundInterface_PlayMusic(); 
 

@@ -16,7 +16,14 @@ extern HUGE const uint8_t data_seq_test_t4[];
 extern HUGE const uint8_t data_seq_test_t5[];
 extern HUGE const uint8_t data_seq_test_t6[];
 
+extern HUGE const uint8_t data_seq_module1_t1[];
+extern HUGE const uint8_t data_seq_module1_t2[];
+extern HUGE const uint8_t data_seq_module1_t3[];
+extern HUGE const uint8_t data_seq_module1_t4[];
+extern HUGE const uint8_t data_seq_module1_t5[];
+
 extern HUGE const struct sample_list_entry_ins data_snd_instruments[];
+extern HUGE const struct sample_list_entry_ins data_snd_instruments_module1[];
 extern HUGE const struct sample_list_entry data_snd_samples[];
 
 // SFX
@@ -59,6 +66,13 @@ extern HUGE const uint8_t data_snd_smp_ins_drum_hihat[];
 extern HUGE const uint8_t data_snd_smp_ins_drum_cymbals[];
 extern HUGE const uint8_t data_snd_smp_ins_drum_clap[];
 extern HUGE const uint8_t data_snd_smp_ins_drum_stick[];
+
+// Module 1 samples
+extern HUGE const uint8_t data_snd_smp_m1_kick[];
+extern HUGE const uint8_t data_snd_smp_m1_hihat[];
+extern HUGE const uint8_t data_snd_smp_m1_snare[];
+extern HUGE const uint8_t data_snd_smp_m1_bass[];
+extern HUGE const uint8_t data_snd_smp_m1_lead[];
 
 // Streamed audio
 // Player voice

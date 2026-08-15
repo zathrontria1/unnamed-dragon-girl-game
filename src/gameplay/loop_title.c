@@ -93,6 +93,7 @@ void Title_Loop()
     // TODO: make this go into a selection for new game/continue
     if (System_CheckKeyAny())
     {
+        SoundInterface_StopMusic();
         SoundInterface_PlaySfx(SFX_ATK_PUNCH, 0); // Perhaps a better sound effect for this would be a "confirm" sound, but for now this is fine.
 
         shadow_brightness_change = 0;
@@ -152,6 +153,19 @@ void Title_Init()
     DmaSystem_CopyToVram((uint8_t *)(LZ4_BUFFER_ADDR+0xc800), 0x3800, 1792);
 
     DmaSystem_UploadCgram();
+
+    // Upload and start Module1 music sequence (5 channels: Kick, Snare, Hihat, Bass, Lead)
+    SoundInterface_ResetSongInstruments();
+    SoundInterface_UploadInstrumentList((struct sample_list_entry_ins *)&data_snd_instruments_module1[0]);
+    
+    SoundInterface_UploadMusicSequence(data_seq_module1_t1, 0);
+    SoundInterface_UploadMusicSequence(data_seq_module1_t2, 1);
+    SoundInterface_UploadMusicSequence(data_seq_module1_t3, 2);
+    SoundInterface_UploadMusicSequence(data_seq_module1_t4, 3);
+    SoundInterface_UploadMusicSequence(data_seq_module1_t5, 4);
+    SoundInterface_SetMusicSpeed(6);
+    SoundInterface_SetMusicTempo(125);
+    SoundInterface_PlayMusic();
 
     REG_INIDISP = 0x00; // Enable display
 
