@@ -97,22 +97,53 @@
 #define STR_STREAM_DATA 0x3f
 
 /*
-    Below 0x80 = play the note directly
-    second, third, and fourth bytes specify sample, vol L and R
-
-    if needed, prefix with SEQ_OPCODE_NOTEPREFIX
-    ADSR is second and third bytes, note length is fourth byte
-
-    If not prefixed, ADSR and length are set at sample defaults.
+    Below 0x80 = 1-byte note key-on (uses track sticky instrument, volume, ADSR, duration).
+    0x80 - 0x8F = 1-byte short wait (0 to 15 ticks).
+    0x90 - 0x98, 0xFF = extended control and parameterized opcodes.
 */
 
-#define SEQ_OPCODE_PLAY_ONESHOT 0x80
-#define SEQ_OPCODE_WAIT 0x81
-#define SEQ_OPCODE_NOTEPREFIX 0x82
-#define SEQ_OPCODE_SETRESTARTPOINT 0x83 // Sets the next 4-byte section as the new restart point. Useful to not loop intros.
-#define SEQ_OPCODE_SETLOOPPOINT 0x84 // Sets the next 4-byte section as the loop point, and sets the loop counter too
-#define SEQ_OPCODE_LOOP 0x85 // Go to loop point and decrement the loop counter, if the loop counter is non-zero
-#define SEQ_OPCODE_RESTART 0xff
+// Short wait opcodes (1-byte opcodes for 0..15 ticks)
+#define SEQ_WAIT_0   0x80
+#define SEQ_WAIT_1   0x81
+#define SEQ_WAIT_2   0x82
+#define SEQ_WAIT_3   0x83
+#define SEQ_WAIT_4   0x84
+#define SEQ_WAIT_5   0x85
+#define SEQ_WAIT_6   0x86
+#define SEQ_WAIT_7   0x87
+#define SEQ_WAIT_8   0x88
+#define SEQ_WAIT_9   0x89
+#define SEQ_WAIT_10  0x8a
+#define SEQ_WAIT_11  0x8b
+#define SEQ_WAIT_12  0x8c
+#define SEQ_WAIT_13  0x8d
+#define SEQ_WAIT_14  0x8e
+#define SEQ_WAIT_15  0x8f
+
+// Parameterized & control macros
+#define SEQ_WAIT(ticks)          0x90, (uint8_t)(ticks)
+#define SEQ_SET_INS(ins)         0x91, (uint8_t)(ins)
+#define SEQ_SET_VOL(l, r)        0x92, (uint8_t)(l), (uint8_t)(r)
+#define SEQ_SET_ADSR(l, h)       0x93, (uint8_t)(l), (uint8_t)(h)
+#define SEQ_SET_DURATION(ticks)  0x94, (uint8_t)(ticks)
+#define SEQ_PLAY_DRUM(drum_id)   0x95, (uint8_t)(drum_id)
+#define SEQ_SET_LOOP(count)      0x96, (uint8_t)(count)
+#define SEQ_LOOP                 0x97
+#define SEQ_SET_RESTART          0x98
+#define SEQ_RESTART              0xff
+
+// Raw opcode numbers for parser
+#define SEQ_OPCODE_WAIT_BASE     0x80
+#define SEQ_OPCODE_WAIT_EXT      0x90
+#define SEQ_OPCODE_SET_INS       0x91
+#define SEQ_OPCODE_SET_VOL       0x92
+#define SEQ_OPCODE_SET_ADSR      0x93
+#define SEQ_OPCODE_SET_DURATION  0x94
+#define SEQ_OPCODE_PLAY_DRUM     0x95
+#define SEQ_OPCODE_SET_LOOP      0x96
+#define SEQ_OPCODE_LOOP          0x97
+#define SEQ_OPCODE_SET_RESTART   0x98
+#define SEQ_OPCODE_RESTART       0xff
 
 // Piano key freq names to MIDI note
 #define NOTE_C0 12+(0*12)

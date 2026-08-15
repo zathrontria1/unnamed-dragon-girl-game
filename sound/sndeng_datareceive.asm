@@ -34,16 +34,34 @@ _mus_seq_upload:
     movw ya, <global_sample_end
     cmpw ya, <r8
     bne :+
+        ; First sequence upload after samples: lock in sample boundary and sequence start
         movw ya, <global_nextfree
         movw <global_sample_end, ya
+        movw <global_seq_start, ya
     :
+
+    ; If uploading Track 0, reset sequence allocation back to sequence start
+    ; and clear all track starting pointers so unused tracks from a previous song are disabled
+    mov A, <r1
+    bne @not_track_0
+        movw ya, <global_seq_start
+        movw <global_nextfree, ya
+
+        mov X, #0
+        mov A, #0
+        @clear_track_ptrs:
+            mov <seq_ptr_start+X, A
+            mov <seq_ptr+X, A
+            inc X
+            cmp X, #16
+            bcc @clear_track_ptrs
+    @not_track_0:
 
     mov A, <r1
     asl A
     mov X, A
 
     movw ya, <global_nextfree
-    movw <global_sample_end, ya
     movw <r2, ya
 
     movw ya, <global_nextfree
@@ -53,6 +71,7 @@ _mus_seq_upload:
         ret
     :
     movw <global_nextfree,ya
+    movw <global_seq_end,ya
 
     mov A,#<global_sampledata
     mov Y,#>global_sampledata

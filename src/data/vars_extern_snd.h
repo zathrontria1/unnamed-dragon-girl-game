@@ -9,12 +9,12 @@ extern HUGE const uint8_t data_soundengine_binary[];
 extern HUGE const uint16_t data_soundengine_binary_size;
 
 // Sequence data
-extern HUGE const struct seq_command data_seq_test_t1[];
-extern HUGE const struct seq_command data_seq_test_t2[];
-extern HUGE const struct seq_command data_seq_test_t3[];
-extern HUGE const struct seq_command data_seq_test_t4[];
-extern HUGE const struct seq_command data_seq_test_t5[];
-extern HUGE const struct seq_command data_seq_test_t6[];
+extern HUGE const uint8_t data_seq_test_t1[];
+extern HUGE const uint8_t data_seq_test_t2[];
+extern HUGE const uint8_t data_seq_test_t3[];
+extern HUGE const uint8_t data_seq_test_t4[];
+extern HUGE const uint8_t data_seq_test_t5[];
+extern HUGE const uint8_t data_seq_test_t6[];
 
 extern HUGE const struct sample_list_entry_ins data_snd_instruments[];
 extern HUGE const struct sample_list_entry data_snd_samples[];

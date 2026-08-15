@@ -85,7 +85,7 @@ void SoundInterface_UploadSampleList(struct sample_list_entry * s);
 void SoundInterface_SetSampleTune(uint8_t ins_id, uint8_t tune);
 void SoundInterface_SetMusicTempo(uint16_t tempo);
 
-void SoundInterface_UploadMusicSequence(struct seq_command * s, uint8_t track);
+void SoundInterface_UploadMusicSequence(const uint8_t * s, uint8_t track);
 void SoundInterface_PlayMusic();
 void SoundInterface_PauseMusic();
 void SoundInterface_StopMusic();

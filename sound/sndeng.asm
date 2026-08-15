@@ -376,21 +376,13 @@ _process_mus:
     mov Y, #0
 
     mov A, [<seq_current_track_ptr]+Y
-    bpl @note ; all positive is a note
-    cmp A, #$86
-    bcc @opcode_runfromtable
+    bpl @note ; all positive (0x00..0x7F) is a 1-byte note
+    cmp A, #$90
+    bcc @is_short_wait ; 0x80..0x8F is a 1-byte short wait (0..15 ticks)
     cmp A, #$ff
-    beq @opcode_restart
+    beq @opcode_restart ; 0xFF is restart/loop track
+    jmp !@opcode_runfromtable ; 0x90..0x98 are extended opcodes
 
-    @increment_track_ptr:
-    mov A, <seq_current_track
-    asl A
-    mov X, A
-
-    call !_adjust_ptr
-
-    mov X, <seq_current_track ; This must be placed outside the function
-    
     @track_end:
     inc X
     cmp X, #8
@@ -417,35 +409,40 @@ _process_mus:
     ret
 
 @note:
-    mov X, A
-    
-    inc Y
-    mov A, [<seq_current_track_ptr]+Y
-    mov <r0, A
+    mov X, A ; X = note
 
-    inc Y
-    mov A, [<seq_current_track_ptr]+Y
+    mov A, <seq_current_track
+    mov Y, A
+    mov A, !seq_track_vol_l+Y
     mov <r8, A
-
-    inc Y
-    mov A, [<seq_current_track_ptr]+Y
+    mov A, !seq_track_vol_r+Y
     mov <r9, A
+    mov A, !seq_track_ins+Y ; Instrument ID
 
-    mov A, <r0
-    
     call !_ins_play_note
 
-    jmp !@increment_track_ptr
+    call !_advance_ptr_1
+    jmp !@track_end
+
+@is_short_wait:
+    and A, #$0f
+    mov X, <seq_current_track
+    mov <seq_track_wait+X, A
+
+    call !_advance_ptr_1
+    jmp !@track_end
 
 @opcode_runfromtable:
     setc
-    sbc A, #$80
+    sbc A, #$90
     asl A
     mov X, A
     jmp_ [!@seq_opcode_table+X]
 
 @opcode_restart:
-    ; Special handling is done here. Do not call the subroutine!
+    mov A, <seq_current_track
+    asl A
+    mov X, A
 
     mov A, <seq_ptr_start+X
     mov <seq_ptr+X, A
@@ -453,76 +450,84 @@ _process_mus:
     mov <seq_ptr+1+X, A
 
     mov X, <seq_current_track
-
     jmp !@track_active ; go to normal processing
 
-@opcode_play_oneshot:
-    mov A, <seq_current_track
-    asl A
-    mov X, A
-
+@opcode_wait_ext:
     inc Y
     mov A, [<seq_current_track_ptr]+Y
-    mov <r0, A
-
-    inc Y
-    mov A, [<seq_current_track_ptr]+Y
-    mov <r8, A
-
-    inc Y
-    mov A, [<seq_current_track_ptr]+Y
-    mov <r9, A
-
-    mov A, <r0
-    
-    call !_ins_play_oneshot
-
-    jmp !@increment_track_ptr
-
-@opcode_wait:
-    inc Y
-    mov A, [<seq_current_track_ptr]+Y
-
     mov X, <seq_current_track
     mov <seq_track_wait+X, A
 
-    jmp !@increment_track_ptr
+    call !_advance_ptr_2
+    jmp !@track_end
 
-@opcode_noteprefix:
-    mov A, <seq_current_track
-    asl A
-    mov X, A
-
-    mov <seq_note_prefix, #1
+@opcode_set_ins:
     inc Y
     mov A, [<seq_current_track_ptr]+Y
-    mov <seq_note_adsr_override, A
-    inc Y
-    mov A, [<seq_current_track_ptr]+Y
-    mov <seq_note_adsr_override+1, A
-    inc Y
-    mov A, [<seq_current_track_ptr]+Y
-    mov <seq_note_tick_override, A
-
-    call !_adjust_ptr
-
-    mov X, <seq_current_track ; This must be placed outside the function
-
-    jmp !@track_active
-
-@opcode_set_restart:
-    mov A, <seq_current_track
-    asl A
-    mov X, A
-    
-    call !_adjust_ptr
-
-    mov <seq_ptr_start+X, A 
-    mov <seq_ptr_start+1+X, Y 
-
     mov X, <seq_current_track
+    mov !seq_track_ins+X, A
 
+    call !_advance_ptr_2
     jmp !@track_active
+
+@opcode_set_vol:
+    inc Y
+    mov A, [<seq_current_track_ptr]+Y
+    mov X, <seq_current_track
+    mov !seq_track_vol_l+X, A
+    inc Y
+    mov A, [<seq_current_track_ptr]+Y
+    mov !seq_track_vol_r+X, A
+
+    call !_advance_ptr_3
+    jmp !@track_active
+
+@opcode_set_adsr:
+    mov A, <seq_current_track
+    asl A
+    mov X, A
+
+    inc Y
+    mov A, [<seq_current_track_ptr]+Y
+    mov !seq_track_adsr_override+X, A
+    inc Y
+    mov A, [<seq_current_track_ptr]+Y
+    mov !seq_track_adsr_override+1+X, A
+
+    call !_advance_ptr_3
+    jmp !@track_active
+
+@opcode_set_duration:
+    mov A, <seq_current_track
+    asl A
+    mov X, A
+
+    inc Y
+    mov A, [<seq_current_track_ptr]+Y
+    mov !seq_track_tick_override+X, A
+    mov A, #0
+    mov !seq_track_tick_override+1+X, A
+
+    call !_advance_ptr_2
+    jmp !@track_active
+
+@opcode_play_drum:
+    inc Y
+    mov A, [<seq_current_track_ptr]+Y
+    mov <r0, A ; Drum ID
+
+    mov A, <seq_current_track
+    mov Y, A
+    mov A, !seq_track_vol_l+Y
+    mov <r8, A
+    mov A, !seq_track_vol_r+Y
+    mov <r9, A
+
+    mov A, <r0
+    call !_ins_play_oneshot
+
+    call !_advance_ptr_2
+    jmp !@track_end
 
 @opcode_set_loop:
     inc Y
@@ -530,72 +535,101 @@ _process_mus:
     mov X, <seq_current_track
     mov <seq_loop_counter+X, A
 
-    call !_adjust_ptr
+    call !_advance_ptr_2
 
-    mov <seq_ptr_loop+X, A 
-    mov <seq_ptr_loop+1+X, Y 
+    mov A, <seq_current_track
+    asl A
+    mov X, A
+    mov A, <seq_ptr+X
+    mov <seq_ptr_loop+X, A
+    mov A, <seq_ptr+1+X
+    mov <seq_ptr_loop+1+X, A
 
     mov X, <seq_current_track
-
     jmp !@track_active
 
 @opcode_loop:
     mov X, <seq_current_track
     mov A, <seq_loop_counter+X
-    bne @prepare_loop_return
-        ; Not looping
-        call !_adjust_ptr
+    beq @loop_done
+        dec <seq_loop_counter+X
+
+        mov A, X
+        asl A
+        mov X, A
+        mov A, <seq_ptr_loop+X
+        mov <seq_ptr+X, A
+        mov A, <seq_ptr_loop+1+X
+        mov <seq_ptr+1+X, A
 
         mov X, <seq_current_track
-
         jmp !@track_active
-    @prepare_loop_return:
+    @loop_done:
+        call !_advance_ptr_1
+        jmp !@track_active
 
-    ; Special handling is done here. Do not call the subroutine!
-    mov A, X
-    asl A
-    mov X, A
+@opcode_set_restart:
+    call !_advance_ptr_1
 
-    mov A, <seq_ptr_loop+X
-    mov <seq_ptr+X, A
-    mov A, <seq_ptr_loop+1+X
-    mov <seq_ptr+1+X, A
-
-    mov X, <seq_current_track
-    dec <seq_loop_counter+X
-
-    jmp !@track_active ; go to normal processing
-
-@seq_opcode_table:
-    .word @opcode_play_oneshot
-    .word @opcode_wait
-    .word @opcode_noteprefix
-    .word @opcode_set_restart
-    .word @opcode_set_loop
-    .word @opcode_loop
-
-_adjust_ptr:
-    ; Use this subroutine to adjust pointer
-    ; A and Y will also contain the correct values 
-    ; for writing out stuff when the subroutine returns
     mov A, <seq_current_track
     asl A
     mov X, A
-
-    mov Y, <seq_ptr+1+X
     mov A, <seq_ptr+X
+    mov <seq_ptr_start+X, A
+    mov A, <seq_ptr+1+X
+    mov <seq_ptr_start+1+X, A
 
-    mov <r0, #4
-    mov <r0+1, #0
+    mov X, <seq_current_track
+    jmp !@track_active
 
+@seq_opcode_table:
+    .word @opcode_wait_ext     ; $90
+    .word @opcode_set_ins      ; $91
+    .word @opcode_set_vol      ; $92
+    .word @opcode_set_adsr     ; $93
+    .word @opcode_set_duration ; $94
+    .word @opcode_play_drum    ; $95
+    .word @opcode_set_loop     ; $96
+    .word @opcode_loop         ; $97
+    .word @opcode_set_restart  ; $98
+
+_advance_ptr_1:
+    mov A, <seq_current_track
+    asl A
+    mov X, A
+    inc <seq_ptr+X
+    bne :+
+        inc <seq_ptr+1+X
+    :
+    mov X, <seq_current_track
+    ret
+
+_advance_ptr_2:
+    mov A, <seq_current_track
+    asl A
+    mov X, A
+    mov A, <seq_ptr+X
     clrc
-    addw ya, <r0
+    adc A, #2
+    mov <seq_ptr+X, A
+    bcc :+
+        inc <seq_ptr+1+X
+    :
+    mov X, <seq_current_track
+    ret
 
-    mov <seq_ptr+X, A 
-    mov <seq_ptr+1+X, Y
-
-    ; mov X, <seq_current_track ; This must be placed outside the function
-
+_advance_ptr_3:
+    mov A, <seq_current_track
+    asl A
+    mov X, A
+    mov A, <seq_ptr+X
+    clrc
+    adc A, #3
+    mov <seq_ptr+X, A
+    bcc :+
+        inc <seq_ptr+1+X
+    :
+    mov X, <seq_current_track
     ret
 
 _process_sfx:
@@ -893,7 +927,20 @@ _dir_reset:
         cmp Y, #64
         bcc :-
 
-    mov <global_nextfree, #0
+    ; write hardcoded values for the 63th entry of the sample table
+    mov A, #<stream_data
+    mov !global_sampletable+252, A
+    mov !global_sampletable+254, A
+    mov A, #>stream_data
+    mov !global_sampletable+253, A
+    mov !global_sampletable+255, A ; Set both to the same pointer to simulate a loop
+
+    mov A, #0
+    mov Y, #0
+    movw <global_nextfree, ya
+    movw <global_sample_end, ya
+    movw <global_seq_start, ya
+    movw <global_seq_end, ya
 
     mov <REG_APUIO1,#SND_CMD_DIR_RESET
 

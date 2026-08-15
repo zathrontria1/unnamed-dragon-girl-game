@@ -564,17 +564,54 @@ void SoundInterface_SetOutputMode(uint8_t mode)
  * @param s     Pointer to the sequence commands array.
  * @param track The target track channel.
  */
-void SoundInterface_UploadMusicSequence(struct seq_command * s, uint8_t track)
+void SoundInterface_UploadMusicSequence(const uint8_t * s, uint8_t track)
 {
-    // Scan the sequence to get its length first
-    uint16_t temp_len = 4; // Include the terminator
+    // Scan the sequence to get its length first, advancing according to opcodes
+    const uint8_t * temp_ptr = s;
 
-    struct seq_command * temp_ptr = s;
-
-    while (temp_ptr->opcode != SEQ_OPCODE_RESTART)
+    while (*temp_ptr != SEQ_OPCODE_RESTART)
     {
-        temp_len += 4;
-        temp_ptr++;
+        uint8_t op = *temp_ptr;
+        if (op < 0x80) // 1-byte note key-on
+        {
+            temp_ptr += 1;
+        }
+        else if (op <= 0x8f) // 1-byte short wait
+        {
+            temp_ptr += 1;
+        }
+        else
+        {
+            switch (op)
+            {
+                case SEQ_OPCODE_WAIT_EXT:     // 2 bytes: opcode + ticks
+                case SEQ_OPCODE_SET_INS:      // 2 bytes: opcode + ins_id
+                case SEQ_OPCODE_SET_DURATION: // 2 bytes: opcode + ticks
+                case SEQ_OPCODE_PLAY_DRUM:    // 2 bytes: opcode + drum_id
+                case SEQ_OPCODE_SET_LOOP:     // 2 bytes: opcode + count
+                    temp_ptr += 2;
+                    break;
+                case SEQ_OPCODE_SET_VOL:      // 3 bytes: opcode + vol_l + vol_r
+                case SEQ_OPCODE_SET_ADSR:     // 3 bytes: opcode + adsr_l + adsr_h
+                    temp_ptr += 3;
+                    break;
+                case SEQ_OPCODE_LOOP:         // 1 byte
+                case SEQ_OPCODE_SET_RESTART:  // 1 byte
+                    temp_ptr += 1;
+                    break;
+                default:
+                    temp_ptr += 1;
+                    break;
+            }
+        }
+    }
+    temp_ptr += 1; // Include SEQ_OPCODE_RESTART (0xFF)
+
+    uint16_t temp_len = (uint16_t)(temp_ptr - s);
+    // Align length to 2-byte boundary (accept slight 1-byte overrun)
+    if (temp_len & 1)
+    {
+        temp_len++;
     }
 
     SoundInterface_AcknowledgeBusy(false);

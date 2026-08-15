@@ -403,13 +403,22 @@ _stream_play:
 ; so they come here
 _start_note:
     ; Update ADSR
-    mov A, <seq_note_prefix
-    beq @adsr_skip
-        mov A, <seq_note_adsr_override
-        or A, <seq_note_adsr_override+1
-        beq @adsr_skip ; if ADSR is not set use defaults
-        mov <dsp_param_adsr, <seq_note_adsr_override
-        mov <dsp_param_adsr+1, <seq_note_adsr_override+1
+    ; Sequence instrument notes (ID < 16) can use per-track sticky overrides
+    mov A, <dsp_param_srcn
+    cmp A, #16
+    bcs @adsr_skip
+
+    mov A, <seq_current_track
+    asl A
+    mov X, A
+
+    mov A, !seq_track_adsr_override+X
+    or A, !seq_track_adsr_override+1+X
+    beq @adsr_skip ; if ADSR is not set use defaults
+        mov A, !seq_track_adsr_override+X
+        mov <dsp_param_adsr, A
+        mov A, !seq_track_adsr_override+1+X
+        mov <dsp_param_adsr+1, A
         bra @adsr_end
     @adsr_skip:
         mov A, #<global_sfx_adsr
@@ -429,13 +438,21 @@ _start_note:
 
     ; Set the tickdown rate
     ; <dsp_param_srcn has the sfx id slot
+    mov A, <dsp_param_srcn
+    cmp A, #16
+    bcs @tick_skip
 
-    mov A, <seq_note_prefix ; check if the tick count is overridden
-    beq @tick_skip
-        mov A, <seq_note_tick_override
-        beq @tick_skip ; if tick is not set, use defaults
+    mov A, <seq_current_track
+    asl A
+    mov X, A
+
+    mov A, !seq_track_tick_override+X
+    or A, !seq_track_tick_override+1+X
+    beq @tick_skip ; if tick is not set, use defaults
+        mov A, !seq_track_tick_override+X
         mov <r8, A
-        mov <r8+1, #0
+        mov A, !seq_track_tick_override+1+X
+        mov <r8+1, A
         bra @tick_end
     @tick_skip:
         mov A,<dsp_param_srcn
@@ -446,9 +463,6 @@ _start_note:
         mov A,!global_sfx_tickcounts+1+Y
         mov <r8+1,A
     @tick_end:
-
-    ; reset the extension command
-    mov <seq_note_prefix, #0
 
     ; now we have to determine what channel to use.
     
