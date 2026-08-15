@@ -10,10 +10,10 @@
 extern bool snd_apu_booted;
 
 extern bool snd_settings_mono;
-extern uint8_t snd_settings_volume; 
-extern bool snd_settings_enable_bgm;
-extern bool snd_settings_enable_sfx;
-extern bool snd_settings_enable_voice;
+extern uint8_t snd_settings_volume_master; 
+extern uint8_t snd_settings_volume_bgm;
+extern uint8_t snd_settings_volume_sfx;
+extern uint8_t snd_settings_volume_voice;
 
 extern uint8_t snd_current_command_counter;
 
@@ -76,6 +76,9 @@ void SoundInterface_RunDeferredCommands();
 
 void SoundInterface_SetDspRegister(uint8_t dsp_reg, uint8_t dsp_data);
 void SoundInterface_SetMasterVolume(uint8_t mvol);
+void SoundInterface_SetMusicVolume(uint8_t vol);
+void SoundInterface_SetSfxVolume(uint8_t vol);
+void SoundInterface_SetVoiceVolume(uint8_t vol);
 void SoundInterface_SetOutputMode(uint8_t mode);
 
 void SoundInterface_ResetAPU();

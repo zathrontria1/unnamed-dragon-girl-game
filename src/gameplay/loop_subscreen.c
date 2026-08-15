@@ -48,6 +48,7 @@ uint16_t subscreen_transition_state;
 
 static uint8_t subscreen_options_volume_repeat_timer;
 static uint32_t subscreen_options_volume_repeat_frame;
+static uint8_t subscreen_audio_test_timer;
 
 void Loop_Subscreen_Transition_Init()
 {
@@ -689,13 +690,11 @@ void Subscreen_Options_DrawTile(uint16_t x, uint16_t y, uint16_t tile)
     return;
 }
 
-void Subscreen_Options_DrawValues(bool copy_result)
+static void Subscreen_Options_DrawVolumeBar(uint16_t row, uint8_t vol)
 {
-    uint8_t volume_display = snd_settings_volume;
+    uint8_t volume_display = vol;
     uint8_t volume_full_tiles;
     uint8_t volume_partial_fill;
-    uint16_t checked_tile = 0x006d;
-    uint16_t unchecked_tile = 0x006e;
 
     if (volume_display != 0)
     {
@@ -704,10 +703,7 @@ void Subscreen_Options_DrawValues(bool copy_result)
     volume_full_tiles = volume_display >> 3;
     volume_partial_fill = volume_display & 0x07;
 
-    Subscreen_Options_DrawTile(16, 5, snd_settings_mono ? unchecked_tile : checked_tile);
-    Subscreen_Options_DrawTile(25, 5, snd_settings_mono ? checked_tile : unchecked_tile);
-
-    Subscreen_Options_DrawTile(13, 7, 0x0062);
+    Subscreen_Options_DrawTile(13, row, 0x0062);
     for (uint8_t i = 0; i < 16; i++)
     {
         uint16_t tile = 0x0063;
@@ -719,16 +715,26 @@ void Subscreen_Options_DrawValues(bool copy_result)
         {
             tile += volume_partial_fill;
         }
-        Subscreen_Options_DrawTile(14 + i, 7, tile);
+        Subscreen_Options_DrawTile(14 + i, row, tile);
     }
-    Subscreen_Options_DrawTile(30, 7, 0x006c);
+    Subscreen_Options_DrawTile(30, row, 0x006c);
 
-    Subscreen_Options_DrawTile(18, 9, snd_settings_enable_bgm ? checked_tile : unchecked_tile);
-    Subscreen_Options_DrawTile(25, 9, snd_settings_enable_bgm ? unchecked_tile : checked_tile);
-    Subscreen_Options_DrawTile(18, 11, snd_settings_enable_sfx ? checked_tile : unchecked_tile);
-    Subscreen_Options_DrawTile(25, 11, snd_settings_enable_sfx ? unchecked_tile : checked_tile);
-    Subscreen_Options_DrawTile(18, 13, snd_settings_enable_voice ? checked_tile : unchecked_tile);
-    Subscreen_Options_DrawTile(25, 13, snd_settings_enable_voice ? unchecked_tile : checked_tile);
+    return;
+}
+
+void Subscreen_Options_DrawValues(bool copy_result)
+{
+    uint16_t checked_tile = 0x006d;
+    uint16_t unchecked_tile = 0x006e;
+
+    Subscreen_Options_DrawTile(16, 5, snd_settings_mono ? unchecked_tile : checked_tile);
+    Subscreen_Options_DrawTile(25, 5, snd_settings_mono ? checked_tile : unchecked_tile);
+
+    Subscreen_Options_DrawVolumeBar(7, snd_settings_volume_master);
+    Subscreen_Options_DrawVolumeBar(9, snd_settings_volume_bgm);
+    Subscreen_Options_DrawVolumeBar(11, snd_settings_volume_sfx);
+    Subscreen_Options_DrawVolumeBar(13, snd_settings_volume_voice);
+
     Subscreen_Options_DrawTile(18, 15, gfx_enable_hitblur ? checked_tile : unchecked_tile);
     Subscreen_Options_DrawTile(25, 15, gfx_enable_hitblur ? unchecked_tile : checked_tile);
     Subscreen_Options_DrawTile(18, 17, gfx_enable_heatwave ? checked_tile : unchecked_tile);
@@ -752,6 +758,7 @@ void Subscreen_Options()
     if (!subscreen_rendered)
     {
         subscreen_selection = 0;
+        subscreen_audio_test_timer = 0;
         Subscreen_Internal_FindBottomEntry((const struct menu_item *)&subscreen_items_options);
         
         UserInterface_ClearWindowBuffer(false);
@@ -767,15 +774,10 @@ void Subscreen_Options()
         UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_SOUND_MODE_MONO, 27, 5);
 
         UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_SOUND_MVOL, 3, 6);
-        UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_SOUND_BGM_ENABLE, 3, 8);
-        UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_ON, 20, 9);
-        UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_OFF, 27, 9);
-        UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_SOUND_SFX_ENABLE, 3, 10);
-        UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_ON, 20, 11);
-        UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_OFF, 27, 11);
-        UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_SOUND_VOI_ENABLE, 3, 12);
-        UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_ON, 20, 13);
-        UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_OFF, 27, 13);
+        UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_SOUND_BGMVOL, 3, 8);
+        UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_SOUND_SFXVOL, 3, 10);
+        UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_SOUND_VOIVOL, 3, 12);
+
         UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_GFX_HITBLUR, 3, 14);
         UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_ON, 20, 15);
         UserInterface_DrawWindowText((char *)&STR_UI_SUBSCREEN_OPTIONS_OFF, 27, 15);
@@ -804,62 +806,117 @@ void Subscreen_Options()
         bool right_pressed = System_CheckKey(KEY_RIGHT);
         bool toggle_pressed = left_pressed || right_pressed || System_CheckKey(KEY_A);
 
-        if ((subscreen_selection == 1) && (System_CheckKeyHeld(KEY_LEFT) || System_CheckKeyHeld(KEY_RIGHT)))
+        if ((subscreen_selection >= 1 && subscreen_selection <= 4) && (System_CheckKeyHeld(KEY_LEFT) || System_CheckKeyHeld(KEY_RIGHT)))
         {
-            switch (subscreen_selection)
+            volume_button_newly_pressed = left_pressed || right_pressed;
+
+            if (volume_button_newly_pressed)
             {
-                case 1:
-                    volume_button_newly_pressed = left_pressed || right_pressed;
+                subscreen_options_volume_repeat_timer = 16;
+                subscreen_options_volume_repeat_frame = system_frames_elapsed;
+            }
+            else if (subscreen_options_volume_repeat_frame != system_frames_elapsed)
+            {
+                subscreen_options_volume_repeat_frame = system_frames_elapsed;
+                if (subscreen_options_volume_repeat_timer > 0)
+                {
+                    subscreen_options_volume_repeat_timer--;
+                }
+                volume_repeat_due = subscreen_options_volume_repeat_timer == 0;
+            }
 
-                    if (volume_button_newly_pressed)
+            if (volume_button_newly_pressed || volume_repeat_due)
+            {
+                uint8_t * target_vol_ptr = 0;
+                switch (subscreen_selection)
+                {
+                    case 1:
+                        target_vol_ptr = &snd_settings_volume_master;
+                        break;
+                    case 2:
+                        target_vol_ptr = &snd_settings_volume_bgm;
+                        break;
+                    case 3:
+                        target_vol_ptr = &snd_settings_volume_sfx;
+                        break;
+                    case 4:
+                        target_vol_ptr = &snd_settings_volume_voice;
+                        break;
+                    default:
+                        break;
+                }
+
+                if (target_vol_ptr != 0)
+                {
+                    uint8_t old_vol = *target_vol_ptr;
+                    uint8_t new_vol = old_vol;
+
+                    if (System_CheckKeyHeld(KEY_LEFT))
                     {
-                        subscreen_options_volume_repeat_timer = 16;
-                        subscreen_options_volume_repeat_frame = system_frames_elapsed;
-                    }
-                    else if (subscreen_options_volume_repeat_frame != system_frames_elapsed)
-                    {
-                        subscreen_options_volume_repeat_frame = system_frames_elapsed;
-                        if (subscreen_options_volume_repeat_timer > 0)
+                        if (new_vol == 127)
                         {
-                            subscreen_options_volume_repeat_timer--;
+                            new_vol = 120;
                         }
-                        volume_repeat_due = subscreen_options_volume_repeat_timer == 0;
+                        else if (new_vol >= 8)
+                        {
+                            new_vol -= 8;
+                        }
+                        else
+                        {
+                            new_vol = 0;
+                        }
+                    }
+                    else if (System_CheckKeyHeld(KEY_RIGHT))
+                    {
+                        if (new_vol <= 119)
+                        {
+                            new_vol += 8;
+                        }
+                        else
+                        {
+                            new_vol = 127;
+                        }
                     }
 
-                    if (volume_button_newly_pressed || volume_repeat_due)
+                    if (new_vol != old_vol)
                     {
-                        if (System_CheckKeyHeld(KEY_LEFT))
+                        *target_vol_ptr = new_vol;
+                        switch (subscreen_selection)
                         {
-                            if (snd_settings_volume >= 8)
-                            {
-                                snd_settings_volume -= 8;
-                            }
-                            else
-                            {
-                                snd_settings_volume = 0;
-                            }
+                            case 1:
+                                SoundInterface_SetMasterVolume(new_vol);
+                                SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
+                                break;
+                            case 2:
+                                SoundInterface_SetMusicVolume(new_vol);
+                                if (old_vol == 0 && new_vol > 0)
+                                {
+                                    SoundInterface_PlayMusic();
+                                }
+                                else if (old_vol > 0 && new_vol == 0)
+                                {
+                                    SoundInterface_PauseMusic();
+                                }
+                                break;
+                            case 3:
+                                SoundInterface_SetSfxVolume(new_vol);
+                                SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
+                                break;
+                            case 4:
+                                SoundInterface_SetVoiceVolume(new_vol);
+                                SoundInterface_PlayClip(STREAM_VOICE_HURT_1 + (Math_GetRandom_u16() & 0x01));
+                                break;
+                            default:
+                                break;
                         }
-                        else if (System_CheckKeyHeld(KEY_RIGHT))
-                        {
-                            if (snd_settings_volume <= 119)
-                            {
-                                snd_settings_volume += 8;
-                            }
-                            else
-                            {
-                                snd_settings_volume = 127;
-                            }
-                        }
-                        if (volume_repeat_due)
-                        {
-                            subscreen_options_volume_repeat_timer = 4;
-                        }
-                        SoundInterface_SetMasterVolume(snd_settings_volume);
                         update_text = true;
                     }
-                    break;
-                default:
-                    break;
+                }
+
+                if (volume_repeat_due)
+                {
+                    subscreen_options_volume_repeat_timer = 4;
+                }
             }
         }
         else if (toggle_pressed)
@@ -869,38 +926,52 @@ void Subscreen_Options()
                 case 0:
                     snd_settings_mono = !snd_settings_mono;
                     SoundInterface_SetOutputMode(snd_settings_mono ? 1 : 0);
-                    update_text = true;
-                    break;
-                case 2:
-                    snd_settings_enable_bgm = !snd_settings_enable_bgm;
-                    if (snd_settings_enable_bgm)
-                    {
-                        SoundInterface_PlayMusic();
-                    }
-                    else
-                    {
-                        SoundInterface_PauseMusic();
-                    }
-                    update_text = true;
-                    break;
-                case 3:
-                    snd_settings_enable_sfx = !snd_settings_enable_sfx;
-                    update_text = true;
-                    break;
-                case 4:
-                    snd_settings_enable_voice = !snd_settings_enable_voice;
+                    subscreen_audio_test_timer = 1;
                     update_text = true;
                     break;
                 case 5:
                     gfx_enable_hitblur = !gfx_enable_hitblur;
+                    SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
                     update_text = true;
                     break;
                 case 6:
                     gfx_enable_heatwave = !gfx_enable_heatwave;
+                    SoundInterface_PlaySfx(SFX_UI_CONFIRM, 0);
                     update_text = true;
                     break;
                 default:
                     break;
+            }
+        }
+
+        if (subscreen_audio_test_timer > 0)
+        {
+            struct game_object dummy_obj;
+            dummy_obj.pos.x.a = 0;
+            dummy_obj.pos.y.a = 0;
+            dummy_obj.w = 0;
+            dummy_obj.h = 0;
+
+            if (subscreen_audio_test_timer == 1)
+            {
+                dummy_obj.pos.x.lh.h = bg_scroll_x.full.high.a + 1;
+                SoundInterface_PlaySfx_Pre(&dummy_obj, SFX_ATK_PUNCH);
+            }
+            else if (subscreen_audio_test_timer == 14)
+            {
+                dummy_obj.pos.x.lh.h = bg_scroll_x.full.high.a + 128;
+                SoundInterface_PlaySfx_Pre(&dummy_obj, SFX_ATK_PUNCH);
+            }
+            else if (subscreen_audio_test_timer == 27)
+            {
+                dummy_obj.pos.x.lh.h = bg_scroll_x.full.high.a + 255;
+                SoundInterface_PlaySfx_Pre(&dummy_obj, SFX_ATK_PUNCH);
+            }
+
+            subscreen_audio_test_timer++;
+            if (subscreen_audio_test_timer > 28)
+            {
+                subscreen_audio_test_timer = 0;
             }
         }
 

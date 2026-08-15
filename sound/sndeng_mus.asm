@@ -106,4 +106,22 @@ _mus_set_outputmode:
     mov <REG_APUIO1,#SND_CMD_MUS_SET_OUTPUTMODE
     
     ret
+
+_set_music_volume:
+    mov A, <REG_APUIO2
+    mov !seq_music_volume, A
+    mov <REG_APUIO1, #SND_CMD_SET_MUSIC_VOL
+    ret
+
+_set_sfx_volume:
+    mov A, <REG_APUIO2
+    mov !seq_sfx_volume, A
+    mov <REG_APUIO1, #SND_CMD_SET_SFX_VOL
+    ret
+
+_set_voice_volume:
+    mov A, <REG_APUIO2
+    mov !seq_voice_volume, A
+    mov <REG_APUIO1, #SND_CMD_SET_VOICE_VOL
+    ret
     

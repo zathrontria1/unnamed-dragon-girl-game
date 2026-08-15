@@ -89,10 +89,10 @@ _start:
     mov <REG_DSPDATA,A ; Reset Echo Volume Right
 
     mov <REG_DSPADDR,#DSP_MVOL0L
-    mov <REG_DSPDATA,#95 ; master volume left
+    mov <REG_DSPDATA,#96 ; master volume left
 
     mov <REG_DSPADDR,#DSP_MVOL0R
-    mov <REG_DSPDATA,#95 ; master volume right
+    mov <REG_DSPDATA,#96 ; master volume right
 
     ; reset all CPU side read ports
     ; #$00 = #SND_SIG_CLEAR, so just use A
@@ -137,6 +137,12 @@ _start:
     mov <seq_speed, #6
     mov <seq_tick_in_row, #0
 
+    mov A, #96
+    mov !seq_music_volume, A
+    mov !seq_sfx_volume, A
+    mov !seq_voice_volume, A
+
+    mov A, #$ff
     mov <global_last_cmd, A ; Make it so that the "last command" is the soft reset command which is impossible for a fresh boot
 _main:
     call !_poll_command
@@ -306,6 +312,21 @@ _service_command:
     cmp A,#SND_CMD_MUS_SET_OUTPUTMODE
     bne :+
         call !_mus_set_outputmode
+        jmp !@end
+    :
+    cmp A,#SND_CMD_SET_MUSIC_VOL
+    bne :+
+        call !_set_music_volume
+        jmp !@end
+    :
+    cmp A,#SND_CMD_SET_SFX_VOL
+    bne :+
+        call !_set_sfx_volume
+        jmp !@end
+    :
+    cmp A,#SND_CMD_SET_VOICE_VOL
+    bne :+
+        call !_set_voice_volume
         jmp !@end
     :
     cmp A,#SND_CMD_DSP_SET

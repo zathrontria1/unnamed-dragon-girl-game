@@ -15,10 +15,10 @@ bool snd_apu_booted;
 
 // User-settable settings.
 bool snd_settings_mono;
-uint8_t snd_settings_volume; // 0-127. Do not use the highest bit.
-bool snd_settings_enable_bgm;
-bool snd_settings_enable_sfx;
-bool snd_settings_enable_voice;
+uint8_t snd_settings_volume_master; // 0-127. Do not use the highest bit.
+uint8_t snd_settings_volume_bgm;
+uint8_t snd_settings_volume_sfx;
+uint8_t snd_settings_volume_voice;
 
 uint8_t snd_current_command_counter; // Used to check if the SPC is ready for a new command
 
@@ -135,7 +135,7 @@ void SoundInterface_StartSoundEngine()
  */
 void SoundInterface_PlaySfx_Pre(struct game_object * o, uint8_t sfx_id)
 {        
-    if (!snd_settings_enable_sfx)
+    if (!snd_settings_volume_sfx)
     {
         return;
     }
@@ -206,7 +206,7 @@ void SoundInterface_PlaySfx(uint8_t sfx_id, int8_t pan)
  */
 void SoundInterface_PlaySfx_Ex(uint8_t sfx_id, int8_t vol_l, int8_t vol_r, int8_t pitch)
 {
-    if (!snd_settings_enable_sfx)
+    if (!snd_settings_volume_sfx)
     {
         return;
     }
@@ -300,6 +300,78 @@ void SoundInterface_SetMasterVolume(uint8_t mvol)
     
     SoundInterface_SetDspRegister(0x0c, mvol);
     SoundInterface_SetDspRegister(0x1c, mvol);
+
+    return;
+}
+
+void SoundInterface_SetMusicVolume(uint8_t vol)
+{
+    if (vol > 127)
+    {
+        vol = 127;
+    }
+
+    SoundInterface_AcknowledgeBusy(false);
+
+    REG_APU02 = vol;
+    REG_APU01 = SND_CMD_SET_MUSIC_VOL;
+
+    while (REG_APU01 != SND_CMD_SET_MUSIC_VOL)
+    {
+        ; // Wait for opcode echo.
+    }
+
+    snd_current_command_counter++;
+
+    SoundInterface_AcknowledgeNop();
+
+    return;
+}
+
+void SoundInterface_SetSfxVolume(uint8_t vol)
+{
+    if (vol > 127)
+    {
+        vol = 127;
+    }
+
+    SoundInterface_AcknowledgeBusy(false);
+
+    REG_APU02 = vol;
+    REG_APU01 = SND_CMD_SET_SFX_VOL;
+
+    while (REG_APU01 != SND_CMD_SET_SFX_VOL)
+    {
+        ; // Wait for opcode echo.
+    }
+
+    snd_current_command_counter++;
+
+    SoundInterface_AcknowledgeNop();
+
+    return;
+}
+
+void SoundInterface_SetVoiceVolume(uint8_t vol)
+{
+    if (vol > 127)
+    {
+        vol = 127;
+    }
+
+    SoundInterface_AcknowledgeBusy(false);
+
+    REG_APU02 = vol;
+    REG_APU01 = SND_CMD_SET_VOICE_VOL;
+
+    while (REG_APU01 != SND_CMD_SET_VOICE_VOL)
+    {
+        ; // Wait for opcode echo.
+    }
+
+    snd_current_command_counter++;
+
+    SoundInterface_AcknowledgeNop();
 
     return;
 }
@@ -688,7 +760,7 @@ void SoundInterface_UploadMusicSequence(const uint8_t * s, uint8_t track)
  */
 void SoundInterface_PlayMusic()
 {
-    if (!snd_settings_enable_bgm)
+    if (!snd_settings_volume_bgm)
     {
         return;
     }

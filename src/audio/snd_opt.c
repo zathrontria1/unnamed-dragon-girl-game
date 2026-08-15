@@ -218,7 +218,7 @@ void SoundInterface_StopStream_Internal()
  */
 void SoundInterface_PlayClip(uint16_t clip_id)
 {
-    if (!snd_settings_enable_voice)
+    if (!snd_settings_volume_voice)
     {
         return;
     }

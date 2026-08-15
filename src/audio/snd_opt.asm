@@ -370,7 +370,7 @@ _SoundInterface_PlayClip:
 	sta	_nmi_snd_scratch_temp 
 	sep	#32
 	a8
-	lda	_snd_settings_enable_voice
+	lda	_snd_settings_volume_voice
 	a16
 	rep	#32
 	beq	l157

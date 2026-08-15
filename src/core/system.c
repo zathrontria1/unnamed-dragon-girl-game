@@ -146,10 +146,10 @@ void System_Init_WramFunctions()
 void System_Init_Settings()
 {
     snd_settings_mono = false;
-    snd_settings_volume = SND_DEFAULT_VOLUME;
-    snd_settings_enable_bgm = true;
-    snd_settings_enable_sfx = true;
-    snd_settings_enable_voice = true;
+    snd_settings_volume_master = SND_DEFAULT_VOLUME;
+    snd_settings_volume_bgm = SND_DEFAULT_VOLUME;
+    snd_settings_volume_sfx = SND_DEFAULT_VOLUME;
+    snd_settings_volume_voice = SND_DEFAULT_VOLUME;
 
     gfx_enable_hitblur = true;
     gfx_enable_heatwave = true;
@@ -238,7 +238,10 @@ void System_DisplayStartupSplash()
     // Initialize user game settings
     System_Init_Settings();
     
-    SoundInterface_SetMasterVolume(snd_settings_volume);
+    SoundInterface_SetMasterVolume(snd_settings_volume_master);
+    SoundInterface_SetMusicVolume(snd_settings_volume_bgm);
+    SoundInterface_SetSfxVolume(snd_settings_volume_sfx);
+    SoundInterface_SetVoiceVolume(snd_settings_volume_voice);
 
     shadow_brightness_change = 0;
 

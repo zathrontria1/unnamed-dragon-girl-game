@@ -33,6 +33,23 @@ _ins_play_note:
         mov <dsp_param_vol_r, A
     :
 
+    ; Scale note volumes with seq_music_volume
+    mov Y, !seq_music_volume
+    mov A, <dsp_param_vol_l
+    mul ya
+    asl A
+    mov A, Y
+    adc A, #0
+    mov <dsp_param_vol_l, A
+
+    mov Y, !seq_music_volume
+    mov A, <dsp_param_vol_r
+    mul ya
+    asl A
+    mov A, Y
+    adc A, #0
+    mov <dsp_param_vol_r, A
+
     ; subtract the MIDI note with reference note point 
     @note_adjust:
     mov A, <r1
@@ -206,6 +223,23 @@ _ins_play_oneshot:
         ret
     :
 
+    ; Scale one-shot volumes with seq_music_volume
+    mov Y, !seq_music_volume
+    mov A, <dsp_param_vol_l
+    mul ya
+    asl A
+    mov A, Y
+    adc A, #0
+    mov <dsp_param_vol_l, A
+
+    mov Y, !seq_music_volume
+    mov A, <dsp_param_vol_r
+    mul ya
+    asl A
+    mov A, Y
+    adc A, #0
+    mov <dsp_param_vol_r, A
+
     ; Fetch the slot effective value; needed for ADSR (auto fetched in _start_note)
     mov <r0+1, #0 ; clear the high byte
     mov <dsp_param_srcn, <r0 ; save this elsewhere as it'll be overwritten
@@ -269,6 +303,23 @@ _sfx_play:
 
     @pan_calc_done:
 
+    ; Scale SFX volume with seq_sfx_volume
+    mov Y, !seq_sfx_volume
+    mov A, <dsp_param_vol_l
+    mul ya
+    asl A
+    mov A, Y
+    adc A, #0
+    mov <dsp_param_vol_l, A
+
+    mov Y, !seq_sfx_volume
+    mov A, <dsp_param_vol_r
+    mul ya
+    asl A
+    mov A, Y
+    adc A, #0
+    mov <dsp_param_vol_r, A
+
     ; Fetch the slot effective value
     mov <r0, <dsp_param_srcn ; copy the SFX ID
     mov <r0+1, #0 ; clear the high byte
@@ -314,6 +365,23 @@ _sfx_play_extend:
     mov <dsp_param_vol_l,<REG_APUIO2
 
     mov <REG_APUIO1,<REG_APUIO1 ; again
+
+    ; Scale SFX extended volume with seq_sfx_volume
+    mov Y, !seq_sfx_volume
+    mov A, <dsp_param_vol_l
+    mul ya
+    asl A
+    mov A, Y
+    adc A, #0
+    mov <dsp_param_vol_l, A
+
+    mov Y, !seq_sfx_volume
+    mov A, <dsp_param_vol_r
+    mul ya
+    asl A
+    mov A, Y
+    adc A, #0
+    mov <dsp_param_vol_r, A
 
     ; check if volume is zero. if yes, return immediately
     mov A, <dsp_param_vol_r
@@ -363,11 +431,18 @@ _stream_play:
     clrc
     adc A, #DSP_V0VOLL ; Contains the first channel
     mov <REG_DSPADDR, A
-    mov <REG_DSPDATA, #63
+
+    mov Y, !seq_voice_volume
+    mov A, #63
+    mul ya
+    asl A
+    mov A, Y
+    adc A, #0
+    mov <REG_DSPDATA, A
 
     ; Remaining DSPADDR reg can be incremented
     inc <REG_DSPADDR ; #DSP_V0VOLR
-    mov <REG_DSPDATA, #63
+    mov <REG_DSPDATA, A
 
     inc <REG_DSPADDR ; #DSP_V0PL
     mov <REG_DSPDATA, #$d7
