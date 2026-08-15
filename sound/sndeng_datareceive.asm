@@ -421,114 +421,52 @@ _data_upload_loop_2byte:
 
     ret
 
+lut_stream_offsets:
+    .word stream_data + 0
+    .word stream_data + 72
+    .word stream_data + 144
+    .word stream_data + 216
+
 _data_upload_loop_stream:
-    ; Begin copy
-    ; r0 contains the length of data transfer (must be even)
-    ; r2 contains the pointer to the write dest
-
-    ; faster version with hardcoded values for streaming data
-
-    mov Y,#0
     mov A, <stream_current_block
-    cmp A, #1
-    beq block_1
-    cmp A, #2
-    beq block_2
-    cmp A, #3
-    beq block_3
+    asl A
+    mov X, A
 
-    block_0:
-    @startup:
-        cmp Y,<REG_APUIO0
-        bne @startup
-        bra @write
-    @loop:
-        cmp Y,<REG_APUIO0
-        bne @check_end
+    mov A, !lut_stream_offsets+X
+    mov !@abs_ptr_0+1, A
+    clrc
+    adc A, #36
+    mov !@abs_ptr_1+1, A
 
-        @write:
-        mov A,<REG_APUIO1
-        mov !stream_data+Y,A
-        mov A,<REG_APUIO2
-        mov <REG_APUIO0,Y
-        mov !stream_data+36+Y,A
-        inc y
-        bra @loop
-        @check_end:
-        bpl @loop
-        cmp Y,<REG_APUIO0
-        bpl @loop
-        bra finish_block
+    mov A, !lut_stream_offsets+1+X
+    mov !@abs_ptr_0+2, A
+    adc A, #0
+    mov !@abs_ptr_1+2, A
 
-    block_1:
-    @startup:
-        cmp Y,<REG_APUIO0
-        bne @startup
-        bra @write
-    @loop:
-        cmp Y,<REG_APUIO0
-        bne @check_end
+    mov Y, #0
+@startup:
+    cmp Y, <REG_APUIO0
+    bne @startup
+    bra @write
+@loop:
+    cmp Y, <REG_APUIO0
+    bne @check_end
 
-        @write:
-        mov A,<REG_APUIO1
-        mov !stream_data+72+Y,A
-        mov A,<REG_APUIO2
-        mov <REG_APUIO0,Y
-        mov !stream_data+108+Y,A
-        inc y
-        bra @loop
-        @check_end:
-        bpl @loop
-        cmp Y,<REG_APUIO0
-        bpl @loop
-        bra finish_block
+@write:
+    mov A, <REG_APUIO1
+@abs_ptr_0:
+    mov !$0000+Y, A
+    mov A, <REG_APUIO2
+    mov <REG_APUIO0, Y
+@abs_ptr_1:
+    mov !$0000+Y, A
+    inc y
+    bra @loop
+@check_end:
+    bpl @loop
+    cmp Y, <REG_APUIO0
+    bpl @loop
 
-    block_2:
-    @startup:
-        cmp Y,<REG_APUIO0
-        bne @startup
-        bra @write
-    @loop:
-        cmp Y,<REG_APUIO0
-        bne @check_end
-
-        @write:
-        mov A,<REG_APUIO1
-        mov !stream_data+144+Y,A
-        mov A,<REG_APUIO2
-        mov <REG_APUIO0,Y
-        mov !stream_data+180+Y,A
-        inc y
-        bra @loop
-        @check_end:
-        bpl @loop
-        cmp Y,<REG_APUIO0
-        bpl @loop
-        bra finish_block
-
-    block_3:
-    @startup:
-        cmp Y,<REG_APUIO0
-        bne @startup
-        bra @write
-    @loop:
-        cmp Y,<REG_APUIO0
-        bne @check_end
-
-        @write:
-        mov A,<REG_APUIO1
-        mov !stream_data+216+Y,A
-        mov A,<REG_APUIO2
-        mov <REG_APUIO0,Y
-        mov !stream_data+252+Y,A
-        inc y
-        bra @loop
-        @check_end:
-        bpl @loop
-        cmp Y,<REG_APUIO0
-        bpl @loop
-
-    finish_block:
     mov A, <stream_current_block
     inc A
     and A, #$03
