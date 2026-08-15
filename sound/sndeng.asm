@@ -464,6 +464,51 @@ _process_mus:
     mov A, [<seq_current_track_ptr]+Y
     mov !seq_track_vol_r+X, A
 
+    ; Check if this track owns an active voice
+    mov A, !seq_track_channel+X
+    cmp A, #8
+    bcs @set_vol_done
+
+    mov Y, A
+    mov A, !voice_owner+Y
+    cmp A, <seq_current_track
+    bne @set_vol_done
+
+    ; Active voice found in Y (channel 0..7)
+    ; Save active voice channel in r0 (since _scale_volumes_music clobbers Y)
+    mov <r0, Y
+
+    ; Prepare volumes in dsp_param_vol_l/r
+    mov A, !seq_track_vol_l+X
+    mov <dsp_param_vol_l, A
+    mov A, !seq_track_vol_r+X
+    mov <dsp_param_vol_r, A
+
+    ; Apply mono downmix if enabled
+    mov A, !seq_force_mono
+    beq :+
+        mov A, <dsp_param_vol_l
+        clrc
+        adc A, <dsp_param_vol_r
+        lsr A
+        mov <dsp_param_vol_l, A
+        mov <dsp_param_vol_r, A
+    :
+
+    call !_scale_volumes_music
+
+    ; Calculate DSP address for voice (voice in r0, r0 * 16)
+    mov A, <r0
+    xcn A
+    clrc
+    adc A, #DSP_V0VOLL
+    mov <REG_DSPADDR, A
+    mov <REG_DSPDATA, <dsp_param_vol_l
+
+    inc <REG_DSPADDR ; #DSP_V0VOLR
+    mov <REG_DSPDATA, <dsp_param_vol_r
+
+@set_vol_done:
     call !_advance_ptr_3
     jmp !@track_active
 

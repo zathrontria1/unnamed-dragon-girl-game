@@ -15,6 +15,9 @@ def parse_it_file(it_path):
     flags, special = struct.unpack_from("<HH", data, 36)
     gvl, mv, ispd, itm, sep = struct.unpack_from("<BBBBB", data, 48)
 
+    chn_pan = list(data[64:128])
+    chn_vol = list(data[128:192])
+
     order_list = list(data[192 : 192 + ordnum])
     offset = 192 + ordnum + insnum * 4
     smp_offsets = struct.unpack_from(f"<{smpnum}I", data, offset)
@@ -82,6 +85,8 @@ def parse_it_file(it_path):
         "name": name,
         "speed": ispd,
         "tempo": itm,
+        "chn_pan": chn_pan,
+        "chn_vol": chn_vol,
         "raw_data": data,
         "smpnum": smpnum,
         "smp_offsets": smp_offsets,
@@ -94,7 +99,23 @@ def parse_it_file(it_path):
         "sample_max_notes": sample_max_notes
     }
 
-def convert_it_song(it_path, max_channels=8, prefix=""):
+def calc_stereo_vol(raw_vol, pan):
+    if raw_vol <= 0:
+        return (0, 0)
+    if pan > 64 and pan != 100:
+        pan = 32
+    if pan == 100 or pan > 64:
+        vl = max(1, (raw_vol * 31 + 32) // 64)
+        return (vl, vl)
+    if pan <= 32:
+        vl = max(1, (raw_vol * 31 + 32) // 64)
+        vr = (vl * pan) // 32
+    else:
+        vr = max(1, (raw_vol * 31 + 32) // 64)
+        vl = (vr * (64 - pan)) // 32
+    return (vl, vr)
+
+def convert_it_song(it_path, max_channels=8, prefix="", merge_drums=True):
     parsed = parse_it_file(it_path)
     data = parsed["raw_data"]
     smp_offsets = parsed["smp_offsets"]
@@ -104,6 +125,7 @@ def convert_it_song(it_path, max_channels=8, prefix=""):
     pat_data = parsed["pattern_data"]
     pat_rows = parsed["pattern_num_rows"]
     sample_max_notes = parsed["sample_max_notes"]
+    chn_pan = parsed["chn_pan"]
 
     song_slug = prefix if prefix else os.path.splitext(os.path.basename(it_path))[0].lower().replace(".", "_").replace(" ", "_")
     if song_slug.startswith("module1"):
@@ -244,13 +266,51 @@ def convert_it_song(it_path, max_channels=8, prefix=""):
     for local_id, s_idx in enumerate(sorted(sample_info.keys())):
         sample_to_local_ins[s_idx] = local_id
 
-    # 3. Find active channels up to max_channels
-    active_channels = []
-    for ch in range(max_channels):
-        has_events = any(pat_data[pidx][ch] for pidx in unique_patterns)
-        if has_events:
-            active_channels.append(ch)
+    # 3. Optimize channels: Detect 100% identical channel pairs and merge percussion
+    merged_into = {}
+    for i in range(max_channels):
+        if i in merged_into: continue
+        for j in range(i+1, max_channels):
+            if j in merged_into: continue
+            is_ident = True
+            for pidx in unique_patterns:
+                evA = pat_data[pidx][i]
+                evB = pat_data[pidx][j]
+                if len(evA) != len(evB):
+                    is_ident = False
+                    break
+                for eA, eB in zip(evA, evB):
+                    if eA[0] != eB[0] or eA[1] != eB[1]:
+                        is_ident = False
+                        break
+                if not is_ident: break
+            if is_ident:
+                merged_into[j] = i
+                chn_pan[i] = 32
+                print(f"Detected identical channel pair: Ch {j+1} merged into Ch {i+1} (Center panned)")
 
+    # Percussion channel consolidation (e.g. Ch 7 & 8 if unlooped one-shots)
+    if merge_drums and 6 < max_channels and 7 < max_channels and 6 not in merged_into and 7 not in merged_into:
+        has_7 = any(pat_data[pidx][6] for pidx in unique_patterns)
+        has_8 = any(pat_data[pidx][7] for pidx in unique_patterns)
+        if has_7 and has_8:
+            print("Merging percussion channels 7 and 8 into single drum track")
+            for pidx in unique_patterns:
+                ev7 = {e[0]: e for e in pat_data[pidx][6]}
+                ev8 = {e[0]: e for e in pat_data[pidx][7]}
+                all_rows = sorted(set(ev7.keys()) | set(ev8.keys()))
+                combined = []
+                for r in all_rows:
+                    e7 = ev7.get(r)
+                    e8 = ev8.get(r)
+                    if e7 and e8: combined.append(e7) # Kick takes priority
+                    elif e7: combined.append(e7)
+                    elif e8: combined.append(e8)
+                pat_data[pidx][6] = combined
+            merged_into[7] = 6
+            chn_pan[6] = 32
+
+    active_channels = [ch for ch in range(max_channels) if ch not in merged_into and any(pat_data[pidx][ch] for pidx in unique_patterns)]
     print(f"Active Channels ({len(active_channels)}): {[c+1 for c in active_channels]}")
 
     # 4. Generate pattern-based bytecode for each active channel
@@ -267,6 +327,7 @@ def convert_it_song(it_path, max_channels=8, prefix=""):
             if first_smp is not None: break
         
         default_local_id = sample_to_local_ins.get(first_smp, 0)
+        pan = chn_pan[ch] if ch < len(chn_pan) else 32
 
         pat_tokens = {}
         for pidx in unique_patterns:
@@ -274,8 +335,11 @@ def convert_it_song(it_path, max_channels=8, prefix=""):
             toks = []
             curr_row = 0
             curr_ins = None
-            curr_vol = 31
+            curr_raw_vol = 64
+            curr_vl, curr_vr = calc_stereo_vol(64, pan)
             num_rows = pat_rows[pidx]
+            last_d = 0
+            speed = parsed["speed"]
 
             for ev in events:
                 r, note, ins, vol, eff_cmd, eff_val = ev
@@ -293,11 +357,45 @@ def convert_it_song(it_path, max_channels=8, prefix=""):
                         toks.append(f"    SEQ_SET_INS({lid}),")
                         curr_ins = lid
 
-                if vol is not None:
-                    mvol = (vol * 31) // 64
-                    if mvol != curr_vol:
-                        toks.append(f"    SEQ_SET_VOL({mvol}, {mvol}),")
-                        curr_vol = mvol
+                # Tracker volume handling:
+                # 1. New note without volume resets to default note volume (64)
+                # 2. Instrument-only row without volume resets to instrument default volume (64) (trance gating)
+                # 3. Explicit volume column sets the volume
+                if note is not None and note < 120:
+                    if vol is not None and 0 <= vol <= 64:
+                        curr_raw_vol = vol
+                    else:
+                        curr_raw_vol = 64
+                elif ins is not None and ins in sample_to_local_ins:
+                    if vol is not None and 0 <= vol <= 64:
+                        curr_raw_vol = vol
+                    else:
+                        curr_raw_vol = 64
+                elif vol is not None and 0 <= vol <= 64:
+                    curr_raw_vol = vol
+
+                # Handle IT Effect D (Volume Slide)
+                if eff_cmd == 4:
+                    if eff_val != 0:
+                        last_d = eff_val
+                    else:
+                        eff_val = last_d
+                    if eff_val:
+                        hi = (eff_val >> 4) & 0x0F
+                        lo = eff_val & 0x0F
+                        if lo == 0x0F and hi > 0:
+                            curr_raw_vol = min(64, curr_raw_vol + hi) # Fine slide up
+                        elif hi == 0x0F and lo > 0:
+                            curr_raw_vol = max(0, curr_raw_vol - lo)  # Fine slide down
+                        elif lo == 0 and hi > 0:
+                            curr_raw_vol = min(64, curr_raw_vol + hi * max(1, speed - 1)) # Slide up
+                        elif hi == 0 and lo > 0:
+                            curr_raw_vol = max(0, curr_raw_vol - lo * max(1, speed - 1)) # Slide down
+
+                vl, vr = calc_stereo_vol(curr_raw_vol, pan)
+                if (vl, vr) != (curr_vl, curr_vr):
+                    toks.append(f"    SEQ_SET_VOL({vl}, {vr}),")
+                    curr_vl, curr_vr = vl, vr
 
                 if note is not None:
                     if note < 120:
@@ -327,9 +425,10 @@ def convert_it_song(it_path, max_channels=8, prefix=""):
                     l += 1
             return l
 
+        init_vl, init_vr = calc_stereo_vol(64, pan)
         init_tokens = [
             f"    SEQ_SET_INS({default_local_id}),",
-            "    SEQ_SET_VOL(31, 31),"
+            f"    SEQ_SET_VOL({init_vl}, {init_vr}),"
         ]
         init_len = get_tok_len(init_tokens)
         order_call_len = len(playable_orders) * 3 + 1
@@ -376,7 +475,7 @@ const struct sample_list_entry_ins data_snd_instruments_{song_slug}[] =
         brr_len = info["brr_size"] - 2
         c5spd = info["c5spd"]
         is_loop = info["is_looped"]
-        adsr = "(0x0f | (0x03 << 4) | (0x01 << 7) | (0x13 << 8) | (0x07 << 13))" if is_loop else "0x0000"
+        adsr = "0x0000"
         ticks = "0xffff" if is_loop else "0"
         header_content += f"    {{{local_id}, (void *)&data_snd_smp_{song_slug}_smp{s_idx}, {brr_len}, (({c5spd}l * 4096l) / 32000l), {adsr}, {ticks}, 60}},\n"
 
@@ -395,7 +494,7 @@ const struct sample_list_entry_ins data_snd_instruments_{song_slug}[] =
     with open(out_header_path, "w") as f:
         f.write(header_content)
 
-    print(f"Generated pattern-based {out_header_path} successfully!")
+    print(f"Generated pattern-based {out_header_path} successfully ({len(active_channels)} tracks)!")
     return song_slug, sample_info, active_channels
 
 if __name__ == "__main__":
@@ -403,10 +502,11 @@ if __name__ == "__main__":
     parser.add_argument("it_file", nargs="?", help="Path to .it file")
     parser.add_argument("--all", action="store_true", help="Convert all IT files in sound/seq/")
     parser.add_argument("--max-channels", type=int, default=8, help="Max active channels to emit")
+    parser.add_argument("--no-merge-drums", action="store_true", help="Disable automatic drum channel merging")
     args = parser.parse_args()
 
     if args.all or not args.it_file:
-        convert_it_song("sound/seq/Module1.compat.it", max_channels=5, prefix="module1")
-        convert_it_song("sound/seq/aryx.it", max_channels=8, prefix="aryx")
+        convert_it_song("sound/seq/Module1.compat.it", max_channels=5, prefix="module1", merge_drums=not args.no_merge_drums)
+        convert_it_song("sound/seq/aryx.it", max_channels=8, prefix="aryx", merge_drums=not args.no_merge_drums)
     else:
-        convert_it_song(args.it_file, max_channels=args.max_channels)
+        convert_it_song(args.it_file, max_channels=args.max_channels, merge_drums=not args.no_merge_drums)

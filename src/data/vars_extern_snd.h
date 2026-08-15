@@ -28,8 +28,6 @@ extern HUGE const uint8_t data_seq_aryx_t3[];
 extern HUGE const uint8_t data_seq_aryx_t4[];
 extern HUGE const uint8_t data_seq_aryx_t5[];
 extern HUGE const uint8_t data_seq_aryx_t6[];
-extern HUGE const uint8_t data_seq_aryx_t7[];
-extern HUGE const uint8_t data_seq_aryx_t8[];
 
 extern HUGE const struct sample_list_entry_ins data_snd_instruments[];
 extern HUGE const struct sample_list_entry_ins data_snd_instruments_module1[];

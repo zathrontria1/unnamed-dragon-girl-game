@@ -473,6 +473,27 @@ _start_note:
     @tick_end:
 
 _commit_dsp_voice:
+    ; Check if this sequence track already owns an active voice channel
+    mov A, <seq_current_track
+    cmp A, #8
+    bcs @use_lru_allocator
+
+    mov X, A
+    mov A, !seq_track_channel+X
+    cmp A, #8
+    bcs @use_lru_allocator
+
+    ; Check if voice is still owned by this track
+    mov Y, A
+    mov A, !voice_owner+Y
+    cmp A, <seq_current_track
+    bne @use_lru_allocator
+
+    ; Reuse already owned voice channel in Y
+    mov <global_sfx_endsoonest, Y
+    bra @voice_alloc_done
+
+@use_lru_allocator:
     ; Update voice ownership and track assignment
     mov Y, <global_sfx_endsoonest
     mov A, !voice_owner+Y
@@ -491,11 +512,11 @@ _commit_dsp_voice:
         mov !seq_track_channel+X, A
         mov A, <seq_current_track
         mov !voice_owner+Y, A
-        bra @voice_owner_done
+        bra @voice_alloc_done
     @sfx_voice_owner:
         mov A, #$ff
         mov !voice_owner+Y, A
-    @voice_owner_done:
+@voice_alloc_done:
 
     ; now we have to determine what channel to use.
     mov A, <global_sfx_endsoonest

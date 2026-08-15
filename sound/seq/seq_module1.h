@@ -13,8 +13,8 @@ const struct sample_list_entry_ins data_snd_instruments_module1[] =
     {0, (void *)&data_snd_smp_module1_smp1, 540, ((9363l * 4096l) / 32000l), 0x0000, 0, 60},
     {1, (void *)&data_snd_smp_module1_smp2, 540, ((4555l * 4096l) / 32000l), 0x0000, 0, 60},
     {2, (void *)&data_snd_smp_module1_smp4, 540, ((9363l * 4096l) / 32000l), 0x0000, 0, 60},
-    {3, (void *)&data_snd_smp_module1_smp5, 1494, ((44125l * 4096l) / 32000l), (0x0f | (0x03 << 4) | (0x01 << 7) | (0x13 << 8) | (0x07 << 13)), 0xffff, 60},
-    {4, (void *)&data_snd_smp_module1_smp6, 198, ((7354l * 4096l) / 32000l), (0x0f | (0x03 << 4) | (0x01 << 7) | (0x13 << 8) | (0x07 << 13)), 0xffff, 60},
+    {3, (void *)&data_snd_smp_module1_smp5, 1494, ((44125l * 4096l) / 32000l), 0x0000, 0xffff, 60},
+    {4, (void *)&data_snd_smp_module1_smp6, 198, ((7354l * 4096l) / 32000l), 0x0000, 0xffff, 60},
     {0, 0, 0, 0x1000, 0x0000, 0, 0},
 };
 
