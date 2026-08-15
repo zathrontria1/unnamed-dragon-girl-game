@@ -127,6 +127,7 @@
 #define SEQ_NOTE_CUT             0x9b
 #define SEQ_CALL_SUB(off)        0x9c, (uint8_t)((off)&0xff), (uint8_t)(((off)>>8)&0xff)
 #define SEQ_RET                  0x9d
+#define SEQ_SET_PORTA(n, spd)    0x9e, (uint8_t)(n), (uint8_t)(spd)
 #define SEQ_RESTART              0xff
 
 // Raw opcode numbers for parser
@@ -145,6 +146,7 @@
 #define SEQ_OPCODE_NOTE_CUT      0x9b
 #define SEQ_OPCODE_CALL_SUB      0x9c
 #define SEQ_OPCODE_RET           0x9d
+#define SEQ_OPCODE_SET_PORTA     0x9e
 #define SEQ_OPCODE_RESTART       0xff
 
 // Piano key freq names to MIDI note

@@ -373,9 +373,10 @@ _process_mus:
     inc <seq_tick_in_row
     mov A, <seq_tick_in_row
     cmp A, <seq_speed
-    bcc @tick_done
+    bcc :+
         mov <seq_tick_in_row, #0
-    @tick_done:
+    :
+    call !_update_sub_row_pitch
     mov A, #0
     ret
 
@@ -405,6 +406,20 @@ _process_mus:
     mov A, !seq_track_ins+Y ; Instrument ID
 
     call !_ins_play_note
+
+    ; Store initial note pitch into seq_track_pitch_curr
+    mov A, <seq_current_track
+    asl A
+    mov X, A
+    mov A, <dsp_param_vpitch
+    mov !seq_track_pitch_curr+X, A
+    mov A, <dsp_param_vpitch+1
+    mov !seq_track_pitch_curr+1+X, A
+
+    ; Reset pitch portamento mode for newly keyed notes
+    mov X, <seq_current_track
+    mov A, #0
+    mov !seq_track_pitch_mode+X, A
 
     call !_advance_ptr_1
     jmp !@track_end
@@ -736,6 +751,182 @@ _process_mus:
     .word @opcode_note_cut     ; $9b
     .word @opcode_call_sub     ; $9c
     .word @opcode_ret          ; $9d
+    .word @opcode_set_porta    ; $9e
+
+@opcode_set_porta:
+    ; 3-byte opcode: $9E, target_note, speed
+    inc Y
+    mov A, [<seq_current_track_ptr]+Y ; Target note
+    mov <r12, A ; Save target note in r12
+    inc Y
+    mov A, [<seq_current_track_ptr]+Y ; Speed
+    mov <r13, A ; Save speed in r13
+
+    ; Calculate target note DSP pitch using _lookup_pitch_note
+    mov X, <r12 ; X = target note
+    mov A, <seq_current_track
+    mov Y, A
+    mov A, !seq_track_ins+Y ; Instrument ID
+    call !_lookup_pitch_note
+
+    ; Store calculated target pitch into seq_track_pitch_target
+    mov A, <seq_current_track
+    asl A
+    mov X, A
+    mov A, <dsp_param_vpitch
+    mov !seq_track_pitch_target+X, A
+    mov A, <dsp_param_vpitch+1
+    mov !seq_track_pitch_target+1+X, A
+
+    ; Convert speed in r13 to 16-bit pitch delta (speed * 32)
+    mov A, <r13
+    mov <r13+1, #0
+    asl A
+    rol <r13+1
+    asl A
+    rol <r13+1
+    asl A
+    rol <r13+1
+    asl A
+    rol <r13+1
+    asl A
+    rol <r13+1
+    mov <r13, A
+
+    mov A, <seq_current_track
+    asl A
+    mov X, A
+    mov A, <r13
+    mov !seq_track_pitch_slide+X, A
+    mov A, <r13+1
+    mov !seq_track_pitch_slide+1+X, A
+
+    ; Set pitch mode to 2 (Portamento active)
+    mov X, <seq_current_track
+    mov A, #2
+    mov !seq_track_pitch_mode+X, A
+
+    call !_advance_ptr_3
+    jmp !@track_active
+
+_update_sub_row_pitch:
+    mov <r14, #0 ; Track index 0..7
+
+@update_pitch_loop:
+    mov X, <r14
+    mov A, !seq_track_pitch_mode+X
+    cmp A, #2 ; Portamento mode
+    beq :+
+        jmp !@next_pitch_track
+    :
+
+    ; Check if this track owns an active voice channel
+    mov A, !seq_track_channel+X
+    cmp A, #8
+    bcc :+
+        jmp !@next_pitch_track
+    :
+    mov Y, A
+    mov A, !voice_owner+Y
+    cmp A, <r14
+    beq :+
+        jmp !@next_pitch_track
+    :
+
+    ; Active voice channel is in Y (0..7)
+    mov <r15, Y
+
+    ; Load curr pitch and target pitch
+    mov A, <r14
+    asl A
+    mov X, A
+    mov A, !seq_track_pitch_curr+X
+    mov <r2, A
+    mov A, !seq_track_pitch_curr+1+X
+    mov <r2+1, A
+
+    mov A, !seq_track_pitch_target+X
+    mov <r3, A
+    mov A, !seq_track_pitch_target+1+X
+    mov <r3+1, A
+
+    mov A, !seq_track_pitch_slide+X
+    mov <r4, A
+    mov A, !seq_track_pitch_slide+1+X
+    mov <r4+1, A
+
+    ; Compare curr (r2) with target (r3)
+    movw ya, <r2
+    cmpw ya, <r3
+    beq @porta_reached
+    bcc @slide_pitch_up
+
+    ; Slide Pitch Down (curr > target)
+    setc
+    subw ya, <r4
+    ; Check if we went below target
+    cmpw ya, <r3
+    bcs :+
+        ; Reached target
+        mov X, <r14
+        mov A, #0
+        mov !seq_track_pitch_mode+X, A
+        movw ya, <r3
+    :
+    movw <r2, ya
+    bra @write_dsp_pitch
+
+@slide_pitch_up:
+    ; Slide Pitch Up (curr < target)
+    clrc
+    addw ya, <r4
+    ; Check if we went above target
+    cmpw ya, <r3
+    bcc :+
+        ; Reached target
+        mov X, <r14
+        mov A, #0
+        mov !seq_track_pitch_mode+X, A
+        movw ya, <r3
+    :
+    movw <r2, ya
+    bra @write_dsp_pitch
+
+@porta_reached:
+    mov X, <r14
+    mov A, #0
+    mov !seq_track_pitch_mode+X, A
+    bra @next_pitch_track
+
+@write_dsp_pitch:
+    ; Save updated curr pitch back to seq_track_pitch_curr
+    mov A, <r14
+    asl A
+    mov X, A
+    mov A, <r2
+    mov !seq_track_pitch_curr+X, A
+    mov A, <r2+1
+    mov !seq_track_pitch_curr+1+X, A
+
+    ; Write updated pitch to DSP voice (voice channel in r15)
+    mov A, <r15
+    xcn A
+    clrc
+    adc A, #DSP_V0PL
+    mov <REG_DSPADDR, A
+    mov <REG_DSPDATA, <r2
+
+    inc <REG_DSPADDR ; DSP_V0PH
+    mov <REG_DSPDATA, <r2+1
+
+@next_pitch_track:
+    inc <r14
+    mov A, <r14
+    cmp A, #8
+    bcs :+
+        jmp !@update_pitch_loop
+    :
+    ret
 
 _advance_ptr_3:
     mov A, #3

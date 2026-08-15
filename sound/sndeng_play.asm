@@ -62,6 +62,19 @@ _ins_play_note:
     ; Scale note volumes with seq_music_volume
     call !_scale_volumes_music
 
+    mov A, <r0
+    mov X, <r1
+    call !_lookup_pitch_note
+
+    call !_start_note
+    ret
+
+_lookup_pitch_note:
+    ;(A = instrument ID, X = MIDI note number)
+    mov <r0, A
+    mov <r1, X
+    mov <r10, X
+
     ; subtract the MIDI note with reference note point 
     @note_adjust:
     mov A, <r1
@@ -215,9 +228,6 @@ _ins_play_note:
         movw ya, <mul16_product_32
     :
     movw <dsp_param_vpitch,ya
-
-    call !_start_note
-
     ret
 
 _ins_play_oneshot:

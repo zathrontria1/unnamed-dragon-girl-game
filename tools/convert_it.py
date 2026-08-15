@@ -5,6 +5,28 @@ import math
 import wave
 import subprocess
 import argparse
+import numpy as np
+
+def lowpass_filter(samples, downsample_factor, num_taps=65, is_looped=False):
+    if downsample_factor <= 1:
+        return np.array(samples, dtype=float)
+    cutoff = 1.0 / downsample_factor
+    t = np.arange(num_taps) - (num_taps - 1) / 2
+    sinc = np.sinc(2 * (cutoff * 0.92) * t)
+    window = np.blackman(num_taps)
+    h = sinc * window
+    h /= np.sum(h)
+    arr = np.array(samples, dtype=float)
+    if is_looped and len(arr) > 0:
+        pad = num_taps // 2
+        reps = (pad + len(arr) - 1) // len(arr) + 1
+        padded = np.tile(arr, reps * 2 + 1)
+        start_idx = reps * len(arr) - pad
+        chunk = padded[start_idx : start_idx + len(arr) + 2 * pad]
+        filtered = np.convolve(chunk, h, mode="valid")
+        return filtered[:len(arr)]
+    else:
+        return np.convolve(arr, h, mode="same")
 
 def parse_it_file(it_path):
     with open(it_path, "rb") as f:
@@ -181,6 +203,7 @@ def convert_it_song(it_path, max_channels=8, prefix="", merge_drums=True):
 
             L = len(s_vals)
             if downsample_factor > 1:
+                s_vals = lowpass_filter(s_vals, downsample_factor, is_looped=True)
                 target_M = round(L / downsample_factor)
                 c5spd = round(c5spd * target_M / L)
                 resampled_vals = []
@@ -199,7 +222,8 @@ def convert_it_song(it_path, max_channels=8, prefix="", merge_drums=True):
             pcm16 = bytearray()
             for _ in range(m):
                 for val in s_vals:
-                    pcm16 += struct.pack("<h", val)
+                    c_val = int(np.clip(val, -32768, 32767))
+                    pcm16 += struct.pack("<h", c_val)
         else:
             if is_signed:
                 s_vals = [struct.unpack("b", bytes([b]))[0] * 256 for b in raw_smp]
@@ -208,6 +232,7 @@ def convert_it_song(it_path, max_channels=8, prefix="", merge_drums=True):
 
             L = len(s_vals)
             if downsample_factor > 1:
+                s_vals = lowpass_filter(s_vals, downsample_factor, is_looped=False)
                 target_M = round(L / downsample_factor)
                 c5spd = round(c5spd * target_M / L)
                 resampled_vals = []
@@ -222,7 +247,8 @@ def convert_it_song(it_path, max_channels=8, prefix="", merge_drums=True):
 
             pcm16 = bytearray()
             for val in s_vals:
-                pcm16 += struct.pack("<h", val)
+                c_val = int(np.clip(val, -32768, 32767))
+                pcm16 += struct.pack("<h", c_val)
 
             n_samples = len(pcm16) // 2
             # Pad to multiple of 32 samples (even number of 9-byte BRR blocks)
@@ -265,6 +291,17 @@ def convert_it_song(it_path, max_channels=8, prefix="", merge_drums=True):
     sample_to_local_ins = {}
     for local_id, s_idx in enumerate(sorted(sample_info.keys())):
         sample_to_local_ins[s_idx] = local_id
+
+    # 2.5 Resolve tracker instrument inheritance chronologically across orders
+    curr_ch_ins = {}
+    for pidx in playable_orders:
+        for ch in range(32):
+            for idx, ev in enumerate(pat_data[pidx][ch]):
+                r, n, i, v, ec, ev_val = ev
+                if i is not None:
+                    curr_ch_ins[ch] = i
+                elif n is not None and ch in curr_ch_ins:
+                    pat_data[pidx][ch][idx] = (r, n, curr_ch_ins[ch], v, ec, ev_val)
 
     # 3. Optimize channels: Detect 100% identical channel pairs and merge percussion
     merged_into = {}
@@ -328,87 +365,129 @@ def convert_it_song(it_path, max_channels=8, prefix="", merge_drums=True):
         
         default_local_id = sample_to_local_ins.get(first_smp, 0)
         pan = chn_pan[ch] if ch < len(chn_pan) else 32
+        init_s_def_vol = sample_info[first_smp]["vol"] if (first_smp is not None and first_smp in sample_info) else 64
+        init_vl, init_vr = calc_stereo_vol(init_s_def_vol, pan)
 
         pat_tokens = {}
         for pidx in unique_patterns:
             events = sorted(pat_data[pidx][ch], key=lambda x: x[0])
+            events_by_row = {}
+            for ev in events:
+                events_by_row.setdefault(ev[0], []).append(ev)
+
             toks = []
-            curr_row = 0
             curr_ins = None
-            curr_raw_vol = 64
-            curr_vl, curr_vr = calc_stereo_vol(64, pan)
+            curr_ins_sidx = first_smp
+            curr_raw_vol = init_s_def_vol
+            curr_vl, curr_vr = calc_stereo_vol(init_s_def_vol, pan)
             num_rows = pat_rows[pidx]
             last_d = 0
             speed = parsed["speed"]
 
-            for ev in events:
-                r, note, ins, vol, eff_cmd, eff_val = ev
-                if r < curr_row: continue
-                if r > curr_row:
-                    wait_ticks = r - curr_row - 1
-                    if wait_ticks == 0: toks.append("    SEQ_WAIT_0,")
-                    elif 1 <= wait_ticks <= 15: toks.append(f"    SEQ_WAIT_{wait_ticks},")
-                    else: toks.append(f"    SEQ_WAIT({wait_ticks}),")
-                    curr_row = r
+            r = 0
+            while r < num_rows:
+                if r in events_by_row:
+                    row_note = None
+                    has_g_effect = any(ev[4] == 7 for ev in events_by_row[r])
 
-                if ins is not None and ins in sample_to_local_ins:
-                    lid = sample_to_local_ins[ins]
-                    if lid != curr_ins:
-                        toks.append(f"    SEQ_SET_INS({lid}),")
-                        curr_ins = lid
+                    for ev in events_by_row[r]:
+                        _, note, ins, vol, eff_cmd, eff_val = ev
 
-                # Tracker volume handling:
-                # 1. New note without volume resets to default note volume (64)
-                # 2. Instrument-only row without volume resets to instrument default volume (64) (trance gating)
-                # 3. Explicit volume column sets the volume
-                if note is not None and note < 120:
-                    if vol is not None and 0 <= vol <= 64:
-                        curr_raw_vol = vol
+                        if ins is not None and ins in sample_to_local_ins:
+                            curr_ins_sidx = ins
+                            lid = sample_to_local_ins[ins]
+                            if lid != curr_ins:
+                                toks.append(f"    SEQ_SET_INS({lid}),")
+                                curr_ins = lid
+                        elif note is not None and not has_g_effect and curr_ins is None and curr_ins_sidx in sample_to_local_ins:
+                            lid = sample_to_local_ins[curr_ins_sidx]
+                            toks.append(f"    SEQ_SET_INS({lid}),")
+                            curr_ins = lid
+
+                        s_def_vol = sample_info[curr_ins_sidx]["vol"] if (curr_ins_sidx in sample_info) else 64
+
+                        # Tracker volume handling with sample default volume scaling:
+                        if note is not None and not has_g_effect and note < 120:
+                            if vol is not None and 0 <= vol <= 64:
+                                curr_raw_vol = (vol * s_def_vol) // 64
+                            else:
+                                curr_raw_vol = s_def_vol
+                        elif ins is not None and ins in sample_to_local_ins:
+                            if vol is not None and 0 <= vol <= 64:
+                                curr_raw_vol = (vol * s_def_vol) // 64
+                            else:
+                                curr_raw_vol = s_def_vol
+                        elif vol is not None and 0 <= vol <= 64:
+                            curr_raw_vol = (vol * s_def_vol) // 64
+
+                        # Handle IT Effect D (Volume Slide)
+                        if eff_cmd == 4:
+                            if eff_val != 0:
+                                last_d = eff_val
+                            else:
+                                eff_val = last_d
+                            if eff_val:
+                                hi = (eff_val >> 4) & 0x0F
+                                lo = eff_val & 0x0F
+                                if lo == 0x0F and hi > 0:
+                                    curr_raw_vol = min(64, curr_raw_vol + max(1, (hi * s_def_vol) // 64)) # Fine slide up
+                                elif hi == 0x0F and lo > 0:
+                                    curr_raw_vol = max(0, curr_raw_vol - max(1, (lo * s_def_vol) // 64))  # Fine slide down
+                                elif lo == 0 and hi > 0:
+                                    curr_raw_vol = min(64, curr_raw_vol + max(1, (hi * s_def_vol * max(1, speed - 1)) // 64)) # Slide up
+                                elif hi == 0 and lo > 0:
+                                    curr_raw_vol = max(0, curr_raw_vol - max(1, (lo * s_def_vol * max(1, speed - 1)) // 64)) # Slide down
+
+                        # Handle IT Effect G (Tone Portamento)
+                        if eff_cmd == 7:
+                            if eff_val != 0:
+                                last_g = eff_val
+                            else:
+                                eff_val = last_g
+                            g_spd = max(1, eff_val)
+                            if note is not None and note < 120:
+                                toks.append(f"    SEQ_SET_PORTA({note}, {g_spd}),")
+
+                        vl, vr = calc_stereo_vol(curr_raw_vol, pan)
+                        if (vl, vr) != (curr_vl, curr_vr):
+                            toks.append(f"    SEQ_SET_VOL({vl}, {vr}),")
+                            curr_vl, curr_vr = vl, vr
+
+                        if note is not None:
+                            if note < 120:
+                                if not has_g_effect:
+                                    row_note = note
+                            elif note == 254:
+                                toks.append("    SEQ_NOTE_CUT,")
+
+                    if row_note is not None:
+                        toks.append(f"    {row_note},")
+                        r += 1
                     else:
-                        curr_raw_vol = 64
-                elif ins is not None and ins in sample_to_local_ins:
-                    if vol is not None and 0 <= vol <= 64:
-                        curr_raw_vol = vol
+                        # Row has commands but no note: find following empty rows to wait
+                        k = 0
+                        while (r + 1 + k) < num_rows and (r + 1 + k) not in events_by_row:
+                            k += 1
+                        if k == 0:
+                            toks.append("    SEQ_WAIT_0,")
+                        elif 1 <= k <= 15:
+                            toks.append(f"    SEQ_WAIT_{k},")
+                        else:
+                            toks.append(f"    SEQ_WAIT({k}),")
+                        r += 1 + k
+                else:
+                    # Row r is empty: find consecutive empty rows
+                    k = 0
+                    while (r + k) < num_rows and (r + k) not in events_by_row:
+                        k += 1
+                    wait_val = k - 1
+                    if wait_val == 0:
+                        toks.append("    SEQ_WAIT_0,")
+                    elif 1 <= wait_val <= 15:
+                        toks.append(f"    SEQ_WAIT_{wait_val},")
                     else:
-                        curr_raw_vol = 64
-                elif vol is not None and 0 <= vol <= 64:
-                    curr_raw_vol = vol
-
-                # Handle IT Effect D (Volume Slide)
-                if eff_cmd == 4:
-                    if eff_val != 0:
-                        last_d = eff_val
-                    else:
-                        eff_val = last_d
-                    if eff_val:
-                        hi = (eff_val >> 4) & 0x0F
-                        lo = eff_val & 0x0F
-                        if lo == 0x0F and hi > 0:
-                            curr_raw_vol = min(64, curr_raw_vol + hi) # Fine slide up
-                        elif hi == 0x0F and lo > 0:
-                            curr_raw_vol = max(0, curr_raw_vol - lo)  # Fine slide down
-                        elif lo == 0 and hi > 0:
-                            curr_raw_vol = min(64, curr_raw_vol + hi * max(1, speed - 1)) # Slide up
-                        elif hi == 0 and lo > 0:
-                            curr_raw_vol = max(0, curr_raw_vol - lo * max(1, speed - 1)) # Slide down
-
-                vl, vr = calc_stereo_vol(curr_raw_vol, pan)
-                if (vl, vr) != (curr_vl, curr_vr):
-                    toks.append(f"    SEQ_SET_VOL({vl}, {vr}),")
-                    curr_vl, curr_vr = vl, vr
-
-                if note is not None:
-                    if note < 120:
-                        toks.append(f"    {note},")
-                        curr_row = r + 1
-                    elif note == 254:
-                        toks.append("    SEQ_NOTE_CUT,")
-
-            if curr_row < num_rows:
-                wait_ticks = num_rows - curr_row - 1
-                if wait_ticks == 0: toks.append("    SEQ_WAIT_0,")
-                elif 1 <= wait_ticks <= 15: toks.append(f"    SEQ_WAIT_{wait_ticks},")
-                else: toks.append(f"    SEQ_WAIT({wait_ticks}),")
+                        toks.append(f"    SEQ_WAIT({wait_val}),")
+                    r += k
 
             toks.append("    SEQ_RET,")
             pat_tokens[pidx] = toks
@@ -419,13 +498,12 @@ def convert_it_song(it_path, max_channels=8, prefix="", merge_drums=True):
                 s = t.strip()
                 if s.startswith("SEQ_WAIT(") or s.startswith("SEQ_SET_INS(") or s.startswith("SEQ_SET_DURATION(") or s.startswith("SEQ_PLAY_DRUM(") or s.startswith("SEQ_SET_LOOP(") or s.startswith("SEQ_SET_SPEED(") or s.startswith("SEQ_SET_TEMPO("):
                     l += 2
-                elif s.startswith("SEQ_SET_VOL(") or s.startswith("SEQ_SET_ADSR(") or s.startswith("SEQ_CALL_SUB("):
+                elif s.startswith("SEQ_SET_VOL(") or s.startswith("SEQ_SET_ADSR(") or s.startswith("SEQ_CALL_SUB(") or s.startswith("SEQ_SET_PORTA("):
                     l += 3
                 else:
                     l += 1
             return l
 
-        init_vl, init_vr = calc_stereo_vol(64, pan)
         init_tokens = [
             f"    SEQ_SET_INS({default_local_id}),",
             f"    SEQ_SET_VOL({init_vl}, {init_vr}),"
