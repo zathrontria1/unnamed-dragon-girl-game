@@ -91,6 +91,9 @@ extern HUGE const uint8_t data_snd_smp_aryx_smp5[];
 extern HUGE const uint8_t data_snd_smp_aryx_smp6[];
 extern HUGE const uint8_t data_snd_smp_aryx_smp7[];
 extern HUGE const uint8_t data_snd_smp_aryx_smp8[];
+// Aryx Oxx slice samples
+extern HUGE const uint8_t data_snd_smp_aryx_smp6_o01[];
+extern HUGE const uint8_t data_snd_smp_aryx_smp6_o02[];
 
 // Streamed audio
 // Player voice

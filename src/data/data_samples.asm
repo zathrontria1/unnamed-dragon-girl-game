@@ -215,6 +215,16 @@ _data_snd_smp_aryx_smp7:
 _data_snd_smp_aryx_smp8:
     incbin "sound/ins/itconv/ins_aryx_smp8.brr"
 
+    section "_rodata.huge.bindata.audio.samples.42"
+    global _data_snd_smp_aryx_smp6_o01
+_data_snd_smp_aryx_smp6_o01:
+    incbin "sound/ins/itconv/ins_aryx_smp6_o01.brr"
+
+    section "_rodata.huge.bindata.audio.samples.43"
+    global _data_snd_smp_aryx_smp6_o02
+_data_snd_smp_aryx_smp6_o02:
+    incbin "sound/ins/itconv/ins_aryx_smp6_o02.brr"
+
 ; START OF STREAMED AUDIO
 ; Player voice data
     section "_rodata.huge.bindata.audio.stream.player.0"

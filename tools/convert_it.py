@@ -287,10 +287,105 @@ def convert_it_song(it_path, max_channels=8, prefix="", merge_drums=True):
         }
         print(f"Sample {s_idx} ({s_name}): C5spd={c5spd}Hz, BRR Size={brr_size} bytes (with 2-byte header)")
 
+    # 1.5 Generate BRR slices for Effect Oxx (Sample Offset) usage
+    # Keys for slices are tuples (s_idx, offset_val) so they don't clash with int s_idx keys
+    slice_to_local_ins = {}  # (s_idx, offset) -> local_id
+    used_slices = set()
+    last_ins_scan = {}
+    for pidx in playable_orders:
+        for r in range(pat_rows.get(pidx, 64)):
+            for ch in range(max_channels):
+                for ev in pat_data[pidx][ch]:
+                    if ev[0] == r:
+                        row, note, ins, vol, eff_cmd, eff_val = ev
+                        if ins is not None:
+                            last_ins_scan[ch] = ins
+                        if eff_cmd == 15 and eff_val > 0:  # Oxx with offset > 0
+                            smp = last_ins_scan.get(ch)
+                            if smp is not None and smp in sample_info:
+                                used_slices.add((smp, eff_val))
+
+    for (s_idx, offset_val) in sorted(used_slices):
+        base_info = sample_info[s_idx]
+        soff = smp_offsets[s_idx - 1]
+        gvl_s, flags_s_s, vol_s, sname_s = struct.unpack_from('<BBB26s', data, soff + 16)
+        length_s, loopbeg_s, loopend_s, c5spd_s, _, _, smpptr_s = struct.unpack_from('<IIIIIII', data, soff + 48)
+        convert_s = data[soff + 45]
+        is_signed_s = bool(convert_s & 1)
+
+        raw_smp_s = data[smpptr_s: smpptr_s + length_s]
+        slice_start = min(offset_val * 256, length_s)
+        sliced_raw = raw_smp_s[slice_start:]
+
+        if len(sliced_raw) == 0:
+            # Offset is beyond sample length — skip slice generation
+            print(f"Sample {s_idx} Oxx slice O{offset_val:02X}: offset {slice_start} >= length {length_s}, skipping.")
+            continue
+
+        if is_signed_s:
+            s_vals = [struct.unpack('b', bytes([b]))[0] * 256 for b in sliced_raw]
+        else:
+            s_vals = [(b - 128) * 256 for b in sliced_raw]
+
+        # Apply same downsample factor as base sample (re-derive from base_info c5spd ratio)
+        ds_factor = round(c5spd_s / base_info['c5spd']) if base_info['c5spd'] > 0 else 1
+        if ds_factor < 1: ds_factor = 1
+        if ds_factor > 1:
+            s_vals = lowpass_filter(s_vals, ds_factor, is_looped=False)
+            L_s = len(sliced_raw)
+            target_M_s = round(len(sliced_raw) / ds_factor)
+            resampled = []
+            for i in range(target_M_s):
+                src_pos = (i * len(sliced_raw)) / target_M_s
+                idx0 = int(src_pos)
+                idx1 = min(idx0 + 1, len(s_vals) - 1)
+                frac = src_pos - idx0
+                resampled.append(int((1.0 - frac) * s_vals[idx0] + frac * s_vals[idx1]))
+            s_vals = resampled
+
+        pcm16 = bytearray()
+        for val in s_vals:
+            pcm16 += struct.pack('<h', int(np.clip(val, -32768, 32767)))
+        n_samp = len(pcm16) // 2
+        target_samp = ((n_samp + 31) // 32) * 32
+        pcm16 += b'\x00\x00' * (target_samp - n_samp)
+
+        slice_c5spd = base_info['c5spd']  # same playback rate as base sample
+        slice_name = f"{base_info['name']}_o{offset_val:02d}"
+        wav_path_sl = f"sound/ins/itconv/{slice_name}.wav"
+        brr_path_sl = f"sound/ins/itconv/{slice_name}.brr"
+
+        with wave.open(wav_path_sl, 'wb') as wf:
+            wf.setnchannels(1)
+            wf.setsampwidth(2)
+            wf.setframerate(slice_c5spd)
+            wf.writeframes(pcm16)
+
+        res = subprocess.run(['wav2brr', '-o', brr_path_sl, wav_path_sl], capture_output=True, text=True)
+        if res.returncode != 0:
+            subprocess.run(['snesbrr', '-e', '-h', wav_path_sl, brr_path_sl], check=True)
+
+        brr_size_sl = os.path.getsize(brr_path_sl)
+        sample_info[(s_idx, offset_val)] = {
+            'name': slice_name,
+            'brr_file': brr_path_sl,
+            'brr_size': brr_size_sl,
+            'c5spd': slice_c5spd,
+            'vol': base_info['vol'],
+            'is_looped': False,
+            'loop_start': 0
+        }
+        print(f"Sample {s_idx} Oxx slice O{offset_val:02X} ({slice_name}): C5spd={slice_c5spd}Hz, BRR Size={brr_size_sl} bytes")
+
     # 2. Build local instrument mapping: s_idx -> local_id (0..N-1)
+    # Base samples first (int keys), then slices (tuple keys) in sorted order
     sample_to_local_ins = {}
-    for local_id, s_idx in enumerate(sorted(sample_info.keys())):
+    base_keys = sorted(k for k in sample_info.keys() if isinstance(k, int))
+    slice_keys = sorted(k for k in sample_info.keys() if isinstance(k, tuple))
+    for local_id, s_idx in enumerate(base_keys + slice_keys):
         sample_to_local_ins[s_idx] = local_id
+    for (s_idx, offset_val), local_id in [(k, sample_to_local_ins[k]) for k in slice_keys]:
+        slice_to_local_ins[(s_idx, offset_val)] = local_id
 
     # 2.5 Resolve tracker instrument inheritance chronologically across orders
     curr_ch_ins = {}
@@ -382,6 +477,8 @@ def convert_it_song(it_path, max_channels=8, prefix="", merge_drums=True):
             curr_vl, curr_vr = calc_stereo_vol(init_s_def_vol, pan)
             num_rows = pat_rows[pidx]
             last_d = 0
+            last_g = 0
+            last_oxx = 0   # last Oxx offset value for this channel in this pattern
             speed = parsed["speed"]
 
             r = 0
@@ -390,19 +487,42 @@ def convert_it_song(it_path, max_channels=8, prefix="", merge_drums=True):
                     row_note = None
                     has_g_effect = any(ev[4] == 7 for ev in events_by_row[r])
 
+                    # Determine Oxx offset for this row (0 means no non-zero offset)
+                    row_oxx = 0
+                    for ev in events_by_row[r]:
+                        if ev[4] == 15 and ev[5] > 0:
+                            row_oxx = ev[5]
+                            last_oxx = row_oxx
+                            break
+                        elif ev[4] == 15 and ev[5] == 0:
+                            row_oxx = 0  # O00 resets to base sample
+                            last_oxx = 0
+                            break
+
                     for ev in events_by_row[r]:
                         _, note, ins, vol, eff_cmd, eff_val = ev
 
                         if ins is not None and ins in sample_to_local_ins:
                             curr_ins_sidx = ins
-                            lid = sample_to_local_ins[ins]
+                            # Determine the effective instrument accounting for Oxx slice
+                            if note is not None and note < 120 and row_oxx > 0 and (ins, row_oxx) in slice_to_local_ins:
+                                lid = slice_to_local_ins[(ins, row_oxx)]
+                            else:
+                                lid = sample_to_local_ins[ins]
                             if lid != curr_ins:
                                 toks.append(f"    SEQ_SET_INS({lid}),")
                                 curr_ins = lid
-                        elif note is not None and not has_g_effect and curr_ins is None and curr_ins_sidx in sample_to_local_ins:
-                            lid = sample_to_local_ins[curr_ins_sidx]
-                            toks.append(f"    SEQ_SET_INS({lid}),")
-                            curr_ins = lid
+                        elif note is not None and not has_g_effect and curr_ins_sidx is not None:
+                            # Apply Oxx slice instrument if applicable
+                            if row_oxx > 0 and (curr_ins_sidx, row_oxx) in slice_to_local_ins:
+                                lid = slice_to_local_ins[(curr_ins_sidx, row_oxx)]
+                            elif curr_ins_sidx in sample_to_local_ins:
+                                lid = sample_to_local_ins[curr_ins_sidx]
+                            else:
+                                lid = None
+                            if lid is not None and lid != curr_ins:
+                                toks.append(f"    SEQ_SET_INS({lid}),")
+                                curr_ins = lid
 
                         s_def_vol = sample_info[curr_ins_sidx]["vol"] if (curr_ins_sidx in sample_info) else 64
 
@@ -555,7 +675,12 @@ const struct sample_list_entry_ins data_snd_instruments_{song_slug}[] =
         is_loop = info["is_looped"]
         adsr = "0x0000"
         ticks = "0xffff" if is_loop else "0"
-        header_content += f"    {{{local_id}, (void *)&data_snd_smp_{song_slug}_smp{s_idx}, {brr_len}, (({c5spd}l * 4096l) / 32000l), {adsr}, {ticks}, 60}},\n"
+        if isinstance(s_idx, tuple):
+            smp_base, oxx_val = s_idx
+            sym_name = f"data_snd_smp_{song_slug}_smp{smp_base}_o{oxx_val:02d}"
+        else:
+            sym_name = f"data_snd_smp_{song_slug}_smp{s_idx}"
+        header_content += f"    {{{local_id}, (void *)&{sym_name}, {brr_len}, (({c5spd}l * 4096l) / 32000l), {adsr}, {ticks}, 60}},\n"
 
     header_content += """    {0, 0, 0, 0x1000, 0x0000, 0, 0},
 };

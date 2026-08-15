@@ -7,7 +7,7 @@
 #include "defs_structs.h"
 #include "vars_extern_snd.h"
 
-// Aryx Song Instrument Bank (Slots 0..7)
+// Aryx Song Instrument Bank (Slots 0..9)
 const struct sample_list_entry_ins data_snd_instruments_aryx[] = 
 {
     {0, (void *)&data_snd_smp_aryx_smp1, 378, ((11178l * 4096l) / 32000l), 0x0000, 0xffff, 60},
@@ -18,6 +18,8 @@ const struct sample_list_entry_ins data_snd_instruments_aryx[] =
     {5, (void *)&data_snd_smp_aryx_smp6, 540, ((4555l * 4096l) / 32000l), 0x0000, 0, 60},
     {6, (void *)&data_snd_smp_aryx_smp7, 8010, ((11027l * 4096l) / 32000l), 0x0000, 0xffff, 60},
     {7, (void *)&data_snd_smp_aryx_smp8, 126, ((7443l * 4096l) / 32000l), 0x0000, 0xffff, 60},
+    {8, (void *)&data_snd_smp_aryx_smp6_o01, 396, ((4555l * 4096l) / 32000l), 0x0000, 0, 60},
+    {9, (void *)&data_snd_smp_aryx_smp6_o02, 252, ((4555l * 4096l) / 32000l), 0x0000, 0, 60},
     {0, 0, 0, 0x1000, 0x0000, 0, 0},
 };
 
@@ -5534,55 +5536,56 @@ HUGE const uint8_t data_seq_aryx_t6[] = {
     // --- Order Call Script ---
     SEQ_SET_INS(5),
     SEQ_SET_VOL(4, 4),
-    SEQ_CALL_SUB(418), // Pattern 3
-    SEQ_CALL_SUB(344), // Pattern 2
-    SEQ_CALL_SUB(451), // Pattern 4
-    SEQ_CALL_SUB(451), // Pattern 4
-    SEQ_CALL_SUB(592), // Pattern 5
-    SEQ_CALL_SUB(592), // Pattern 5
-    SEQ_CALL_SUB(700), // Pattern 6
-    SEQ_CALL_SUB(700), // Pattern 6
-    SEQ_CALL_SUB(912), // Pattern 8
-    SEQ_CALL_SUB(987), // Pattern 9
-    SEQ_CALL_SUB(993), // Pattern 10
-    SEQ_CALL_SUB(1165), // Pattern 11
+    SEQ_CALL_SUB(474), // Pattern 3
+    SEQ_CALL_SUB(400), // Pattern 2
+    SEQ_CALL_SUB(507), // Pattern 4
+    SEQ_CALL_SUB(507), // Pattern 4
+    SEQ_CALL_SUB(648), // Pattern 5
+    SEQ_CALL_SUB(648), // Pattern 5
+    SEQ_CALL_SUB(784), // Pattern 6
+    SEQ_CALL_SUB(784), // Pattern 6
+    SEQ_CALL_SUB(1052), // Pattern 8
+    SEQ_CALL_SUB(1127), // Pattern 9
+    SEQ_CALL_SUB(1133), // Pattern 10
+    SEQ_CALL_SUB(1305), // Pattern 11
     SEQ_CALL_SUB(132), // Pattern 0
-    SEQ_CALL_SUB(238), // Pattern 1
+    SEQ_CALL_SUB(266), // Pattern 1
     SEQ_CALL_SUB(132), // Pattern 0
-    SEQ_CALL_SUB(238), // Pattern 1
-    SEQ_CALL_SUB(806), // Pattern 7
-    SEQ_CALL_SUB(592), // Pattern 5
-    SEQ_CALL_SUB(806), // Pattern 7
-    SEQ_CALL_SUB(592), // Pattern 5
-    SEQ_CALL_SUB(700), // Pattern 6
-    SEQ_CALL_SUB(700), // Pattern 6
-    SEQ_CALL_SUB(993), // Pattern 10
-    SEQ_CALL_SUB(1165), // Pattern 11
-    SEQ_CALL_SUB(993), // Pattern 10
-    SEQ_CALL_SUB(1165), // Pattern 11
-    SEQ_CALL_SUB(912), // Pattern 8
-    SEQ_CALL_SUB(987), // Pattern 9
-    SEQ_CALL_SUB(912), // Pattern 8
-    SEQ_CALL_SUB(987), // Pattern 9
+    SEQ_CALL_SUB(266), // Pattern 1
+    SEQ_CALL_SUB(918), // Pattern 7
+    SEQ_CALL_SUB(648), // Pattern 5
+    SEQ_CALL_SUB(918), // Pattern 7
+    SEQ_CALL_SUB(648), // Pattern 5
+    SEQ_CALL_SUB(784), // Pattern 6
+    SEQ_CALL_SUB(784), // Pattern 6
+    SEQ_CALL_SUB(1133), // Pattern 10
+    SEQ_CALL_SUB(1305), // Pattern 11
+    SEQ_CALL_SUB(1133), // Pattern 10
+    SEQ_CALL_SUB(1305), // Pattern 11
+    SEQ_CALL_SUB(1052), // Pattern 8
+    SEQ_CALL_SUB(1127), // Pattern 9
+    SEQ_CALL_SUB(1052), // Pattern 8
+    SEQ_CALL_SUB(1127), // Pattern 9
     SEQ_CALL_SUB(132), // Pattern 0
-    SEQ_CALL_SUB(238), // Pattern 1
+    SEQ_CALL_SUB(266), // Pattern 1
     SEQ_CALL_SUB(132), // Pattern 0
-    SEQ_CALL_SUB(238), // Pattern 1
+    SEQ_CALL_SUB(266), // Pattern 1
     SEQ_CALL_SUB(132), // Pattern 0
-    SEQ_CALL_SUB(238), // Pattern 1
+    SEQ_CALL_SUB(266), // Pattern 1
     SEQ_CALL_SUB(132), // Pattern 0
-    SEQ_CALL_SUB(238), // Pattern 1
-    SEQ_CALL_SUB(806), // Pattern 7
-    SEQ_CALL_SUB(700), // Pattern 6
-    SEQ_CALL_SUB(700), // Pattern 6
-    SEQ_CALL_SUB(700), // Pattern 6
+    SEQ_CALL_SUB(266), // Pattern 1
+    SEQ_CALL_SUB(918), // Pattern 7
+    SEQ_CALL_SUB(784), // Pattern 6
+    SEQ_CALL_SUB(784), // Pattern 6
+    SEQ_CALL_SUB(784), // Pattern 6
     SEQ_RESTART,
 
     // --- Pattern 0 Subroutine (Offset: 132) ---
+    SEQ_SET_INS(9),
+    SEQ_SET_VOL(1, 1),
+    71,
+    SEQ_WAIT_0,
     SEQ_SET_INS(5),
-    SEQ_SET_VOL(1, 1),
-    71,
-    SEQ_WAIT_0,
     71,
     SEQ_WAIT_0,
     SEQ_SET_VOL(0, 0),
@@ -5593,15 +5596,19 @@ HUGE const uint8_t data_seq_aryx_t6[] = {
     SEQ_SET_VOL(4, 4),
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(8),
     SEQ_SET_VOL(1, 1),
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(5),
     71,
     SEQ_WAIT_0,
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(9),
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(5),
     71,
     SEQ_WAIT_0,
     SEQ_SET_VOL(0, 0),
@@ -5612,15 +5619,19 @@ HUGE const uint8_t data_seq_aryx_t6[] = {
     SEQ_SET_VOL(4, 4),
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(8),
     SEQ_SET_VOL(1, 1),
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(5),
     71,
     SEQ_WAIT_0,
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(9),
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(5),
     71,
     SEQ_WAIT_0,
     SEQ_SET_VOL(0, 0),
@@ -5631,15 +5642,19 @@ HUGE const uint8_t data_seq_aryx_t6[] = {
     SEQ_SET_VOL(4, 4),
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(8),
     SEQ_SET_VOL(1, 1),
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(5),
     71,
     SEQ_WAIT_0,
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(9),
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(5),
     71,
     SEQ_WAIT_0,
     SEQ_SET_VOL(0, 0),
@@ -5650,6 +5665,7 @@ HUGE const uint8_t data_seq_aryx_t6[] = {
     SEQ_SET_VOL(4, 4),
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(8),
     SEQ_SET_VOL(1, 1),
     71,
     SEQ_WAIT_0,
@@ -5659,11 +5675,12 @@ HUGE const uint8_t data_seq_aryx_t6[] = {
     SEQ_WAIT_0,
     SEQ_RET,
 
-    // --- Pattern 1 Subroutine (Offset: 238) ---
+    // --- Pattern 1 Subroutine (Offset: 266) ---
+    SEQ_SET_INS(9),
+    SEQ_SET_VOL(1, 1),
+    71,
+    SEQ_WAIT_0,
     SEQ_SET_INS(5),
-    SEQ_SET_VOL(1, 1),
-    71,
-    SEQ_WAIT_0,
     71,
     SEQ_WAIT_0,
     SEQ_SET_VOL(0, 0),
@@ -5674,15 +5691,19 @@ HUGE const uint8_t data_seq_aryx_t6[] = {
     SEQ_SET_VOL(4, 4),
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(8),
     SEQ_SET_VOL(1, 1),
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(5),
     71,
     SEQ_WAIT_0,
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(9),
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(5),
     71,
     SEQ_WAIT_0,
     SEQ_SET_VOL(0, 0),
@@ -5693,15 +5714,19 @@ HUGE const uint8_t data_seq_aryx_t6[] = {
     SEQ_SET_VOL(4, 4),
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(8),
     SEQ_SET_VOL(1, 1),
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(5),
     71,
     SEQ_WAIT_0,
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(9),
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(5),
     71,
     SEQ_WAIT_0,
     SEQ_SET_VOL(0, 0),
@@ -5712,15 +5737,19 @@ HUGE const uint8_t data_seq_aryx_t6[] = {
     SEQ_SET_VOL(4, 4),
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(8),
     SEQ_SET_VOL(1, 1),
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(5),
     71,
     SEQ_WAIT_0,
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(9),
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(5),
     71,
     SEQ_WAIT_0,
     SEQ_SET_VOL(0, 0),
@@ -5731,6 +5760,7 @@ HUGE const uint8_t data_seq_aryx_t6[] = {
     SEQ_SET_VOL(4, 4),
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(8),
     SEQ_SET_VOL(1, 1),
     71,
     SEQ_WAIT_0,
@@ -5740,7 +5770,7 @@ HUGE const uint8_t data_seq_aryx_t6[] = {
     SEQ_WAIT_0,
     SEQ_RET,
 
-    // --- Pattern 2 Subroutine (Offset: 344) ---
+    // --- Pattern 2 Subroutine (Offset: 400) ---
     SEQ_SET_INS(6),
     SEQ_SET_VOL(12, 12),
     36,
@@ -5792,7 +5822,7 @@ HUGE const uint8_t data_seq_aryx_t6[] = {
     SEQ_WAIT_3,
     SEQ_RET,
 
-    // --- Pattern 3 Subroutine (Offset: 418) ---
+    // --- Pattern 3 Subroutine (Offset: 474) ---
     SEQ_SET_INS(5),
     48,
     SEQ_WAIT_2,
@@ -5819,7 +5849,7 @@ HUGE const uint8_t data_seq_aryx_t6[] = {
     SEQ_WAIT(34),
     SEQ_RET,
 
-    // --- Pattern 4 Subroutine (Offset: 451) ---
+    // --- Pattern 4 Subroutine (Offset: 507) ---
     SEQ_SET_INS(7),
     SEQ_SET_VOL(12, 12),
     SEQ_NOTE_CUT,
@@ -5912,7 +5942,7 @@ HUGE const uint8_t data_seq_aryx_t6[] = {
     SEQ_WAIT_0,
     SEQ_RET,
 
-    // --- Pattern 5 Subroutine (Offset: 592) ---
+    // --- Pattern 5 Subroutine (Offset: 648) ---
     SEQ_SET_INS(7),
     SEQ_SET_VOL(1, 1),
     71,
@@ -5928,158 +5958,19 @@ HUGE const uint8_t data_seq_aryx_t6[] = {
     SEQ_SET_VOL(4, 4),
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(8),
     SEQ_SET_VOL(1, 1),
     71,
     SEQ_WAIT_0,
-    71,
-    SEQ_WAIT_0,
-    71,
-    SEQ_WAIT_0,
-    71,
-    SEQ_WAIT_0,
-    71,
-    SEQ_WAIT_0,
-    SEQ_SET_VOL(0, 0),
-    71,
-    SEQ_WAIT_0,
-    71,
-    SEQ_WAIT_0,
-    SEQ_SET_VOL(4, 4),
-    71,
-    SEQ_WAIT_0,
-    SEQ_SET_VOL(1, 1),
-    71,
-    SEQ_WAIT_0,
-    71,
-    SEQ_WAIT_0,
-    71,
-    SEQ_WAIT_0,
-    71,
-    SEQ_WAIT_0,
-    71,
-    SEQ_WAIT_0,
-    SEQ_SET_VOL(0, 0),
-    71,
-    SEQ_WAIT_0,
-    71,
-    SEQ_WAIT_0,
-    SEQ_SET_VOL(4, 4),
-    71,
-    SEQ_WAIT_0,
-    SEQ_SET_VOL(1, 1),
-    71,
-    SEQ_WAIT_0,
-    71,
-    SEQ_WAIT_0,
-    71,
-    SEQ_WAIT_0,
-    71,
-    SEQ_WAIT_0,
-    71,
-    SEQ_WAIT_0,
-    SEQ_SET_VOL(0, 0),
-    71,
-    SEQ_WAIT_0,
-    71,
-    SEQ_WAIT_0,
-    SEQ_SET_VOL(4, 4),
-    71,
-    SEQ_WAIT_0,
-    SEQ_SET_VOL(1, 1),
-    71,
-    SEQ_WAIT_0,
-    71,
-    SEQ_WAIT_0,
-    71,
-    SEQ_WAIT_0,
-    SEQ_RET,
-
-    // --- Pattern 6 Subroutine (Offset: 700) ---
     SEQ_SET_INS(5),
-    SEQ_SET_VOL(1, 1),
     71,
     SEQ_WAIT_0,
     71,
     SEQ_WAIT_0,
-    SEQ_SET_VOL(0, 0),
+    SEQ_SET_INS(9),
     71,
     SEQ_WAIT_0,
-    71,
-    SEQ_WAIT_0,
-    SEQ_SET_VOL(4, 4),
-    71,
-    SEQ_WAIT_0,
-    SEQ_SET_VOL(1, 1),
-    71,
-    SEQ_WAIT_0,
-    71,
-    SEQ_WAIT_0,
-    71,
-    SEQ_WAIT_0,
-    71,
-    SEQ_WAIT_0,
-    71,
-    SEQ_WAIT_0,
-    SEQ_SET_VOL(0, 0),
-    71,
-    SEQ_WAIT_0,
-    71,
-    SEQ_WAIT_0,
-    SEQ_SET_VOL(4, 4),
-    71,
-    SEQ_WAIT_0,
-    SEQ_SET_VOL(1, 1),
-    71,
-    SEQ_WAIT_0,
-    71,
-    SEQ_WAIT_0,
-    71,
-    SEQ_WAIT_0,
-    71,
-    SEQ_WAIT_0,
-    71,
-    SEQ_WAIT_0,
-    SEQ_SET_VOL(0, 0),
-    71,
-    SEQ_WAIT_0,
-    71,
-    SEQ_WAIT_0,
-    SEQ_SET_VOL(4, 4),
-    71,
-    SEQ_WAIT_0,
-    SEQ_SET_VOL(1, 1),
-    71,
-    SEQ_WAIT_0,
-    71,
-    SEQ_WAIT_0,
-    71,
-    SEQ_WAIT_0,
-    71,
-    SEQ_WAIT_0,
-    71,
-    SEQ_WAIT_0,
-    SEQ_SET_VOL(0, 0),
-    71,
-    SEQ_WAIT_0,
-    71,
-    SEQ_WAIT_0,
-    SEQ_SET_VOL(4, 4),
-    71,
-    SEQ_WAIT_0,
-    SEQ_SET_VOL(1, 1),
-    71,
-    SEQ_WAIT_0,
-    71,
-    SEQ_WAIT_0,
-    71,
-    SEQ_WAIT_0,
-    SEQ_RET,
-
-    // --- Pattern 7 Subroutine (Offset: 806) ---
     SEQ_SET_INS(5),
-    SEQ_SET_VOL(1, 1),
-    71,
-    SEQ_WAIT_0,
     71,
     SEQ_WAIT_0,
     SEQ_SET_VOL(0, 0),
@@ -6090,15 +5981,19 @@ HUGE const uint8_t data_seq_aryx_t6[] = {
     SEQ_SET_VOL(4, 4),
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(8),
     SEQ_SET_VOL(1, 1),
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(5),
     71,
     SEQ_WAIT_0,
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(9),
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(5),
     71,
     SEQ_WAIT_0,
     SEQ_SET_VOL(0, 0),
@@ -6109,15 +6004,19 @@ HUGE const uint8_t data_seq_aryx_t6[] = {
     SEQ_SET_VOL(4, 4),
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(8),
     SEQ_SET_VOL(1, 1),
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(5),
     71,
     SEQ_WAIT_0,
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(9),
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(5),
     71,
     SEQ_WAIT_0,
     SEQ_SET_VOL(0, 0),
@@ -6128,15 +6027,23 @@ HUGE const uint8_t data_seq_aryx_t6[] = {
     SEQ_SET_VOL(4, 4),
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(8),
     SEQ_SET_VOL(1, 1),
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(5),
     71,
     SEQ_WAIT_0,
     71,
     SEQ_WAIT_0,
+    SEQ_RET,
+
+    // --- Pattern 6 Subroutine (Offset: 784) ---
+    SEQ_SET_INS(9),
+    SEQ_SET_VOL(1, 1),
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(5),
     71,
     SEQ_WAIT_0,
     SEQ_SET_VOL(0, 0),
@@ -6147,6 +6054,76 @@ HUGE const uint8_t data_seq_aryx_t6[] = {
     SEQ_SET_VOL(4, 4),
     71,
     SEQ_WAIT_0,
+    SEQ_SET_INS(8),
+    SEQ_SET_VOL(1, 1),
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_INS(5),
+    71,
+    SEQ_WAIT_0,
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_INS(9),
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_INS(5),
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_VOL(0, 0),
+    71,
+    SEQ_WAIT_0,
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_VOL(4, 4),
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_INS(8),
+    SEQ_SET_VOL(1, 1),
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_INS(5),
+    71,
+    SEQ_WAIT_0,
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_INS(9),
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_INS(5),
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_VOL(0, 0),
+    71,
+    SEQ_WAIT_0,
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_VOL(4, 4),
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_INS(8),
+    SEQ_SET_VOL(1, 1),
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_INS(5),
+    71,
+    SEQ_WAIT_0,
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_INS(9),
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_INS(5),
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_VOL(0, 0),
+    71,
+    SEQ_WAIT_0,
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_VOL(4, 4),
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_INS(8),
     SEQ_SET_VOL(1, 1),
     71,
     SEQ_WAIT_0,
@@ -6156,7 +6133,102 @@ HUGE const uint8_t data_seq_aryx_t6[] = {
     SEQ_WAIT_0,
     SEQ_RET,
 
-    // --- Pattern 8 Subroutine (Offset: 912) ---
+    // --- Pattern 7 Subroutine (Offset: 918) ---
+    SEQ_SET_INS(9),
+    SEQ_SET_VOL(1, 1),
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_INS(5),
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_VOL(0, 0),
+    71,
+    SEQ_WAIT_0,
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_VOL(4, 4),
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_INS(8),
+    SEQ_SET_VOL(1, 1),
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_INS(5),
+    71,
+    SEQ_WAIT_0,
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_INS(9),
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_INS(5),
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_VOL(0, 0),
+    71,
+    SEQ_WAIT_0,
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_VOL(4, 4),
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_INS(8),
+    SEQ_SET_VOL(1, 1),
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_INS(5),
+    71,
+    SEQ_WAIT_0,
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_INS(9),
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_INS(5),
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_VOL(0, 0),
+    71,
+    SEQ_WAIT_0,
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_VOL(4, 4),
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_INS(8),
+    SEQ_SET_VOL(1, 1),
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_INS(5),
+    71,
+    SEQ_WAIT_0,
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_INS(9),
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_INS(5),
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_VOL(0, 0),
+    71,
+    SEQ_WAIT_0,
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_VOL(4, 4),
+    71,
+    SEQ_WAIT_0,
+    SEQ_SET_INS(8),
+    SEQ_SET_VOL(1, 1),
+    71,
+    SEQ_WAIT_0,
+    71,
+    SEQ_WAIT_0,
+    71,
+    SEQ_WAIT_0,
+    SEQ_RET,
+
+    // --- Pattern 8 Subroutine (Offset: 1052) ---
     SEQ_SET_INS(5),
     48,
     SEQ_WAIT_0,
@@ -6207,13 +6279,13 @@ HUGE const uint8_t data_seq_aryx_t6[] = {
     SEQ_WAIT_1,
     SEQ_RET,
 
-    // --- Pattern 9 Subroutine (Offset: 987) ---
+    // --- Pattern 9 Subroutine (Offset: 1127) ---
     SEQ_SET_INS(5),
     SEQ_NOTE_CUT,
     SEQ_WAIT(63),
     SEQ_RET,
 
-    // --- Pattern 10 Subroutine (Offset: 993) ---
+    // --- Pattern 10 Subroutine (Offset: 1133) ---
     SEQ_SET_INS(2),
     67,
     SEQ_WAIT_0,
@@ -6321,7 +6393,7 @@ HUGE const uint8_t data_seq_aryx_t6[] = {
     SEQ_WAIT_0,
     SEQ_RET,
 
-    // --- Pattern 11 Subroutine (Offset: 1165) ---
+    // --- Pattern 11 Subroutine (Offset: 1305) ---
     SEQ_SET_INS(2),
     67,
     SEQ_WAIT_0,
