@@ -126,7 +126,7 @@ void Title_Loop()
         system_target_routine = ROUTINE_CUTSCENE_INIT;
         
         // Upload and start Module1 music sequence (5 channels: Kick, Snare, Hihat, Bass, Lead)
-        SoundInterface_ResetSongInstruments();
+        /*SoundInterface_ResetSongInstruments();
         SoundInterface_UploadInstrumentList((struct sample_list_entry_ins *)&data_snd_instruments_module1[0]);
         
         SoundInterface_UploadMusicSequence(data_seq_module1_t1, 0);
@@ -136,7 +136,7 @@ void Title_Loop()
         SoundInterface_UploadMusicSequence(data_seq_module1_t5, 4);
         SoundInterface_SetMusicSpeed(6);
         SoundInterface_SetMusicTempo(125);
-        SoundInterface_PlayMusic();
+        SoundInterface_PlayMusic();*/
 
         cs_current = (struct cutscene_data *)&data_cs_intro;
         
@@ -166,8 +166,8 @@ void Title_Init()
 
     DmaSystem_UploadCgram();
     
-    // Upload and start Aryx music sequence (6 channels)
-    SoundInterface_ResetSongInstruments();
+    // Upload and start Aryx music sequence (8 channels)
+    /*SoundInterface_ResetSongInstruments();
     SoundInterface_UploadInstrumentList((struct sample_list_entry_ins *)&data_snd_instruments_aryx[0]);
     SoundInterface_UploadMusicSequence(data_seq_aryx_t1, 0);
     SoundInterface_UploadMusicSequence(data_seq_aryx_t2, 1);
@@ -179,7 +179,7 @@ void Title_Init()
     SoundInterface_UploadMusicSequence(data_seq_aryx_t8, 7);
     SoundInterface_SetMusicSpeed(2);
     SoundInterface_SetMusicTempo(95);
-    SoundInterface_PlayMusic();
+    SoundInterface_PlayMusic();*/
 
     REG_INIDISP = 0x00; // Enable display
 
