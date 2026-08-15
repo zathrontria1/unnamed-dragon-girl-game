@@ -85,6 +85,18 @@ mul16_product_32: .res 4
 mul16_scratch: .res 2
 mul16_fix: .res 2
 
+.segment "SPCSTACKRAM"
+
+; --- Near-future tracker state variables (pitch modulation, portamento, volume slides) ---
+; Allocated in lower Page 1 ($0100..$014F); stack operates at $01FF downward.
+seq_track_channel: .res 8 ; Currently assigned DSP voice channel (0..7, or $FF if inactive) for real-time modulation
+seq_track_vol_slide_l: .res 8 ; Signed 8-bit left volume delta per tick (volume slides / tremolo)
+seq_track_vol_slide_r: .res 8 ; Signed 8-bit right volume delta per tick (stereo panning slides)
+seq_track_pitch_curr: .res (2 * 8) ; 16-bit current DSP pitch (pitch bends / vibrato)
+seq_track_pitch_target: .res (2 * 8) ; 16-bit target DSP pitch for portamento (IT/MOD command G / 3xx)
+seq_track_pitch_slide: .res (2 * 8) ; Signed 16-bit pitch delta per tick
+seq_track_pitch_mode: .res 8 ; 0 = Off, 1 = Pitch Slide (E/F), 2 = Portamento (G)
+
 .segment "SPCBSS"
 
 BSS_START:
@@ -94,15 +106,6 @@ seq_track_vol_l: .res 8 ; Sticky left volume
 seq_track_vol_r: .res 8 ; Sticky right volume
 seq_track_adsr_override: .res (2 * 8) ; Sticky ADSR (low/high per track)
 seq_track_tick_override: .res (2 * 8) ; Sticky tick duration per track (16-bit)
-
-; --- Near-future tracker state variables (pitch modulation, portamento, volume slides) ---
-seq_track_channel: .res 8 ; Currently assigned DSP voice channel (0..7, or $FF if inactive) for real-time modulation
-seq_track_vol_slide_l: .res 8 ; Signed 8-bit left volume delta per tick (volume slides / tremolo)
-seq_track_vol_slide_r: .res 8 ; Signed 8-bit right volume delta per tick (stereo panning slides)
-seq_track_pitch_curr: .res (2 * 8) ; 16-bit current DSP pitch (pitch bends / vibrato)
-seq_track_pitch_target: .res (2 * 8) ; 16-bit target DSP pitch for portamento (IT/MOD command G / 3xx)
-seq_track_pitch_slide: .res (2 * 8) ; Signed 16-bit pitch delta per tick
-seq_track_pitch_mode: .res 8 ; 0 = Off, 1 = Pitch Slide (E/F), 2 = Portamento (G)
 
 seq_force_mono: .res 1
 
