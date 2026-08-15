@@ -245,6 +245,17 @@ _ins_play_oneshot:
         ret
     :
 
+    ; if mono is set, sum the volumes and then divide them by 2.
+    mov A, !seq_force_mono
+    beq :+
+        mov A, <dsp_param_vol_l
+        clrc
+        adc A, <dsp_param_vol_r
+        lsr A
+        mov <dsp_param_vol_l, A
+        mov <dsp_param_vol_r, A
+    :
+
     ; Scale one-shot volumes with seq_music_volume
     call !_scale_volumes_music
 

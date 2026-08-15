@@ -149,6 +149,7 @@ _start:
     mov A, #0
     mov <global_sfx_end, A
     mov <global_sfx_end+1, A
+    mov !seq_force_mono, A
 
     mov A, #96
     mov !seq_music_volume, A

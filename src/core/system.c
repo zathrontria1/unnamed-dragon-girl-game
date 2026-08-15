@@ -233,6 +233,7 @@ void System_DisplayStartupSplash()
     SoundInterface_SetMusicVolume(snd_settings_volume_bgm);
     SoundInterface_SetSfxVolume(snd_settings_volume_sfx);
     SoundInterface_SetVoiceVolume(snd_settings_volume_voice);
+    SoundInterface_SetOutputMode(snd_settings_mono ? 1 : 0);
 
     shadow_brightness_change = 0;
 
