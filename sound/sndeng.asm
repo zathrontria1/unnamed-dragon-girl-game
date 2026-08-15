@@ -158,6 +158,7 @@ _start:
 
     mov X, #0
     mov A, #$ff
+    mov <stream_channel, A
     :
         mov !seq_track_channel+X, A
         mov !voice_owner+X, A
@@ -1042,6 +1043,7 @@ _stream_stop:
     mov <stream_current_block, #0
     mov <stream_watchdog, #0
     mov <stream_watchdog+1, #0
+    mov <stream_channel, #$ff
     mov A, #63 ; voice for stream
 
 _stop_voice_channels:

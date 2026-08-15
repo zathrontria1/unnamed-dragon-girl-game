@@ -427,6 +427,18 @@ _stream_play:
     mov <dsp_param_vol_l, A
     mov <dsp_param_vol_r, A
 
+    ; Check if an existing voice stream channel is already active
+    mov A, <stream_channel
+    cmp A, #8
+    bcs :+
+        ; Reuse the existing stream channel
+        mov <global_sfx_endsoonest, A
+        bra _commit_dsp_voice
+    :
+    ; Otherwise, allocate via LRU and save assigned channel
+    mov A, <global_sfx_endsoonest
+    mov <stream_channel, A
+
     bra _commit_dsp_voice
 
 ; Call after finishing setting up non-shared input to a DSP channel
@@ -522,6 +534,15 @@ _commit_dsp_voice:
         mov A, #$ff
         mov !seq_track_channel+X, A
     @no_prev_track_owner:
+
+    ; If this channel was stream_channel, invalidate it if non-stream is allocating
+    mov A, <seq_current_track
+    cmp A, #$ff
+    beq :+
+        cmp Y, <stream_channel
+        bne :+
+            mov <stream_channel, #$ff
+    :
 
     mov A, <seq_current_track
     cmp A, #8

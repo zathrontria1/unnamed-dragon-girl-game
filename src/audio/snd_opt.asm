@@ -474,6 +474,8 @@ _SoundInterface_NmiAudioUpload:
 	jsl	>_SoundInterface_AcknowledgeBusy
 	sep	#32
 	a8
+	lda	_snd_stream_current_block
+	sta	8514
 	lda	#$11 ; SND_CMD_STREAM_UPLOAD
 	sta	8513
 	lda	8513
@@ -514,6 +516,10 @@ l176:
 	sta	8512
 	inc	_snd_current_command_counter
 	stz	8513
+l349:
+	lda	8512
+	cmp	_snd_current_command_counter
+	bne	l349
 	a16
 	rep	#32
 	lda	_snd_stream_current_block

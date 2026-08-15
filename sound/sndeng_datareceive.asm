@@ -244,13 +244,11 @@ _sfx_upload:
     ret
 
 _stream_upload:
-    ; fixed location, so easier
-    ; assumes fixed size
-    ;mov <r0, #72 ; always 72 bytes
-    ;mov <r0+1, #0
-
-    ;mov <r2, #<stream_data
-    ;mov <r2+1, #>stream_data
+    mov A, <REG_APUIO2
+    mov <stream_current_block, A
+    bne :+
+        mov <stream_active, #0
+    :
 
     mov <REG_APUIO1,<REG_APUIO1 ;echo the opcode.
 

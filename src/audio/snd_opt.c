@@ -302,6 +302,7 @@ void SoundInterface_NmiAudioUpload()
 
     uint16_t temp_len = 72;
 
+    REG_APU02 = (uint8_t)snd_stream_current_block;
     REG_APU01 = SND_CMD_STREAM_UPLOAD; // Initial
 
     while (REG_APU01 != SND_CMD_STREAM_UPLOAD)
@@ -328,6 +329,11 @@ void SoundInterface_NmiAudioUpload()
     snd_current_command_counter++;
 
     SoundInterface_AcknowledgeNop();
+
+    while (REG_APU00 != snd_current_command_counter)
+    {
+        ;
+    }
 
     snd_stream_current_block = ((snd_stream_current_block + 1) & 0x03);
 

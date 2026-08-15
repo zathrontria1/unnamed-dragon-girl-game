@@ -78,6 +78,7 @@ seq_track_ret: .res (2 * 8) ; Subroutine return address per track
 
 stream_active: .res 1
 stream_current_block: .res 1 ; 0, 1, 2, 3
+stream_channel: .res 1 ; Active voice stream DSP channel (0..7, or $FF if inactive)
 stream_watchdog: .res 2 ; must be 2 bytes
 
 mul16_a: .res 2
