@@ -87,7 +87,6 @@ mul16_fix: .res 2
 
 .segment "SPCBSS"
 
-.align $100
 BSS_START:
 
 seq_track_ins: .res 8 ; Sticky instrument ID

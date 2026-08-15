@@ -52,8 +52,8 @@ _start:
         inc Y
         bne :-
 
-    ; Full clear BSS section
-    mov <r0+1, #>BSS_START
+    ; Full clear sample memory pool
+    mov <r0+1, #(>global_sampledata + 1)
     mov Y, A
     :
         mov [<r0]+Y,A
