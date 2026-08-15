@@ -576,38 +576,25 @@ _process_mus:
     .word @opcode_set_speed    ; $99
     .word @opcode_set_tempo    ; $9a
 
-_advance_ptr_1:
-    mov A, <seq_current_track
-    asl A
-    mov X, A
-    inc <seq_ptr+X
-    bne :+
-        inc <seq_ptr+1+X
-    :
-    mov X, <seq_current_track
-    ret
+_advance_ptr_3:
+    mov A, #3
+    bra _advance_ptr_A
 
 _advance_ptr_2:
-    mov A, <seq_current_track
-    asl A
-    mov X, A
-    mov A, <seq_ptr+X
-    clrc
-    adc A, #2
-    mov <seq_ptr+X, A
-    bcc :+
-        inc <seq_ptr+1+X
-    :
-    mov X, <seq_current_track
-    ret
+    mov A, #2
+    bra _advance_ptr_A
 
-_advance_ptr_3:
+_advance_ptr_1:
+    mov A, #1
+
+_advance_ptr_A:
+    mov <r0, A
     mov A, <seq_current_track
     asl A
     mov X, A
     mov A, <seq_ptr+X
     clrc
-    adc A, #3
+    adc A, <r0
     mov <seq_ptr+X, A
     bcc :+
         inc <seq_ptr+1+X
