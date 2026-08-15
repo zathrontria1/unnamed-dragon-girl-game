@@ -73,14 +73,8 @@ seq_ptr_loop: .res (2 * 8) ; loop ptr
 seq_loop_counter: .res 8 
 seq_track_wait: .res 8 ; if non-zero, nops this row. Placed here to make clearing values more convenient
 
-seq_note_prefix: .res 1
-seq_note_adsr_override: .res 2
-seq_note_tick_override: .res 2
-
+; Near-future tracker state: Subroutine calls for reusable pattern/phrase macros
 seq_track_ret: .res (2 * 8) ; Subroutine return address per track
-
-channel_owner: .res 8
-channel_owner_pending: .res 1
 
 stream_active: .res 1
 stream_current_block: .res 1 ; 0, 1, 2, 3
@@ -97,18 +91,18 @@ mul16_fix: .res 2
 .align $100
 BSS_START:
 
-seq_track_mode: .res 8 ; 0 = Standard (4B notes), 1 = Compact (1B notes)
 seq_track_ins: .res 8 ; Sticky instrument ID
 seq_track_vol_l: .res 8 ; Sticky left volume
 seq_track_vol_r: .res 8 ; Sticky right volume
-seq_track_channel: .res 8 ; Currently assigned DSP voice channel (0..7, or $FF if inactive)
 seq_track_adsr_override: .res (2 * 8) ; Sticky ADSR (low/high per track)
 seq_track_tick_override: .res (2 * 8) ; Sticky tick duration per track (16-bit)
 
-seq_track_vol_slide_l: .res 8 ; Signed 8-bit left volume delta per tick
-seq_track_vol_slide_r: .res 8 ; Signed 8-bit right volume delta per tick
-seq_track_pitch_curr: .res (2 * 8) ; 16-bit current DSP pitch
-seq_track_pitch_target: .res (2 * 8) ; 16-bit target DSP pitch for portamento
+; --- Near-future tracker state variables (pitch modulation, portamento, volume slides) ---
+seq_track_channel: .res 8 ; Currently assigned DSP voice channel (0..7, or $FF if inactive) for real-time modulation
+seq_track_vol_slide_l: .res 8 ; Signed 8-bit left volume delta per tick (volume slides / tremolo)
+seq_track_vol_slide_r: .res 8 ; Signed 8-bit right volume delta per tick (stereo panning slides)
+seq_track_pitch_curr: .res (2 * 8) ; 16-bit current DSP pitch (pitch bends / vibrato)
+seq_track_pitch_target: .res (2 * 8) ; 16-bit target DSP pitch for portamento (IT/MOD command G / 3xx)
 seq_track_pitch_slide: .res (2 * 8) ; Signed 16-bit pitch delta per tick
 seq_track_pitch_mode: .res 8 ; 0 = Off, 1 = Pitch Slide (E/F), 2 = Portamento (G)
 
@@ -117,9 +111,6 @@ seq_force_mono: .res 1
 seq_music_volume: .res 1
 seq_sfx_volume: .res 1
 seq_voice_volume: .res 1
-
-channel_base_vol_l: .res 8
-channel_base_vol_r: .res 8
 
 global_sfx_samplerates: .res (2 * INTERNAL_UNIQUE_SAMPLE_COUNT)
 global_sfx_adsr: .res (2 * INTERNAL_UNIQUE_SAMPLE_COUNT)
