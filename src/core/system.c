@@ -232,6 +232,7 @@ void System_DisplayStartupSplash()
     SoundInterface_UploadMusicSequence(data_seq_test_t4, 3); // Secondary
     //SoundInterface_UploadMusicSequence(data_seq_test_t5, 4); // Drum test sequence
     //SoundInterface_UploadMusicSequence(data_seq_test_t6, 5); // Drum + instrument test sequence
+    SoundInterface_SetMusicSpeed(6);
     SoundInterface_SetMusicTempo(120);
 
     // Initialize user game settings

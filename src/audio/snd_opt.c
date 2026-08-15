@@ -198,6 +198,20 @@ void SoundInterface_StopSfx_Internal(uint8_t sfx_id)
 }
 
 /**
+ * @brief Sends a stream stop command directly to the APU.
+ */
+void SoundInterface_StopStream_Internal()
+{
+    SoundInterface_AcknowledgeBusy(true);
+
+    REG_APU01 = SND_CMD_STREAM_STOP;
+
+    snd_current_command_counter++;
+
+    return;
+}
+
+/**
  * @brief Plays a short sound clip.
  * 
  * @param clip_id The ID of the clip to play.
@@ -223,15 +237,22 @@ void SoundInterface_PlayClip(uint16_t clip_id)
  */
 void SoundInterface_PlayStream(uint8_t * ptr, uint16_t len, bool loop)
 {
+    if (snd_stream_enable && snd_stream_ptr_start == ptr)
+    {
+        return;
+    }
+
     SoundInterface_PauseStream();
     
-    snd_stream_ptr = ptr + (snd_stream_current_block * 72);
+    snd_defercmd_stream_stop_enable = false;
+
+    snd_stream_ptr = ptr;
     snd_stream_ptr_start = ptr;
+    snd_stream_current_block = 0;
     
     snd_stream_length = len;
     snd_stream_loop = loop;
 
-    // Reuse the current block indicator to prevent stream errors
     snd_stream_enable = true; // MUST BE SET LAST
 
     return;
@@ -266,6 +287,8 @@ void SoundInterface_StopStream()
 
     snd_stream_ptr = snd_stream_ptr_start;
     snd_stream_current_block = 0;
+
+    snd_defercmd_stream_stop_enable = true;
 
     return;
 }
@@ -364,6 +387,13 @@ void SoundInterface_RunDeferredCommands()
         snd_defercmd_sfx_stop_enable = false;
 
         snd_defercmd_sfx_stop_sfx_id = 0; // Set this to invalid
+    }
+
+    if (snd_defercmd_stream_stop_enable)
+    {
+        SoundInterface_StopStream_Internal();
+
+        snd_defercmd_stream_stop_enable = false;
     }
 
     return;

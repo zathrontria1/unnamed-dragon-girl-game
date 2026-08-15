@@ -42,6 +42,7 @@
 #define SND_CMD_MUS_STOP 0x22
 
 #define SND_CMD_MUS_SET_TEMPO 0x23
+#define SND_CMD_MUS_SET_SPEED 0x28
 
 #define SND_CMD_MUS_SET_OUTPUTMODE 0x27
 
@@ -130,6 +131,8 @@
 #define SEQ_SET_LOOP(count)      0x96, (uint8_t)(count)
 #define SEQ_LOOP                 0x97
 #define SEQ_SET_RESTART          0x98
+#define SEQ_SET_SPEED(speed)     0x99, (uint8_t)(speed)
+#define SEQ_SET_TEMPO(bpm)       0x9a, (uint8_t)(bpm)
 #define SEQ_RESTART              0xff
 
 // Raw opcode numbers for parser
@@ -143,6 +146,8 @@
 #define SEQ_OPCODE_SET_LOOP      0x96
 #define SEQ_OPCODE_LOOP          0x97
 #define SEQ_OPCODE_SET_RESTART   0x98
+#define SEQ_OPCODE_SET_SPEED     0x99
+#define SEQ_OPCODE_SET_TEMPO     0x9a
 #define SEQ_OPCODE_RESTART       0xff
 
 // Piano key freq names to MIDI note

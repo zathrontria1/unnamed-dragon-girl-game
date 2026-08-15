@@ -35,6 +35,7 @@ SND_CMD_MUS_STOP = $22
 
 SND_CMD_MUS_SET_TEMPO = $23
 SND_CMD_MUS_SET_OUTPUTMODE = $27
+SND_CMD_MUS_SET_SPEED = $28
 
 ; Streaming stuff
 SND_CMD_STREAM_START = $24
@@ -55,7 +56,7 @@ SND_CMD_SOFTRESET = $ff
 ; 0x80-0x8F: Short wait (0 to 15 ticks)
 SEQ_OPCODE_WAIT_BASE = $80
 
-; Extended / parameterized opcodes ($90-$98, $ff)
+; Extended / parameterized opcodes ($90-$9a, $ff)
 SEQ_OPCODE_WAIT_EXT     = $90
 SEQ_OPCODE_SET_INS      = $91
 SEQ_OPCODE_SET_VOL      = $92
@@ -65,6 +66,8 @@ SEQ_OPCODE_PLAY_DRUM    = $95
 SEQ_OPCODE_SET_LOOP     = $96
 SEQ_OPCODE_LOOP         = $97
 SEQ_OPCODE_SET_RESTART  = $98
+SEQ_OPCODE_SET_SPEED    = $99
+SEQ_OPCODE_SET_TEMPO    = $9a
 SEQ_OPCODE_RESTART      = $ff
 
 ; Define the stream data as this particular sample

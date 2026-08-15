@@ -316,38 +316,40 @@ _SoundInterface_PlayStream:
 	sta	r16
 	stx	r16+2
 
-	;lda	#72
-	;sta	r1
-	;lda	_snd_stream_current_block
-	;sta	r0
-	;jsl	>___mulint16snes
+	sep	#32
+	a8
+	lda	_snd_stream_enable
+	beq	.start_new_stream
+	a16
+	rep	#32
+	lda	_snd_stream_ptr_start
+	cmp	r16
+	bne	.restart_stream
+	lda	2+_snd_stream_ptr_start
+	cmp	r16+2
+	bne	.restart_stream
+	plx
+	stx	r17
+	plx
+	stx	r16
+	rtl
 
-	lda	_snd_stream_current_block
-	and #$0003
-	asl
-	asl
-	asl ; x8
-	sta _nmi_snd_scratch_temp
-	asl
-	asl
-	asl ; x64
-	adc _nmi_snd_scratch_temp ; carry is already clear
-
-	sta	_nmi_snd_scratch_temp
-	lda	r16+2
-	sta	2+_snd_stream_ptr
+.start_new_stream:
+	a16
+	rep	#32
+.restart_stream:
+	stz	_snd_stream_current_block
 	lda	r16
-	clc
-	adc	_nmi_snd_scratch_temp
 	sta	_snd_stream_ptr
-	lda	r16
 	sta	_snd_stream_ptr_start
 	lda	r16+2
+	sta	2+_snd_stream_ptr
 	sta	2+_snd_stream_ptr_start
 	lda	8,s
 	sta	_snd_stream_length
 	sep	#32
 	a8
+	stz	_snd_defercmd_stream_stop_enable
 	lda	10,s
 	sta	_snd_stream_loop
 	lda	#1
@@ -435,6 +437,8 @@ _SoundInterface_StopStream:
 	sep	#32
 	a8
 	stz	_snd_stream_enable
+	lda	#1
+	sta	_snd_defercmd_stream_stop_enable
 	a16
 	rep	#32
 	lda	_snd_stream_ptr_start
@@ -442,6 +446,23 @@ _SoundInterface_StopStream:
 	lda	2+_snd_stream_ptr_start
 	sta	2+_snd_stream_ptr
 	stz	_snd_stream_current_block
+	rtl
+
+	section	"DONTMERGE_text.far.SoundInterface_StopStream_Internal.0","acrx"
+	a16
+	x16
+	global	_SoundInterface_StopStream_Internal
+_SoundInterface_StopStream_Internal:
+	lda	#1
+	jsl	>_SoundInterface_AcknowledgeBusy
+	sep	#$20
+	a8
+	lda	#$25 ; SND_CMD_STREAM_STOP
+	sta	8513
+	inc	_snd_current_command_counter
+	rep	#$30
+	a16
+	x16
 	rtl
 
 	section	"DONTMERGE_text.far.SoundInterface_NmiAudioUpload.0","acrx"
@@ -608,7 +629,7 @@ _SoundInterface_RunDeferredCommands:
 	lda _snd_defercmd_sfx_stop_enable
 	rep #$20
 	a16
-	beq .deferred_done
+	beq .check_stop_stream
 	lda _snd_defercmd_sfx_stop_sfx_id
 	and #$00ff
 	jsl _SoundInterface_StopSfx_Internal
@@ -616,6 +637,20 @@ _SoundInterface_RunDeferredCommands:
 	a8
 	stz _snd_defercmd_sfx_stop_enable
 	stz _snd_defercmd_sfx_stop_sfx_id
+	rep #$20
+	a16
+
+.check_stop_stream:
+	sep #$20
+	a8
+	lda _snd_defercmd_stream_stop_enable
+	rep #$20
+	a16
+	beq .deferred_done
+	jsl _SoundInterface_StopStream_Internal
+	sep #$20
+	a8
+	stz _snd_defercmd_stream_stop_enable
 	rep #$20
 	a16
 

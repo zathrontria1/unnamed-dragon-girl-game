@@ -34,6 +34,8 @@ int8_t snd_defercmd_sfx_pitch;
 bool snd_defercmd_sfx_stop_enable;
 uint8_t snd_defercmd_sfx_stop_sfx_id;
 
+bool snd_defercmd_stream_stop_enable;
+
 uint16_t snd_footstep_timeout;
 uint16_t snd_punch_timeout;
 uint16_t snd_flame_active;
@@ -489,7 +491,7 @@ void SoundInterface_SetSampleTune(uint8_t ins_id, uint8_t tune)
 }
 
 /**
- * @brief Adjusts the sequence playback tempo.
+ * @brief Adjusts the sequence playback tempo using Impulse Tracker tick timing.
  * 
  * @param tempo The tempo rate value in BPM.
  */
@@ -502,20 +504,20 @@ void SoundInterface_SetMusicTempo(uint16_t tempo)
         tempo = 1; // Avoid division by zero
     }
 
-    uint32_t val = 120000ul / tempo;
+    uint32_t val = (20000ul + (tempo >> 1)) / tempo;
     uint16_t temp_interval = 1;
 
-    while (val >= 255)
+    while (val > 255)
     {
         val >>= 1;
         temp_interval <<= 1;
     }
 
-    uint8_t temp_t2timer = (uint8_t)val;
+    uint8_t temp_t1timer = (uint8_t)val;
 
-    if ((temp_t2timer == 0) && (val != 0))
+    if (temp_t1timer == 0)
     {
-        temp_t2timer = 255;
+        temp_t1timer = 1;
     }
 
     if (temp_interval > 255)
@@ -524,10 +526,39 @@ void SoundInterface_SetMusicTempo(uint16_t tempo)
     }
 
     REG_APU03 = (uint8_t)temp_interval;
-    REG_APU02 = temp_t2timer;
+    REG_APU02 = temp_t1timer;
     REG_APU01 = SND_CMD_MUS_SET_TEMPO; // Initial
 
     while (REG_APU01 != SND_CMD_MUS_SET_TEMPO)
+    {
+        ; // Wait for opcode echo.
+    }
+
+    snd_current_command_counter++;
+
+    SoundInterface_AcknowledgeNop();
+
+    return;
+}
+
+/**
+ * @brief Adjusts the sequence playback speed (ticks per row).
+ * 
+ * @param speed The number of ticks per row (typically 1..32, default 6).
+ */
+void SoundInterface_SetMusicSpeed(uint8_t speed)
+{
+    if (speed == 0)
+    {
+        speed = 1;
+    }
+
+    SoundInterface_AcknowledgeBusy(false);
+
+    REG_APU02 = speed;
+    REG_APU01 = SND_CMD_MUS_SET_SPEED; // Initial
+
+    while (REG_APU01 != SND_CMD_MUS_SET_SPEED)
     {
         ; // Wait for opcode echo.
     }
@@ -589,6 +620,8 @@ void SoundInterface_UploadMusicSequence(const uint8_t * s, uint8_t track)
                 case SEQ_OPCODE_SET_DURATION: // 2 bytes: opcode + ticks
                 case SEQ_OPCODE_PLAY_DRUM:    // 2 bytes: opcode + drum_id
                 case SEQ_OPCODE_SET_LOOP:     // 2 bytes: opcode + count
+                case SEQ_OPCODE_SET_SPEED:    // 2 bytes: opcode + speed
+                case SEQ_OPCODE_SET_TEMPO:    // 2 bytes: opcode + tempo
                     temp_ptr += 2;
                     break;
                 case SEQ_OPCODE_SET_VOL:      // 3 bytes: opcode + vol_l + vol_r

@@ -28,6 +28,8 @@ extern int8_t snd_defercmd_sfx_pitch;
 extern bool snd_defercmd_sfx_stop_enable;
 extern uint8_t snd_defercmd_sfx_stop_sfx_id;
 
+extern bool snd_defercmd_stream_stop_enable;
+
 extern uint16_t snd_footstep_timeout;
 extern uint16_t snd_punch_timeout;
 extern uint16_t snd_flame_active;
@@ -84,6 +86,7 @@ void SoundInterface_UploadInstrumentList(struct sample_list_entry_ins * s);
 void SoundInterface_UploadSampleList(struct sample_list_entry * s);
 void SoundInterface_SetSampleTune(uint8_t ins_id, uint8_t tune);
 void SoundInterface_SetMusicTempo(uint16_t tempo);
+void SoundInterface_SetMusicSpeed(uint8_t speed);
 
 void SoundInterface_UploadMusicSequence(const uint8_t * s, uint8_t track);
 void SoundInterface_PlayMusic();
@@ -96,6 +99,7 @@ void SoundInterface_PlayStream(uint8_t * ptr, uint16_t len, bool loop);
 void SoundInterface_ResumeStream();
 void SoundInterface_PauseStream();
 void SoundInterface_StopStream();
+void SoundInterface_StopStream_Internal();
 
 void SoundInterface_NmiAudioUpload();
 

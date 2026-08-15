@@ -71,6 +71,9 @@ _mus_stop:
     mov <REG_DSPADDR, #DSP_KOFF
     mov <REG_DSPDATA, #$00
     
+    mov <seq_speed, #6
+    mov <seq_tick_in_row, #0
+
     mov <REG_APUIO1,#SND_CMD_MUS_STOP
 
     ret
@@ -82,6 +85,18 @@ _mus_set_tempo:
     
     mov <REG_APUIO1,#SND_CMD_MUS_SET_TEMPO
     
+    ret
+
+_mus_set_speed:
+    mov A, <REG_APUIO2
+    bne :+
+        mov A, #6
+    :
+    mov <seq_speed, A
+    mov <seq_tick_in_row, #0
+
+    mov <REG_APUIO1,#SND_CMD_MUS_SET_SPEED
+
     ret
 
 _mus_set_outputmode:

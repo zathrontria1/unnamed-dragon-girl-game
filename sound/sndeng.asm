@@ -128,11 +128,14 @@ _start:
     mov <REG_DSPDATA, #0 ; Clear all Key offs
 
     mov <REG_T0DIV, #133 ; roughly 60Hz
+    mov A, #$ff
     mov <REG_T1DIV, A ; placeholder slowest possible rate
     mov <REG_CONTROL, #$03 ; enable T0 and T1
 
     ; set up the tick timer
     mov <seq_tick_timer_target, A ; slowest possible additional tick wait. music is effectively stopped
+    mov <seq_speed, #6
+    mov <seq_tick_in_row, #0
 
     mov <global_last_cmd, A ; Make it so that the "last command" is the soft reset command which is impossible for a fresh boot
 _main:
@@ -241,74 +244,79 @@ _service_command:
     cmp A,#SND_CMD_STREAM_STOP
     bne :+
         call !_stream_stop
-        bra @end
+        jmp !@end
     :
     cmp A,#SND_CMD_DATA_SAMPLE_UPLOAD
     bne :+
         call !_sfx_upload
         ; subroutine will twiddle the IO ports
-        bra @end
+        jmp !@end
     :
     cmp A,#SND_CMD_DATA_SAMPLE_SET_TUNE
     bne :+
         call !_set_tune
-        bra @end
+        jmp !@end
     :
     cmp A,#SND_CMD_SEQ_UPLOAD
     bne :+
         call !_mus_seq_upload
         ; subroutine will twiddle the IO ports
-        bra @end
+        jmp !@end
     :
     cmp A,#SND_CMD_SFX_PLAY
     bne :+
         call !_sfx_play
-        bra @end
+        jmp !@end
     :
     cmp A,#SND_CMD_SFX_PLAY_EXTEND
     bne :+
         call !_sfx_play_extend
-        bra @end
+        jmp !@end
     :
     cmp A,#SND_CMD_SFX_STOP
     bne :+
         call !_sfx_stop
-        bra @end
+        jmp !@end
     :
     cmp A,#SND_CMD_MUS_START
     bne :+
         call !_mus_start
-        bra @end
+        jmp !@end
     :
     cmp A,#SND_CMD_MUS_PAUSE
     bne :+
         call !_mus_pause
-        bra @end
+        jmp !@end
     :
     cmp A,#SND_CMD_MUS_STOP
     bne :+
         call !_mus_stop
-        bra @end
+        jmp !@end
     :
     cmp A,#SND_CMD_MUS_SET_TEMPO
     bne :+
         call !_mus_set_tempo
-        bra @end
+        jmp !@end
+    :
+    cmp A,#SND_CMD_MUS_SET_SPEED
+    bne :+
+        call !_mus_set_speed
+        jmp !@end
     :
     cmp A,#SND_CMD_MUS_SET_OUTPUTMODE
     bne :+
         call !_mus_set_outputmode
-        bra @end
+        jmp !@end
     :
     cmp A,#SND_CMD_DSP_SET
     bne :+
         call !_dsp_reg_write
-        bra @end
+        jmp !@end
     :
     cmp A,#SND_CMD_DIR_RESET
     bne :+
         call !_dir_reset
-        bra @end
+        jmp !@end
     :
     cmp A,#SND_CMD_SOFTRESET
     bne @end_skipinc
@@ -334,6 +342,10 @@ _process_mus:
         mov A, #0
         ret
     :
+
+    ; Check if this tick is a Row Start (seq_tick_in_row == 0)
+    mov A, <seq_tick_in_row
+    bne @sub_row_tick
 
     mov X, <seq_process_track
     @track_loop:
@@ -381,7 +393,7 @@ _process_mus:
     bcc @is_short_wait ; 0x80..0x8F is a 1-byte short wait (0..15 ticks)
     cmp A, #$ff
     beq @opcode_restart ; 0xFF is restart/loop track
-    jmp !@opcode_runfromtable ; 0x90..0x98 are extended opcodes
+    jmp !@opcode_runfromtable ; 0x90..0x9a are extended opcodes
 
     @track_end:
     inc X
@@ -392,6 +404,15 @@ _process_mus:
     @tick_processed:
     mov A, #0
     mov <seq_process_track, A
+
+    @sub_row_tick:
+    inc <seq_tick_in_row
+    mov A, <seq_tick_in_row
+    cmp A, <seq_speed
+    bcc @tick_done
+        mov <seq_tick_in_row, #0
+    @tick_done:
+    mov A, #0
     ret
 
 @yield_to_command:
@@ -582,6 +603,25 @@ _process_mus:
     mov X, <seq_current_track
     jmp !@track_active
 
+@opcode_set_speed:
+    inc Y
+    mov A, [<seq_current_track_ptr]+Y
+    bne :+
+        mov A, #6
+    :
+    mov <seq_speed, A
+
+    call !_advance_ptr_2
+    jmp !@track_active
+
+@opcode_set_tempo:
+    inc Y
+    mov A, [<seq_current_track_ptr]+Y
+    mov <REG_T1DIV, A
+
+    call !_advance_ptr_2
+    jmp !@track_active
+
 @seq_opcode_table:
     .word @opcode_wait_ext     ; $90
     .word @opcode_set_ins      ; $91
@@ -592,6 +632,8 @@ _process_mus:
     .word @opcode_set_loop     ; $96
     .word @opcode_loop         ; $97
     .word @opcode_set_restart  ; $98
+    .word @opcode_set_speed    ; $99
+    .word @opcode_set_tempo    ; $9a
 
 _advance_ptr_1:
     mov A, <seq_current_track
