@@ -246,9 +246,6 @@ _sfx_upload:
 _stream_upload:
     mov A, <REG_APUIO2
     mov <stream_current_block, A
-    bne :+
-        mov <stream_active, #0
-    :
 
     mov <REG_APUIO1,<REG_APUIO1 ;echo the opcode.
 

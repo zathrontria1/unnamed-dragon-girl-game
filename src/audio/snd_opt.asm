@@ -338,7 +338,6 @@ _SoundInterface_PlayStream:
 	a16
 	rep	#32
 .restart_stream:
-	stz	_snd_stream_current_block
 	lda	r16
 	sta	_snd_stream_ptr
 	sta	_snd_stream_ptr_start
@@ -445,7 +444,6 @@ _SoundInterface_StopStream:
 	sta	_snd_stream_ptr
 	lda	2+_snd_stream_ptr_start
 	sta	2+_snd_stream_ptr
-	stz	_snd_stream_current_block
 	rtl
 
 	section	"DONTMERGE_text.far.SoundInterface_StopStream_Internal.0","acrx"

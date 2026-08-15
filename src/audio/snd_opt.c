@@ -248,7 +248,6 @@ void SoundInterface_PlayStream(uint8_t * ptr, uint16_t len, bool loop)
 
     snd_stream_ptr = ptr;
     snd_stream_ptr_start = ptr;
-    snd_stream_current_block = 0;
     
     snd_stream_length = len;
     snd_stream_loop = loop;
@@ -286,7 +285,6 @@ void SoundInterface_StopStream()
     snd_stream_enable = false;
 
     snd_stream_ptr = snd_stream_ptr_start;
-    snd_stream_current_block = 0;
 
     snd_defercmd_stream_stop_enable = true;
 
