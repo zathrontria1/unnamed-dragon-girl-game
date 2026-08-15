@@ -29,6 +29,8 @@ _mus_stop:
         mov A, #0
         mov <seq_ptr_loop+X, A
         mov <seq_ptr_loop+1+X, A
+        mov <global_sfx_tick_counter+X, A
+        mov <global_sfx_tick_counter+1+X, A
 
         mov !seq_track_adsr_override+X, A
         mov !seq_track_adsr_override+1+X, A
@@ -55,14 +57,6 @@ _mus_stop:
     ; Silence all voices and clear tick counters
     mov <REG_DSPADDR, #DSP_KOFF
     mov <REG_DSPDATA, #$ff
-
-    mov X, #0
-    mov A, #0
-    @loop_clear_ticks:
-        mov <global_sfx_tick_counter+X, A
-        inc X
-        cmp X, #16
-        bcc @loop_clear_ticks
 
     ; Update channel LRUs to reflect all voices free
     mov A, #0

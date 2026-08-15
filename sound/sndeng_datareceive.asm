@@ -28,11 +28,8 @@ _mus_seq_upload:
     mov <REG_APUIO1,<REG_APUIO1
 
     ; Calculate where the pointers should be
-    mov <r8, #0
-    mov <r8+1, #0
-
-    movw ya, <global_sample_end
-    cmpw ya, <r8
+    mov A, <global_sample_end
+    or A, <global_sample_end+1
     bne :+
         ; First sequence upload after samples: lock in sample boundary and sequence start
         movw ya, <global_nextfree
@@ -175,8 +172,8 @@ _sfx_upload:
 
     ; Calculate where the pointers should be
     ; for SFX, both pointers should be identical
-    mov <r2, <global_nextfree
-    mov <r2+1, <global_nextfree+1
+    movw ya, <global_nextfree
+    movw <r2, ya
 
     mov A,#<global_sampledata
     mov Y,#>global_sampledata
@@ -198,100 +195,51 @@ _sfx_upload:
     :
     movw <global_nextfree,ya
 
-    ; Write the tick count of the current sample
-    ; it's in <r6
-    mov A,#<global_sfx_tickcounts
-    mov Y,#>global_sfx_tickcounts
-    clrc
-    addw ya,<r1
-    addw ya,<r1 ; hacky, but avoids a reload
-    movw <r7,ya ; now points to sample tick length table
+    ; Write slot tables using direct absolute indexing
+    ; X = slot * 2
+    mov A, <r1
+    asl A
+    mov X, A
 
-    mov Y, #0
+    ; Write tick count (2 bytes per slot)
     mov A, <r6
-    mov [<r7]+y,a
+    mov !global_sfx_tickcounts+X, A
     mov A, <r6+1
-    inc Y
-    mov [<r7]+y,a
+    mov !global_sfx_tickcounts+1+X, A
 
-    ; Write the slot the sample belongs to
-    asl <r1
-    rol <r1+1
-    mov <r5, <r1
-    mov <r5+1, <r1+1 ; for sample rate table
-    asl <r1
-    rol <r1+1 ; mul 4, for sample pointer table
-
-    ; Write new values to sample pointer table
-    mov A,#<global_sampletable
-    mov Y,#>global_sampletable
-    clrc
-    addw ya,<r1
-    movw <r1,ya ; now points to sample pointer table
-
-    mov Y, #0
-    mov A, <r2
-    mov X, <r2+1
-    mov [<r1]+y,a
-    mov A,X
-    mov Y, #1
-    mov [<r1]+y,a
-
-    mov A, <r2
-    mov Y, <r2+1
-    clrc
-    addw ya,<r12 ; add the loop point offset
-    movw <r13,ya
-
-    mov A, <r13
-    mov X, <r13+1
-
-    mov Y, #2
-    mov [<r1]+y,a
-    mov A,X
-    mov Y, #3
-    mov [<r1]+y,a
-
-    ; Write new values to sample rate table
-    ; copy it again to another variable
-    mov <r11,<r5
-    mov <r11+1,<r5+1
-
-    mov A,#<global_sfx_samplerates
-    mov Y,#>global_sfx_samplerates
-    clrc
-    addw ya,<r5
-    movw <r5,ya ; now points to sample rate table
-
-    mov Y, #0
+    ; Write sample rate (2 bytes per slot)
     mov A, <r4
-    mov X, <r4+1
+    mov !global_sfx_samplerates+X, A
+    mov A, <r4+1
+    mov !global_sfx_samplerates+1+X, A
 
-    mov [<r5]+y,a
-    inc Y
-    mov A,X
-    mov [<r5]+y,a
-
-    ; finally ADSR
-    ; <r10
-    mov A,#<global_sfx_adsr
-    mov Y,#>global_sfx_adsr
-    clrc
-    addw ya,<r11
-    movw <r11,ya ; now points to ADSR table
-
-    mov Y, #0
+    ; Write ADSR (2 bytes per slot)
     mov A, <r10
-    mov X, <r10+1
+    mov !global_sfx_adsr+X, A
+    mov A, <r10+1
+    mov !global_sfx_adsr+1+X, A
 
-    mov [<r11]+y,a
-    inc Y
-    mov A,X
-    mov [<r11]+y,a
+    ; X = slot * 4 for sample directory table (4 bytes per entry)
+    mov A, <r1
+    asl A
+    asl A
+    mov X, A
 
-    ;call !_data_upload_loop
+    ; Write sample start pointer
+    mov A, <r2
+    mov !global_sampletable+X, A
+    mov A, <r2+1
+    mov !global_sampletable+1+X, A
+
+    ; Write loop start pointer (start + loop offset)
+    movw ya, <r2
+    clrc
+    addw ya, <r12
+    mov !global_sampletable+2+X, A
+    mov A, Y
+    mov !global_sampletable+3+X, A
+
     call !_data_upload_loop_2byte
-    ;call !_data_upload_loop_3byte
 
     ret
 

@@ -768,28 +768,11 @@ _update_channel_lru:
     ret
 
 _dir_reset:
-    mov A, #<global_sampletable
-    mov Y, #>global_sampletable
-
-    movw <r8,ya
-    inc Y
-    movw <r9,ya
-    inc Y
-    movw <r10,ya
-    inc Y
-    movw <r11,ya
-
-    mov Y,#0
-    mov A,Y
-
+    mov A, #0
+    mov Y, #0
     :
-        mov [<r8]+Y,A
-        mov [<r9]+Y,A
-        mov [<r10]+Y,A
-        mov [<r11]+Y,A
-        inc Y
-        cmp Y, #64
-        bcc :-
+        mov !global_sampletable+Y, A
+        dbnz Y, :-
 
     ; write hardcoded values for the 63th entry of the sample table
     mov A, #<stream_data
