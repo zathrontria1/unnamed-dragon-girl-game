@@ -742,6 +742,7 @@ void SoundInterface_UploadMusicSequence(const uint8_t * s, uint8_t track)
                 case SEQ_OPCODE_SET_VOL:      // 3 bytes: opcode + vol_l + vol_r
                 case SEQ_OPCODE_SET_ADSR:     // 3 bytes: opcode + adsr_l + adsr_h
                 case SEQ_OPCODE_SET_PORTA:    // 3 bytes: opcode + note + speed
+                case SEQ_OPCODE_SET_PITCH_SLIDE: // 3 bytes: opcode + delta_l + delta_h
                     temp_ptr += 3;
                     break;
                 case SEQ_OPCODE_CALL_SUB:     // 3 bytes: opcode + offset_l + offset_h
@@ -799,6 +800,7 @@ void SoundInterface_UploadMusicSequence(const uint8_t * s, uint8_t track)
                     case SEQ_OPCODE_SET_VOL:
                     case SEQ_OPCODE_SET_ADSR:
                     case SEQ_OPCODE_SET_PORTA:
+                    case SEQ_OPCODE_SET_PITCH_SLIDE:
                     case SEQ_OPCODE_CALL_SUB:
                         temp_ptr += 3;
                         break;

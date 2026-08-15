@@ -21,7 +21,7 @@ const struct sample_list_entry_ins data_snd_instruments_module1[] =
 HUGE const uint8_t data_seq_module1_t1[] = {
     // --- Order Call Script ---
     SEQ_SET_INS(0),
-    SEQ_SET_VOL(4, 4),
+    SEQ_SET_VOL(18, 18),
     SEQ_CALL_SUB(18), // Pattern 0
     SEQ_CALL_SUB(18), // Pattern 0
     SEQ_CALL_SUB(53), // Pattern 1
@@ -105,7 +105,7 @@ HUGE const uint8_t data_seq_module1_t1[] = {
 HUGE const uint8_t data_seq_module1_t2[] = {
     // --- Order Call Script ---
     SEQ_SET_INS(2),
-    SEQ_SET_VOL(4, 4),
+    SEQ_SET_VOL(18, 18),
     SEQ_CALL_SUB(18), // Pattern 0
     SEQ_CALL_SUB(18), // Pattern 0
     SEQ_CALL_SUB(56), // Pattern 1
@@ -195,7 +195,7 @@ HUGE const uint8_t data_seq_module1_t2[] = {
 HUGE const uint8_t data_seq_module1_t3[] = {
     // --- Order Call Script ---
     SEQ_SET_INS(1),
-    SEQ_SET_VOL(4, 4),
+    SEQ_SET_VOL(18, 18),
     SEQ_CALL_SUB(18), // Pattern 0
     SEQ_CALL_SUB(18), // Pattern 0
     SEQ_CALL_SUB(38), // Pattern 1
@@ -249,7 +249,7 @@ HUGE const uint8_t data_seq_module1_t3[] = {
 HUGE const uint8_t data_seq_module1_t4[] = {
     // --- Order Call Script ---
     SEQ_SET_INS(3),
-    SEQ_SET_VOL(12, 12),
+    SEQ_SET_VOL(50, 50),
     SEQ_CALL_SUB(18), // Pattern 0
     SEQ_CALL_SUB(18), // Pattern 0
     SEQ_CALL_SUB(85), // Pattern 1
@@ -397,7 +397,7 @@ HUGE const uint8_t data_seq_module1_t4[] = {
 HUGE const uint8_t data_seq_module1_t5[] = {
     // --- Order Call Script ---
     SEQ_SET_INS(4),
-    SEQ_SET_VOL(12, 12),
+    SEQ_SET_VOL(50, 50),
     SEQ_CALL_SUB(18), // Pattern 0
     SEQ_CALL_SUB(18), // Pattern 0
     SEQ_CALL_SUB(57), // Pattern 1

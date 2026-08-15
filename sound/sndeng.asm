@@ -752,6 +752,43 @@ _process_mus:
     .word @opcode_call_sub     ; $9c
     .word @opcode_ret          ; $9d
     .word @opcode_set_porta    ; $9e
+    .word @opcode_set_pitch_slide ; $9f
+
+@opcode_set_pitch_slide:
+    ; 3-byte opcode: $9F, delta_low, delta_high (signed 16-bit DSP pitch delta per sub-tick)
+    ; Positive delta = slide up (Fxx), Negative (two's complement) = slide down (Exx)
+    ; delta = 0x0000 = stop slide (set mode to 0)
+    inc Y
+    mov A, [<seq_current_track_ptr]+Y  ; delta_low
+    mov <r12, A
+    inc Y
+    mov A, [<seq_current_track_ptr]+Y  ; delta_high
+    mov <r13, A
+
+    ; Store signed delta into seq_track_pitch_slide
+    mov A, <seq_current_track
+    asl A
+    mov X, A
+    mov A, <r12
+    mov !seq_track_pitch_slide+X, A
+    mov A, <r13
+    mov !seq_track_pitch_slide+1+X, A
+
+    ; Determine mode: zero delta -> stop (mode 0); nonzero -> free slide (mode 1)
+    mov A, <r12
+    or A, <r13
+    mov X, <seq_current_track
+    beq :+
+        mov A, #1
+        mov !seq_track_pitch_mode+X, A
+        bra :++
+    :
+        mov A, #0
+        mov !seq_track_pitch_mode+X, A
+    :
+
+    call !_advance_ptr_3
+    jmp !@track_active
 
 @opcode_set_porta:
     ; 3-byte opcode: $9E, target_note, speed
@@ -810,17 +847,16 @@ _process_mus:
     jmp !@track_active
 
 _update_sub_row_pitch:
-    mov <r14, #0 ; Track index 0..7
+    mov <r14, #0  ; track index 0..7
 
 @update_pitch_loop:
     mov X, <r14
     mov A, !seq_track_pitch_mode+X
-    cmp A, #2 ; Portamento mode
-    beq :+
-        jmp !@next_pitch_track
+    bne :+
+        jmp !@next_pitch_track  ; mode == 0, nothing to do
     :
 
-    ; Check if this track owns an active voice channel
+    ; mode != 0: check voice channel ownership
     mov A, !seq_track_channel+X
     cmp A, #8
     bcc :+
@@ -832,11 +868,9 @@ _update_sub_row_pitch:
     beq :+
         jmp !@next_pitch_track
     :
+    mov <r15, Y  ; save active voice channel
 
-    ; Active voice channel is in Y (0..7)
-    mov <r15, Y
-
-    ; Load curr pitch and target pitch
+    ; Load curr pitch and slide delta (shared by both modes)
     mov A, <r14
     asl A
     mov X, A
@@ -844,16 +878,50 @@ _update_sub_row_pitch:
     mov <r2, A
     mov A, !seq_track_pitch_curr+1+X
     mov <r2+1, A
-
-    mov A, !seq_track_pitch_target+X
-    mov <r3, A
-    mov A, !seq_track_pitch_target+1+X
-    mov <r3+1, A
-
     mov A, !seq_track_pitch_slide+X
     mov <r4, A
     mov A, !seq_track_pitch_slide+1+X
     mov <r4+1, A
+
+    ; Dispatch on mode value
+    mov X, <r14
+    mov A, !seq_track_pitch_mode+X
+    cmp A, #2
+    bne :+
+        jmp !@handle_portamento
+    :
+
+    ; Mode 1: free pitch slide (Exx/Fxx) -- add signed delta and clamp
+    movw ya, <r2
+    clrc
+    addw ya, <r4       ; signed add (two's complement for downward slide)
+    movw <r2, ya       ; store tentative result
+    ; Clamp: high byte in r2+1
+    mov A, <r2+1
+    bmi @clamp_free_low    ; bit 7 set = wrapped below zero
+    cmp A, #$40            ; >= 0x4000 = above DSP pitch ceiling
+    bcc @free_slide_done
+    ; Result > 0x3FFF: clamp to 0x3FFF
+    mov <r2, #$ff
+    mov <r2+1, #$3f
+    bra @free_slide_done
+@clamp_free_low:
+    ; Result < 0: clamp to 0x0001 (avoid silencing voice)
+    mov <r2, #$01
+    mov <r2+1, #$00
+@free_slide_done:
+    bra @write_dsp_pitch
+
+@handle_portamento:
+    ; Mode 2: portamento toward target (Gxx)
+    ; Load target pitch
+    mov A, <r14
+    asl A
+    mov X, A
+    mov A, !seq_track_pitch_target+X
+    mov <r3, A
+    mov A, !seq_track_pitch_target+1+X
+    mov <r3+1, A
 
     ; Compare curr (r2) with target (r3)
     movw ya, <r2

@@ -127,13 +127,13 @@ def calc_stereo_vol(raw_vol, pan):
     if pan > 64 and pan != 100:
         pan = 32
     if pan == 100 or pan > 64:
-        vl = max(1, (raw_vol * 31 + 32) // 64)
+        vl = min(127, max(1, (raw_vol * 127 + 32) // 64))
         return (vl, vl)
     if pan <= 32:
-        vl = max(1, (raw_vol * 31 + 32) // 64)
+        vl = min(127, max(1, (raw_vol * 127 + 32) // 64))
         vr = (vl * pan) // 32
     else:
-        vr = max(1, (raw_vol * 31 + 32) // 64)
+        vr = min(127, max(1, (raw_vol * 127 + 32) // 64))
         vl = (vr * (64 - pan)) // 32
     return (vl, vr)
 
@@ -478,6 +478,9 @@ def convert_it_song(it_path, max_channels=8, prefix="", merge_drums=True):
             num_rows = pat_rows[pidx]
             last_d = 0
             last_g = 0
+            last_e = 0  # E memory: last non-zero Exx value for this channel
+            last_f = 0  # F memory: last non-zero Fxx value for this channel
+            slide_active = False  # whether a free pitch slide is currently running
             last_oxx = 0   # last Oxx offset value for this channel in this pattern
             speed = parsed["speed"]
 
@@ -486,6 +489,12 @@ def convert_it_song(it_path, max_channels=8, prefix="", merge_drums=True):
                 if r in events_by_row:
                     row_note = None
                     has_g_effect = any(ev[4] == 7 for ev in events_by_row[r])
+
+                    # Exx/Fxx: stop slide if not active on this row
+                    has_ef_effect = any(ev[4] in (5, 6) for ev in events_by_row[r])
+                    if slide_active and not has_ef_effect:
+                        toks.append("    SEQ_SET_PITCH_SLIDE(0, 0),")
+                        slide_active = False
 
                     # Determine Oxx offset for this row (0 means no non-zero offset)
                     row_oxx = 0
@@ -558,6 +567,31 @@ def convert_it_song(it_path, max_channels=8, prefix="", merge_drums=True):
                                 elif hi == 0 and lo > 0:
                                     curr_raw_vol = max(0, curr_raw_vol - max(1, (lo * s_def_vol * max(1, speed - 1)) // 64)) # Slide down
 
+                        # Handle IT Effect E (Portamento Down)
+                        if eff_cmd == 5:
+                            if eff_val != 0:
+                                last_e = eff_val
+                            else:
+                                eff_val = last_e
+                            if eff_val > 0 and eff_val < 0xe0:  # Normal slide only (< 0xE0)
+                                # IT linear: delta = eff_val * 4 / 768 octaves per tick
+                                # At DSP 0x1000 (C5), 1 octave = 0x1000, so delta ~ eff_val * 64 / 3
+                                delta = -(eff_val * 64 // 3)
+                                delta16 = delta & 0xFFFF  # two's complement
+                                toks.append(f"    SEQ_SET_PITCH_SLIDE({delta16 & 0xFF}, {(delta16 >> 8) & 0xFF}),")
+                                slide_active = True
+
+                        # Handle IT Effect F (Portamento Up)
+                        if eff_cmd == 6:
+                            if eff_val != 0:
+                                last_f = eff_val
+                            else:
+                                eff_val = last_f
+                            if eff_val > 0 and eff_val < 0xe0:  # Normal slide only (< 0xE0)
+                                delta = eff_val * 64 // 3
+                                toks.append(f"    SEQ_SET_PITCH_SLIDE({delta & 0xFF}, {(delta >> 8) & 0xFF}),")
+                                slide_active = True
+
                         # Handle IT Effect G (Tone Portamento)
                         if eff_cmd == 7:
                             if eff_val != 0:
@@ -596,7 +630,11 @@ def convert_it_song(it_path, max_channels=8, prefix="", merge_drums=True):
                             toks.append(f"    SEQ_WAIT({k}),")
                         r += 1 + k
                 else:
-                    # Row r is empty: find consecutive empty rows
+                    # Row r is empty: stop slide before emitting wait if active
+                    if slide_active:
+                        toks.append("    SEQ_SET_PITCH_SLIDE(0, 0),")
+                        slide_active = False
+                    # find consecutive empty rows
                     k = 0
                     while (r + k) < num_rows and (r + k) not in events_by_row:
                         k += 1
@@ -618,7 +656,7 @@ def convert_it_song(it_path, max_channels=8, prefix="", merge_drums=True):
                 s = t.strip()
                 if s.startswith("SEQ_WAIT(") or s.startswith("SEQ_SET_INS(") or s.startswith("SEQ_SET_DURATION(") or s.startswith("SEQ_PLAY_DRUM(") or s.startswith("SEQ_SET_LOOP(") or s.startswith("SEQ_SET_SPEED(") or s.startswith("SEQ_SET_TEMPO("):
                     l += 2
-                elif s.startswith("SEQ_SET_VOL(") or s.startswith("SEQ_SET_ADSR(") or s.startswith("SEQ_CALL_SUB(") or s.startswith("SEQ_SET_PORTA("):
+                elif s.startswith("SEQ_SET_VOL(") or s.startswith("SEQ_SET_ADSR(") or s.startswith("SEQ_CALL_SUB(") or s.startswith("SEQ_SET_PORTA(") or s.startswith("SEQ_SET_PITCH_SLIDE("):
                     l += 3
                 else:
                     l += 1
