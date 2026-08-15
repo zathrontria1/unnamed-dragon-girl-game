@@ -1,3 +1,11 @@
+#ifndef SEQ_TEST_H
+#define SEQ_TEST_H
+
+#include <stdint.h>
+#include "consts.h"
+#include "consts_snd.h"
+#include "defs_structs.h"
+
 HUGE const struct seq_command data_seq_test_t1[] = {
     {SEQ_OPCODE_SETLOOPPOINT, 6, 0, 0},
     {SEQ_OPCODE_PLAY_ONESHOT, INS_DRUM_KICK, 31, 31},
@@ -575,3 +583,5 @@ HUGE const struct seq_command data_seq_test_t6[] = {
 
     {SEQ_OPCODE_RESTART, 0, 0, 0},
 };
+
+#endif // SEQ_TEST_H
