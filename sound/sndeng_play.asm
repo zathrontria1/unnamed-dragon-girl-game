@@ -386,58 +386,26 @@ _sfx_play_extend:
     ret
 
 _stream_play:
-    mov A, <global_sfx_endsoonest
-    mov X, A
-    asl A
-    mov Y, A
+    ; Set up infinite tick count ($FFFF)
     mov A, #$ff
-    mov !global_sfx_tick_counter+Y,A
-    mov !global_sfx_tick_counter+1+Y,A
-    mov A, !lut_channel_mask+X
-    mov <dsp_param_kon,A
+    mov <r8, A
+    mov <r8+1, A
 
-    mov A,<global_sfx_endsoonest
-    xcn A ; Contains the channel offset
-    clrc
-    adc A, #DSP_V0VOLL ; Contains the first channel
-    mov <REG_DSPADDR, A
+    ; Set up stream sample parameters
+    mov <dsp_param_srcn, #63
+    mov <dsp_param_vpitch, #$d7
+    mov <dsp_param_vpitch+1, #$03
+    mov <dsp_param_adsr, #0
+    mov <dsp_param_adsr+1, #0
 
+    ; Scale voice volume
     mov Y, !seq_voice_volume
     mov A, #63
     call !_scale_single_volume
-    mov <REG_DSPDATA, A
+    mov <dsp_param_vol_l, A
+    mov <dsp_param_vol_r, A
 
-    ; Remaining DSPADDR reg can be incremented
-    inc <REG_DSPADDR ; #DSP_V0VOLR
-    mov <REG_DSPDATA, A
-
-    inc <REG_DSPADDR ; #DSP_V0PL
-    mov <REG_DSPDATA, #$d7
-
-    inc <REG_DSPADDR ; #DSP_V0PH
-    mov <REG_DSPDATA, #$03
-
-    inc <REG_DSPADDR ; #DSP_V0SRCN
-    mov <REG_DSPDATA, #63
-
-    inc <REG_DSPADDR ; #DSP_V0ADSRL
-    mov <REG_DSPDATA, #$00
-
-    inc <REG_DSPADDR ; #DSP_V0ADSRH
-    mov <REG_DSPDATA, #$00
-
-    inc <REG_DSPADDR ; #DSP_V0GAIN
-    mov <REG_DSPDATA, #$7f ; always write this regardless
-
-    ; This one is a global reg
-    mov <REG_DSPADDR, #DSP_KON
-    mov <REG_DSPDATA, <dsp_param_kon
-
-    ; Update channel LRUs to the newest situation without ticking
-    mov A, #0
-    call !_update_channel_lru
-
-    ret
+    bra _commit_dsp_voice
 
 ; Call after finishing setting up non-shared input to a DSP channel
 ; to play the SFX or note
@@ -506,8 +474,8 @@ _start_note:
         mov <r8+1,A
     @tick_end:
 
+_commit_dsp_voice:
     ; now we have to determine what channel to use.
-    
     mov A, <global_sfx_endsoonest
     asl A
     mov Y, A
