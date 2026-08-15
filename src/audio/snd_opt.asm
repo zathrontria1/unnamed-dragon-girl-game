@@ -240,7 +240,7 @@ _SoundInterface_PlaySfx_Internal:
 	sta $2142
 	lda 4,s
 	sta $2143
-	lda #16
+	lda #$04 ; SND_CMD_SFX_PLAY
 	sta $2141
 	inc _snd_current_command_counter
 	rep #$30
@@ -265,17 +265,17 @@ _SoundInterface_PlaySfx_Ex_Internal:
 	sta $2142
 	lda 8,s
 	sta $2143
-	lda #17
+	lda #$05 ; SND_CMD_SFX_PLAY_EXTEND
 	sta $2141
 .play_sfx_ex_wait1:
 	lda $2141
-	cmp #17
+	cmp #$05
 	bne .play_sfx_ex_wait1
 	lda 4,s
 	sta $2142
 	lda 6,s
 	sta $2143
-	lda #18
+	lda #$26 ; SND_CMD_SFX_PLAY_EXTEND_VOLDATA
 	sta $2141
 	inc _snd_current_command_counter
 	rep #$30
@@ -298,7 +298,7 @@ _SoundInterface_StopSfx_Internal:
 	a8
 	lda _nmi_snd_scratch_temp
 	sta $2142
-	lda #19
+	lda #$06 ; SND_CMD_SFX_STOP
 	sta $2141
 	inc _snd_current_command_counter
 	rep #$30
@@ -457,7 +457,7 @@ _SoundInterface_StopStream_Internal:
 	jsl	>_SoundInterface_AcknowledgeBusy
 	sep	#$20
 	a8
-	lda	#$25 ; SND_CMD_STREAM_STOP
+	lda	#$10 ; SND_CMD_STREAM_STOP
 	sta	8513
 	inc	_snd_current_command_counter
 	rep	#$30
@@ -474,10 +474,10 @@ _SoundInterface_NmiAudioUpload:
 	jsl	>_SoundInterface_AcknowledgeBusy
 	sep	#32
 	a8
-	lda	#38
+	lda	#$11 ; SND_CMD_STREAM_UPLOAD
 	sta	8513
 	lda	8513
-	cmp	#38
+	cmp	#$11
 	a16
 	rep	#32
 	beq	l348
@@ -485,7 +485,7 @@ l347:
 	sep	#32
 	a8
 	lda	8513
-	cmp	#38
+	cmp	#$11
 	a16
 	rep	#32
 	bne	l347

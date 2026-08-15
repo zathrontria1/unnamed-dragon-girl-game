@@ -6,57 +6,42 @@
 
 #define SND_CMD_NOP 0x00
 
-//#define SND_CMD_SYNC 0x01 // Not used
+// Primary commands (0x01..0x14)
+#define SND_CMD_DATA_SAMPLE_UPLOAD 0x01
+#define SND_CMD_DATA_SAMPLE_SET_TUNE 0x02
+#define SND_CMD_SEQ_UPLOAD 0x03
 
-/*
-    Starts a chain, setting up the length of transfer
-    then the sample directory slot.
-*/
-#define SND_CMD_DATA_SAMPLE_UPLOAD 0x02
-#define SND_CMD_DATA_SAMPLE_UPLOAD_TICK 0x07
-#define SND_CMD_DATA_SAMPLE_UPLOAD_SLOT 0x03
-#define SND_CMD_DATA_SAMPLE_UPLOAD_SAMPLERATE 0x04
-#define SND_CMD_DATA_SAMPLE_UPLOAD_LOOPSTART 0x05
-#define SND_CMD_DATA_SAMPLE_UPLOAD_ADSR 0x06
+#define SND_CMD_SFX_PLAY 0x04
+#define SND_CMD_SFX_PLAY_EXTEND 0x05
+#define SND_CMD_SFX_STOP 0x06
 
-#define SND_CMD_DATA_SAMPLE_SET_TUNE 0x09
+#define SND_CMD_MUS_START 0x07
+#define SND_CMD_MUS_PAUSE 0x08
+#define SND_CMD_MUS_STOP 0x09
+#define SND_CMD_MUS_SET_TEMPO 0x0a
+#define SND_CMD_MUS_SET_SPEED 0x0b
+#define SND_CMD_MUS_SET_OUTPUTMODE 0x0c
 
-#define SND_CMD_SEQ_UPLOAD 0x07
-#define SND_CMD_SEQ_UPLOAD_TRACK 0x08
+#define SND_CMD_SET_MUSIC_VOL 0x0d
+#define SND_CMD_SET_SFX_VOL 0x0e
+#define SND_CMD_SET_VOICE_VOL 0x0f
 
-#define SND_CMD_SFX_PLAY 0x10 // Simple use (pan only)
+#define SND_CMD_STREAM_STOP 0x10
+#define SND_CMD_STREAM_UPLOAD 0x11
+#define SND_CMD_DSP_SET 0x12
+#define SND_CMD_DIR_RESET 0x13
+#define SND_CMD_SOFTRESET 0x14
 
-/*
-    Starts a chain, setting up channel volumes and pitch for an SFX
-*/
-#define SND_CMD_SFX_PLAY_EXTEND 0x11
-#define SND_CMD_SFX_PLAY_EXTEND_VOLDATA 0x12
+// Multi-phase handshake sub-commands (0x20..0x26)
+#define SND_CMD_DATA_SAMPLE_UPLOAD_TICK 0x20
+#define SND_CMD_DATA_SAMPLE_UPLOAD_SLOT 0x21
+#define SND_CMD_DATA_SAMPLE_UPLOAD_SAMPLERATE 0x22
+#define SND_CMD_DATA_SAMPLE_UPLOAD_LOOPSTART 0x23
+#define SND_CMD_DATA_SAMPLE_UPLOAD_ADSR 0x24
 
-#define SND_CMD_SFX_STOP 0x13 // Stops all channel with SFX ID
+#define SND_CMD_SEQ_UPLOAD_TRACK 0x25
 
-/*
-    Music playback to be implemented yet...
-*/
-#define SND_CMD_MUS_START 0x20
-#define SND_CMD_MUS_PAUSE 0x21
-#define SND_CMD_MUS_STOP 0x22
-
-#define SND_CMD_MUS_SET_TEMPO 0x23
-#define SND_CMD_MUS_SET_SPEED 0x28
-
-#define SND_CMD_MUS_SET_OUTPUTMODE 0x27
-
-#define SND_CMD_SET_MUSIC_VOL 0x29
-#define SND_CMD_SET_SFX_VOL 0x2a
-#define SND_CMD_SET_VOICE_VOL 0x2b
-
-#define SND_CMD_STREAM_START 0x24
-#define SND_CMD_STREAM_STOP 0x25
-#define SND_CMD_STREAM_UPLOAD 0x26
-
-#define SND_CMD_DIR_RESET 0xfd
-#define SND_CMD_DSP_SET 0xfe
-#define SND_CMD_SOFTRESET 0xff
+#define SND_CMD_SFX_PLAY_EXTEND_VOLDATA 0x26
 
 // Instruments: 0x00-0x0f (0-15)
 #define INS_TONE_SQUARE 0x00

@@ -227,133 +227,55 @@ _poll_stream_watchdog:
     mov A, #0
     ret
 
+SND_CMD_COUNT = $14
+
 _service_command:
-    ; A signal exists. Check the contents of APUIO2 and jump accordingly
-    mov A,<REG_APUIO1
+    mov A, <REG_APUIO1
+    beq @end_skipinc ; SND_CMD_NOP ($00) -> skip
 
-    ; test the message
-    cmp A,#SND_CMD_NOP
-    bne :+
-        mov <REG_APUIO1,#SND_CMD_NOP
-        jmp !@end_skipinc
-    :
+    cmp A, #SND_CMD_COUNT + 1
+    bcs @end_skipinc ; Out-of-range safety check
 
-    ; as a rule
-    ; opcode echo within the routine
-
-    cmp A,#SND_CMD_STREAM_UPLOAD
-    bne :+
-        call !_stream_upload
-        jmp !@end
-    :
-    cmp A,#SND_CMD_STREAM_STOP
-    bne :+
-        call !_stream_stop
-        jmp !@end
-    :
-    cmp A,#SND_CMD_DATA_SAMPLE_UPLOAD
-    bne :+
-        call !_sfx_upload
-        ; subroutine will twiddle the IO ports
-        jmp !@end
-    :
-    cmp A,#SND_CMD_DATA_SAMPLE_SET_TUNE
-    bne :+
-        call !_set_tune
-        jmp !@end
-    :
-    cmp A,#SND_CMD_SEQ_UPLOAD
-    bne :+
-        call !_mus_seq_upload
-        ; subroutine will twiddle the IO ports
-        jmp !@end
-    :
-    cmp A,#SND_CMD_SFX_PLAY
-    bne :+
-        call !_sfx_play
-        jmp !@end
-    :
-    cmp A,#SND_CMD_SFX_PLAY_EXTEND
-    bne :+
-        call !_sfx_play_extend
-        jmp !@end
-    :
-    cmp A,#SND_CMD_SFX_STOP
-    bne :+
-        call !_sfx_stop
-        jmp !@end
-    :
-    cmp A,#SND_CMD_MUS_START
-    bne :+
-        call !_mus_start
-        jmp !@end
-    :
-    cmp A,#SND_CMD_MUS_PAUSE
-    bne :+
-        call !_mus_pause
-        jmp !@end
-    :
-    cmp A,#SND_CMD_MUS_STOP
-    bne :+
-        call !_mus_stop
-        jmp !@end
-    :
-    cmp A,#SND_CMD_MUS_SET_TEMPO
-    bne :+
-        call !_mus_set_tempo
-        jmp !@end
-    :
-    cmp A,#SND_CMD_MUS_SET_SPEED
-    bne :+
-        call !_mus_set_speed
-        jmp !@end
-    :
-    cmp A,#SND_CMD_MUS_SET_OUTPUTMODE
-    bne :+
-        call !_mus_set_outputmode
-        jmp !@end
-    :
-    cmp A,#SND_CMD_SET_MUSIC_VOL
-    bne :+
-        call !_set_music_volume
-        jmp !@end
-    :
-    cmp A,#SND_CMD_SET_SFX_VOL
-    bne :+
-        call !_set_sfx_volume
-        jmp !@end
-    :
-    cmp A,#SND_CMD_SET_VOICE_VOL
-    bne :+
-        call !_set_voice_volume
-        jmp !@end
-    :
-    cmp A,#SND_CMD_DSP_SET
-    bne :+
-        call !_dsp_reg_write
-        jmp !@end
-    :
-    cmp A,#SND_CMD_DIR_RESET
-    bne :+
-        call !_dir_reset
-        jmp !@end
-    :
-    cmp A,#SND_CMD_SOFTRESET
-    bne @end_skipinc
-        jmp !_reset_spc
-    @end:
+    dec A
+    asl A
+    mov X, A
+    call !@indirect_dispatch
     inc <global_current_command_counter
-    @end_skipinc:
 
+@end_skipinc:
     mov <REG_CONTROL, #$33 ; Reset the read ports
     mov <global_last_cmd, #SND_CMD_NOP
-    
+
     mov <REG_APUIO0, <global_current_command_counter
     mov <REG_APUIO1, #0
     mov <REG_APUIO2, #0
     mov <REG_APUIO3, #0
-
     ret
+
+@indirect_dispatch:
+    jmp_ [!@cmd_table+X]
+
+@cmd_table:
+    .word _sfx_upload           ; $01: SND_CMD_DATA_SAMPLE_UPLOAD
+    .word _set_tune             ; $02: SND_CMD_DATA_SAMPLE_SET_TUNE
+    .word _mus_seq_upload       ; $03: SND_CMD_SEQ_UPLOAD
+    .word _sfx_play             ; $04: SND_CMD_SFX_PLAY
+    .word _sfx_play_extend      ; $05: SND_CMD_SFX_PLAY_EXTEND
+    .word _sfx_stop             ; $06: SND_CMD_SFX_STOP
+    .word _mus_start            ; $07: SND_CMD_MUS_START
+    .word _mus_pause            ; $08: SND_CMD_MUS_PAUSE
+    .word _mus_stop             ; $09: SND_CMD_MUS_STOP
+    .word _mus_set_tempo        ; $0A: SND_CMD_MUS_SET_TEMPO
+    .word _mus_set_speed        ; $0B: SND_CMD_MUS_SET_SPEED
+    .word _mus_set_outputmode   ; $0C: SND_CMD_MUS_SET_OUTPUTMODE
+    .word _set_music_volume     ; $0D: SND_CMD_SET_MUSIC_VOL
+    .word _set_sfx_volume       ; $0E: SND_CMD_SET_SFX_VOL
+    .word _set_voice_volume     ; $0F: SND_CMD_SET_VOICE_VOL
+    .word _stream_stop          ; $10: SND_CMD_STREAM_STOP
+    .word _stream_upload        ; $11: SND_CMD_STREAM_UPLOAD
+    .word _dsp_reg_write        ; $12: SND_CMD_DSP_SET
+    .word _dir_reset            ; $13: SND_CMD_DIR_RESET
+    .word _reset_spc            ; $14: SND_CMD_SOFTRESET
 
 _process_mus:
     mov A, <seq_playing
