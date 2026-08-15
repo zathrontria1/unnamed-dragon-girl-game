@@ -1,3 +1,7 @@
+.segment "SPCDIR"
+INTERNAL_UNIQUE_SAMPLE_COUNT = 64
+global_sampletable: .res (4 * INTERNAL_UNIQUE_SAMPLE_COUNT)
+
 .segment "SPCZEROPAGE"
 
 ; scratch/temp variables, first group. pass parameters in A, X, or r8-r15
@@ -35,6 +39,8 @@ r13: .res 2
 r14: .res 2
 r15: .res 2
 
+global_current_command_counter: .res 1
+
 global_last_cmd: .res 1
 global_received_cmd: .res 1
 
@@ -44,8 +50,8 @@ global_sfx_tick_counter: .res 16 ; eight 16-bit counters
 
 global_nextfree: .res 2
 global_sample_end: .res 2
-
-global_current_command_counter: .res 1
+global_seq_start: .res 2
+global_seq_end: .res 2
 
 seq_playing: .res 1
 
@@ -55,6 +61,9 @@ seq_process_track: .res 1
 
 seq_tick_timer: .res 1
 seq_tick_timer_target: .res 1
+
+seq_speed: .res 1
+seq_tick_in_row: .res 1
 
 seq_ptr_start: .res (2 * 8) ; starting pointer
 seq_ptr: .res (2 * 8) ; return pointer
@@ -66,9 +75,16 @@ seq_track_wait: .res 8 ; if non-zero, nops this row. Placed here to make clearin
 
 seq_note_prefix: .res 1
 seq_note_adsr_override: .res 2
-seq_note_tick_override: .res 1
+seq_note_tick_override: .res 2
 
-seq_force_mono: .res 1
+seq_track_ret: .res (2 * 8) ; Subroutine return address per track
+
+channel_owner: .res 8
+channel_owner_pending: .res 1
+
+stream_active: .res 1
+stream_current_block: .res 1 ; 0, 1, 2, 3
+stream_watchdog: .res 2 ; must be 2 bytes
 
 mul16_a: .res 2
 mul16_b: .res 2
@@ -76,24 +92,34 @@ mul16_product_32: .res 4
 mul16_scratch: .res 2
 mul16_fix: .res 2
 
-divabs3_dividend: .res 2
-divabs3_lo_temp: .res 1
-divabs3_lo_product: .res 1
-divabs3_hi_temp: .res 1
-divabs3_quotient: .res 2
-
-stream_active: .res 1
-stream_current_block: .res 1 ; 0, 1, 2, 3
-stream_watchdog: .res 2 ; must be 2 bytes
-
 .segment "SPCBSS"
 
 .align $100
 BSS_START:
-global_sampledata: .res 61184
-.align $100
-INTERNAL_UNIQUE_SAMPLE_COUNT = 64
-global_sampletable: .res (4 * INTERNAL_UNIQUE_SAMPLE_COUNT)
+
+seq_track_mode: .res 8 ; 0 = Standard (4B notes), 1 = Compact (1B notes)
+seq_track_ins: .res 8 ; Sticky instrument ID
+seq_track_vol_l: .res 8 ; Sticky left volume
+seq_track_vol_r: .res 8 ; Sticky right volume
+seq_track_channel: .res 8 ; Currently assigned DSP voice channel (0..7, or $FF if inactive)
+seq_track_adsr_override: .res (2 * 8) ; Sticky ADSR (low/high per track)
+seq_track_tick_override: .res (2 * 8) ; Sticky tick duration per track (16-bit)
+
+seq_track_vol_slide_l: .res 8 ; Signed 8-bit left volume delta per tick
+seq_track_vol_slide_r: .res 8 ; Signed 8-bit right volume delta per tick
+seq_track_pitch_curr: .res (2 * 8) ; 16-bit current DSP pitch
+seq_track_pitch_target: .res (2 * 8) ; 16-bit target DSP pitch for portamento
+seq_track_pitch_slide: .res (2 * 8) ; Signed 16-bit pitch delta per tick
+seq_track_pitch_mode: .res 8 ; 0 = Off, 1 = Pitch Slide (E/F), 2 = Portamento (G)
+
+seq_force_mono: .res 1
+
+seq_music_volume: .res 1
+seq_sfx_volume: .res 1
+seq_voice_volume: .res 1
+
+channel_base_vol_l: .res 8
+channel_base_vol_r: .res 8
 
 global_sfx_samplerates: .res (2 * INTERNAL_UNIQUE_SAMPLE_COUNT)
 global_sfx_adsr: .res (2 * INTERNAL_UNIQUE_SAMPLE_COUNT)
@@ -102,3 +128,6 @@ global_ins_tune: .res INTERNAL_UNIQUE_SAMPLE_COUNT
 
 ; for sample streaming
 stream_data: .res 288 ; 72 * 4
+
+; Dynamic sample and sequence memory pool extending to $FFFF
+global_sampledata:

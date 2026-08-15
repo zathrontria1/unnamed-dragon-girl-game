@@ -49,12 +49,18 @@ _mus_seq_upload:
     movw ya, <global_nextfree
     clrc
     addw ya,<r0
+    bcc :+
+        ret
+    :
     movw <global_nextfree,ya
 
     mov A,#<global_sampledata
     mov Y,#>global_sampledata
     clrc
     addw ya,<r2
+    bcc :+
+        ret
+    :
     movw <r2,ya ; save the starting pointer
 
     mov <seq_ptr+X, A
@@ -155,19 +161,22 @@ _sfx_upload:
 
     mov A,#<global_sampledata
     mov Y,#>global_sampledata
-
     clrc
-
     addw ya,<r2
+    bcc :+
+        ; Start address + offset wraps past $FFFF
+        bra @reject_upload
+    :
     movw <r2,ya ; save the starting pointer
 
-    ; Check if overflow
-    mov <r3, #$00
-    mov <r3+1, #$e0 ; 56KB
-    
     movw ya,<global_nextfree ; current size
     clrc
     addw ya,<r0 ; length
+    bcc :+
+    @reject_upload:
+        ; TODO: this is broken
+        ret
+    :
     movw <global_nextfree,ya
 
     ; Write the tick count of the current sample

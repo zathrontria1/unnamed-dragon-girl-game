@@ -80,7 +80,7 @@ void SoundInterface_StartSoundEngine()
 
     // Write start address
     REG_APU02 = 0x00;
-    REG_APU03 = 0x02; // 0x0200
+    REG_APU03 = 0x03; // 0x0300
 
     // Write non-zero
     REG_APU01 = 0xcc;
@@ -99,7 +99,7 @@ void SoundInterface_StartSoundEngine()
     // Start the engine
     // Write start address
     REG_APU02 = 0x00;
-    REG_APU03 = 0x02; // 0x0200
+    REG_APU03 = 0x03; // 0x0300
 
     // Write zero
     REG_APU01 = 0x00;

@@ -49,7 +49,8 @@ _mus_set_tempo:
     ret
 
 _mus_set_outputmode:
-    mov <seq_force_mono, <REG_APUIO2
+    mov A, <REG_APUIO2
+    mov !seq_force_mono, A
     
     mov <REG_APUIO1,#SND_CMD_MUS_SET_OUTPUTMODE
     

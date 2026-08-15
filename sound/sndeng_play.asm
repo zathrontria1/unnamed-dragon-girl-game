@@ -22,7 +22,7 @@ _ins_play_note:
     ; if mono is set, sum the volumes and then divide them by 2.
     ; as values never exceed 127, and negative volumes are out of scope
     ; this should be fine
-    mov A, <seq_force_mono
+    mov A, !seq_force_mono
     beq :+
         ; mono is set
         mov A, <dsp_param_vol_l
