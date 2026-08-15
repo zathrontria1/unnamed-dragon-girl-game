@@ -189,10 +189,6 @@ _ins_play_note:
 
     call !_start_note
 
-    ; Update channel LRUs to the newest situation without ticking
-    mov A, #0
-    call !_update_channel_lru
-
     ret
 
 _ins_play_oneshot:
@@ -234,10 +230,6 @@ _ins_play_oneshot:
     mov <dsp_param_vpitch+1, A ; <r9 contains the sample's native rate.
 
     call !_start_note
-
-    ; Update channel LRUs to the newest situation without ticking
-    mov A, #0
-    call !_update_channel_lru
 
     ret
 
@@ -302,10 +294,6 @@ _sfx_play:
 
     call !_start_note
 
-    ; Update channel LRUs to the newest situation without ticking
-    mov A, #0
-    call !_update_channel_lru
-
     ret
 
 _sfx_play_extend:
@@ -356,10 +344,6 @@ _sfx_play_extend:
     mov <dsp_param_vpitch,A
 
     call !_start_note
-
-    ; Update channel LRUs to the newest situation without ticking
-    mov A, #0
-    call !_update_channel_lru
 
     ret
 
@@ -516,6 +500,10 @@ _start_note:
     ; This one is a global reg
     mov <REG_DSPADDR, #DSP_KON
     mov <REG_DSPDATA, <dsp_param_kon
+
+    ; Update channel LRUs to the newest situation without ticking
+    mov A, #0
+    call !_update_channel_lru
 
     ret
 

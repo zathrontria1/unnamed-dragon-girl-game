@@ -844,10 +844,14 @@ _update_channel_lru:
             bra @check_next_channel
     @zero_tick:
         ; Zero tick, aka finished playing.
-        mov A, !lut_channel_mask+X
+        ; Only send DSP_KOFF if we are in the timer tickdown pass (r1 == 1)
+        cmp <r1, #1
+        bne :+
+            mov A, !lut_channel_mask+X
 
-        mov <REG_DSPADDR,#DSP_KOFF
-        mov <REG_DSPDATA,A
+            mov <REG_DSPADDR,#DSP_KOFF
+            mov <REG_DSPDATA,A
+        :
         
         mov <global_sfx_endsoonest,X
 
