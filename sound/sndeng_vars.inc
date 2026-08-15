@@ -42,7 +42,6 @@ r15: .res 2
 global_current_command_counter: .res 1
 
 global_last_cmd: .res 1
-global_received_cmd: .res 1
 
 global_sfx_endsoonest: .res 1
 

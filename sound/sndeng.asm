@@ -230,7 +230,6 @@ _poll_stream_watchdog:
 _service_command:
     ; A signal exists. Check the contents of APUIO2 and jump accordingly
     mov A,<REG_APUIO1
-    mov <global_received_cmd,A ;copy it so that it doesn't disappear on us later
 
     ; test the message
     cmp A,#SND_CMD_NOP
@@ -347,8 +346,7 @@ _service_command:
     @end_skipinc:
 
     mov <REG_CONTROL, #$33 ; Reset the read ports
-    mov <global_received_cmd, #SND_CMD_NOP
-    mov <global_last_cmd,<global_received_cmd
+    mov <global_last_cmd, #SND_CMD_NOP
     
     mov <REG_APUIO0, <global_current_command_counter
     mov <REG_APUIO1, #0
