@@ -77,6 +77,7 @@ seq_track_ret: .res (2 * 8) ; Subroutine return address per track
 
 stream_active: .res 1
 stream_current_block: .res 1 ; 0, 1, 2, 3
+stream_channel: .res 1 ; Active voice stream DSP channel (0..7, or $FF if inactive)
 stream_watchdog: .res 2 ; must be 2 bytes
 
 mul16_a: .res 2
@@ -90,6 +91,7 @@ mul16_fix: .res 2
 ; --- Tracker track state & modulation variables ---
 ; Allocated in lower Page 1 ($0100..$018B); stack operates at $01FF downward.
 seq_track_channel: .res 8 ; Currently assigned DSP voice channel (0..7, or $FF if inactive) for real-time modulation
+voice_owner: .res 8 ; Sequence track owning each DSP voice channel (0..7, or $FF if unowned/SFX)
 seq_track_vol_slide_l: .res 8 ; Signed 8-bit left volume delta per tick (volume slides / tremolo)
 seq_track_vol_slide_r: .res 8 ; Signed 8-bit right volume delta per tick (stereo panning slides)
 seq_track_pitch_curr: .res (2 * 8) ; 16-bit current DSP pitch (pitch bends / vibrato)

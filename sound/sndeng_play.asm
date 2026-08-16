@@ -280,6 +280,7 @@ _ins_play_oneshot:
 
 _sfx_play:
     ;(uint8_t id, uint8_t properties)
+    mov <seq_current_track, #$ff
     mov <dsp_param_srcn, <REG_APUIO2 ; sfx ID
     mov A, <REG_APUIO3 ; pan (from -127 to +127)
 
@@ -347,6 +348,7 @@ _sfx_play:
 
 _sfx_play_extend:
     ;(uint8_t sfx_id, int8_t vol_l, int8_t vol_r, int8_t pitch)
+    mov <seq_current_track, #$ff
     mov <dsp_param_srcn, <REG_APUIO2 ; sfx ID
     mov <dsp_param_vpitch, <REG_APUIO3 ; pitch (8-bit)
 
@@ -402,6 +404,7 @@ _sfx_play_extend:
     ret
 
 _stream_play:
+    mov <seq_current_track, #$ff
     ; Set up infinite tick count ($FFFF)
     mov A, #$ff
     mov <r8, A
@@ -429,12 +432,11 @@ _stream_play:
 ; so they come here
 _start_note:
     ; Update ADSR
-    ; Sequence instrument notes (ID < 16) can use per-track sticky overrides
-    mov A, <dsp_param_srcn
-    cmp A, #16
-    bcs @adsr_skip
-
+    ; Sequence instrument notes can use per-track sticky overrides
     mov A, <seq_current_track
+    cmp A, #8
+    bcs @adsr_skip ; SFX ($FF) or invalid track: use instrument table default
+
     asl A
     mov X, A
 
@@ -450,25 +452,23 @@ _start_note:
         mov A, #<global_sfx_adsr
         mov Y, #>global_sfx_adsr
         clrc
-        addw ya,<r15
-        movw <r15,ya
+        addw ya, <r15
+        movw <r15, ya
 
-        mov Y,#0
+        mov Y, #0
 
-        mov A,[<r15]+Y
+        mov A, [<r15]+Y
         mov <dsp_param_adsr, A
-        inc y
-        mov A,[<r15]+Y
+        inc Y
+        mov A, [<r15]+Y
         mov <dsp_param_adsr+1, A
     @adsr_end:
 
     ; Set the tickdown rate
-    ; <dsp_param_srcn has the sfx id slot
-    mov A, <dsp_param_srcn
-    cmp A, #16
-    bcs @tick_skip
-
     mov A, <seq_current_track
+    cmp A, #8
+    bcs @tick_skip ; SFX ($FF) or invalid track: use instrument table default
+
     asl A
     mov X, A
 
@@ -481,16 +481,47 @@ _start_note:
         mov <r8+1, A
         bra @tick_end
     @tick_skip:
-        mov A,<dsp_param_srcn
+        mov A, <dsp_param_srcn
         asl A
         mov Y, A
-        mov A,!global_sfx_tickcounts+Y
-        mov <r8,A
-        mov A,!global_sfx_tickcounts+1+Y
-        mov <r8+1,A
+        mov A, !global_sfx_tickcounts+Y
+        mov <r8, A
+        mov A, !global_sfx_tickcounts+1+Y
+        mov <r8+1, A
     @tick_end:
 
 _commit_dsp_voice:
+    ; Update voice ownership and track assignment
+    mov Y, <global_sfx_endsoonest
+    mov A, !voice_owner+Y
+    cmp A, #8
+    bcs @no_prev_track_owner
+        ; Voice Y was previously owned by a track.
+        ; Only clear that track's seq_track_channel if it still points to Y
+        mov X, A
+        mov A, !seq_track_channel+X
+        cmp A, <global_sfx_endsoonest
+        bne @no_prev_track_owner
+            mov A, #$ff
+            mov !seq_track_channel+X, A
+    @no_prev_track_owner:
+
+    mov A, <seq_current_track
+    cmp A, #8
+    bcs @sfx_voice_owner
+        ; Music track (0..7) allocates this voice
+        mov X, A
+        mov A, <global_sfx_endsoonest
+        mov !seq_track_channel+X, A
+        mov A, <seq_current_track
+        mov !voice_owner+Y, A
+        bra @voice_alloc_done
+    @sfx_voice_owner:
+        ; SFX or Stream allocates this voice ($FF)
+        mov A, #$ff
+        mov !voice_owner+Y, A
+@voice_alloc_done:
+
     ; now we have to determine what channel to use.
     mov A, <global_sfx_endsoonest
     asl A

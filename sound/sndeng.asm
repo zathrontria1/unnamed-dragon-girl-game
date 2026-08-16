@@ -151,7 +151,16 @@ _start:
     mov !seq_sfx_volume, A
     mov !seq_voice_volume, A
 
+    mov X, #0
     mov A, #$ff
+    mov <stream_channel, A
+    :
+        mov !seq_track_channel+X, A
+        mov !voice_owner+X, A
+        inc X
+        cmp X, #8
+        bcc :-
+
     mov <global_last_cmd, A ; Make it so that the "last command" is the soft reset command which is impossible for a fresh boot
 _main:
     call !_poll_command
@@ -630,6 +639,7 @@ _stream_stop:
     mov <stream_current_block, #0
     mov <stream_watchdog, #0
     mov <stream_watchdog+1, #0
+    mov <stream_channel, #$ff
     mov A, #63 ; voice for stream
 
 _stop_voice_channels:
@@ -717,6 +727,23 @@ _update_channel_lru:
         or A, <global_sfx_tick_counter+1+X
         bne @no_dec
             ; Channel just expired: add to KOFF mask and mark as free
+            mov A, !voice_owner+Y
+            cmp A, #8
+            bcs :+
+                push X
+                mov X, A
+                mov A, !seq_track_channel+X
+                mov <r15, Y
+                cmp A, <r15
+                bne @skip_clr_chan
+                    mov A, #$ff
+                    mov !seq_track_channel+X, A
+            @skip_clr_chan:
+                pop X
+            :
+            mov A, #$ff
+            mov !voice_owner+Y, A
+
             mov A, !lut_channel_mask+Y
             or A, <r3
             mov <r3, A

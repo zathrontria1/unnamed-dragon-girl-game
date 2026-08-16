@@ -50,6 +50,9 @@ _mus_stop:
         mov !seq_track_ins+X, A
         mov !seq_track_vol_l+X, A
         mov !seq_track_vol_r+X, A
+        mov A, #$ff
+        mov !seq_track_channel+X, A
+        mov !voice_owner+X, A
         inc X
         cmp X, #8
         bcc @loop_8
