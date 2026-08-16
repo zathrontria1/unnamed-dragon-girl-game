@@ -904,7 +904,14 @@ void Subscreen_Options()
                                 break;
                             case 4:
                                 SoundInterface_SetVoiceVolume(new_vol);
-                                SoundInterface_PlayClip(STREAM_VOICE_HURT_1 + (Math_GetRandom_u16() & 0x01));
+                                if (new_vol > 0)
+                                {
+                                    SoundInterface_PlayClip(STREAM_VOICE_HURT_1 + (Math_GetRandom_u16() & 0x01));
+                                }
+                                else
+                                {
+                                    SoundInterface_StopStream();
+                                }
                                 break;
                             default:
                                 break;

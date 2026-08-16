@@ -119,6 +119,28 @@ _set_sfx_volume:
 _set_voice_volume:
     mov A, <REG_APUIO2
     mov !seq_voice_volume, A
+
+    ; If a stream channel is currently active, update its DSP volume immediately
+    mov A, <stream_channel
+    cmp A, #8
+    bcs @voice_vol_done
+
+    mov Y, !seq_voice_volume
+    mov A, #127
+    call !_scale_single_volume
+    mov <dsp_param_vol_l, A
+    mov <dsp_param_vol_r, A
+
+    mov A, <stream_channel
+    xcn A
+    clrc
+    adc A, #DSP_V0VOLL
+    mov <REG_DSPADDR, A
+    mov <REG_DSPDATA, <dsp_param_vol_l
+    inc <REG_DSPADDR ; #DSP_V0VOLR
+    mov <REG_DSPDATA, <dsp_param_vol_r
+
+@voice_vol_done:
     mov <REG_APUIO1, #SND_CMD_SET_VOICE_VOL
     ret
     

@@ -417,7 +417,22 @@ _stream_play:
     mov <dsp_param_adsr, #0
     mov <dsp_param_adsr+1, #0
 
-    ; Scale voice volume
+    ; Check if an existing voice stream channel is already active
+    mov A, <stream_channel
+    cmp A, #8
+    bcs :+
+        ; Reuse the existing stream channel
+        mov <global_sfx_endsoonest, A
+        bra @stream_alloc_done
+    :
+    ; Otherwise, allocate via LRU and save assigned channel
+    mov A, #0
+    call !_update_channel_lru
+    mov A, <global_sfx_endsoonest
+    mov <stream_channel, A
+
+@stream_alloc_done:
+    ; Scale voice volume AFTER _update_channel_lru (which uses r3 as its KOFF mask)
     mov Y, !seq_voice_volume
     mov A, #127
     call !_scale_single_volume
@@ -505,6 +520,16 @@ _commit_dsp_voice:
             mov A, #$ff
             mov !seq_track_channel+X, A
     @no_prev_track_owner:
+
+    ; If this channel was stream_channel, invalidate stream_channel if non-stream is allocating
+    mov A, <dsp_param_srcn
+    cmp A, #63
+    beq :+
+        mov A, <stream_channel
+        cmp A, <global_sfx_endsoonest
+        bne :+
+            mov <stream_channel, #$ff
+    :
 
     mov A, <seq_current_track
     cmp A, #8
