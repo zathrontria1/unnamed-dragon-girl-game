@@ -237,11 +237,6 @@ void SoundInterface_PlayClip(uint16_t clip_id)
  */
 void SoundInterface_PlayStream(uint8_t * ptr, uint16_t len, bool loop)
 {
-    if (snd_stream_enable && snd_stream_ptr_start == ptr)
-    {
-        return;
-    }
-
     if (!snd_stream_enable)
     {
         snd_stream_current_block = 0;

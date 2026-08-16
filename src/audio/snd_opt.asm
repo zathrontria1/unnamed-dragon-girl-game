@@ -307,24 +307,7 @@ _SoundInterface_PlayStream:
 	sep	#32
 	a8
 	lda	_snd_stream_enable
-	beq	.start_new_stream
-	a16
-	rep	#32
-	lda	_snd_stream_ptr_start
-	cmp	r16
 	bne	.restart_stream
-	lda	2+_snd_stream_ptr_start
-	cmp	r16+2
-	bne	.restart_stream
-	plx
-	stx	r17
-	plx
-	stx	r16
-	rtl
-
-.start_new_stream:
-	sep	#32
-	a8
 	stz	_snd_stream_current_block
 	bra	.restart_stream
 
