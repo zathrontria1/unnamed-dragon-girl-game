@@ -307,9 +307,31 @@ _SoundInterface_PlayStream:
 	sep	#32
 	a8
 	lda	_snd_stream_enable
+	beq	.cold_start
+
+	; Active stream: check if loop flag is set (10,s is loop)
+	lda	10,s
+	beq	.restart_stream ; One-shot (loop == 0): always restart!
+
+	; Looping stream: check if already playing same pointer
+	a16
+	rep	#32
+	lda	_snd_stream_ptr_start
+	cmp	r16
 	bne	.restart_stream
+	lda	2+_snd_stream_ptr_start
+	cmp	r16+2
+	bne	.restart_stream
+
+	; Same looping stream: keep playing smoothly
+	plx
+	stx	r17
+	plx
+	stx	r16
+	rtl
+
+.cold_start:
 	stz	_snd_stream_current_block
-	bra	.restart_stream
 
 .restart_stream:
 	a16
