@@ -2,9 +2,8 @@
 
 _scale_single_volume:
     mul ya
-    asl A
-    mov A, Y
-    rol A
+    mov X, #127
+    div ya, x
     ret
 
 _scale_volumes_music:
@@ -296,7 +295,7 @@ _sfx_play:
         ; negative pan value.
         mov <dsp_param_vol_l, #64 ; max reasonable left
 
-        mov A, #127
+        mov A, #128
         clrc
         adc A, <r1 ; becomes a subtraction
         lsr A
@@ -308,7 +307,7 @@ _sfx_play:
         ; positive pan value
         mov <dsp_param_vol_r, #64 ; max reasonable right
 
-        mov A, #127
+        mov A, #128
         setc
         sbc A, <r1
         lsr A
