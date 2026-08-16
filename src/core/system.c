@@ -238,6 +238,7 @@ void System_DisplayStartupSplash()
     // Initialize user game settings
     System_Init_Settings();
     
+    SoundInterface_SetOutputMode(snd_settings_mono ? 1 : 0);
     SoundInterface_SetMasterVolume(snd_settings_volume_master);
     SoundInterface_SetMusicVolume(snd_settings_volume_bgm);
     SoundInterface_SetSfxVolume(snd_settings_volume_sfx);

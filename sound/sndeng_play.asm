@@ -4,7 +4,7 @@ _scale_single_volume:
     mul ya
     asl A
     mov A, Y
-    adc A, #0
+    rol A
     ret
 
 _scale_volumes_music:
@@ -235,6 +235,20 @@ _ins_play_oneshot:
         ret
     :
 
+    ; if mono is set, sum the volumes and then divide them by 2.
+    ; as values never exceed 127, and negative volumes are out of scope
+    ; this should be fine
+    mov A, !seq_force_mono
+    beq :+
+        ; mono is set
+        mov A, <dsp_param_vol_l
+        clrc
+        adc A, <dsp_param_vol_r
+        lsr A
+        mov <dsp_param_vol_l, A
+        mov <dsp_param_vol_r, A
+    :
+
     ; Scale one-shot volumes with seq_music_volume
     call !_scale_volumes_music
 
@@ -272,17 +286,19 @@ _sfx_play:
 
     mov <REG_APUIO1,#SND_CMD_SFX_PLAY
 
+    ; mono handling for this is done on main CPU side.
+    ; no need to branch here - if mono, the maths should work out to centre
+
     mov <r1,A
     bpl @pan_right
 
     @pan_left:
         ; negative pan value.
-        mov <dsp_param_vol_l, #31 ; max reasonable left
+        mov <dsp_param_vol_l, #64 ; max reasonable left
 
         mov A, #127
         clrc
         adc A, <r1 ; becomes a subtraction
-        lsr A
         lsr A
         mov <dsp_param_vol_r, A
 
@@ -290,12 +306,11 @@ _sfx_play:
 
     @pan_right:
         ; positive pan value
-        mov <dsp_param_vol_r, #31 ; max reasonable right
+        mov <dsp_param_vol_r, #64 ; max reasonable right
 
         mov A, #127
         setc
         sbc A, <r1
-        lsr A
         lsr A
         mov <dsp_param_vol_l, A
 
@@ -349,16 +364,18 @@ _sfx_play_extend:
     mov <dsp_param_vol_l,<REG_APUIO2
 
     mov <REG_APUIO1,<REG_APUIO1 ; again
-
-    ; Scale SFX extended volume with seq_sfx_volume
-    call !_scale_volumes_sfx
-
+    
     ; check if volume is zero. if yes, return immediately
     mov A, <dsp_param_vol_r
     or A, <dsp_param_vol_l
     bne :+
         ret
     :
+
+    ; mono handling for this is done on main CPU side.
+
+    ; Scale SFX extended volume with seq_sfx_volume
+    call !_scale_volumes_sfx
 
     ; calculate the pitch (expand from 8 bits to 12 bits)
     ; shift both values to the left 4 times
@@ -400,7 +417,7 @@ _stream_play:
 
     ; Scale voice volume
     mov Y, !seq_voice_volume
-    mov A, #63
+    mov A, #127
     call !_scale_single_volume
     mov <dsp_param_vol_l, A
     mov <dsp_param_vol_r, A

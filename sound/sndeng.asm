@@ -98,10 +98,10 @@ _start:
     mov <REG_DSPDATA,A ; Reset Echo Volume Right
 
     mov <REG_DSPADDR,#DSP_MVOL0L
-    mov <REG_DSPDATA,#96 ; master volume left
+    mov <REG_DSPDATA,#127 ; master volume left
 
     mov <REG_DSPADDR,#DSP_MVOL0R
-    mov <REG_DSPDATA,#96 ; master volume right
+    mov <REG_DSPDATA,#127 ; master volume right
 
     ; reset all CPU side read ports
     ; #$00 = #SND_SIG_CLEAR, so just use A
@@ -146,7 +146,7 @@ _start:
     mov <seq_speed, #6
     mov <seq_tick_in_row, #0
 
-    mov A, #96
+    mov A, #127
     mov !seq_music_volume, A
     mov !seq_sfx_volume, A
     mov !seq_voice_volume, A

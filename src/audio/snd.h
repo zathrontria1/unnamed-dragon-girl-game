@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include "defs_structs.h"
 
-#define SND_DEFAULT_VOLUME 96
+#define SND_DEFAULT_VOLUME 127
 
 extern bool snd_apu_booted;
 
