@@ -119,8 +119,8 @@ global_sfx_adsr: .res (2 * INTERNAL_UNIQUE_SAMPLE_COUNT)
 global_sfx_tickcounts: .res (2 * INTERNAL_UNIQUE_SAMPLE_COUNT)
 global_ins_tune: .res INTERNAL_UNIQUE_SAMPLE_COUNT
 
-; for sample streaming
-stream_data: .res 288 ; 72 * 4
+; for sample streaming: 4 blocks of 72 bytes = 288 bytes, plus 9-byte END BRR guard block
+stream_data: .res 288 + 9
 
 ; Dynamic sample and sequence memory pool extending to $FFFF
 global_sampledata:

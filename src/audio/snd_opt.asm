@@ -170,52 +170,37 @@ _SoundInterface_AcknowledgeNop:
 _SoundInterface_IsHigherPriority:
 	sep #$20
 	a8
-	sta _nmi_snd_scratch_temp
-	cmp #37
-	rep #$20
-	a16
-	bne .check_bounce
-	lda #1
-	rtl
-.check_bounce:
-	sep #$20
-	a8
-	lda _nmi_snd_scratch_temp
-	cmp #42
-	rep #$20
-	a16
+	; sfx_id is in A (8-bit)
+	cmp #37 ; SFX_ATK_FIRE_BREATH
+	beq .is_higher
+
+	cmp #42 ; SFX_DROP_BOUNCE
 	beq .check_not_fire
-	sep #$20
-	a8
-	lda _nmi_snd_scratch_temp
-	cmp #41
-	rep #$20
-	a16
-	bne .check_queued_protected
+	cmp #41 ; SFX_DROP_COIN
+	beq .check_not_fire
+
+	; Fallthrough: other sound effects
+	lda _snd_defercmd_sfx_id
+	cmp #37 ; SFX_ATK_FIRE_BREATH
+	beq .not_higher
+	cmp #2  ; SFX_UI_CONFIRM
+	beq .not_higher
+	cmp #1  ; SFX_MOV_FOOTSTEP
+	beq .not_higher
+	bra .is_higher
+
 .check_not_fire:
-	sep #$20
-	a8
 	lda _snd_defercmd_sfx_id
-	cmp #37
-	rep #$20
-	a16
+	cmp #37 ; SFX_ATK_FIRE_BREATH
 	beq .not_higher
+
+.is_higher:
+	rep #$30
+	a16
+	x16
 	lda #1
 	rtl
-.check_queued_protected:
-	sep #$20
-	a8
-	lda _snd_defercmd_sfx_id
-	cmp #37
-	beq .not_higher
-	cmp #2
-	beq .not_higher
-	cmp #1
-	beq .not_higher
-	rep #$20
-	a16
-	lda #1
-	rtl
+
 .not_higher:
 	rep #$30
 	a16
@@ -231,14 +216,14 @@ _SoundInterface_PlaySfx_Internal:
 	rep #$30
 	a16
 	x16
-	sta _nmi_snd_scratch_temp
+	pha ; Save sfx_id (2 bytes)
 	lda #1
 	jsl _SoundInterface_AcknowledgeBusy
 	sep #$20
 	a8
-	lda _nmi_snd_scratch_temp
+	lda 1,s ; Load sfx_id (low byte)
 	sta $2142
-	lda 4,s
+	lda 6,s ; Load pan (low byte from caller's stack)
 	sta $2143
 	lda #$04 ; SND_CMD_SFX_PLAY
 	sta $2141
@@ -246,6 +231,7 @@ _SoundInterface_PlaySfx_Internal:
 	rep #$30
 	a16
 	x16
+	pla ; Clean up saved sfx_id
 	rtl
 
 	section	"DONTMERGE_text.far.SoundInterface_PlaySfx_Ex_Internal.0","acrx"
@@ -256,14 +242,14 @@ _SoundInterface_PlaySfx_Ex_Internal:
 	rep #$30
 	a16
 	x16
-	sta _nmi_snd_scratch_temp
+	pha ; Save sfx_id (2 bytes)
 	lda #1
 	jsl _SoundInterface_AcknowledgeBusy
 	sep #$20
 	a8
-	lda _nmi_snd_scratch_temp
+	lda 1,s ; sfx_id
 	sta $2142
-	lda 8,s
+	lda 10,s ; pitch
 	sta $2143
 	lda #$05 ; SND_CMD_SFX_PLAY_EXTEND
 	sta $2141
@@ -271,9 +257,9 @@ _SoundInterface_PlaySfx_Ex_Internal:
 	lda $2141
 	cmp #$05
 	bne .play_sfx_ex_wait1
-	lda 4,s
+	lda 6,s ; vol_l
 	sta $2142
-	lda 6,s
+	lda 8,s ; vol_r
 	sta $2143
 	lda #$26 ; SND_CMD_SFX_PLAY_EXTEND_VOLDATA
 	sta $2141
@@ -281,6 +267,7 @@ _SoundInterface_PlaySfx_Ex_Internal:
 	rep #$30
 	a16
 	x16
+	pla ; Clean up saved sfx_id
 	rtl
 
 	section	"DONTMERGE_text.far.SoundInterface_StopSfx_Internal.0","acrx"
@@ -291,12 +278,12 @@ _SoundInterface_StopSfx_Internal:
 	rep #$30
 	a16
 	x16
-	sta _nmi_snd_scratch_temp
+	pha ; Save sfx_id (2 bytes)
 	lda #1
 	jsl _SoundInterface_AcknowledgeBusy
 	sep #$20
 	a8
-	lda _nmi_snd_scratch_temp
+	lda 1,s ; Load sfx_id (low byte)
 	sta $2142
 	lda #$06 ; SND_CMD_SFX_STOP
 	sta $2141
@@ -304,6 +291,7 @@ _SoundInterface_StopSfx_Internal:
 	rep #$30
 	a16
 	x16
+	pla ; Clean up saved sfx_id (2 bytes in a16 mode)
 	rtl
 
 	section	"DONTMERGE_text.far.SoundInterface_PlayStream.0","acrx"
@@ -335,18 +323,21 @@ _SoundInterface_PlayStream:
 	rtl
 
 .start_new_stream:
+	sep	#32
+	a8
+	stz	_snd_stream_current_block
+	bra	.restart_stream
+
+.restart_stream:
 	a16
 	rep	#32
-.restart_stream:
-	stz	_snd_stream_current_block
 	lda	r16
 	sta	_snd_stream_ptr
 	sta	_snd_stream_ptr_start
 	lda	r16+2
 	sta	2+_snd_stream_ptr
 	sta	2+_snd_stream_ptr_start
-	lda	8,s
-	sta	_snd_stream_length
+
 	sep	#32
 	a8
 	stz	_snd_defercmd_stream_stop_enable
@@ -355,6 +346,10 @@ _SoundInterface_PlayStream:
 	lda	#1
 	sta	_snd_stream_enable
 	a16
+	rep	#32
+	lda	8,s
+	sta	_snd_stream_length
+
 	plx
 	stx	r17
 	plx
@@ -367,41 +362,43 @@ _SoundInterface_PlayStream:
 	x16
 	global	_SoundInterface_PlayClip
 _SoundInterface_PlayClip:
-	sta	_nmi_snd_scratch_temp 
+	tax	; Save clip_id in X register
 	sep	#32
 	a8
 	lda	_snd_settings_volume_voice
-	a16
 	rep	#32
+	a16
 	beq	l157
-	lda	_nmi_snd_scratch_temp 
+
+	; Restore clip_id into A and multiply by 8 to index _data_stream_table
+	txa
 	asl
 	asl
 	asl
-	sta	_nmi_snd_scratch_temp 
 	tax
+
+	; Push loop parameter (2 bytes)
 	lda	>6+_data_stream_table,x
-	and	#255
+	and	#$00ff
 	pha
-	ldx _nmi_snd_scratch_temp 
+
+	; Push len parameter (2 bytes)
 	lda	>4+_data_stream_table,x
 	pha
-	
-	lda	#<_data_stream_table
-	clc
-	adc	_nmi_snd_scratch_temp 
-	sta	_nmi_snd_scratch_ptr
-	lda	#^(_data_stream_table)
-	adc	#0
-	sta	_nmi_snd_scratch_ptr+2
-	ldy	#2
-	lda	[_nmi_snd_scratch_ptr],y
-	tax
-	lda	[_nmi_snd_scratch_ptr]
+
+	; Load ptr parameter: Bank in X, Offset in A
+	lda	>2+_data_stream_table,x
+	pha	; save bank
+	lda	>0+_data_stream_table,x
+	plx	; bank into X
+
 	jsl	>_SoundInterface_PlayStream
 	ply
 	ply
 l157:
+	rep	#$30
+	a16
+	x16
 	rtl
 
 	section	"DONTMERGE_text.far.SoundInterface_ResumeStream.0","acrx"
@@ -474,6 +471,8 @@ _SoundInterface_NmiAudioUpload:
 	jsl	>_SoundInterface_AcknowledgeBusy
 	sep	#32
 	a8
+	lda	_snd_stream_current_block
+	sta	8514
 	lda	#$11 ; SND_CMD_STREAM_UPLOAD
 	sta	8513
 	lda	8513

@@ -128,10 +128,18 @@ _start:
     mov !global_sampletable+253, A
     mov !global_sampletable+255, A ; Set both to the same pointer to simulate a loop
 
-    ; Place a guard header
-    mov A, !stream_data+144
-    or A, #$03
-    mov !stream_data+144, A
+    ; Set up 9-byte END BRR guard block at stream_data + 288 (END=1, LOOP=0)
+    mov A, #$01
+    mov !stream_data+288, A
+    mov A, #$00
+    mov !stream_data+289, A
+    mov !stream_data+290, A
+    mov !stream_data+291, A
+    mov !stream_data+292, A
+    mov !stream_data+293, A
+    mov !stream_data+294, A
+    mov !stream_data+295, A
+    mov !stream_data+296, A
 
     mov <REG_DSPADDR,#DSP_KOFF
     mov <REG_DSPDATA, #0 ; Clear all Key offs
